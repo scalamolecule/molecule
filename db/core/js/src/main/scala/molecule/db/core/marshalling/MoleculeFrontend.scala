@@ -20,7 +20,7 @@ import scala.scalajs.js
 import scala.scalajs.js.typedarray.TypedArrayBufferOps.*
 import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
 
-case class MoleculeFrontend(host: String, port: Int)
+case class MoleculeFrontend(host: String, port: Int, protocol: String)
   extends MoleculeRpc
     with MoleculeEndpoints
     with FutureUtils {
@@ -32,7 +32,7 @@ case class MoleculeFrontend(host: String, port: Int)
     unpickle: ByteBuffer => T,
   ): Future[Either[MoleculeError, T]] = {
     SttpClientInterpreter()
-      .toRequestThrowDecodeFailures(endpoint, Some(uri"http://$host:$port"))
+      .toRequestThrowDecodeFailures(endpoint, Some(uri"$protocol://$host:$port"))
       .apply(args)
       .send(FetchBackend())
       .map { response =>

@@ -1,8 +1,8 @@
 package boilerplate.db.core.marshalling.serialize
 
-import boilerplate.db.core.CoreGenBase
+import boilerplate.db.core.CoreBase
 
-object _PickleTpl extends CoreGenBase("PickleTpl", "/marshalling/serialize") {
+object _PickleTpl extends CoreBase("PickleTpl", "/marshalling/serialize") {
 
   val content = {
     val unpackX       = (1 to 22).map(i => s"case ${caseN(i)} => resolve$i(picklers)").mkString("\n      ")

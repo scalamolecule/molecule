@@ -1,8 +1,8 @@
 package boilerplate.db.core.api
 
-import boilerplate.db.core.CoreGenBase
+import boilerplate.db.core.CoreBase
 
-object _Molecules extends CoreGenBase( "Molecules", "/api") {
+object _Molecules extends CoreBase( "Molecules", "/api") {
 
   val content = {
     val molecules = (1 to 22).map(arity => MoleculeFactories(arity).body).mkString("\n")

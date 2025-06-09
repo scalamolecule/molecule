@@ -1,9 +1,9 @@
 package boilerplate.db.core.api.expression
 
-import boilerplate.db.core.CoreGenBase
+import boilerplate.db.core.CoreBase
 
 
-object _ExprBArTac extends CoreGenBase("ExprBArTac", "/api/expression") {
+object _ExprBArTac extends CoreBase("ExprBArTac", "/api/expression") {
   val content = {
     val traits = (0 to 22).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************

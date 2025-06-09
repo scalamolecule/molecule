@@ -1,8 +1,8 @@
 package boilerplate.db.core.action
 
-import boilerplate.db.core.CoreGenBase
+import boilerplate.db.core.CoreBase
 
-object _Insert extends CoreGenBase( "Insert", "/action") {
+object _Insert extends CoreBase( "Insert", "/action") {
 
   val content = {
     val traits = (2 to 22).map(arity => Trait(arity).body).mkString("\n")

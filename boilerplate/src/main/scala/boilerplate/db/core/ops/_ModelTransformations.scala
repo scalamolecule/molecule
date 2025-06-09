@@ -1,8 +1,8 @@
 package boilerplate.db.core.ops
 
-import boilerplate.db.core.CoreGenBase
+import boilerplate.db.core.CoreBase
 
-object _ModelTransformations extends CoreGenBase("ModelTransformations", "/ops") {
+object _ModelTransformations extends CoreBase("ModelTransformations", "/ops") {
 
   override val content = {
     s"""// GENERATED CODE ********************************

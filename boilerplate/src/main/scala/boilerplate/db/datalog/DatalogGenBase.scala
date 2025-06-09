@@ -1,9 +1,9 @@
 package boilerplate.db.datalog
 
-import boilerplate.CodeGenTemplate
+import boilerplate.Util
 
 abstract class DatalogGenBase(fileName: String, dir: String)
-  extends CodeGenTemplate(
+  extends Util(
     fileName,
     dir,
     "db/datalog/core/shared/src/main/scala/molecule/db/datalog/core"

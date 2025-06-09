@@ -1,8 +1,9 @@
 package molecule.graphql.client.spi
 
-import boopickle.Default._
-import molecule.db.core.ast._
-import scala.concurrent.{Future, ExecutionContext => EC}
+import boopickle.Default.*
+import molecule.db.core.ast.*
+import molecule.graphql.client
+import scala.concurrent.{Future, ExecutionContext as EC}
 
 
 object SpiAsync_graphql extends SpiAsync_graphql

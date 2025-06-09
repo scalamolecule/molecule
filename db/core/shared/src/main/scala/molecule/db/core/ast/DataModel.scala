@@ -4,7 +4,8 @@ case class DataModel(
   elements: List[Element],
   attrIndexes: Set[Int] = Set.empty[Int],
   firstEntityIndex: Int = -1,
-  binds: Int = 0
+  binds: Int = 0,
+  inputElements: List[Element] = Nil,
 ) {
 
   def add(attr: Attr): DataModel = {
@@ -20,10 +21,15 @@ case class DataModel(
   }
 
   override def toString: String = {
-    val elems = if(elements.isEmpty) "" else elements.map(_.render(2)).mkString("\n", ",\n", "\n  ")
+    val elems = if (elements.isEmpty) "" else
+      elements.map(_.render(2)).mkString("\n", ",\n", "\n  ")
+
+    val input = if (inputElements.isEmpty) " Nil" else
+      inputElements.map(_.render(2)).mkString("\n  List(\n", ",\n", "\n  )")
+
     s"""DataModel(
        |  List($elems),
-       |  $attrIndexes, $firstEntityIndex, $binds
+       |  $attrIndexes, $firstEntityIndex, $binds,$input
        |)""".stripMargin
   }
 }

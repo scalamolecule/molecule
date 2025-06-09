@@ -1,8 +1,8 @@
 package boilerplate.db.core.validation.insert
 
-import boilerplate.db.core.CoreGenBase
+import boilerplate.db.core.CoreBase
 
-object _InsertValidationResolvers extends CoreGenBase("InsertValidationResolvers", "/validation/insert") {
+object _InsertValidationResolvers extends CoreBase("InsertValidationResolvers", "/validation/insert") {
 
   val content = {
     val validateX         = (1 to 22).map(i => s"case ${caseN(i)} => validate$i(validators)").mkString("\n      ")

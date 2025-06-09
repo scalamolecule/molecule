@@ -1,10 +1,10 @@
 package boilerplate.db.compliance.test.aggregation.any
 
 import java.nio.file.{Files, Paths}
-import boilerplate.CodeGenBase
+import boilerplate.Base
 import boilerplate.db.compliance.ComplianceGenBase
 
-object _Aggr extends CodeGenBase {
+object _Aggr extends Base {
 
   //    def generate(): Unit = tpeVarImp.take(1).foreach { case (name, tpe, v, imp) =>
   def generate(): Unit = tpeVarImp.foreach { case (name, tpe, v, imp) =>

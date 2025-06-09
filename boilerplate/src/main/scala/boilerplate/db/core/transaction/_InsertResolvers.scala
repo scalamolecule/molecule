@@ -1,8 +1,8 @@
 package boilerplate.db.core.transaction
 
-import boilerplate.db.core.CoreGenBase
+import boilerplate.db.core.CoreBase
 
-object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
+object _InsertResolvers extends CoreBase("InsertResolvers", "/transaction") {
 
   val content = {
     val resolveX       = (1 to 22).map(i => s"case ${caseN(i)} => resolve$i(resolvers)").mkString("\n      ")

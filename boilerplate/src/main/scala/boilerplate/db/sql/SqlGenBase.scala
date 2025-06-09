@@ -1,9 +1,9 @@
 package boilerplate.db.sql
 
-import boilerplate.CodeGenTemplate
+import boilerplate.Util
 
 abstract class SqlGenBase(fileName: String, dir: String)
-  extends CodeGenTemplate(
+  extends Util(
     fileName,
     dir,
     "db/sql/core/shared/src/main/scala/molecule/db/sql/core"

@@ -1,10 +1,10 @@
 package boilerplate.db.compliance.test.filter.one.decimal
 
 import java.nio.file.{Files, Paths}
-import boilerplate.CodeGenBase
+import boilerplate.Base
 import boilerplate.db.compliance.ComplianceGenBase
 
-object _FilterOneDecimal extends CodeGenBase {
+object _FilterOneDecimal extends Base {
 
   def generate(): Unit = Seq(
     ("Float", "float"),

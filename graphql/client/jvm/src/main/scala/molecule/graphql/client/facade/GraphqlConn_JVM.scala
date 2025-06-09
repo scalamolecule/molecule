@@ -6,6 +6,7 @@ import molecule.db.core.util.MoleculeLogging
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.{Conn, TxReport}
 import molecule.db.core.util.ModelUtils
+import molecule.graphql
 import molecule.graphql.client.transaction.GraphqlDataType_JVM
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal

@@ -1,10 +1,10 @@
 package boilerplate.db.compliance.test.bind.types
 
 import java.nio.file.{Files, Paths}
-import boilerplate.CodeGenBase
+import boilerplate.Base
 import boilerplate.db.compliance.ComplianceGenBase
 
-object _BindTypes extends CodeGenBase {
+object _BindTypes extends Base {
 
   def generate(): Unit = tpeVarImp
     .filterNot(_._1 == "ref")

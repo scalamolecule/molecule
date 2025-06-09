@@ -1,10 +1,10 @@
 package boilerplate.db.compliance.test.transaction.update.attrOp.decimal
 
 import java.nio.file.{Files, Paths}
-import boilerplate.CodeGenBase
+import boilerplate.Base
 import boilerplate.db.compliance.ComplianceGenBase
 
-object _AttrOpDecimal extends CodeGenBase {
+object _AttrOpDecimal extends Base {
 
   def generate(): Unit = Seq(
     ("Float", "float"),

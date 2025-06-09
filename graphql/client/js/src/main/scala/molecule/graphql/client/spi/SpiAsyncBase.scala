@@ -6,6 +6,7 @@ import molecule.db.core.action.*
 import molecule.db.core.ast.*
 import molecule.db.core.spi.{Conn, Renderer, Spi_async, TxReport}
 import molecule.db.core.util.FutureUtils
+import molecule.graphql.client
 import scala.concurrent.{Future, ExecutionContext as EC}
 
 

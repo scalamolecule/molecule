@@ -1,10 +1,10 @@
 package boilerplate.db.compliance.test.aggregation.number
 
 import java.nio.file.{Files, Paths}
-import boilerplate.CodeGenBase
+import boilerplate.Base
 import boilerplate.db.compliance.ComplianceGenBase
 
-object _AggrNum extends CodeGenBase  {
+object _AggrNum extends Base  {
 
   def generate(): Unit = numberTypes.foreach { case (name, tpe, v) =>
     TransformFile(name, tpe, v).generate()

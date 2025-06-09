@@ -1,8 +1,8 @@
 package boilerplate.db.core.transaction
 
-import boilerplate.db.core.CoreGenBase
+import boilerplate.db.core.CoreBase
 
-object _InsertValidators extends CoreGenBase("InsertValidators", "/transaction") {
+object _InsertValidators extends CoreBase("InsertValidators", "/transaction") {
 
   override val content = {
     s"""// GENERATED CODE ********************************

@@ -1,3 +1,5 @@
+package molecule.graphql.client.facade
+
 //package molecule.graphql.client.facade
 //
 //import boopickle.Default._

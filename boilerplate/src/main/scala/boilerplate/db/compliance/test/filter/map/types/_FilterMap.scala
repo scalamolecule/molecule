@@ -1,10 +1,10 @@
 package boilerplate.db.compliance.test.filter.map.types
 
 import java.nio.file.{Files, Paths}
-import boilerplate.CodeGenBase
+import boilerplate.Base
 import boilerplate.db.compliance.ComplianceGenBase
 
-object _FilterMap extends CodeGenBase {
+object _FilterMap extends Base {
 
   //  def generate(): Unit = (("Boolean", "Boolean", "boolean", "") +: tpeVarImp)
   //    def generate(): Unit = tpeVarImp.take(1) // String

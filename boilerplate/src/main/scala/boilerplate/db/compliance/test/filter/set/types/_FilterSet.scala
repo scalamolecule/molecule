@@ -1,10 +1,10 @@
 package boilerplate.db.compliance.test.filter.set.types
 
 import java.nio.file.{Files, Paths}
-import boilerplate.CodeGenBase
+import boilerplate.Base
 import boilerplate.db.compliance.ComplianceGenBase
 
-object _FilterSet extends CodeGenBase {
+object _FilterSet extends Base {
 
   def generate(): Unit = tpeVarImp.filterNot(_._1 == "ref").foreach { case (name, tpe, v, imp) =>
     TransformFile(name, tpe, v, imp).generate()

@@ -1,10 +1,10 @@
 package boilerplate.db.compliance.test.filter.one.number
 
 import java.nio.file.{Files, Paths}
-import boilerplate.CodeGenBase
+import boilerplate.Base
 import boilerplate.db.compliance.ComplianceGenBase
 
-object _FilterOneInteger extends CodeGenBase {
+object _FilterOneInteger extends Base {
 
   def generate(): Unit = Seq(
     ("Long", "long"),

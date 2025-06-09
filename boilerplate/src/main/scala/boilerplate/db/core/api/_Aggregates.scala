@@ -1,8 +1,8 @@
 package boilerplate.db.core.api
 
-import boilerplate.db.core.CoreGenBase
+import boilerplate.db.core.CoreBase
 
-object _Aggregates extends CoreGenBase("Aggregates", "/api") {
+object _Aggregates extends CoreBase("Aggregates", "/api") {
   val content = {
     val traits = (1 to 22).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************

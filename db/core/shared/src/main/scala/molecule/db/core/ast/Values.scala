@@ -72,7 +72,7 @@ case class SeqOffsetDateTime(v: Seq[OffsetDateTime]) extends Value
 case class SeqZonedDateTime(v: Seq[ZonedDateTime]) extends Value
 case class SeqUUID(v: Seq[UUID]) extends Value
 case class SeqURI(v: Seq[URI]) extends Value
-case class ArrayByte(v: Array[Byte]) extends Value
+case class ArrayByte(v: Array[Byte]) extends Value // OBS: special, since Array[Byte] is a common transport type
 case class SeqShort(v: Seq[Short]) extends Value
 case class SeqChar(v: Seq[Char]) extends Value
 

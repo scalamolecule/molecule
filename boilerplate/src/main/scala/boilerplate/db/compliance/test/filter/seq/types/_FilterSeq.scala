@@ -1,10 +1,10 @@
 package boilerplate.db.compliance.test.filter.seq.types
 
 import java.nio.file.{Files, Paths}
-import boilerplate.CodeGenBase
+import boilerplate.Base
 import boilerplate.db.compliance.ComplianceGenBase
 
-object _FilterSeq extends CodeGenBase {
+object _FilterSeq extends Base {
 
   def generate(): Unit = tpeVarImp.filterNot(
     coord => coord._3 == "ref" || coord._3 == "byte"

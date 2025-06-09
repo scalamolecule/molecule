@@ -5,6 +5,7 @@ import molecule.db.core.action.*
 import molecule.db.core.marshalling.ConnProxy
 import molecule.db.core.spi.{Conn, Spi_async, TxReport}
 import molecule.db.core.util.FutureUtils
+import molecule.graphql
 import molecule.graphql.client.facade.GraphqlConn_JVM
 import molecule.graphql.client.transaction.GraphqlDataType_JVM
 //import molecule.db.datalog.datomic.facade.DatomicConn_JVM

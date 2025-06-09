@@ -1,10 +1,10 @@
 package boilerplate.db.core.ast
 
 import java.io.File
-import boilerplate.db.core.CoreGenBase
+import boilerplate.db.core.CoreBase
 import scala.io.Source
 
-object _Element extends CoreGenBase("Element", "/ast") {
+object _Element extends CoreBase("Element", "/ast") {
 
   private val customCode = {
     val it        = Source.fromFile(new File(path + "/Element.scala"))
