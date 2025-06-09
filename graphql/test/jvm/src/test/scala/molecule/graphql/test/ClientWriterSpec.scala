@@ -7,7 +7,7 @@ import caliban.parsing.adt.Document
 import caliban.tools.{ClientWriter, Formatter}
 import molecule.graphql.client
 
-object ClientWriterSpec extends StarwarsTest_zio {
+object ClientWriterSpec extends StarWarsTest_zio {
 
   //  def gen(
   //    schema: String,
