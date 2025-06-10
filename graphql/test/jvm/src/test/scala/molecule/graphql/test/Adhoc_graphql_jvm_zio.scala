@@ -93,7 +93,6 @@ object Adhoc_graphql_jvm_zio extends StarWarsTest_zio {
 
         def load(loader: SchemaLoader) = loader.load.map { doc =>
           doc.typeDefinitions.collect {
-            //            case ObjectTypeDefinition(a, name, b, c, fields)    => println("1 " + name + "\n    " + fields.map(_.name).mkString(", "))
             case ObjectTypeDefinition(a, name, b, c, fields)    => println("1 " + name + "\n    " + fields.map(_.ofType).mkString(", "))
             case InputObjectTypeDefinition(_, name, _, fields)  => println("2 " + name + "\n    " + fields.map(_.name).mkString(", "))
             case EnumTypeDefinition(_, name, _, fields)         => println("3 " + name + "\n    " + fields.map(_.enumValue).mkString(", "))
@@ -113,7 +112,7 @@ object Adhoc_graphql_jvm_zio extends StarWarsTest_zio {
         //        load(FromIntrospection(url, None, false))
         //        load(fromIntrospectionWith(url, None)(_.supportIsRepeatable(true)))
         //load(fromIntrospection(url, None, IntrospectionClient.Config.default))
-        //        load(SchemaLoader.fromIntrospection(url, None))
+//        load(SchemaLoader.fromIntrospection(url, None))
       }
     )
   }

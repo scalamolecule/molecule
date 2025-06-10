@@ -1,13 +1,12 @@
 package molecule.db.sql.mariadb.setup
 
-import molecule.db.core.api.{Schema, Schema_mariadb}
+import molecule.core.ast.{Schema, Schema_mariadb}
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS
 import zio.{ZIO, ZLayer}
 import scala.util.Random
 
-//trait DbConnection_mariadb extends DbConnection {
 object DbConnection_mariadb {
 
   def run(test: Conn => Any, schema: Schema_mariadb): Any = {

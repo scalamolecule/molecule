@@ -9,7 +9,7 @@
 //
 //import molecule.base.ast.*
 //import molecule.base.ast.*
-////import molecule.db.core.api.Schema
+////import molecule.base.ast.Schema
 //
 //
 //trait StarWarsSchema extends Schema {

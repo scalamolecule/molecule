@@ -10,7 +10,6 @@ import molecule.base.ast.*
 import molecule.base.error.*
 import molecule.core.ast.*
 import molecule.core.util.MoleculeLogging
-import molecule.db.core.api.*
 
 
 object Boopicklers extends MoleculeLogging {

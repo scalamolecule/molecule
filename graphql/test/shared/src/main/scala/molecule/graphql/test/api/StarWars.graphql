@@ -1,0 +1,57 @@
+
+
+enum Episode {
+    NEWHOPE
+    EMPIRE
+    JEDI
+}
+
+interface Character {
+    id: ID!
+    name: String!
+    friends: [Character]
+    appearsIn: [Episode]!
+}
+
+type Droid implements Character {
+    id: ID!
+    name: String!
+    friends: [Character]
+    appearsIn: [Episode]!
+    primaryFunction: String
+}
+
+type Human implements Character {
+    id: ID!
+    name: String!
+    friends: [Character]
+    appearsIn: [Episode]!
+    homePlanet: String
+}
+
+type Query {
+    hero(episode: Episode!): Character
+    character(id: ID!): Character
+    human(id: ID!): Human
+    droid(id: ID!): Droid
+}
+
+
+type Review {
+    text: String
+}
+
+input ReviewInput {
+    stars: Int!
+    commentary: String
+}
+
+type Mutation {
+    createReview(episode: Episode, review: ReviewInput!): Review
+    updateHumanName(id: ID!, name: String!): Human
+    deleteHuman(id: ID!): ID!
+}
+
+type Subscription {
+    reviewCreated: Review
+}

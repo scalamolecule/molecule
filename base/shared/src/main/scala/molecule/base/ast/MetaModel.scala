@@ -5,7 +5,16 @@ import molecule.base.util.BaseHelpers
 
 sealed trait MetaModel
 
+// Scala 2.12 compatible enum definition (for the sbt-molecule plugin)
+sealed trait Endpoint extends Product with Serializable
+object Endpoint {
+  case object Db extends Endpoint
+  case object GraphQL extends Endpoint
+  case object REST extends Endpoint
+}
+
 case class MetaDomain(
+  endpoint: Endpoint,
   pkg: String,
   domain: String,
   maxArity: Int,
@@ -17,7 +26,7 @@ case class MetaDomain(
     val pad         = s"\n$p  "
     val segmentsStr = if (segments.isEmpty) "" else
       segments.map(_.render(tabs + 1)).mkString(pad, s",\n\n$pad", s"\n$p")
-    s"""MetaDomain("$pkg", "$domain", $maxArity, List($segmentsStr))"""
+    s"""MetaDomain(Endpoint.$endpoint, "$pkg", "$domain", $maxArity, List($segmentsStr))"""
   }
 
   override def toString: String = render(0)
@@ -91,7 +100,8 @@ case class MetaEntity(
   attrs: List[MetaAttribute],
   backRefs: List[String] = Nil,
   mandatoryAttrs: List[String] = Nil,
-  mandatoryRefs: List[(String, String)] = Nil
+  mandatoryRefs: List[(String, String)] = Nil,
+  description: Option[String] = None
 ) extends MetaModel {
   import BaseHelpers._
   def render(tabs: Int): String = {
@@ -111,7 +121,7 @@ case class MetaEntity(
         val requiredAttrs = list(attr.requiredAttrs)
         val valueAttrs    = list(attr.valueAttrs)
         val validations1  = renderValidations(attr.validations)
-        s"""MetaAttribute($attr1, $card, $tpe, $ref, $options, $descr, $alias, $requiredAttrs, $valueAttrs, $validations1)"""
+        s"""MetaAttribute($attr1, $card, $tpe, $ref, $options, $alias, $requiredAttrs, $valueAttrs, $validations1, $descr)"""
       }.mkString(pad, s",$pad", s"\n$p")
     }
     val backRefs1         = if (backRefs.isEmpty) "" else backRefs.mkString("\"", "\", \"", "\"")
@@ -119,7 +129,7 @@ case class MetaEntity(
     val mandatoryRefsStr  = if (mandatoryRefs.isEmpty) "" else mandatoryRefs.map {
       case (attr, ref) => s"""\"$attr\" -> \"$ref\""""
     }.mkString(", ")
-    s"""MetaEntity("$ent", List($attrsStr), List($backRefs1), List($mandatoryAttrsStr), List($mandatoryRefsStr))"""
+    s"""MetaEntity("$ent", List($attrsStr), List($backRefs1), List($mandatoryAttrsStr), List($mandatoryRefsStr), ${o(description)})"""
   }
 
   override def toString: String = render(0)
@@ -132,16 +142,27 @@ case class MetaAttribute(
   baseTpe: String,
   ref: Option[String] = None,
   options: List[String] = Nil,
-  description: Option[String] = None,
   alias: Option[String] = None,
   requiredAttrs: List[String] = Nil,
   valueAttrs: List[String] = Nil,
-  validations: List[(String, String)] = Nil
+  validations: List[(String, String)] = Nil,
+  description: Option[String] = None,
 ) extends MetaModel {
   import BaseHelpers._
   override def toString: String = {
     val validations1 = renderValidations(validations)
-    s"""MetaAttribute("$attr", $card, "$baseTpe", ${o(ref)}, ${list(options)}, ${o(description)}, ${o(alias)}, ${list(requiredAttrs)}, ${list(valueAttrs)}, $validations1)"""
+    s"""MetaAttribute("$attr", $card, "$baseTpe", ${o(ref)}, ${list(options)}, ${o(alias)}, ${list(requiredAttrs)}, ${list(valueAttrs)}, $validations1, ${o(description)})"""
+  }
+}
+
+case class MetaEnum(
+  name: String,
+  values: List[String],
+  description: Option[String] = None
+) extends MetaModel {
+  import BaseHelpers._
+  override def toString: String = {
+    s"""MetaEnum("$name", ${list(values)}, ${o(description)})"""
   }
 }
 

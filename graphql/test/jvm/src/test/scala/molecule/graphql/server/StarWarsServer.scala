@@ -5,6 +5,7 @@ import caliban.schema.Annotations.GQLInterface
 import caliban.schema.Schema.auto.genAll
 import caliban.schema.{ArgBuilder, Schema}
 
+// Caliban server setup to test StarWars queries
 trait StarWarsServer {
 
   // Schema -----------------------------------------
@@ -36,6 +37,7 @@ trait StarWarsServer {
     primaryFunction: Option[String])
     extends Character
 
+  // Entry points
   case class Query(
     hero: HeroArg => Character,
     character: CharacterArg => Option[Character],
@@ -69,7 +71,8 @@ trait StarWarsServer {
   val droids                      = List(c3po2, r2d2_2)
   val characters: List[Character] = humans ++ droids
 
-  // Resolve -----------------------------------------
+
+  // Resolver -----------------------------------------
 
   case class HeroArg(episode: Option[Episode])derives Schema.SemiAuto, ArgBuilder
   case class CharacterArg(id: String)derives Schema.SemiAuto, ArgBuilder

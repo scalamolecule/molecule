@@ -1,13 +1,7 @@
-/*
-* AUTO-GENERATED Molecule DSL boilerplate code for entity `Character`
-*
-* To change:
-* 1. Edit domain structure in molecule.graphql.client.dataModel.dsl.Starwars
-* 2. `sbt compile -Dmolecule=true`
-*/
+// AUTO-GENERATED Molecule DSL boilerplate code for entity `Character`
 package molecule.graphql.test.api.dsl.StarWars.output
 
-import molecule.base.ast.{CardOne, CardSet}
+import molecule.base.ast.*
 import molecule.core.ast
 import molecule.core.ast.*
 import molecule.graphql.client.api.*
@@ -22,11 +16,6 @@ private[StarWars] trait Character_base {
   protected lazy val name_opt     : AttrOneOptString = AttrOneOptString("Character", "name"     )
   protected lazy val friends_opt  : AttrSetOptID     = AttrSetOptID    ("Character", "friends"  , ref = Some("Character"))
   protected lazy val appearsIn_opt: AttrSetOptString = AttrSetOptString("Character", "appearsIn", validator = Some(validation_appearsIn))
-
-  protected lazy val id_tac       : AttrOneTacID     = AttrOneTacID    ("Character", "id"       )
-  protected lazy val name_tac     : AttrOneTacString = AttrOneTacString("Character", "name"     )
-  protected lazy val friends_tac  : AttrSetTacID     = AttrSetTacID    ("Character", "friends"  , ref = Some("Character"))
-  protected lazy val appearsIn_tac: AttrSetTacString = AttrSetTacString("Character", "appearsIn", validator = Some(validation_appearsIn))
 
   private lazy val validation_appearsIn = new ValidateString {
     override def validate(v: String): Seq[String] = {

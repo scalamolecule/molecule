@@ -1,5 +1,5 @@
 package molecule.graphql.test.api
 
-import molecule.GraphqlAPI
+import molecule.Graphql
 
-object StarWars extends GraphqlAPI(6, "file...")
+object StarWars extends Graphql(6)
