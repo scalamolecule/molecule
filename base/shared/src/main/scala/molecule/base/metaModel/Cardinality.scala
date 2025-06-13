@@ -1,4 +1,4 @@
-package molecule.base.ast
+package molecule.base.metaModel
 
 sealed trait Card {
   def _marker: String

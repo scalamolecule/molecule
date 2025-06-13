@@ -8,7 +8,7 @@ object _Nested extends DbCoreBase("Nested", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api
        |
-       |import molecule.core.ast.DataModel
+       |import molecule.core.dataModel.DataModel
        |
        |$traits
        |""".stripMargin

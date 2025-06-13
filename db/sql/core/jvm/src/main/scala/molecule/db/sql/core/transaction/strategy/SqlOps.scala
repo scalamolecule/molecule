@@ -2,7 +2,7 @@ package molecule.db.sql.core.transaction.strategy
 
 import java.sql.PreparedStatement as PS
 import molecule.base.util.BaseHelpers
-import molecule.core.ast.Element
+import molecule.core.dataModel.Element
 import molecule.db.sql.core.query.Model2SqlQuery
 import scala.collection.mutable.ListBuffer
 

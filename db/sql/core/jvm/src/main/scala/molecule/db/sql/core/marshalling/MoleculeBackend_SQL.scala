@@ -2,7 +2,7 @@ package molecule.db.sql.core.marshalling
 
 import java.nio.ByteBuffer
 import molecule.base.error.MoleculeError
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 import molecule.db.core.action.*
 import molecule.db.core.marshalling.deserialize.UnpickleTpls
 import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}

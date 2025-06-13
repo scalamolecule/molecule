@@ -1,7 +1,7 @@
 package molecule.db.core.transaction
 
 import molecule.base.error.ModelError
-import molecule.core.ast.Element
+import molecule.core.dataModel.Element
 
 trait Action2Data {
 

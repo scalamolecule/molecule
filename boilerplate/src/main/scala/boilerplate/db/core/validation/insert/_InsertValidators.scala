@@ -11,7 +11,7 @@ object _InsertValidators extends DbCoreBase("InsertValidators", "/transaction") 
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.core.ast.*
+       |import molecule.core.dataModel.*
        |
        |trait $fileName_ extends InsertValueResolvers_ {
        |  $validators

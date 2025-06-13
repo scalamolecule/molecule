@@ -1,8 +1,8 @@
 package molecule.db.core.marshalling
 
 import java.util.UUID
-import molecule.base.ast.{Card, MetaEntity}
-import molecule.core.ast.Schema
+import molecule.base.metaModel.{Card, MetaEntity}
+import molecule.core.dataModel.Schema
 import molecule.db.core.marshalling.dbView.DbView
 
 sealed trait ConnProxy {

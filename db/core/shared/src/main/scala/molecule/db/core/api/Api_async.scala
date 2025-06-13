@@ -2,7 +2,7 @@ package molecule.db.core.api
 
 import cats.effect.IO
 import molecule.base.error.InsertError
-import molecule.core.ast.Keywords
+import molecule.core.dataModel.Keywords
 import molecule.db.core.action.*
 import molecule.db.core.spi.*
 import molecule.db.core.util.ModelUtils

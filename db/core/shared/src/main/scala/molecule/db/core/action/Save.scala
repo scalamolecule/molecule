@@ -1,6 +1,6 @@
 package molecule.db.core.action
 
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 
 case class Save(
   dataModel: DataModel,

@@ -10,7 +10,7 @@ object _Molecules extends GraphqlBase( "Molecules", "/api") {
        |package molecule.graphql.client.api
        |
        |import molecule.base.error.ModelError
-       |import molecule.core.ast.DataModel
+       |import molecule.core.dataModel.DataModel
        |import molecule.graphql.client.action.{Mutate, Query}
        |
        |trait Molecule {

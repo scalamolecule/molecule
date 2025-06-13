@@ -6,9 +6,9 @@ import java.time.*
 import java.util.Date
 import boopickle.Default.*
 import boopickle.{CompositePickler, Pickler}
-import molecule.base.ast.*
+import molecule.base.metaModel.*
 import molecule.base.error.*
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.core.util.MoleculeLogging
 
 
@@ -46,11 +46,11 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleMetaSegment: Pickler[MetaSegment]   = generatePickler[MetaSegment]
   implicit val pickleMetaDomain : Pickler[MetaDomain]    = generatePickler[MetaDomain]
 
-  implicit val pickleMetaModel: CompositePickler[MetaModel] = compositePickler[MetaModel]
-  pickleMetaModel.addConcreteType[MetaAttribute]
-  pickleMetaModel.addConcreteType[MetaEntity]
-  pickleMetaModel.addConcreteType[MetaSegment]
-  pickleMetaModel.addConcreteType[MetaDomain]
+//  implicit val pickleMetaModel: CompositePickler[MetaModel] = compositePickler[MetaModel]
+//  pickleMetaModel.addConcreteType[MetaAttribute]
+//  pickleMetaModel.addConcreteType[MetaEntity]
+//  pickleMetaModel.addConcreteType[MetaSegment]
+//  pickleMetaModel.addConcreteType[MetaDomain]
 
   implicit val pickleOp: CompositePickler[Op] = compositePickler[Op]
   pickleOp.addConcreteType[NoValue.type]

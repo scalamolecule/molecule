@@ -2,7 +2,7 @@ package molecule.server.pekko
 
 import boopickle.Default.*
 import molecule.base.error.ModelError
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.serialize.PickleTpls
 import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}

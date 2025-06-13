@@ -2,7 +2,7 @@ package molecule.db.sql.core.transaction
 
 import molecule.base.error.{ExecutionError, ModelError, MoleculeError}
 import molecule.base.util.BaseHelpers
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.db.core.marshalling.ConnProxy
 import molecule.db.core.validation.TxModelValidation
 import molecule.db.sql.core.javaSql.ResultSetInterface as RS

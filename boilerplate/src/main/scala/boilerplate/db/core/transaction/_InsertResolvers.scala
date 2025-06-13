@@ -10,7 +10,7 @@ object _InsertResolvers extends DbCoreBase("InsertResolvers", "/transaction") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.transaction
        |
-       |import molecule.core.ast.*
+       |import molecule.core.dataModel.*
        |
        |trait $fileName_ {
        |

@@ -1,8 +1,8 @@
 package molecule.db.sql.core.transaction
 
-import molecule.base.ast.{CardOne, MetaEntity}
+import molecule.base.metaModel.{CardOne, MetaEntity}
 import molecule.base.error.ModelError
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.db.core.transaction.ResolveDelete
 import molecule.db.core.transaction.ops.DeleteOps
 import molecule.db.core.util.ModelUtils

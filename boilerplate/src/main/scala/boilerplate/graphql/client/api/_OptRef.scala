@@ -8,7 +8,7 @@ object _OptRef extends GraphqlBase("OptRef", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.graphql.client.api
        |
-       |import molecule.core.ast.*
+       |import molecule.core.dataModel.*
        |
        |$traits
        |""".stripMargin

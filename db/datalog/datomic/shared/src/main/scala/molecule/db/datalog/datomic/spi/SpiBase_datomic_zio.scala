@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.spi
 
 import molecule.base.error.MoleculeError
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 import molecule.db.core.spi.{Conn, Renderer}
 import molecule.db.datalog.core.query.Model2DatomicQuery
 import zio.ZIO

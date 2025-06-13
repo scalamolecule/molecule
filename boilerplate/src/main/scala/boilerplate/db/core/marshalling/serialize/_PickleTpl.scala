@@ -10,7 +10,7 @@ object _PickleTpl extends DbCoreBase("PickleTpl", "/marshalling/serialize") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.marshalling.serialize
        |
-       |import molecule.core.ast._
+       |import molecule.core.dataModel.*
        |
        |trait $fileName_ { self: PickleTpls =>
        |

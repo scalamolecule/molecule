@@ -9,7 +9,7 @@ object _ExprMapMan extends DbCoreBase("ExprMapMan", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api.expression
        |
-       |import molecule.core.ast.*
+       |import molecule.core.dataModel.*
        |$traits
        |""".stripMargin
   }

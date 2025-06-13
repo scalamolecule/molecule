@@ -1,7 +1,7 @@
 package molecule.db.sql.core.query
 
 import molecule.base.error.ModelError
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 import molecule.core.util.MoleculeLogging
 import molecule.db.core.util.{FutureUtils, ModelUtils}
 import molecule.db.sql.core.facade.JdbcConn_JVM

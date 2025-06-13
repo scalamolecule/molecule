@@ -8,8 +8,8 @@ object _ExprAttr extends DbCoreBase("ExprAttr", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api.expression
        |
-       |import molecule.base.ast.CardOne
-       |import molecule.core.ast.*
+       |import molecule.base.metaModel.CardOne
+       |import molecule.core.dataModel.*
        |import molecule.db.core.api.*
        |
        |

@@ -13,7 +13,7 @@ object _InsertValueResolvers extends DbCoreBase("InsertValueResolvers", "/valida
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.core.ast.*
+       |import molecule.core.dataModel.*
        |
        |trait $fileName_ {
        |

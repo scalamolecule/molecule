@@ -3,7 +3,7 @@ package molecule.server.core
 import java.nio.ByteBuffer
 import boopickle.Default.*
 import molecule.base.error.MoleculeError
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 import molecule.core.util.MoleculeLogging
 import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.serialize.PickleTpls

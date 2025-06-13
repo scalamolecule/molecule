@@ -7,9 +7,9 @@
 //*/
 //package molecule.graphql.test.api.schema
 //
-//import molecule.base.ast.*
-//import molecule.base.ast.*
-////import molecule.base.ast.Schema
+//import molecule.base.metaModel.*
+//import molecule.base.metaModel.*
+////import molecule.core.dataModel.Schema
 //
 //
 //trait StarWarsSchema extends Schema {

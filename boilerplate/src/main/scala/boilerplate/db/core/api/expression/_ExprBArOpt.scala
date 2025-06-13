@@ -9,7 +9,7 @@ object _ExprBArOpt extends DbCoreBase( "ExprBArOpt", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api.expression
        |
-       |import molecule.core.ast.*
+       |import molecule.core.dataModel.*
        |$traits
        |""".stripMargin
   }

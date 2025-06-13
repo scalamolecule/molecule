@@ -1,6 +1,6 @@
 package molecule.db.datalog.datomic.compliance.inspection
 
-import molecule.core.ast.{AttrOneManInt, AttrOneManString, DataModel, V}
+import molecule.core.dataModel.{AttrOneManInt, AttrOneManString, DataModel, V}
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.core.util.Executor.*

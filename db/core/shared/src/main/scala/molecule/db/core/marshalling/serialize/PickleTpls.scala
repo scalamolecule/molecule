@@ -9,7 +9,7 @@ import boopickle.BasicPicklers.*
 import boopickle.Default.*
 import molecule.db.core.marshalling.Boopicklers.*
 import molecule.base.error.{ModelError, MoleculeError}
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.core.util.MoleculeLogging
 import molecule.db.core.util.{ModelUtils, SerializationUtils}
 import scala.annotation.tailrec

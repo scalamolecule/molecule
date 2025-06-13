@@ -10,7 +10,7 @@ object _Molecules extends DbCoreBase( "Molecules", "/api") {
        |package molecule.db.core.api
        |
        |import molecule.base.error.ModelError
-       |import molecule.core.ast.DataModel
+       |import molecule.core.dataModel.DataModel
        |import molecule.db.core.action.*
        |
        |trait Molecule {

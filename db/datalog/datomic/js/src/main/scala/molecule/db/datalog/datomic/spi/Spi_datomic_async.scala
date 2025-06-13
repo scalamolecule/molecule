@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.spi
 
 import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 import molecule.db.core.action.*
 import molecule.db.core.marshalling.serialize.PickleTpls
 import molecule.db.core.spi.{Conn, Spi_async, TxReport}

@@ -2,7 +2,7 @@ package molecule.db.core.spi
 
 import cats.effect.IO
 import molecule.base.error.{ExecutionError, MoleculeError}
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 import molecule.db.core.api.Savepoint
 import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.db.core.util.ModelUtils

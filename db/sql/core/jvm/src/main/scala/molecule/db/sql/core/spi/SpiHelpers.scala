@@ -4,7 +4,7 @@ import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
 import molecule.base.error.ModelError
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.db.core.util.ModelUtils
 import molecule.db.sql.core.javaSql.ResultSetInterface as RS
 

@@ -8,7 +8,7 @@ object _Aggregates extends DbCoreBase("Aggregates", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.api
        |
-       |import molecule.core.ast.Keywords.*
+       |import molecule.core.dataModel.Keywords.*
        |$traits""".stripMargin
   }
 

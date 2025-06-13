@@ -1,6 +1,6 @@
 package molecule.db.sql.mysql.query
 
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.db.core.query.Model2Query
 import molecule.db.sql.core.query.{QueryExprSetRefAttr, SqlQueryBase}
 

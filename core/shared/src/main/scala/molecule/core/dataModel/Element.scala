@@ -1,9 +1,9 @@
-package molecule.core.ast
+package molecule.core.dataModel
 
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.ast.{Card, CardOne}
+import molecule.base.metaModel.{Card, CardOne}
 import molecule.base.util.BaseHelpers.*
 
 

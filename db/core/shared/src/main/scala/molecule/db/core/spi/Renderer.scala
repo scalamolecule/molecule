@@ -1,6 +1,6 @@
 package molecule.db.core.spi
 
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 
 trait Renderer {
 

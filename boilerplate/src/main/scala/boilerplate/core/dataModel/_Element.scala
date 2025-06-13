@@ -1,10 +1,10 @@
-package boilerplate.core.ast
+package boilerplate.core.dataModel
 
 import java.io.File
 import boilerplate.core.CoreBase
 import scala.io.Source
 
-object _Element extends CoreBase("Element", "/ast") {
+object _Element extends CoreBase("Element", "/dataModel") {
 
   private val customCode = {
     val it        = Source.fromFile(new File(path + "/Element.scala"))

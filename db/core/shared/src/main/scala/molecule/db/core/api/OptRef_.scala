@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.core.api
 
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 
 
 trait OptRefOp_0[Entity[_, _]] {

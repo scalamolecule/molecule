@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.core.transaction
 
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 
 trait InsertResolvers_ {
 

@@ -1,9 +1,9 @@
 package molecule.db.datalog.core.query
 
 import java.util.Iterator as jIterator
-import molecule.base.ast.CardOne
+import molecule.base.metaModel.CardOne
 import molecule.base.error.ModelError
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import scala.annotation.tailrec
 
 

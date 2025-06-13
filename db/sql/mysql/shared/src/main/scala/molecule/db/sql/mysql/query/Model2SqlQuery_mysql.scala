@@ -1,6 +1,6 @@
 package molecule.db.sql.mysql.query
 
-import molecule.core.ast.Element
+import molecule.core.dataModel.Element
 import molecule.db.sql.core.query.*
 import scala.collection.mutable.ListBuffer
 

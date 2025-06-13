@@ -5,7 +5,7 @@ import java.util.stream.Stream as jStream
 import java.util.{Collections, Comparator, ArrayList as jArrayList, Collection as jCollection, List as jList}
 import datomic.{Database, Peer}
 import molecule.base.error.ModelError
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.core.util.MoleculeLogging
 import molecule.db.core.marshalling.dbView.*
 import molecule.db.core.query.Pagination

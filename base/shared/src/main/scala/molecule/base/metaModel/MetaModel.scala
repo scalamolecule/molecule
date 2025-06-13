@@ -1,32 +1,19 @@
-package molecule.base.ast
+package molecule.base.metaModel
 
-import molecule.base.util.BaseHelpers
-
-
-sealed trait MetaModel
-
-// Scala 2.12 compatible enum definition (for the sbt-molecule plugin)
-sealed trait Endpoint extends Product with Serializable
-object Endpoint {
-  case object Db extends Endpoint
-  case object GraphQL extends Endpoint
-  case object REST extends Endpoint
-}
+import molecule.base.util.BaseHelpers._
 
 case class MetaDomain(
-  endpoint: Endpoint,
   pkg: String,
   domain: String,
   maxArity: Int,
   segments: List[MetaSegment]
-) extends MetaModel {
-  import BaseHelpers._ // import BaseHelpers methods instead of extending to avoid polluting namespace
+)  {
   def render(tabs: Int = 0): String = {
     val p           = indent(tabs)
     val pad         = s"\n$p  "
     val segmentsStr = if (segments.isEmpty) "" else
       segments.map(_.render(tabs + 1)).mkString(pad, s",\n\n$pad", s"\n$p")
-    s"""MetaDomain(Endpoint.$endpoint, "$pkg", "$domain", $maxArity, List($segmentsStr))"""
+    s"""MetaDomain("$pkg", "$domain", $maxArity, List($segmentsStr))"""
   }
 
   override def toString: String = render(0)
@@ -81,8 +68,7 @@ case class MetaDomain(
 case class MetaSegment(
   segment: String,
   ents: List[MetaEntity]
-) extends MetaModel {
-  import BaseHelpers._
+)  {
   def render(tabs: Int): String = {
     val p           = indent(tabs)
     val pad         = s"\n$p  "
@@ -102,14 +88,13 @@ case class MetaEntity(
   mandatoryAttrs: List[String] = Nil,
   mandatoryRefs: List[(String, String)] = Nil,
   description: Option[String] = None
-) extends MetaModel {
-  import BaseHelpers._
+)  {
   def render(tabs: Int): String = {
-    val maxAttr           = attrs.map(_.attr.length).max
-    val maxTpe            = attrs.map(_.baseTpe.length).max
     val attrsStr          = if (attrs.isEmpty) "" else {
-      val p   = indent(tabs)
-      val pad = s"\n$p  "
+      val maxAttr = attrs.map(_.attr.length).max
+      val maxTpe  = attrs.map(_.baseTpe.length).max
+      val p       = indent(tabs)
+      val pad     = s"\n$p  "
       attrs.map { attr =>
         val attr1         = "\"" + attr.attr + "\"" + padS(maxAttr, attr.attr)
         val card          = attr.card
@@ -147,8 +132,7 @@ case class MetaAttribute(
   valueAttrs: List[String] = Nil,
   validations: List[(String, String)] = Nil,
   description: Option[String] = None,
-) extends MetaModel {
-  import BaseHelpers._
+)  {
   override def toString: String = {
     val validations1 = renderValidations(validations)
     s"""MetaAttribute("$attr", $card, "$baseTpe", ${o(ref)}, ${list(options)}, ${o(alias)}, ${list(requiredAttrs)}, ${list(valueAttrs)}, $validations1, ${o(description)})"""
@@ -159,8 +143,7 @@ case class MetaEnum(
   name: String,
   values: List[String],
   description: Option[String] = None
-) extends MetaModel {
-  import BaseHelpers._
+)  {
   override def toString: String = {
     s"""MetaEnum("$name", ${list(values)}, ${o(description)})"""
   }

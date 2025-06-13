@@ -1,7 +1,7 @@
 package molecule.rest.setup
 
-import molecule.base.ast.Schema
 import molecule.base.util.BaseHelpers
+import molecule.core.dataModel.Schema
 import molecule.db.core.spi.Conn
 import molecule.db.compliance.domains.schema._
 import molecule.db.compliance.setup.CoreTestSuite

@@ -1,6 +1,6 @@
 package molecule.db.sql.core.query
 
-import molecule.core.ast.Element
+import molecule.core.dataModel.Element
 import molecule.core.util.MoleculeLogging
 import molecule.db.core.marshalling.ConnProxy
 import molecule.db.core.query.{Model2Query, QueryExpr}

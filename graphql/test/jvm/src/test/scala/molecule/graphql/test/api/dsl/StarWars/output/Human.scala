@@ -7,9 +7,9 @@
 */
 package molecule.graphql.test.api.dsl.StarWars.output
 
-import molecule.base.ast.{CardOne, CardSet}
-import molecule.core.ast
-import molecule.core.ast.*
+import molecule.base.metaModel.{CardOne, CardSet}
+import molecule.core.dataModel
+import molecule.core.dataModel.*
 
 
 trait Human_base {
@@ -73,7 +73,7 @@ class Human_0_refs[t](dataModel: DataModel) {
 //      ))
 //  }
 
-  object Friends extends Character_0[t](dataModel.add(ast.Ref("Human", "friends", "Character", CardSet, false, List(2, 11, 0)))) //with NestedInit
+  object Friends extends Character_0[t](dataModel.add(dataModel.Ref("Human", "friends", "Character", CardSet, false, List(2, 11, 0)))) //with NestedInit
 }
 
 
@@ -108,7 +108,7 @@ class Human_1_refs[A, t](dataModel: DataModel) {
 //      ))
 //  }
 
-  object Friends extends Character_1[A, t](dataModel.add(ast.Ref("Human", "friends", "Character", CardSet, false, List(2, 11, 0)))) //with NestedInit
+  object Friends extends Character_1[A, t](dataModel.add(dataModel.Ref("Human", "friends", "Character", CardSet, false, List(2, 11, 0)))) //with NestedInit
 }
 
 
@@ -143,7 +143,7 @@ class Human_2_refs[A, B, t](dataModel: DataModel) {
 //      ))
 //  }
 
-  object Friends extends Character_2[A, B, t](dataModel.add(ast.Ref("Human", "friends", "Character", CardSet, false, List(2, 11, 0)))) //with NestedInit
+  object Friends extends Character_2[A, B, t](dataModel.add(dataModel.Ref("Human", "friends", "Character", CardSet, false, List(2, 11, 0)))) //with NestedInit
 }
 
 

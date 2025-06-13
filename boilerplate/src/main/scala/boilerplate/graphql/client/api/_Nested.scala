@@ -8,7 +8,7 @@ object _Nested extends GraphqlBase("Nested", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.graphql.client.api
        |
-       |import molecule.core.ast.DataModel
+       |import molecule.core.dataModel.DataModel
        |
        |$traits
        |""".stripMargin

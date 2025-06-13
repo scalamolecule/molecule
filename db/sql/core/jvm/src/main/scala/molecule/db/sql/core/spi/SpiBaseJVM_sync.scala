@@ -4,7 +4,7 @@ import java.sql.{ResultSet, ResultSetMetaData, Statement}
 import geny.Generator
 import molecule.base.error.{InsertError, InsertErrors, ModelError, ValidationErrors}
 import molecule.base.util.BaseHelpers
-import molecule.core.ast.{DataModel, Element}
+import molecule.core.dataModel.{DataModel, Element}
 import molecule.db.core.action.*
 import molecule.db.core.marshalling.ConnProxy
 import molecule.db.core.spi.{Conn, Renderer, Spi_sync, TxReport}

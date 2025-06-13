@@ -1,6 +1,6 @@
 package molecule.db.sql.postgres.setup
 
-import molecule.core.ast.Schema_postgres
+import molecule.core.dataModel.Schema_postgres
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS

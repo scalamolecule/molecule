@@ -1,7 +1,7 @@
 package molecule.db.sql.mysql.spi
 
 import java.sql.DriverManager
-import molecule.core.ast.Element
+import molecule.core.dataModel.Element
 import molecule.db.core.action.{Delete, Insert, Save, Update}
 import molecule.db.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.db.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}

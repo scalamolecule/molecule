@@ -2,7 +2,7 @@ package molecule.rpc.grpc.spi
 
 import boopickle.Default._
 import molecule.base.error.{InsertError, InsertErrors, ModelError, ValidationErrors}
-import molecule.core.ast._
+import molecule.core.dataModel._
 import molecule.db.core.action._
 import molecule.db.core.marshalling.serialize.PickleTpls
 import molecule.db.core.spi.{Conn, Renderer, SpiAsync, TxReport}

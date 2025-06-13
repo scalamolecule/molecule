@@ -1,8 +1,8 @@
 package molecule.db.core.validation.insert
 
-import molecule.base.ast.MetaEntity
+import molecule.base.metaModel.MetaEntity
 import molecule.base.error.{InsertError, ModelError}
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.db.core.util.ModelUtils
 import scala.annotation.tailrec
 

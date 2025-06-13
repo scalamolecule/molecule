@@ -14,7 +14,7 @@ object _SortOneOptFlat extends DbDatalogBase("SortOneOptFlat", "/query") {
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.core.ast.*
+       |import molecule.core.dataModel.*
        |
        |
        |trait $fileName_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =>

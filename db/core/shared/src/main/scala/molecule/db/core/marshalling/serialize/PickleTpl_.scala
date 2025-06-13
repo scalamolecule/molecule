@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.core.marshalling.serialize
 
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 
 trait PickleTpl_ { self: PickleTpls =>
 

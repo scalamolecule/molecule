@@ -1,6 +1,6 @@
 package molecule.db.sql.sqlite.setup
 
-import molecule.core.ast.Schema_sqlite
+import molecule.core.dataModel.Schema_sqlite
 import molecule.db.compliance.setup.DbConnection
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn

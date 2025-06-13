@@ -5,7 +5,7 @@ import java.util.stream.Stream as jStream
 import datomic.Peer
 import geny.Generator
 import molecule.base.error.{InsertError, ModelError}
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.db.core.action.*
 import molecule.db.core.spi.{Conn, Spi_sync, TxReport}
 import molecule.db.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}

@@ -2,7 +2,7 @@ package molecule.db.datalog.datomic.transaction
 
 import datomic.Peer
 import molecule.base.error.ExecutionError
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.core.util.{JavaConversions, MoleculeLogging}
 import molecule.db.core.transaction.ResolveDelete
 import molecule.db.core.transaction.ops.DeleteOps

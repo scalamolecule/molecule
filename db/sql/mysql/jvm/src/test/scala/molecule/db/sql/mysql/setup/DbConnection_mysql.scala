@@ -1,7 +1,7 @@
 package molecule.db.sql.mysql.setup
 
 import com.mysql.cj.jdbc.MysqlDataSource
-import molecule.core.ast.Schema_mysql
+import molecule.core.dataModel.Schema_mysql
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}

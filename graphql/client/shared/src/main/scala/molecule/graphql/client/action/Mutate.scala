@@ -1,6 +1,6 @@
 package molecule.graphql.client.action
 
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 
 case class Mutate(
   dataModel: DataModel,

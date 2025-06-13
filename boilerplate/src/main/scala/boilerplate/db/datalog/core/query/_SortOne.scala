@@ -14,7 +14,7 @@ object _SortOne extends DbDatalogBase("SortOne", "/query") {
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.core.ast.*
+       |import molecule.core.dataModel.*
        |
        |
        |trait $fileName_[Tpl] { self: Model2DatomicQuery[Tpl] =>

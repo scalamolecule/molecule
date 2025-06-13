@@ -1,6 +1,6 @@
-package molecule.core.ast
+package molecule.core.dataModel
 
-import molecule.base.ast.{Card, MetaDomain, MetaEntity}
+import molecule.base.metaModel.{Card, MetaDomain, MetaEntity}
 
 /** Schema transaction data interface
  *
@@ -8,7 +8,7 @@ import molecule.base.ast.{Card, MetaDomain, MetaEntity}
  * */
 trait Schema {
 
-  val metaDomain: MetaDomain
+//  val metaDomain: MetaDomain
 
   /** Entity name -> MetaEntity */
   val entityMap: Map[String, MetaEntity]

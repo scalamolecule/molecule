@@ -9,7 +9,7 @@ object _Insert extends DbCoreBase( "Insert", "/action") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.action
        |
-       |import molecule.core.ast.DataModel
+       |import molecule.core.dataModel.DataModel
        |
        |case class ${fileName}_1[A](dataModel: DataModel) {
        |  final def apply(a: A, as: A*) = Insert(dataModel, (a +: as).map(a => Tuple1(a)))

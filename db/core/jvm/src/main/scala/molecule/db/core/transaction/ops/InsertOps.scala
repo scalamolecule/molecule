@@ -1,7 +1,7 @@
 package molecule.db.core.transaction.ops
 
-import molecule.base.ast.Card
-import molecule.core.ast.{Attr, Element}
+import molecule.base.metaModel.Card
+import molecule.core.dataModel.{Attr, Element}
 
 trait InsertOps extends BaseOps {
 

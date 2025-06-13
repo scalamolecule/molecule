@@ -6,9 +6,9 @@ import java.util.{List as jList, Map as jMap, Set as jSet}
 import clojure.lang.Keyword
 import datomic.query.EntityMap
 import datomic.{Database, Peer}
-import molecule.base.ast.CardOne
+import molecule.base.metaModel.CardOne
 import molecule.base.error.{ExecutionError, ModelError, MoleculeError, ValidationErrors}
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.core.util.{JavaConversions, MoleculeLogging}
 import molecule.db.core.ops.ModelTransformations_
 import molecule.db.core.transaction.ResolveUpdate

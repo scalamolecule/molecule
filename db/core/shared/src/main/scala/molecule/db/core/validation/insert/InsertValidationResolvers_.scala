@@ -1,9 +1,9 @@
 // GENERATED CODE ********************************
 package molecule.db.core.validation.insert
 
-import molecule.base.ast.MetaEntity
+import molecule.base.metaModel.MetaEntity
 import molecule.base.error.InsertError
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 
 trait InsertValidationResolvers_ {
 

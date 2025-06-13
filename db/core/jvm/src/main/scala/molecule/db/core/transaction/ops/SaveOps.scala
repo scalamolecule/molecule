@@ -1,6 +1,6 @@
 package molecule.db.core.transaction.ops
 
-import molecule.base.ast.Card
+import molecule.base.metaModel.Card
 import molecule.db.core.transaction.Action2Data
 
 trait SaveOps extends Action2Data with BaseOps {

@@ -3,7 +3,7 @@ package molecule.db.sql.core.spi
 import boopickle.Default.*
 import cats.effect.IO
 import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 import molecule.db.core.action.*
 import molecule.db.core.marshalling.serialize.PickleTpls
 import molecule.db.core.spi.{Conn, Renderer, Spi_io, TxReport}

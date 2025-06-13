@@ -1,4 +1,4 @@
-package molecule.core.ast
+package molecule.core.dataModel
 
 case class DataModel(
   elements: List[Element],

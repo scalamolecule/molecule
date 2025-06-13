@@ -1,4 +1,4 @@
-package molecule.core.ast
+package molecule.core.dataModel
 
 sealed trait Op
 case object NoValue extends Op

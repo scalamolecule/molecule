@@ -10,9 +10,9 @@ object _InsertValidationResolvers extends DbCoreBase("InsertValidationResolvers"
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.validation.insert
        |
-       |import molecule.base.ast.*
+       |import molecule.base.metaModel.*
        |import molecule.base.error.InsertError
-       |import molecule.core.ast.*
+       |import molecule.core.dataModel.*
        |
        |trait $fileName_ {
        |

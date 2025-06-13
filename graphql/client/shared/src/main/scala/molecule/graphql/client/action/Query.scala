@@ -1,7 +1,7 @@
 package molecule.graphql.client.action
 
 import molecule.base.error.ModelError
-import molecule.core.ast.DataModel
+import molecule.core.dataModel.DataModel
 
 case class Query[Tpl](
   dataModel: DataModel,

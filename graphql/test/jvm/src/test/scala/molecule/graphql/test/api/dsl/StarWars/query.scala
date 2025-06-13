@@ -1,12 +1,38 @@
 package molecule.graphql.test.api.dsl.StarWars
 
-import molecule.core.ast.*
-import molecule.core.ast.Keywords.qm
+import molecule.base.metaModel.*
+import molecule.core.dataModel.*
+import molecule.core.dataModel.Keywords.qm
 import molecule.graphql.test.api.dsl.StarWars.output.*
 
 object query extends query
 
 trait query {
+
+  MetaSegment(
+    "query",
+    List(
+      MetaEntity(
+        "hero",
+        List(
+          MetaAttribute("id", CardOne, "String", options = List("mandatory"))
+        ),
+        List("Character")
+      ),
+      MetaEntity(
+        "hero",
+        Nil,
+        List("Character")
+      ),
+      MetaEntity(
+        "character",
+        List(
+          MetaAttribute("id", CardOne, "String", options = List("mandatory"))
+        ),
+        List("Character")
+      ),
+    )
+  )
 
   def hero(id: String) = new Character_0[Nothing](DataModel(List(
     AttrOneTacString("hero", "id", Eq, Seq(id))

@@ -2,7 +2,7 @@ package molecule.db.datalog.core.query
 
 import java.util.{Iterator as jIterator, List as jList}
 import molecule.base.util.BaseHelpers
-import molecule.core.ast.*
+import molecule.core.dataModel.*
 import molecule.core.util.JavaConversions
 import molecule.db.core.query.Model2Query
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
