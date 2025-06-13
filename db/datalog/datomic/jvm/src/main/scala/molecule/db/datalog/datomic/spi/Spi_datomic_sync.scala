@@ -30,7 +30,7 @@ trait Spi_datomic_sync
     with FutureUtils {
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
-    if (q.printInspect) query_inspect(q).foreach(println)
+    if (q.printInspect) query_inspect(q)
     val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
     m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveOffset[Tpl](
@@ -45,7 +45,7 @@ trait Spi_datomic_sync
   override def queryOffset_get[Tpl](
     q: QueryOffset[Tpl]
   )(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
-    if (q.printInspect) queryOffset_inspect(q).map(println)
+    if (q.printInspect) queryOffset_inspect(q)
     val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
     m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveOffset[Tpl](
@@ -62,7 +62,7 @@ trait Spi_datomic_sync
   override def queryCursor_get[Tpl](
     q: QueryCursor[Tpl]
   )(implicit conn: Conn): (List[Tpl], String, Boolean) = {
-    if (q.printInspect) queryCursor_inspect(q).map(println)
+    if (q.printInspect) queryCursor_inspect(q)
     val m2q = new Model2DatomicQuery[Tpl](q.dataModel)
     m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveCursor[Tpl](

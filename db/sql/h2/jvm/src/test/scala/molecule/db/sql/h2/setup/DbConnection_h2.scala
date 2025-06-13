@@ -2,8 +2,8 @@ package molecule.db.sql.h2.setup
 
 import java.sql.DriverManager
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-import molecule.core.dataModel.Schema_h2
 import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.api.Schema_h2
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcHandler_JVM

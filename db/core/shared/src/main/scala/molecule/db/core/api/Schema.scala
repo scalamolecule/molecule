@@ -1,6 +1,6 @@
-package molecule.core.dataModel
+package molecule.db.core.api
 
-import molecule.base.metaModel.{Card, MetaDomain, MetaEntity}
+import molecule.base.metaModel.{Card, MetaEntity}
 
 /** Schema transaction data interface
  *

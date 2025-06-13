@@ -73,7 +73,7 @@ trait Spi_datomic_io
   override def save_transact(save: Save)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (save.printInspect) save_inspect(save).map(println) else IO.unit
+      _ <- if (save.printInspect) save_inspect(save) else IO.unit
       errors <- save_validate(save) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty => conn.rpc.save(conn.proxy, save.dataModel).io
@@ -100,7 +100,7 @@ trait Spi_datomic_io
   override def insert_transact(insert: Insert)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (insert.printInspect) insert_inspect(insert).map(println) else IO.unit
+      _ <- if (insert.printInspect) insert_inspect(insert) else IO.unit
       errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
@@ -128,7 +128,7 @@ trait Spi_datomic_io
   override def update_transact(update: Update)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (update.printInspect) update_inspect(update).map(println) else IO.unit
+      _ <- if (update.printInspect) update_inspect(update) else IO.unit
       errors <- update_validate(update) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>

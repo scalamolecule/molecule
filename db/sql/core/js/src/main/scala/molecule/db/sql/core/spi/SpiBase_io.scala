@@ -70,7 +70,7 @@ trait SpiBase_io
   override def save_transact(save: Save)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
-      _ <- if (save.printInspect) save_inspect(save).map(println) else IO.unit
+      _ <- if (save.printInspect) save_inspect(save) else IO.unit
       // Validating on JS side since it doesn't require db lookups
       errors <- save_validate(save) // validate original elements against meta model
       txReport <- if (errors.isEmpty) {
@@ -103,7 +103,7 @@ trait SpiBase_io
   override def insert_transact(insert: Insert)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
-      _ <- if (insert.printInspect) insert_inspect(insert).map(println) else IO.unit
+      _ <- if (insert.printInspect) insert_inspect(insert) else IO.unit
       // Validating on JS side since it doesn't require db lookups
       errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- if (errors.isEmpty) {
@@ -141,7 +141,7 @@ trait SpiBase_io
   override def update_transact(update: Update)(implicit conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
-      _ <- if (update.printInspect) update_inspect(update).map(println) else IO.unit
+      _ <- if (update.printInspect) update_inspect(update) else IO.unit
       // Validating on JVM side only since it requires db lookups
       txReport <- conn.rpc.update(conn.proxy, update.dataModel, update.isUpsert).io
       _ <- conn.callback(update.dataModel).io

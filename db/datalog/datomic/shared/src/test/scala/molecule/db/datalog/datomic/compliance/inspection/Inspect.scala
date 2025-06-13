@@ -24,7 +24,7 @@ class Test_Inspect extends MUnit with DbProviders_datomic with TestUtils {
           |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 7)),
           |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 8))
           |  ),
-          |  Set(7, 8), 0, 0
+          |  Set(7, 8), 0, 0, Nil
           |)
           |
           |[:find  ?b ?c
@@ -60,7 +60,7 @@ class Test_Inspect extends MUnit with DbProviders_datomic with TestUtils {
           |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, false, List(0, 7)),
           |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, false, List(0, 8))
           |  ),
-          |  Set(7, 8), 0, 0
+          |  Set(7, 8), 0, 0, Nil
           |)
           |
           |[
@@ -98,7 +98,7 @@ class Test_Inspect extends MUnit with DbProviders_datomic with TestUtils {
           |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 7)),
           |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 8))
           |  ),
-          |  Set(7, 8), 0, 0
+          |  Set(7, 8), 0, 0, Nil
           |)
           |
           |[
@@ -140,7 +140,7 @@ class Test_Inspect extends MUnit with DbProviders_datomic with TestUtils {
           |    AttrOneTacID("Entity", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, false, List(0, 0)),
           |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, false, List(0, 7))
           |  ),
-          |  Set(7), 0, 0
+          |  Set(7), 0, 0, Nil
           |)
           |
           |[
@@ -180,7 +180,7 @@ class Test_Inspect extends MUnit with DbProviders_datomic with TestUtils {
           |  List(
           |    AttrOneTacID("Entity", "id", Eq, Seq(17592186045418L), None, None, Nil, Nil, None, None, false, List(0, 0))
           |  ),
-          |  Set(), 0, 0
+          |  Set(), 0, 0, Nil
           |)
           |
           |[

@@ -8,7 +8,7 @@
 package molecule.graphql.test.api.dsl.StarWars.output
 
 import molecule.base.metaModel.{CardOne, CardSet}
-import molecule.core.dataModel
+import molecule.core.dataModel as _dm
 import molecule.core.dataModel.*
 
 
@@ -72,7 +72,7 @@ class Droid_0_refs[t](dataModel: DataModel) {
 //      ))
 //  }
 
-  object Friends extends Character_0[t](dataModel.add(dataModel.Ref("Droid", "friends", "Character", CardSet, false, List(1, 6, 0)))) //with NestedInit
+  object Friends extends Character_0[t](dataModel.add(_dm.Ref("Droid", "friends", "Character", CardSet, false, List(1, 6, 0)))) //with NestedInit
 }
 
 
@@ -107,7 +107,7 @@ class Droid_1_refs[A, t](dataModel: DataModel) {
 //      ))
 //  }
 
-  object Friends extends Character_1[A, t](dataModel.add(dataModel.Ref("Droid", "friends", "Character", CardSet, false, List(1, 6, 0))))// with NestedInit
+  object Friends extends Character_1[A, t](dataModel.add(_dm.Ref("Droid", "friends", "Character", CardSet, false, List(1, 6, 0))))// with NestedInit
 }
 
 
@@ -142,7 +142,7 @@ class Droid_2_refs[A, B, t](dataModel: DataModel) {
 //      ))
 //  }
 
-  object Friends extends Character_2[A, B, t](dataModel.add(dataModel.Ref("Droid", "friends", "Character", CardSet, false, List(1, 6, 0)))) //with NestedInit
+  object Friends extends Character_2[A, B, t](dataModel.add(_dm.Ref("Droid", "friends", "Character", CardSet, false, List(1, 6, 0)))) //with NestedInit
 }
 
 

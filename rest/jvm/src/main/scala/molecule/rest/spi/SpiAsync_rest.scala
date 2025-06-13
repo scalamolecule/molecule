@@ -78,7 +78,7 @@ trait SpiAsync_rest
   override def save_transact(save: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
 //    val conn = conn0.asInstanceOf[DatomicConn_JVM]
 //    for {
-//      _ <- if (save.printInspect) save_inspect(save).map(println) else Future.unit
+//      _ <- if (save.printInspect) save_inspect(save) else Future.unit
 //      errors <- save_validate(save)
 //      txReport <- errors match {
 //        case errors if errors.isEmpty => conn.transact_async(save_getStmts(save))
@@ -112,7 +112,7 @@ trait SpiAsync_rest
   override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
 //    val conn = conn0.asInstanceOf[DatomicConn_JVM]
 //    for {
-//      _ <- if (insert.printInspect) insert_inspect(insert).map(println) else Future.unit
+//      _ <- if (insert.printInspect) insert_inspect(insert) else Future.unit
 //      errors <- insert_validate(insert)
 //      txReport <- errors match {
 //        case errors if errors.isEmpty => conn.transact_async(insert_getStmts(insert, conn.proxy))
@@ -147,7 +147,7 @@ trait SpiAsync_rest
   override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
 //    val conn = conn0.asInstanceOf[DatomicConn_JVM]
 //    for {
-//      _ <- if (update.printInspect) update_inspect(update).map(println) else Future.unit
+//      _ <- if (update.printInspect) update_inspect(update) else Future.unit
 //      errors <- update_validate(update)
 //      txReport <- errors match {
 //        case errors if errors.isEmpty => conn.transact_async(update_getStmts(update, conn))
@@ -181,7 +181,7 @@ trait SpiAsync_rest
   override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
 //    val conn = conn0.asInstanceOf[DatomicConn_JVM]
 //    for {
-//      _ <- if (delete.printInspect) delete_inspect(delete).map(println) else Future.unit
+//      _ <- if (delete.printInspect) delete_inspect(delete) else Future.unit
 //      txReport <- conn.transact_async(delete_getStmts(delete, conn))
 //    } yield {
 //      conn.callback(delete.elements, true)

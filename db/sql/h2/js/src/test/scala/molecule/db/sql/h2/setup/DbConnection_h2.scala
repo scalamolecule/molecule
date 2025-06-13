@@ -1,7 +1,7 @@
 package molecule.db.sql.h2.setup
 
-import molecule.core.dataModel.{Schema, Schema_h2}
 import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.api.*
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS

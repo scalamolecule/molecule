@@ -76,7 +76,7 @@ trait Spi_datomic_async
   override def save_transact(save: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (save.printInspect) save_inspect(save).map(println) else Future.unit
+      _ <- if (save.printInspect) save_inspect(save) else Future.unit
       errors <- save_validate(save) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty => conn.rpc.save(conn.proxy, save.dataModel).future
@@ -104,7 +104,7 @@ trait Spi_datomic_async
   override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (insert.printInspect) insert_inspect(insert).map(println) else Future.unit
+      _ <- if (insert.printInspect) insert_inspect(insert) else Future.unit
       errors <- insert_validate(insert) // validate original elements against meta model
       txReport <- errors match {
         case errors if errors.isEmpty =>
@@ -133,7 +133,7 @@ trait Spi_datomic_async
   override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     for {
-      _ <- if (update.printInspect) update_inspect(update).map(println) else Future.unit
+      _ <- if (update.printInspect) update_inspect(update) else Future.unit
       // Error handling on jvm side since it needs db lookups
       txReport <- conn.rpc.update(conn.proxy, update.dataModel, update.isUpsert).future
       _ <- conn.callback(update.dataModel)

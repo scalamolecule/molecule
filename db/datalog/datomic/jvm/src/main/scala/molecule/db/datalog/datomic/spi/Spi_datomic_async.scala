@@ -92,7 +92,7 @@ trait Spi_datomic_async
   )(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     for {
-      _ <- if (save.printInspect) save_inspect(save).map(println) else Future.unit
+      _ <- if (save.printInspect) save_inspect(save) else Future.unit
       errors <- save_validate(save)
       txReport <- errors match {
         case errors if errors.isEmpty =>
@@ -129,7 +129,7 @@ trait Spi_datomic_async
   )(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     for {
-      _ <- if (insert.printInspect) insert_inspect(insert).map(println) else Future.unit
+      _ <- if (insert.printInspect) insert_inspect(insert) else Future.unit
       errors <- insert_validate(insert)
       txReport <- errors match {
         case errors if errors.isEmpty =>
@@ -166,7 +166,7 @@ trait Spi_datomic_async
   )(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     for {
-      _ <- if (update.printInspect) update_inspect(update).map(println) else Future.unit
+      _ <- if (update.printInspect) update_inspect(update) else Future.unit
       errors <- update_validate(update)
       txReport <- errors match {
         case errors if errors.isEmpty =>
@@ -203,7 +203,7 @@ trait Spi_datomic_async
   )(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     for {
-      _ <- if (delete.printInspect) delete_inspect(delete).map(println) else Future.unit
+      _ <- if (delete.printInspect) delete_inspect(delete) else Future.unit
       txReport <- conn.transact_async(delete_getStmts(delete, conn))
       _ <- conn.callback(delete.dataModel, true)
     } yield {

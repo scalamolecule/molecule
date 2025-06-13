@@ -23,7 +23,7 @@ package molecule.graphql.client.spi
 //    with JavaConversions {
 //
 //  override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
-////    if (q.printInspect) query_inspect(q).map(println)
+////    if (q.printInspect) query_inspect(q)
 ////    val m2q = new Model2DatomicQuery[Tpl](q.elements)
 ////    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView, m2q)
 ////      .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
@@ -52,7 +52,7 @@ package molecule.graphql.client.spi
 //  }
 //
 //  override def queryOffset_get[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
-////    if (q.printInspect) queryOffset_inspect(q).map(println)
+////    if (q.printInspect) queryOffset_inspect(q)
 ////    val m2q = new Model2DatomicQuery[Tpl](q.elements)
 ////    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset), q.dbView, m2q)
 ////      .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])
@@ -65,7 +65,7 @@ package molecule.graphql.client.spi
 //  }
 //
 //  override def queryCursor_get[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): (List[Tpl], String, Boolean) = {
-////    if (q.printInspect) queryCursor_inspect(q).map(println)
+////    if (q.printInspect) queryCursor_inspect(q)
 ////    val m2q = new Model2DatomicQuery[Tpl](q.elements)
 ////    DatomicQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor), q.dbView, m2q)
 ////      .getListFromCursor_sync(conn.asInstanceOf[DatomicConn_JVM])

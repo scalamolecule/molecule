@@ -1,6 +1,6 @@
 package molecule.db.sql.mysql.setup
 
-import molecule.core.dataModel.Schema_mysql
+import molecule.db.core.api.Schema_mysql
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS

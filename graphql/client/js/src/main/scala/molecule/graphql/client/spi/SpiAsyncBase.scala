@@ -87,7 +87,7 @@
 ////    val conn = conn0.asInstanceOf[JdbcConn_JS]
 ////    val save = save0.copy(elements = noKeywords(save0.elements, conn.proxy))
 ////    for {
-////      _ <- if (save.printInspect) save_inspect(save).map(println) else Future.unit
+////      _ <- if (save.printInspect) save_inspect(save) else Future.unit
 ////      errors <- save_validate(save0) // validate original elements against meta model
 ////      txReport <- errors match {
 ////        case errors if errors.isEmpty => conn.rpc.save(conn.proxy, save.elements).future
@@ -118,7 +118,7 @@
 ////    val conn   = conn0.asInstanceOf[JdbcConn_JS]
 ////    val insert = insert0.copy(elements = noKeywords(insert0.elements, conn.proxy))
 ////    for {
-////      _ <- if (insert.printInspect) insert_inspect(insert).map(println) else Future.unit
+////      _ <- if (insert.printInspect) insert_inspect(insert) else Future.unit
 ////      errors <- insert_validate(insert0) // validate original elements against meta model
 ////      txReport <- errors match {
 ////        case errors if errors.isEmpty =>
@@ -151,7 +151,7 @@
 ////    val conn   = conn0.asInstanceOf[JdbcConn_JS]
 ////    val update = update0.copy(elements = noKeywords(update0.elements, conn.proxy))
 ////    for {
-////      _ <- if (update.printInspect) update_inspect(update).map(println) else Future.unit
+////      _ <- if (update.printInspect) update_inspect(update) else Future.unit
 ////      errors <- update_validate(update0) // validate original elements against meta model
 ////      txReport <- errors match {
 ////        case errors if errors.isEmpty => conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future

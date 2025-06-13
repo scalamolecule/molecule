@@ -24,7 +24,7 @@ class Test_Inspect extends MUnit with DbProviders_sqlite with TestUtils {
           |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 7)),
           |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 8))
           |  ),
-          |  Set(7, 8), 0, 0
+          |  Set(7, 8), 0, 0, Nil
           |)
           |
           |SELECT DISTINCT
@@ -64,7 +64,7 @@ class Test_Inspect extends MUnit with DbProviders_sqlite with TestUtils {
           |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, false, List(0, 7)),
           |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, false, List(0, 8))
           |  ),
-          |  Set(7, 8), 0, 0
+          |  Set(7, 8), 0, 0, Nil
           |)
           |
           |Save(
@@ -106,7 +106,7 @@ class Test_Inspect extends MUnit with DbProviders_sqlite with TestUtils {
           |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 7)),
           |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 8))
           |  ),
-          |  Set(7, 8), 0, 0
+          |  Set(7, 8), 0, 0, Nil
           |)
           |
           |Insert(
@@ -153,7 +153,7 @@ class Test_Inspect extends MUnit with DbProviders_sqlite with TestUtils {
           |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0)),
           |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, false, List(0, 7))
           |  ),
-          |  Set(7), 0, 0
+          |  Set(7), 0, 0, Nil
           |)
           |
           |Update(
@@ -200,7 +200,7 @@ class Test_Inspect extends MUnit with DbProviders_sqlite with TestUtils {
           |  List(
           |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0))
           |  ),
-          |  Set(), 0, 0
+          |  Set(), 0, 0, Nil
           |)
           |
           |Delete(

@@ -2,7 +2,7 @@
 package molecule.graphql.test.api.dsl.StarWars.output
 
 import molecule.base.metaModel.*
-import molecule.core.dataModel
+import molecule.core.dataModel as _dm
 import molecule.core.dataModel.*
 import molecule.graphql.client.api.*
 
@@ -54,10 +54,10 @@ private[dsl] class Character_0_refs[t](override val dataModel: DataModel) extend
       ))
   }
 
-  object Friends extends Character_0[t](dataModel.add(dataModel.Ref("Character", "friends", "Character", CardSet, false, List(0, 2, 0)))) with NestedInit
+  object Friends extends Character_0[t](dataModel.add(_dm.Ref("Character", "friends", "Character", CardSet, false, List(0, 2, 0)))) with NestedInit
 
-  object _Droid     extends Droid_0    [t](dataModel.add(dataModel.BackRef("Droid", "Character", List(1, 0))))
-  object _Human     extends Human_0    [t](dataModel.add(dataModel.BackRef("Human", "Character", List(2, 0))))
+  object _Droid     extends Droid_0    [t](dataModel.add(_dm.BackRef("Droid", "Character", List(1, 0))))
+  object _Human     extends Human_0    [t](dataModel.add(_dm.BackRef("Human", "Character", List(2, 0))))
 }
 
 
@@ -88,10 +88,10 @@ private[dsl] class Character_1_refs[A, t](override val dataModel: DataModel) ext
       ))
   }
 
-  object Friends extends Character_1[A, t](dataModel.add(dataModel.Ref("Character", "friends", "Character", CardSet, false, List(0, 2, 0)))) with NestedInit
+  object Friends extends Character_1[A, t](dataModel.add(_dm.Ref("Character", "friends", "Character", CardSet, false, List(0, 2, 0)))) with NestedInit
 
-  object _Droid     extends Droid_1    [A, t](dataModel.add(dataModel.BackRef("Droid", "Character", List(1, 0))))
-  object _Human     extends Human_1    [A, t](dataModel.add(dataModel.BackRef("Human", "Character", List(2, 0))))
+  object _Droid     extends Droid_1    [A, t](dataModel.add(_dm.BackRef("Droid", "Character", List(1, 0))))
+  object _Human     extends Human_1    [A, t](dataModel.add(_dm.BackRef("Human", "Character", List(2, 0))))
 }
 
 
@@ -122,10 +122,10 @@ private[dsl] class Character_2_refs[A, B, t](override val dataModel: DataModel) 
       ))
   }
 
-  object Friends extends Character_2[A, B, t](dataModel.add(dataModel.Ref("Character", "friends", "Character", CardSet, false, List(0, 2, 0)))) with NestedInit
+  object Friends extends Character_2[A, B, t](dataModel.add(_dm.Ref("Character", "friends", "Character", CardSet, false, List(0, 2, 0)))) with NestedInit
 
-  object _Droid     extends Droid_2    [A, B, t](dataModel.add(dataModel.BackRef("Droid", "Character", List(1, 0))))
-  object _Human     extends Human_2    [A, B, t](dataModel.add(dataModel.BackRef("Human", "Character", List(2, 0))))
+  object _Droid     extends Droid_2    [A, B, t](dataModel.add(_dm.BackRef("Droid", "Character", List(1, 0))))
+  object _Human     extends Human_2    [A, B, t](dataModel.add(_dm.BackRef("Human", "Character", List(2, 0))))
 }
 
 
