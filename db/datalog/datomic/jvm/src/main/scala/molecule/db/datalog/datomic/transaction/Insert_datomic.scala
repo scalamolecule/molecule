@@ -2,7 +2,7 @@ package molecule.db.datalog.datomic.transaction
 
 import java.time.*
 import java.util.{ArrayList as jArrayList, List as jList}
-import molecule.base.metaModel.{Card, CardOne}
+import molecule.base.metaModel.{Cardinality, CardOne}
 import molecule.base.error.ModelError
 import molecule.core.dataModel.*
 import molecule.core.util.MoleculeLogging
@@ -291,7 +291,7 @@ trait Insert_datomic
     ent: String,
     refAttr: String,
     ref: String,
-    card: Card
+    card: Cardinality
   ): Product => Unit = {
     val a = kw(ent, refAttr)
     (_: Product) =>

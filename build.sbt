@@ -1,6 +1,6 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.22.0-SNAPSHOT"
+val moleculeVersion = "0.22.0"
 
 val scala212 = "2.12.20"
 val scala3   = "3.3.6"
@@ -411,7 +411,8 @@ lazy val graphqlClient = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("graphql/client"))
   .settings(name := "molecule-graphql-client")
-  .settings(compilerArgs, checkPublishing)
+  //  .settings(compilerArgs, checkPublishing)
+  .settings(publish / skip := true)
   .jvmSettings(
     libraryDependencies ++= Seq(
       "com.lihaoyi" %% "requests" % "0.9.0",
@@ -431,6 +432,7 @@ lazy val graphqlTest = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("graphql/test"))
   .settings(name := "molecule-graphql-test")
+  .settings(withoutDocs)
   .enablePlugins(MoleculePlugin)
   .settings(
     publish / skip := true,

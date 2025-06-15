@@ -6,14 +6,11 @@
     // or
     sbt clean compile
 
-
 To have molecule jars generated, add `-Dmolecule=true`
 
     sbt compile -Dmolecule=true
     // or
     sbt clean compile -Dmolecule=true
-
-
 
 ## Test JVM
 
@@ -47,51 +44,70 @@ Compilation on JS side can take some time and be quite memory hungry. You might 
 
     sbt -mem 10000
 
+## Changes to molecule and sbt-molecule with snapshot versions
 
-## Changes to molecule and sbt-molecule
-
+### Develop
 1) molecule: make changes
 1) `sbt ++2.12.20 "project baseJVM" publishLocal` (using old sbt-molecule version)
 1) sbt-molecule: make changes
-1) sbt-molecule: `sbt +publishLocal`
-1) molecule: `sbt clean compile -Dmolecule=true`
-1) molecule: test all
-
-## Publish with sbt-molecule update too
-
-1) Snapshot, molecule: `sbt +publishLocal`
-1) Snapshot, sbt-molecule: `./test-all.sh` (with molecule snapshot dependency)
-1) Snapshot, molecule-samples: `./test-all.sh` (with molecule snapshot dependency)
-1) Snapshot, Fix molecule/sbt-molecule until all tests pass
-1) Snapshot, sbt-molecule: `sbt publishLocal` (still snapshot version)
-1) Snapshot, molecule: `sbt clean compile -Dmolecule=true`
-1) Snapshot, when all molecule tests pass, set molecule build version to new version
-1) molecule: `sbt ++2.12.20 "project baseJVM" publishLocal`
-1) Set sbt-molecule to new version and `molecule-base` dep to new molecule version in all sbt/sbt test build files
+1) sbt-molecule: `./test.sh`
 1) sbt-molecule: `sbt publishLocal`
-1) sbt-molecule: `sbt publishSigned`
-1) molecule: set sbt-molecule plugin version to new plugin version
-1) molecule: `sbt +publishSigned -Ddocs=true` (publish for 2.12 and 3.3)
-1) commit and push molecule, sbt-molecule and molecule-samples to github
-1) molecule github: create release
+1) molecule: `sbt moleculeGen`
+1) molecule: test all
+1) molecule-samples: set snapshot version
+1) molecule-samples: `./test.sh`
 
-molecule 2.12.20:
 
-sbt ++2.12.20 "project dbBaseJVM" publishSigned -Ddocs=true
+### Publish snapshots locally
+
+When changes are done and all tests pass, publish snapshots locally. Start with molecule 2.12:
+
+    sbt ++2.12.20 "project baseJVM" publishLocal
+
+Then sbt-molecule:
+
+    sbt publishLocal
+
+And lastly molecule for scala 3:
+
+    sbt publishLocal
+
+
+### Publish to Sonatype
+
+Sonatype doesn't allow missing library dependencies. So we need to be careful to publish in the right order since we have a circular reference between molecule and sbt-molecule.
+
+1. Set new non-snapshot version in molecule, sbt-molecule and molecule-samples projects (search and replace for all occurencies in subproject sbt files). But keep keep sbt-molecule snapshot version in molecule plugins for now.
+
+2. Publish molecule 2.12 so that sbt-molecule can then refer to it:
+
+```
+sbt ++2.12.20 "project baseJVM" publishSigned -Ddocs=true
 sbt sonaRelease
+```
 
-sbt-molecule (no need for scala version or setting -Ddocs):
+3. Publish sbt-molecule (no need for scala version or setting -Ddocs):
 
-sbt clean publishSigned
+```
+sbt publishSigned
 sbt sonaRelease
+```
 
-And then publishing all molecule modules (depends on sbt-molecule):
+4. Set new sbt-molecule new version in molecule project/plugins. Publish molecule for scala 3 (depends on sbt-molecule):
 
-sbt clean publishSigned -Ddocs=true
+```
+sbt ++3.3.6 publishSigned -Ddocs=true
 sbt sonaRelease
+```
 
-If something goes wrong, then login to central.sonatype.com, chose Deployments and check the errors
-                           
+If something goes wrong, then login to central.sonatype.com, chose Deployments and check the errors.
+
+5. Update molecule README and write release note in project/releases.
+ 
+6. Commit and push molecule, sbt-molecule and molecule-samples to github.
+
+7. Make release on github.
+
 
 ## Publish without sbt-molecule update
 
@@ -103,7 +119,6 @@ If something goes wrong, then login to central.sonatype.com, chose Deployments a
 1) molecule: `sbt +publishSigned -Ddocs=true`
 1) commit and push molecule and molecule-samples to github
 1) molecule github: create release
-
 
 ### Misc
 

@@ -1,6 +1,6 @@
 package molecule.db.core.api
 
-import molecule.base.metaModel.{Card, MetaEntity}
+import molecule.base.metaModel.{Cardinality, MetaEntity}
 
 /** Schema transaction data interface
  *
@@ -14,7 +14,7 @@ trait Schema {
   val entityMap: Map[String, MetaEntity]
 
   /** Attribute name -> (Cardinality, Scala type, Required attributes) */
-  val attrMap: Map[String, (Card, String, Seq[String])]
+  val attrMap: Map[String, (Cardinality, String, Seq[String])]
 
   /** Attributes requiring unique values */
   val uniqueAttrs: List[String]

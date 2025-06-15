@@ -18,13 +18,19 @@ object _ExprSetOpt extends DbCoreBase( "ExprSetOpt", "/api/expression") {
     val body =
       s"""
          |
-         |trait ${fileName}Ops_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
+         |trait ${fileName}Ops_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
+         |  extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
          |  protected def _exprSetOpt(op: Op, optSet: Option[Set[t]]): Entity1[${`A..V`}, t] = ???
          |}
          |
          |trait $fileName_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Entity1, Entity2] {
          |  def apply(optSet: Option[Set[t]]): Entity1[${`A..V`}, t] = _exprSetOpt(Eq, optSet)
+         |}
+         |
+         |trait $fileName_${arity}_Enum[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
+         |  extends ${fileName}Ops_$arity[${`A..V`}, t, Entity1, Entity2] {
+         |  def apply(optSet: Option[Set[t]]): Entity1[${`A..V`}, t] = _exprSetOpt(Eq, optSet.map(_.map(_.toString.asInstanceOf[t])))
          |}""".stripMargin
   }
 }

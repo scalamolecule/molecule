@@ -1,7 +1,7 @@
 package molecule.db.sql.h2.compliance.filter.seq
 
 import molecule.core.setup.{MUnit, MUnit_arrays}
-import molecule.db.compliance.test.filter.seq.SeqSemantics
+import molecule.db.compliance.test.filter.seq.{FilterSeq_Enum, SeqSemantics}
 import molecule.db.compliance.test.filter.seq.ref.{FilterRefSeq_Card1Ref, FilterRefSeq_Card2Ref}
 import molecule.db.compliance.test.filter.seq.types.*
 import molecule.db.sql.h2.setup.Api_h2_async
@@ -73,10 +73,12 @@ class FilterSeq_Char_Test extends MUnit {
   FilterSeq_Char_(this, Api_h2_async)
 }
 
+class FilterSeq_EnumTest extends MUnit {
+  FilterSeq_Enum(this, Api_h2_async)
+}
 class SeqSemanticsTest extends MUnit {
   SeqSemantics(this, Api_h2_async)
 }
-
 
 class FilterRefSeq_Card1RefTest extends MUnit {
   FilterRefSeq_Card1Ref(this, Api_h2_async)

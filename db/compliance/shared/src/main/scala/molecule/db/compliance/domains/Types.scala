@@ -12,6 +12,13 @@ object Types extends DomainStructure(5) {
     val s    = oneString
     val u    = oneInt.unique
 
+    enum Color:
+      case White, Red, Green, Blue, Yellow, Black
+
+    val color    = oneEnum[Color]
+    val colorSet = setEnum[Color]
+    val colorSeq = seqEnum[Color]("optional comment")
+
     // Single values
     val string         = oneString
     val int            = oneInt
@@ -85,7 +92,7 @@ object Types extends DomainStructure(5) {
     val zonedDateTimeSeq  = seqZonedDateTime
     val uuidSeq           = seqUUID
     val uriSeq            = seqURI
-    val byteArray         = arrayByte
+    val byteArray         = arrayByte.descr("special case")
     val shortSeq          = seqShort
     val charSeq           = seqChar
 

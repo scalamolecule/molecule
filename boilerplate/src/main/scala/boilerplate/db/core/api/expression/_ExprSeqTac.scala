@@ -46,6 +46,16 @@ object _ExprSeqTac extends DbCoreBase("ExprSeqTac", "/api/expression") {
          |  def hasNo(v  : t, vs: t*  ): Entity1[${`A..V, `}t] = _exprSeq(HasNo  , Seq(v) ++ vs)
          |  def hasNo(vs : Iterable[t]): Entity1[${`A..V, `}t] = _exprSeq(HasNo  , Seq()  ++ vs)
          |  $attrExprs
+         |}
+         |
+         |trait $fileName_${arity}_Enum[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
+         |  extends ${fileName}Ops_$arity[${`A..V, `}t, Entity1, Entity2] {
+         |  def apply(                ): Entity1[${`A..V, `}t] = _exprSeq(NoValue, Seq.empty[t]                                  )
+         |  def apply(seq: Seq[t]     ): Entity1[${`A..V, `}t] = _exprSeq(Eq     , seq           .map(_.toString.asInstanceOf[t]))
+         |  def has  (v  : t, vs: t*  ): Entity1[${`A..V, `}t] = _exprSeq(Has    , (Seq(v) ++ vs).map(_.toString.asInstanceOf[t]))
+         |  def has  (vs : Iterable[t]): Entity1[${`A..V, `}t] = _exprSeq(Has    , (Seq()  ++ vs).map(_.toString.asInstanceOf[t]))
+         |  def hasNo(v  : t, vs: t*  ): Entity1[${`A..V, `}t] = _exprSeq(HasNo  , (Seq(v) ++ vs).map(_.toString.asInstanceOf[t]))
+         |  def hasNo(vs : Iterable[t]): Entity1[${`A..V, `}t] = _exprSeq(HasNo  , (Seq()  ++ vs).map(_.toString.asInstanceOf[t]))
          |}""".stripMargin
   }
 }

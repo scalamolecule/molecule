@@ -1,7 +1,7 @@
 package molecule.db.sql.postgres.compliance.filter.set
 
 import molecule.core.setup.MUnit
-import molecule.db.compliance.test.filter.set.SetSemantics
+import molecule.db.compliance.test.filter.set.{FilterSet_Enum, SetSemantics}
 import molecule.db.compliance.test.filter.set.ref.{FilterRefSet_Card1Ref, FilterRefSet_Card2Ref}
 import molecule.db.compliance.test.filter.set.types.*
 import molecule.db.sql.postgres.setup.Api_postgres_async
@@ -77,6 +77,9 @@ class FilterSet_refTest extends MUnit {
   FilterSet_ref(this, Api_postgres_async)
 }
 
+class FilterSet_EnumTest extends MUnit {
+  FilterSet_Enum(this, Api_postgres_async)
+}
 class SetSemanticsTest extends MUnit {
   SetSemantics(this, Api_postgres_async)
 }

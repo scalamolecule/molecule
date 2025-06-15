@@ -1,15 +1,18 @@
 package molecule.db.sql.h2
 
 import molecule.core.setup.{MUnit, TestUtils}
+import molecule.db.compliance.domains.dsl.Types.Color.{Blue, Green, Red, White, Yellow}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2
+//import moleculeGen.molecule.db.compliance.domains.dsl.Types.Color
 
 
 class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
 
+  import molecule.db.compliance.domains.dsl.Types.*
+
   "types" - types { implicit conn =>
-    import molecule.db.compliance.domains.dsl.Types.*
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
     for {
@@ -21,8 +24,63 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
       _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
 
-      _ <- Entity.int(?).string.query.inspect
+      //      _ <- Entity.string.apply("str").query.inspect
+      //      _ <- Entity.string.apply(Color.BLUE).query.inspect
+      //
+      //      _ <- Entity.color.apply("str").query.inspect
+      //      _ <- Entity.color.apply(X.Y).query.inspect
+      //      _ <- Entity.color.apply(Color.BLUE).query.inspect
+      //      _ <- Entity.color.query.get.map(_ ==> List("BLUE"))
+      //      _ <- Entity.color.query.get.map(_.map(Color.valueOf) ==> List(Color.BLUE))
+      //      _ <- Entity.color.query.get.map(_ ==> List(Color.BLUE))
 
+      //      _ <- Entity.int(?).string.query.inspect
+
+    } yield ()
+  }
+
+  val a = (1, Set(Red.toString, Green.toString))
+  val b = (2, Set(Green.toString, Blue.toString, Yellow.toString))
+
+
+  "Mandatory: has" - types { implicit conn =>
+    for {
+      _ <- Entity.colorSet(Set(Red, Blue)).save.transact
+      _ <- Entity.colorSet.has(Red).query.get.map(_ ==> List(Set("Red", "Blue")))
+      _ <- Entity.colorSet.has(Yellow).query.get.map(_ ==> List())
+
+
+      _ <- Entity.i.colorSet.insert(a, b).transact
+
+      // Sets with one or more values matching
+
+      // "Has this"
+      _ <- Entity.i.a1.colorSet.has(White).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.colorSet.has(Red).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.colorSet.has(Green).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.colorSet.has(Blue).query.get.map(_ ==> List(b))
+      // Same as
+      _ <- Entity.i.a1.colorSet.has(Seq(White)).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.colorSet.has(Seq(Red)).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.colorSet.has(Seq(Green)).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.colorSet.has(Seq(Blue)).query.get.map(_ ==> List(b))
+
+      // OR semantics when multiple values
+
+      // "Has this OR that"
+      _ <- Entity.i.a1.colorSet.has(Red, Green).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.colorSet.has(Red, Blue).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.colorSet.has(Green, Blue).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.colorSet.has(Red, Green, Blue).query.get.map(_ ==> List(a, b))
+      // Same as
+      _ <- Entity.i.a1.colorSet.has(Seq(Red, Green)).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.colorSet.has(Seq(Red, Blue)).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.colorSet.has(Seq(Green, Blue)).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.colorSet.has(Seq(Red, Green, Blue)).query.get.map(_ ==> List(a, b))
+
+
+      // Empty Seq/Sets match nothing
+      _ <- Entity.i.a1.colorSet.has(Seq.empty[Color]).query.get.map(_ ==> List())
     } yield ()
   }
 

@@ -33,7 +33,8 @@ object _ExprSetTac extends DbCoreBase("ExprSetTac", "/api/expression") {
     val body =
       s"""
          |
-         |trait ${fileName}Ops_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
+         |trait ${fileName}Ops_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
+         |  extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
          |  protected def _exprSet(op: Op, set: Set[t]): Entity1[${`A..V, `}t] = ???
          |}
          |
@@ -46,6 +47,16 @@ object _ExprSetTac extends DbCoreBase("ExprSetTac", "/api/expression") {
          |  def hasNo(v  : t, vs: t*  ): Entity1[${`A..V, `}t] = _exprSet(HasNo  , Set(v) ++ vs   )
          |  def hasNo(vs : Iterable[t]): Entity1[${`A..V, `}t] = _exprSet(HasNo  , vs.toSet       )
          |  $attrExprs
+         |}
+         |
+         |trait $fileName_${arity}_Enum[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
+         |  extends ${fileName}Ops_$arity[${`A..V, `}t, Entity1, Entity2] {
+         |  def apply(                ): Entity1[${`A..V, `}t] = _exprSet(NoValue, Set.empty[t]                                  )
+         |  def apply(set: Set[t]     ): Entity1[${`A..V, `}t] = _exprSet(Eq     , set           .map(_.toString.asInstanceOf[t]))
+         |  def has  (v  : t, vs: t*  ): Entity1[${`A..V, `}t] = _exprSet(Has    , (Set(v) ++ vs).map(_.toString.asInstanceOf[t]))
+         |  def has  (vs : Iterable[t]): Entity1[${`A..V, `}t] = _exprSet(Has    , (vs.toSet    ).map(_.toString.asInstanceOf[t]))
+         |  def hasNo(v  : t, vs: t*  ): Entity1[${`A..V, `}t] = _exprSet(HasNo  , (Set(v) ++ vs).map(_.toString.asInstanceOf[t]))
+         |  def hasNo(vs : Iterable[t]): Entity1[${`A..V, `}t] = _exprSet(HasNo  , (vs.toSet    ).map(_.toString.asInstanceOf[t]))
          |}""".stripMargin
   }
 }

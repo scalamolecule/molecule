@@ -272,6 +272,33 @@ abstract class DomainStructure(maxArity: Int) {
   trait many extends refOptions[many]
 
 
+  // Enums ..................................................
+
+  object oneEnum extends enumConstructor
+  object setEnum extends enumConstructor
+  object seqEnum extends enumConstructor
+
+  trait enumConstructor {
+
+    /** Apply enum type to reference.
+     *
+     * @tparam EnumType Ref entity type
+     */
+    def apply[EnumType <: Product](implicit x: DummyImplicit): Nothing = ???
+
+    // We could be even more specific with reflect.Enum but avoid it for now to be able to test
+    // projects directly (without publishing) in sbt-molecule that runs on Scala 2.12 (not having reflect.Enum)
+    //    def apply[EnumType <: reflect.Enum](implicit x: DummyImplicit): Nothing = ???
+
+    /**
+     *
+     * @param description
+     * @tparam EnumType
+     * @return
+     */
+    def apply[EnumType <: Product](description: String): Nothing = ???
+  }
+
   // Options ..................................................
 
   trait Requierable
@@ -291,8 +318,8 @@ abstract class DomainStructure(maxArity: Int) {
     def apply(description: String): Self = ???
 
     // Allowed values (like enumerations)
-    def enums(vs: BaseTpe*): Self = ???
-    def enums(vs: Seq[BaseTpe], failureMsg: String): Self = ???
+    def allowedValues(vs: BaseTpe*): Self = ???
+    def allowedValues(vs: Seq[BaseTpe], failureMsg: String): Self = ???
 
     /** Alias to non-compatible attribute name like `type` or `first-name` etc.
      *
@@ -350,7 +377,7 @@ abstract class DomainStructure(maxArity: Int) {
 
 
   trait stringOptions[Self, Tpe] extends Options[Self, Tpe, String] {
-    // Enable fulltext search (for those data sources that supports it)
+    // Enable fulltext search (for those data sources that support it)
     val fulltext: Self = ???
 
     // Validation .................
@@ -364,18 +391,18 @@ abstract class DomainStructure(maxArity: Int) {
 
     /** Apply entity type to reference.
      *
-     * @tparam RefNs Ref entity type
+     * @tparam Ref Ref entity type
      */
-    def apply[RefNs](implicit x: DummyImplicit): refOptions[Self] = ???
+    def apply[Ref](implicit x: DummyImplicit): refOptions[Self] = ???
 
 
     /**
      *
      * @param description
-     * @tparam RefNs
+     * @tparam Ref
      * @return
      */
-    def apply[RefNs](description: String): refOptions[Self] = ???
+    def apply[Ref](description: String): refOptions[Self] = ???
 
     /** Owner option.
      *
@@ -383,15 +410,6 @@ abstract class DomainStructure(maxArity: Int) {
      *
      * - If this entity is deleted, its references are deleted too
      * (and recursively if sub entities have owned entities!)
-     *
-     * <br><br>
-     * Specifies that an attribute whose type is :db.type/ref is a component.
-     * <br><br>
-     * Referenced entities become subcomponents of the entity to which the attribute is applied.
-     * <br><br>
-     * When you retract an entity with :db/retractEntity, all subcomponents are also retracted.
-     * <br><br>
-     * When you get the graph of an entity, all its subcomponent entities are fetched recursively.
      */
     lazy val owner: Self = ???
 

@@ -46,6 +46,20 @@ object _ExprSetMan extends DbCoreBase( "ExprSetMan", "/api/expression") {
          |  def remove(v   : t, vs: t*  ): Entity1[${`A..V`}, t] = _exprSet(Remove , Set(v) ++ vs   )
          |  def remove(vs  : Iterable[t]): Entity1[${`A..V`}, t] = _exprSet(Remove , vs.toSet       )
          |  $attrExprs
+         |}
+         |
+         |trait $fileName_${arity}_Enum[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
+         |  extends ExprSetTacOps_$arity[${`A..V`}, t, Entity1, Entity2] {
+         |  def apply (                 ): Entity1[${`A..V`}, t] = _exprSet(NoValue, Set.empty[t]                                  )
+         |  def apply (set : Set[t]     ): Entity1[${`A..V`}, t] = _exprSet(Eq     , set           .map(_.toString.asInstanceOf[t]))
+         |  def has   (v   : t, vs: t*  ): Entity1[${`A..V`}, t] = _exprSet(Has    , (Set(v) ++ vs).map(_.toString.asInstanceOf[t]))
+         |  def has   (vs  : Iterable[t]): Entity1[${`A..V`}, t] = _exprSet(Has    , (vs.toSet    ).map(_.toString.asInstanceOf[t]))
+         |  def hasNo (v   : t, vs: t*  ): Entity1[${`A..V`}, t] = _exprSet(HasNo  , (Set(v) ++ vs).map(_.toString.asInstanceOf[t]))
+         |  def hasNo (vs  : Iterable[t]): Entity1[${`A..V`}, t] = _exprSet(HasNo  , (vs.toSet    ).map(_.toString.asInstanceOf[t]))
+         |  def add   (v   : t, vs: t*  ): Entity1[${`A..V`}, t] = _exprSet(Add    , (Set(v) ++ vs).map(_.toString.asInstanceOf[t]))
+         |  def add   (vs  : Iterable[t]): Entity1[${`A..V`}, t] = _exprSet(Add    , (vs.toSet    ).map(_.toString.asInstanceOf[t]))
+         |  def remove(v   : t, vs: t*  ): Entity1[${`A..V`}, t] = _exprSet(Remove , (Set(v) ++ vs).map(_.toString.asInstanceOf[t]))
+         |  def remove(vs  : Iterable[t]): Entity1[${`A..V`}, t] = _exprSet(Remove , (vs.toSet    ).map(_.toString.asInstanceOf[t]))
          |}""".stripMargin
   }
 }

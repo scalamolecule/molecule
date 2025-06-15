@@ -46,13 +46,11 @@ object _ExprOneTac extends DbCoreBase("ExprOneTac", "/api/expression") {
     val body =
       s"""
          |
-         |trait ${fileName}Ops_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
-         |  extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
+         |trait ${fileName}Ops_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
          |  protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[${`A..V, `}t] & CardOne = ???
          |}
          |
-         |trait $fileName_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
-         |  extends ${fileName}Ops_$arity[${`A..V, `}t, Entity1, Entity2] {
+         |trait $fileName_$arity[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ${fileName}Ops_$arity[${`A..V, `}t, Entity1, Entity2] {
          |  def apply(                ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(NoValue, Nil         )
          |  def apply(v    : t, vs: t*): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
          |  def apply(vs   : Seq[t]   ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -82,6 +80,17 @@ object _ExprOneTac extends DbCoreBase("ExprOneTac", "/api/expression") {
          |  def endsWith  (suffix: qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(EndsWith  , Nil, true)
          |  def contains  (needle: qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Contains  , Nil, true)
          |  def matches   (regex : qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Matches   , Nil, true)
+         |}
+         |
+         |trait $fileName_${arity}_Enum[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ${fileName}Ops_$arity[${`A..V, `}t, Entity1, Entity2] {
+         |  def apply(             ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+         |  def apply(v : t, vs: t*): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+         |  def apply(vs: Seq[t]   ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+         |  def not  (v : t, vs: t*): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+         |  def not  (vs: Seq[t]   ): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+         |
+         |  def apply(v : qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Eq , Nil, true)
+         |  def not  (v : qm): Entity1[${`A..V, `}t] & CardOne = _exprOneTac(Neq, Nil, true)
          |}
          |
          |trait $fileName_${arity}_Integer[${`A..V, `}t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends $fileName_${arity}[${`A..V, `}t, Entity1, Entity2] {

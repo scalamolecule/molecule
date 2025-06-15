@@ -1,6 +1,7 @@
 package boilerplate.db.core.api.expression
 
 import boilerplate.db.core.DbCoreBase
+import boilerplate.db.core.api.expression._ExprOneMan.fileName_
 
 
 object _ExprOneOpt extends DbCoreBase("ExprOneOpt", "/api/expression") {
@@ -20,8 +21,7 @@ object _ExprOneOpt extends DbCoreBase("ExprOneOpt", "/api/expression") {
     val body =
       s"""
          |
-         |trait ${fileName}Ops_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
-         |  extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
+         |trait ${fileName}Ops_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Entity1, Entity2] {
          |  protected def _exprOneOpt(op: Op, opt: Option[t]): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] = ???
          |}
          |
@@ -29,6 +29,12 @@ object _ExprOneOpt extends DbCoreBase("ExprOneOpt", "/api/expression") {
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Entity1, Entity2]
          |    with SortAttrs_$arity[${`A..V`}, t, Entity1] {
          |  def apply(opt: Option[t]): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] = _exprOneOpt(Eq, opt)
+         |}
+         |
+         |trait $fileName_${arity}_Enum[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]]
+         |  extends ${fileName}Ops_$arity[${`A..V`}, t, Entity1, Entity2]
+         |    with SortAttrs_$arity[${`A..V`}, t, Entity1] {
+         |  def apply(opt: Option[t]): Entity1[${`A..V`}, t] & SortAttrs_$arity[${`A..V`}, t, Entity1] = _exprOneOpt(Eq, opt.map(_.toString.asInstanceOf[t]))
          |}""".stripMargin
   }
 }

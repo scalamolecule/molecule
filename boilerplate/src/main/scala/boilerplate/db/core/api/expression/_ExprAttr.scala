@@ -24,8 +24,8 @@ object _ExprAttr extends DbCoreBase("ExprAttr", "/api/expression") {
     val body   = if (arity == 22) {
       s"""
          |trait $fileName_$arity[${`A..V`}, t, Entity1[${`_, _`}], Entity2[${`_, _, _`}]] extends ExprBase {
-         |  protected def _attrSortTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2] & CardOne): Entity1[${`A..V`},    t] & SortAttrs${a0}[${`A..V`},    t, Entity1] = ???
-         |  protected def _attrTac    [   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]          ): Entity1[${`A..V`},    t] = ???
+         |  protected def _attrSortTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2] & CardOne): Entity1[${`A..V`}, t] & SortAttrs${a0}[${`A..V`}, t, Entity1] = ???
+         |  protected def _attrTac    [   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]          ): Entity1[${`A..V`}, t] = ???
          |}""".stripMargin
     } else {
       s"""

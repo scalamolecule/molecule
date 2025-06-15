@@ -68,28 +68,24 @@ case class FilterSeq_Int(
       _ <- Entity.i.a1.intSeq.hasNo(int1).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.intSeq.hasNo(int2).query.get.map(_ ==> List())
       _ <- Entity.i.a1.intSeq.hasNo(int3).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.intSeq.hasNo(int3).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.intSeq.hasNo(int5).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.intSeq.hasNo(int4).query.get.map(_ ==> List(a, b))
       // Same as
       _ <- Entity.i.a1.intSeq.hasNo(List(int0)).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.intSeq.hasNo(List(int1)).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.intSeq.hasNo(List(int2)).query.get.map(_ ==> List())
       _ <- Entity.i.a1.intSeq.hasNo(List(int3)).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.intSeq.hasNo(List(int3)).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.intSeq.hasNo(List(int5)).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.intSeq.hasNo(List(int4)).query.get.map(_ ==> List(a, b))
 
       // OR semantics when multiple values
 
       // "Has neither this OR that"
       _ <- Entity.i.a1.intSeq.hasNo(int1, int2).query.get.map(_ ==> List())
       _ <- Entity.i.a1.intSeq.hasNo(int1, int3).query.get.map(_ ==> List())
-      _ <- Entity.i.a1.intSeq.hasNo(int1, int3).query.get.map(_ ==> List())
-      _ <- Entity.i.a1.intSeq.hasNo(int1, int5).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.intSeq.hasNo(int1, int4).query.get.map(_ ==> List(b))
       // Same as
       _ <- Entity.i.a1.intSeq.hasNo(List(int1, int2)).query.get.map(_ ==> List())
       _ <- Entity.i.a1.intSeq.hasNo(List(int1, int3)).query.get.map(_ ==> List())
-      _ <- Entity.i.a1.intSeq.hasNo(List(int1, int3)).query.get.map(_ ==> List())
-      _ <- Entity.i.a1.intSeq.hasNo(List(int1, int5)).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.intSeq.hasNo(List(int1, int4)).query.get.map(_ ==> List(b))
 
       // Negating empty Seqs has no effect
       _ <- Entity.i.a1.intSeq.hasNo(List.empty[Int]).query.get.map(_ ==> List(a, b))
@@ -146,28 +142,24 @@ case class FilterSeq_Int(
       _ <- Entity.i.a1.intSeq_.hasNo(int1).query.get.map(_ ==> List(2))
       _ <- Entity.i.a1.intSeq_.hasNo(int2).query.get.map(_ ==> List())
       _ <- Entity.i.a1.intSeq_.hasNo(int3).query.get.map(_ ==> List(1))
-      _ <- Entity.i.a1.intSeq_.hasNo(int3).query.get.map(_ ==> List(1))
-      _ <- Entity.i.a1.intSeq_.hasNo(int5).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.intSeq_.hasNo(int4).query.get.map(_ ==> List(1, 2))
       // Same as
       _ <- Entity.i.a1.intSeq_.hasNo(List(int0)).query.get.map(_ ==> List(1, 2))
       _ <- Entity.i.a1.intSeq_.hasNo(List(int1)).query.get.map(_ ==> List(2))
       _ <- Entity.i.a1.intSeq_.hasNo(List(int2)).query.get.map(_ ==> List())
       _ <- Entity.i.a1.intSeq_.hasNo(List(int3)).query.get.map(_ ==> List(1))
-      _ <- Entity.i.a1.intSeq_.hasNo(List(int3)).query.get.map(_ ==> List(1))
-      _ <- Entity.i.a1.intSeq_.hasNo(List(int5)).query.get.map(_ ==> List(1, 2))
+      _ <- Entity.i.a1.intSeq_.hasNo(List(int4)).query.get.map(_ ==> List(1, 2))
 
       // OR semantics when multiple values
 
       // "Has neither this OR that"
       _ <- Entity.i.a1.intSeq_.hasNo(int1, int2).query.get.map(_ ==> List())
       _ <- Entity.i.a1.intSeq_.hasNo(int1, int3).query.get.map(_ ==> List())
-      _ <- Entity.i.a1.intSeq_.hasNo(int1, int3).query.get.map(_ ==> List())
-      _ <- Entity.i.a1.intSeq_.hasNo(int1, int5).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.intSeq_.hasNo(int1, int4).query.get.map(_ ==> List(2))
       // Same as
       _ <- Entity.i.a1.intSeq_.hasNo(List(int1, int2)).query.get.map(_ ==> List())
       _ <- Entity.i.a1.intSeq_.hasNo(List(int1, int3)).query.get.map(_ ==> List())
-      _ <- Entity.i.a1.intSeq_.hasNo(List(int1, int3)).query.get.map(_ ==> List())
-      _ <- Entity.i.a1.intSeq_.hasNo(List(int1, int5)).query.get.map(_ ==> List(2))
+      _ <- Entity.i.a1.intSeq_.hasNo(List(int1, int4)).query.get.map(_ ==> List(2))
 
       // Negating empty Seqs has no effect
       _ <- Entity.i.a1.intSeq_.hasNo(List.empty[Int]).query.get.map(_ ==> List(1, 2))

@@ -1,6 +1,6 @@
 package molecule.db.core.validation
 
-import molecule.base.metaModel.{Card, MetaEntity}
+import molecule.base.metaModel.{Cardinality, MetaEntity}
 import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.dataModel.*
 import molecule.db.core.ops.ModelTransformations_
@@ -9,7 +9,7 @@ import scala.annotation.tailrec
 
 case class TxModelValidation(
   entityMap: Map[String, MetaEntity],
-  attrMap: Map[String, (Card, String, Seq[String])],
+  attrMap: Map[String, (Cardinality, String, Seq[String])],
   action: String,
   getCurSetValues: Option[Attr => Set[Any]] = None
 ) extends ModelTransformations_ {

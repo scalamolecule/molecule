@@ -1,7 +1,7 @@
 package molecule.db.sql.core.transaction
 
 import java.sql.PreparedStatement as PS
-import molecule.base.metaModel.{Card, CardOne}
+import molecule.base.metaModel.{Cardinality, CardOne}
 import molecule.core.dataModel.{Attr, Element}
 import molecule.db.core.transaction.ops.InsertOps
 import molecule.db.core.transaction.{InsertResolvers_, ResolveInsert}
@@ -202,7 +202,7 @@ trait SqlInsert
     ent: String,
     refAttr: String,
     ref: String,
-    card: Card
+    card: Cardinality
   ): Product => Unit = {
     insertAction = card match {
       case CardOne => insertAction.refOne(ent, refAttr, ref)

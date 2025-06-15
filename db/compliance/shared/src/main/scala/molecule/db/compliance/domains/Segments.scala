@@ -12,7 +12,7 @@ object Segments extends DomainStructure(5) {
 
     trait Person {
       val name        = oneString
-      val gender      = oneString.enums("male", "female")
+      val gender      = oneString.allowedValues("male", "female")
       val professions = many[Profession]
     }
   }
@@ -26,7 +26,7 @@ object Segments extends DomainStructure(5) {
       // To avoid attr/partition name clashes we can prepend the definition object name
       // (in case we would have needed an attribute named `gen` for instance)
       val editor    = one[gen.Person]
-      val cat       = oneString.enums("good", "bad")
+      val cat       = oneString.allowedValues("good", "bad")
       val reviewers = many[gen.Person]
     }
   }

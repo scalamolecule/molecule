@@ -21,10 +21,10 @@ class Test_Inspect extends MUnit with DbProviders_h2 with TestUtils {
           |QUERY:
           |DataModel(
           |  List(
-          |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 7)),
-          |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 8))
+          |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 10)),
+          |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 11))
           |  ),
-          |  Set(7, 8), 0, 0, Nil
+          |  Set(10, 11), 0, 0, Nil
           |)
           |
           |SELECT DISTINCT
@@ -41,10 +41,10 @@ class Test_Inspect extends MUnit with DbProviders_h2 with TestUtils {
       // Or get the DataModel
       _ = Entity.string.int.query.dataModel ==> DataModel(
         List(
-          AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 7)),
-          AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 8))
+          AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 10)),
+          AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 11))
         ),
-        Set(7, 8), 0, 0, Nil
+        Set(10, 11), 0, 0, Nil
       )
 
       // Return query result and print the above inspection output to console
@@ -61,10 +61,10 @@ class Test_Inspect extends MUnit with DbProviders_h2 with TestUtils {
           |SAVE:
           |DataModel(
           |  List(
-          |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, false, List(0, 7)),
-          |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, false, List(0, 8))
+          |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, false, List(0, 10)),
+          |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, false, List(0, 11))
           |  ),
-          |  Set(7, 8), 0, 0, Nil
+          |  Set(10, 11), 0, 0, Nil
           |)
           |
           |Save(
@@ -103,10 +103,10 @@ class Test_Inspect extends MUnit with DbProviders_h2 with TestUtils {
           |INSERT:
           |DataModel(
           |  List(
-          |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 7)),
-          |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 8))
+          |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 10)),
+          |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 11))
           |  ),
-          |  Set(7, 8), 0, 0, Nil
+          |  Set(10, 11), 0, 0, Nil
           |)
           |
           |Insert(
@@ -151,9 +151,9 @@ class Test_Inspect extends MUnit with DbProviders_h2 with TestUtils {
           |DataModel(
           |  List(
           |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0)),
-          |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, false, List(0, 7))
+          |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, false, List(0, 10))
           |  ),
-          |  Set(7), 0, 0, Nil
+          |  Set(10), 0, 0, Nil
           |)
           |
           |Update(

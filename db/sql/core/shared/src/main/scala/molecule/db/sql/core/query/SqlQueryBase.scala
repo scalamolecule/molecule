@@ -1,6 +1,6 @@
 package molecule.db.sql.core.query
 
-import molecule.base.metaModel.Card
+import molecule.base.metaModel.Cardinality
 import molecule.base.util.BaseHelpers
 import molecule.core.dataModel.*
 import molecule.core.util.JavaConversions
@@ -16,7 +16,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   type Cast = (RS, ParamIndex) => Any
 
   // Lookup original type of aggregate attributes
-  final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
+  final protected var attrMap = Map.empty[String, (Cardinality, String, Seq[String])]
 
   // Main query
   final protected val select      = new ListBuffer[String]

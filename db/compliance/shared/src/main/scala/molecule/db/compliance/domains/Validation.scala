@@ -19,8 +19,8 @@ object Validation extends DomainStructure(5) {
   }
 
   trait Enum {
-    val luckyNumber  = oneInt.enums(7, 9, 13)
-    val luckyNumber2 = oneInt.enums(
+    val luckyNumber  = oneInt.allowedValues(7, 9, 13)
+    val luckyNumber2 = oneInt.allowedValues(
       Seq(7, 9, 13),
       "Lucky number can only be 7, 9 or 13"
     )

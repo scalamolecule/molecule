@@ -2,7 +2,7 @@ package molecule.db.sql.core.transaction
 
 import java.sql.PreparedStatement as PS
 import boopickle.Default.*
-import molecule.base.metaModel.{Card, CardOne}
+import molecule.base.metaModel.{Cardinality, CardOne}
 import molecule.core.dataModel.Element
 import molecule.db.core.transaction.ResolveSave
 import molecule.db.core.transaction.ops.SaveOps
@@ -96,7 +96,7 @@ trait SqlSave
   }
 
   override protected def addRef(
-    ent: String, refAttr: String, ref: String, card: Card
+    ent: String, refAttr: String, ref: String, card: Cardinality
   ): Unit = {
     saveAction = card match {
       case CardOne => saveAction.refOne(ent, refAttr, ref)

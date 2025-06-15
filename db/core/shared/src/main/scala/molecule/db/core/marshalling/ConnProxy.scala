@@ -1,7 +1,7 @@
 package molecule.db.core.marshalling
 
 import java.util.UUID
-import molecule.base.metaModel.{Card, MetaEntity}
+import molecule.base.metaModel.{Cardinality, MetaEntity}
 import molecule.db.core.api.Schema
 import molecule.db.core.marshalling.dbView.DbView
 
@@ -17,7 +17,7 @@ sealed trait ConnProxy {
   val entityMap: Map[String, MetaEntity]
 
   /** Attribute name -> (Cardinality, Scala type, Required attributes) */
-  val attrMap: Map[String, (Card, String, Seq[String])]
+  val attrMap: Map[String, (Cardinality, String, Seq[String])]
 
   /** Attributes requiring unique values */
   val uniqueAttrs: List[String]
@@ -41,7 +41,7 @@ case class JdbcProxy(
   override val uuid: UUID,
   override val schemaStr: String,
   override val entityMap: Map[String, MetaEntity],
-  override val attrMap: Map[String, (Card, String, Seq[String])],
+  override val attrMap: Map[String, (Cardinality, String, Seq[String])],
   override val uniqueAttrs: List[String],
   override val schemaData: List[String],
   override val reservedEntities: IArray[Byte] = IArray.empty[Byte],
@@ -81,7 +81,7 @@ case class DatomicProxy(
   override val dbView: Option[DbView] = None,
   override val schemaStr: String,
   override val entityMap: Map[String, MetaEntity],
-  override val attrMap: Map[String, (Card, String, Seq[String])],
+  override val attrMap: Map[String, (Cardinality, String, Seq[String])],
   override val uniqueAttrs: List[String],
   override val schemaData: List[String],
   override val reservedEntities: IArray[Byte] = IArray.empty[Byte],

@@ -2,7 +2,7 @@ package molecule.db.sql.sqlite.compliance.filter.one
 
 import molecule.core.setup.MUnit
 import molecule.db.compliance.test.filter.one.types.*
-import molecule.db.compliance.test.filter.one.{FilterOneSpecial_String, FilterOne_id, FilterRefOne}
+import molecule.db.compliance.test.filter.one.{FilterOneSpecial_String, FilterOne_Enum, FilterOne_id, FilterRefOne}
 import molecule.db.sql.sqlite.setup.Api_sqlite_async
 
 class FilterOne_String_Test extends MUnit {
@@ -75,14 +75,16 @@ class FilterOne_Char_Test extends MUnit {
 class FilterOne_refTest extends MUnit {
   FilterOne_ref(this, Api_sqlite_async)
 }
+
+class FilterOne_EnumTest extends MUnit {
+  FilterOne_Enum(this, Api_sqlite_async)
+}
 class FilterOne_idTest extends MUnit {
   FilterOne_id(this, Api_sqlite_async)
 }
-
 class FilterOneSpecial_StringTest extends MUnit {
   FilterOneSpecial_String(this, Api_sqlite_async)
 }
-
 class FilterRefOneTest extends MUnit {
   FilterRefOne(this, Api_sqlite_async)
 }

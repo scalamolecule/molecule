@@ -190,13 +190,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```
-sbt.version = 1.11.1
+sbt.version = 1.11.2
 ```
 
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.16.1")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.17.0")
 ```
 
 `build.sbt`:
@@ -207,12 +207,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %% "molecule-db-sql-postgres" % "0.21.0",
-      "org.scalamolecule" %% "molecule-db-sql-sqlite" % "0.21.0",
-      "org.scalamolecule" %% "molecule-db-sql-mysql" % "0.21.0",
-      "org.scalamolecule" %% "molecule-db-sql-mariadb" % "0.21.0",
-      "org.scalamolecule" %% "molecule-db-sql-h2" % "0.21.0",
-      "org.scalamolecule" %% "molecule-db-datalog-datomic" % "0.21.0",
+      "org.scalamolecule" %% "molecule-db-sql-postgres" % "0.22.0",
+      "org.scalamolecule" %% "molecule-db-sql-sqlite" % "0.22.0",
+      "org.scalamolecule" %% "molecule-db-sql-mysql" % "0.22.0",
+      "org.scalamolecule" %% "molecule-db-sql-mariadb" % "0.22.0",
+      "org.scalamolecule" %% "molecule-db-sql-h2" % "0.22.0",
+      "org.scalamolecule" %% "molecule-db-datalog-datomic" % "0.22.0",
     )
   )
 ```

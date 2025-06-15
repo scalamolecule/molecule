@@ -3,7 +3,7 @@ package molecule.db.datalog.datomic.transaction
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.metaModel.Card
+import molecule.base.metaModel.Cardinality
 import molecule.core.dataModel.Element
 import molecule.core.util.{JavaConversions, MoleculeLogging}
 import molecule.db.core.transaction.ResolveSave
@@ -139,7 +139,7 @@ trait Save_datomic
     ent: String,
     refAttr: String,
     ref: String,
-    card: Card,
+    card: Cardinality,
   ): Unit = {
     stmt = stmtList
     stmt.add(add)

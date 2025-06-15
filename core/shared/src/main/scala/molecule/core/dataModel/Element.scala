@@ -3,7 +3,7 @@ package molecule.core.dataModel
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.metaModel.{Card, CardOne}
+import molecule.base.metaModel.{Cardinality, CardOne}
 import molecule.base.util.BaseHelpers.*
 
 
@@ -52,7 +52,7 @@ case class Ref(
   ent: String,
   refAttr: String,
   ref: String = "",
-  card: Card = CardOne,
+  card: Cardinality = CardOne,
   owner: Boolean = false,
   coord: List[Int] = Nil
 ) extends Element {

@@ -1,6 +1,6 @@
 package molecule.db.core.transaction.ops
 
-import molecule.base.metaModel.Card
+import molecule.base.metaModel.Cardinality
 import molecule.db.core.transaction.Action2Data
 
 trait SaveOps extends Action2Data with BaseOps {
@@ -53,7 +53,7 @@ trait SaveOps extends Action2Data with BaseOps {
     ent: String,
     refAttr: String,
     ref: String,
-    card: Card
+    card: Cardinality
   ): Unit
 
   protected def addBackRef(

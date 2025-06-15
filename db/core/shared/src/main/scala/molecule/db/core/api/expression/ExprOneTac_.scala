@@ -7,13 +7,11 @@ import molecule.core.dataModel.Keywords.qm
 import molecule.db.core.api.*
 
 
-trait ExprOneTacOps_0[t, Entity1[_], Entity2[_, _]]
-  extends ExprAttr_0[t, Entity1, Entity2] {
+trait ExprOneTacOps_0[t, Entity1[_], Entity2[_, _]] extends ExprAttr_0[t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[t] & CardOne = ???
 }
 
-trait ExprOneTac_0[t, Entity1[_], Entity2[_, _]]
-  extends ExprOneTacOps_0[t, Entity1, Entity2] {
+trait ExprOneTac_0[t, Entity1[_], Entity2[_, _]] extends ExprOneTacOps_0[t, Entity1, Entity2] {
   def apply(                ): Entity1[t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -58,6 +56,17 @@ trait ExprOneTac_0_String[t, Entity1[_], Entity2[_, _]] extends ExprOneTac_0[t, 
   def matches   (regex : qm): Entity1[t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_0_Enum[t, Entity1[_], Entity2[_, _]] extends ExprOneTacOps_0[t, Entity1, Entity2] {
+  def apply(             ): Entity1[t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_0_Integer[t, Entity1[_], Entity2[_, _]] extends ExprOneTac_0[t, Entity1, Entity2] {
   def even                       : Entity1[t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -65,13 +74,11 @@ trait ExprOneTac_0_Integer[t, Entity1[_], Entity2[_, _]] extends ExprOneTac_0[t,
 }
 
 
-trait ExprOneTacOps_1[A, t, Entity1[_, _], Entity2[_, _, _]]
-  extends ExprAttr_1[A, t, Entity1, Entity2] {
+trait ExprOneTacOps_1[A, t, Entity1[_, _], Entity2[_, _, _]] extends ExprAttr_1[A, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, t] & CardOne = ???
 }
 
-trait ExprOneTac_1[A, t, Entity1[_, _], Entity2[_, _, _]]
-  extends ExprOneTacOps_1[A, t, Entity1, Entity2] {
+trait ExprOneTac_1[A, t, Entity1[_, _], Entity2[_, _, _]] extends ExprOneTacOps_1[A, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -116,6 +123,17 @@ trait ExprOneTac_1_String[A, t, Entity1[_, _], Entity2[_, _, _]] extends ExprOne
   def matches   (regex : qm): Entity1[A, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_1_Enum[A, t, Entity1[_, _], Entity2[_, _, _]] extends ExprOneTacOps_1[A, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_1_Integer[A, t, Entity1[_, _], Entity2[_, _, _]] extends ExprOneTac_1[A, t, Entity1, Entity2] {
   def even                       : Entity1[A, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -123,13 +141,11 @@ trait ExprOneTac_1_Integer[A, t, Entity1[_, _], Entity2[_, _, _]] extends ExprOn
 }
 
 
-trait ExprOneTacOps_2[A, B, t, Entity1[_, _, _], Entity2[_, _, _, _]]
-  extends ExprAttr_2[A, B, t, Entity1, Entity2] {
+trait ExprOneTacOps_2[A, B, t, Entity1[_, _, _], Entity2[_, _, _, _]] extends ExprAttr_2[A, B, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, t] & CardOne = ???
 }
 
-trait ExprOneTac_2[A, B, t, Entity1[_, _, _], Entity2[_, _, _, _]]
-  extends ExprOneTacOps_2[A, B, t, Entity1, Entity2] {
+trait ExprOneTac_2[A, B, t, Entity1[_, _, _], Entity2[_, _, _, _]] extends ExprOneTacOps_2[A, B, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -174,6 +190,17 @@ trait ExprOneTac_2_String[A, B, t, Entity1[_, _, _], Entity2[_, _, _, _]] extend
   def matches   (regex : qm): Entity1[A, B, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_2_Enum[A, B, t, Entity1[_, _, _], Entity2[_, _, _, _]] extends ExprOneTacOps_2[A, B, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_2_Integer[A, B, t, Entity1[_, _, _], Entity2[_, _, _, _]] extends ExprOneTac_2[A, B, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -181,13 +208,11 @@ trait ExprOneTac_2_Integer[A, B, t, Entity1[_, _, _], Entity2[_, _, _, _]] exten
 }
 
 
-trait ExprOneTacOps_3[A, B, C, t, Entity1[_, _, _, _], Entity2[_, _, _, _, _]]
-  extends ExprAttr_3[A, B, C, t, Entity1, Entity2] {
+trait ExprOneTacOps_3[A, B, C, t, Entity1[_, _, _, _], Entity2[_, _, _, _, _]] extends ExprAttr_3[A, B, C, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, t] & CardOne = ???
 }
 
-trait ExprOneTac_3[A, B, C, t, Entity1[_, _, _, _], Entity2[_, _, _, _, _]]
-  extends ExprOneTacOps_3[A, B, C, t, Entity1, Entity2] {
+trait ExprOneTac_3[A, B, C, t, Entity1[_, _, _, _], Entity2[_, _, _, _, _]] extends ExprOneTacOps_3[A, B, C, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -232,6 +257,17 @@ trait ExprOneTac_3_String[A, B, C, t, Entity1[_, _, _, _], Entity2[_, _, _, _, _
   def matches   (regex : qm): Entity1[A, B, C, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_3_Enum[A, B, C, t, Entity1[_, _, _, _], Entity2[_, _, _, _, _]] extends ExprOneTacOps_3[A, B, C, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_3_Integer[A, B, C, t, Entity1[_, _, _, _], Entity2[_, _, _, _, _]] extends ExprOneTac_3[A, B, C, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -239,13 +275,11 @@ trait ExprOneTac_3_Integer[A, B, C, t, Entity1[_, _, _, _], Entity2[_, _, _, _, 
 }
 
 
-trait ExprOneTacOps_4[A, B, C, D, t, Entity1[_, _, _, _, _], Entity2[_, _, _, _, _, _]]
-  extends ExprAttr_4[A, B, C, D, t, Entity1, Entity2] {
+trait ExprOneTacOps_4[A, B, C, D, t, Entity1[_, _, _, _, _], Entity2[_, _, _, _, _, _]] extends ExprAttr_4[A, B, C, D, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, t] & CardOne = ???
 }
 
-trait ExprOneTac_4[A, B, C, D, t, Entity1[_, _, _, _, _], Entity2[_, _, _, _, _, _]]
-  extends ExprOneTacOps_4[A, B, C, D, t, Entity1, Entity2] {
+trait ExprOneTac_4[A, B, C, D, t, Entity1[_, _, _, _, _], Entity2[_, _, _, _, _, _]] extends ExprOneTacOps_4[A, B, C, D, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -290,6 +324,17 @@ trait ExprOneTac_4_String[A, B, C, D, t, Entity1[_, _, _, _, _], Entity2[_, _, _
   def matches   (regex : qm): Entity1[A, B, C, D, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_4_Enum[A, B, C, D, t, Entity1[_, _, _, _, _], Entity2[_, _, _, _, _, _]] extends ExprOneTacOps_4[A, B, C, D, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_4_Integer[A, B, C, D, t, Entity1[_, _, _, _, _], Entity2[_, _, _, _, _, _]] extends ExprOneTac_4[A, B, C, D, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -297,13 +342,11 @@ trait ExprOneTac_4_Integer[A, B, C, D, t, Entity1[_, _, _, _, _], Entity2[_, _, 
 }
 
 
-trait ExprOneTacOps_5[A, B, C, D, E, t, Entity1[_, _, _, _, _, _], Entity2[_, _, _, _, _, _, _]]
-  extends ExprAttr_5[A, B, C, D, E, t, Entity1, Entity2] {
+trait ExprOneTacOps_5[A, B, C, D, E, t, Entity1[_, _, _, _, _, _], Entity2[_, _, _, _, _, _, _]] extends ExprAttr_5[A, B, C, D, E, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, t] & CardOne = ???
 }
 
-trait ExprOneTac_5[A, B, C, D, E, t, Entity1[_, _, _, _, _, _], Entity2[_, _, _, _, _, _, _]]
-  extends ExprOneTacOps_5[A, B, C, D, E, t, Entity1, Entity2] {
+trait ExprOneTac_5[A, B, C, D, E, t, Entity1[_, _, _, _, _, _], Entity2[_, _, _, _, _, _, _]] extends ExprOneTacOps_5[A, B, C, D, E, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -348,6 +391,17 @@ trait ExprOneTac_5_String[A, B, C, D, E, t, Entity1[_, _, _, _, _, _], Entity2[_
   def matches   (regex : qm): Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_5_Enum[A, B, C, D, E, t, Entity1[_, _, _, _, _, _], Entity2[_, _, _, _, _, _, _]] extends ExprOneTacOps_5[A, B, C, D, E, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_5_Integer[A, B, C, D, E, t, Entity1[_, _, _, _, _, _], Entity2[_, _, _, _, _, _, _]] extends ExprOneTac_5[A, B, C, D, E, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -355,13 +409,11 @@ trait ExprOneTac_5_Integer[A, B, C, D, E, t, Entity1[_, _, _, _, _, _], Entity2[
 }
 
 
-trait ExprOneTacOps_6[A, B, C, D, E, F, t, Entity1[_, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _]]
-  extends ExprAttr_6[A, B, C, D, E, F, t, Entity1, Entity2] {
+trait ExprOneTacOps_6[A, B, C, D, E, F, t, Entity1[_, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _]] extends ExprAttr_6[A, B, C, D, E, F, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, t] & CardOne = ???
 }
 
-trait ExprOneTac_6[A, B, C, D, E, F, t, Entity1[_, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_6[A, B, C, D, E, F, t, Entity1, Entity2] {
+trait ExprOneTac_6[A, B, C, D, E, F, t, Entity1[_, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _]] extends ExprOneTacOps_6[A, B, C, D, E, F, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -406,6 +458,17 @@ trait ExprOneTac_6_String[A, B, C, D, E, F, t, Entity1[_, _, _, _, _, _, _], Ent
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_6_Enum[A, B, C, D, E, F, t, Entity1[_, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _]] extends ExprOneTacOps_6[A, B, C, D, E, F, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_6_Integer[A, B, C, D, E, F, t, Entity1[_, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _]] extends ExprOneTac_6[A, B, C, D, E, F, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -413,13 +476,11 @@ trait ExprOneTac_6_Integer[A, B, C, D, E, F, t, Entity1[_, _, _, _, _, _, _], En
 }
 
 
-trait ExprOneTacOps_7[A, B, C, D, E, F, G, t, Entity1[_, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_7[A, B, C, D, E, F, G, t, Entity1, Entity2] {
+trait ExprOneTacOps_7[A, B, C, D, E, F, G, t, Entity1[_, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _]] extends ExprAttr_7[A, B, C, D, E, F, G, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, t] & CardOne = ???
 }
 
-trait ExprOneTac_7[A, B, C, D, E, F, G, t, Entity1[_, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_7[A, B, C, D, E, F, G, t, Entity1, Entity2] {
+trait ExprOneTac_7[A, B, C, D, E, F, G, t, Entity1[_, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_7[A, B, C, D, E, F, G, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -464,6 +525,17 @@ trait ExprOneTac_7_String[A, B, C, D, E, F, G, t, Entity1[_, _, _, _, _, _, _, _
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_7_Enum[A, B, C, D, E, F, G, t, Entity1[_, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_7[A, B, C, D, E, F, G, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_7_Integer[A, B, C, D, E, F, G, t, Entity1[_, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _]] extends ExprOneTac_7[A, B, C, D, E, F, G, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -471,13 +543,11 @@ trait ExprOneTac_7_Integer[A, B, C, D, E, F, G, t, Entity1[_, _, _, _, _, _, _, 
 }
 
 
-trait ExprOneTacOps_8[A, B, C, D, E, F, G, H, t, Entity1[_, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_8[A, B, C, D, E, F, G, H, t, Entity1, Entity2] {
+trait ExprOneTacOps_8[A, B, C, D, E, F, G, H, t, Entity1[_, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _]] extends ExprAttr_8[A, B, C, D, E, F, G, H, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = ???
 }
 
-trait ExprOneTac_8[A, B, C, D, E, F, G, H, t, Entity1[_, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_8[A, B, C, D, E, F, G, H, t, Entity1, Entity2] {
+trait ExprOneTac_8[A, B, C, D, E, F, G, H, t, Entity1[_, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_8[A, B, C, D, E, F, G, H, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -522,6 +592,17 @@ trait ExprOneTac_8_String[A, B, C, D, E, F, G, H, t, Entity1[_, _, _, _, _, _, _
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_8_Enum[A, B, C, D, E, F, G, H, t, Entity1[_, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_8[A, B, C, D, E, F, G, H, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_8_Integer[A, B, C, D, E, F, G, H, t, Entity1[_, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_8[A, B, C, D, E, F, G, H, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -529,13 +610,11 @@ trait ExprOneTac_8_Integer[A, B, C, D, E, F, G, H, t, Entity1[_, _, _, _, _, _, 
 }
 
 
-trait ExprOneTacOps_9[A, B, C, D, E, F, G, H, I, t, Entity1[_, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_9[A, B, C, D, E, F, G, H, I, t, Entity1, Entity2] {
+trait ExprOneTacOps_9[A, B, C, D, E, F, G, H, I, t, Entity1[_, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_9[A, B, C, D, E, F, G, H, I, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = ???
 }
 
-trait ExprOneTac_9[A, B, C, D, E, F, G, H, I, t, Entity1[_, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_9[A, B, C, D, E, F, G, H, I, t, Entity1, Entity2] {
+trait ExprOneTac_9[A, B, C, D, E, F, G, H, I, t, Entity1[_, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_9[A, B, C, D, E, F, G, H, I, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -580,6 +659,17 @@ trait ExprOneTac_9_String[A, B, C, D, E, F, G, H, I, t, Entity1[_, _, _, _, _, _
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_9_Enum[A, B, C, D, E, F, G, H, I, t, Entity1[_, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_9[A, B, C, D, E, F, G, H, I, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_9_Integer[A, B, C, D, E, F, G, H, I, t, Entity1[_, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_9[A, B, C, D, E, F, G, H, I, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -587,13 +677,11 @@ trait ExprOneTac_9_Integer[A, B, C, D, E, F, G, H, I, t, Entity1[_, _, _, _, _, 
 }
 
 
-trait ExprOneTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Entity1[_, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_10[A, B, C, D, E, F, G, H, I, J, t, Entity1, Entity2] {
+trait ExprOneTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Entity1[_, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_10[A, B, C, D, E, F, G, H, I, J, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = ???
 }
 
-trait ExprOneTac_10[A, B, C, D, E, F, G, H, I, J, t, Entity1[_, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Entity1, Entity2] {
+trait ExprOneTac_10[A, B, C, D, E, F, G, H, I, J, t, Entity1[_, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -638,6 +726,17 @@ trait ExprOneTac_10_String[A, B, C, D, E, F, G, H, I, J, t, Entity1[_, _, _, _, 
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_10_Enum[A, B, C, D, E, F, G, H, I, J, t, Entity1[_, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_10_Integer[A, B, C, D, E, F, G, H, I, J, t, Entity1[_, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_10[A, B, C, D, E, F, G, H, I, J, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -645,13 +744,11 @@ trait ExprOneTac_10_Integer[A, B, C, D, E, F, G, H, I, J, t, Entity1[_, _, _, _,
 }
 
 
-trait ExprOneTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1, Entity2] {
+trait ExprOneTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = ???
 }
 
-trait ExprOneTac_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1, Entity2] {
+trait ExprOneTac_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -696,6 +793,17 @@ trait ExprOneTac_11_String[A, B, C, D, E, F, G, H, I, J, K, t, Entity1[_, _, _, 
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_11_Enum[A, B, C, D, E, F, G, H, I, J, K, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_11_Integer[A, B, C, D, E, F, G, H, I, J, K, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_11[A, B, C, D, E, F, G, H, I, J, K, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, K, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -703,13 +811,11 @@ trait ExprOneTac_11_Integer[A, B, C, D, E, F, G, H, I, J, K, t, Entity1[_, _, _,
 }
 
 
-trait ExprOneTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1, Entity2] {
+trait ExprOneTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = ???
 }
 
-trait ExprOneTac_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1, Entity2] {
+trait ExprOneTac_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -754,6 +860,17 @@ trait ExprOneTac_12_String[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1[_, _, 
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_12_Enum[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_12_Integer[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -761,13 +878,11 @@ trait ExprOneTac_12_Integer[A, B, C, D, E, F, G, H, I, J, K, L, t, Entity1[_, _,
 }
 
 
-trait ExprOneTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1, Entity2] {
+trait ExprOneTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = ???
 }
 
-trait ExprOneTac_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1, Entity2] {
+trait ExprOneTac_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -812,6 +927,17 @@ trait ExprOneTac_13_String[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1[_, 
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_13_Enum[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_13_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -819,13 +945,11 @@ trait ExprOneTac_13_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Entity1[_,
 }
 
 
-trait ExprOneTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1, Entity2] {
+trait ExprOneTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = ???
 }
 
-trait ExprOneTac_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1, Entity2] {
+trait ExprOneTac_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -870,6 +994,17 @@ trait ExprOneTac_14_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1[
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_14_Enum[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_14_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -877,13 +1012,11 @@ trait ExprOneTac_14_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Entity1
 }
 
 
-trait ExprOneTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1, Entity2] {
+trait ExprOneTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = ???
 }
 
-trait ExprOneTac_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1, Entity2] {
+trait ExprOneTac_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -928,6 +1061,17 @@ trait ExprOneTac_15_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entit
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_15_Enum[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_15_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -935,13 +1079,11 @@ trait ExprOneTac_15_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Enti
 }
 
 
-trait ExprOneTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1, Entity2] {
+trait ExprOneTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = ???
 }
 
-trait ExprOneTac_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1, Entity2] {
+trait ExprOneTac_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -986,6 +1128,17 @@ trait ExprOneTac_16_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, En
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_16_Enum[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_16_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -993,13 +1146,11 @@ trait ExprOneTac_16_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, E
 }
 
 
-trait ExprOneTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1, Entity2] {
+trait ExprOneTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = ???
 }
 
-trait ExprOneTac_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1, Entity2] {
+trait ExprOneTac_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -1044,6 +1195,17 @@ trait ExprOneTac_17_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t,
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_17_Enum[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_17_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -1051,13 +1213,11 @@ trait ExprOneTac_17_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t
 }
 
 
-trait ExprOneTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1, Entity2] {
+trait ExprOneTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = ???
 }
 
-trait ExprOneTac_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1, Entity2] {
+trait ExprOneTac_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -1102,6 +1262,17 @@ trait ExprOneTac_18_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R,
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_18_Enum[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_18_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -1109,13 +1280,11 @@ trait ExprOneTac_18_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R
 }
 
 
-trait ExprOneTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1, Entity2] {
+trait ExprOneTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = ???
 }
 
-trait ExprOneTac_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1, Entity2] {
+trait ExprOneTac_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -1160,6 +1329,17 @@ trait ExprOneTac_19_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R,
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_19_Enum[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_19_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -1167,13 +1347,11 @@ trait ExprOneTac_19_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R
 }
 
 
-trait ExprOneTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1, Entity2] {
+trait ExprOneTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = ???
 }
 
-trait ExprOneTac_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1, Entity2] {
+trait ExprOneTac_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -1218,6 +1396,17 @@ trait ExprOneTac_20_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R,
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_20_Enum[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_20_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -1225,13 +1414,11 @@ trait ExprOneTac_20_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R
 }
 
 
-trait ExprOneTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1, Entity2] {
+trait ExprOneTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = ???
 }
 
-trait ExprOneTac_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1, Entity2] {
+trait ExprOneTac_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -1276,6 +1463,17 @@ trait ExprOneTac_21_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R,
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(Matches   , Nil, true)
 }
 
+trait ExprOneTac_21_Enum[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(Neq, Nil, true)
+}
+
 trait ExprOneTac_21_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Entity1, Entity2] {
   def even                       : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(Even      , Nil                    )
   def odd                        : Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] & CardOne = _exprOneTac(Odd       , Nil                    )
@@ -1283,13 +1481,11 @@ trait ExprOneTac_21_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R
 }
 
 
-trait ExprOneTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprAttr_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1, Entity2] {
+trait ExprOneTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprAttr_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1, Entity2] {
   protected def _exprOneTac(op: Op, vs: Seq[t], binding: Boolean = false): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = ???
 }
 
-trait ExprOneTac_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1, Entity2] {
+trait ExprOneTac_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1, Entity2] {
   def apply(                ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(NoValue, Nil         )
   def apply(v    : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(Eq     , Seq(v) ++ vs)
   def apply(vs   : Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(Eq     , vs          )
@@ -1325,6 +1521,17 @@ trait ExprOneTac_22_String[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R,
   def endsWith  (suffix: qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(EndsWith  , Nil, true)
   def contains  (needle: qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(Contains  , Nil, true)
   def matches   (regex : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(Matches   , Nil, true)
+}
+
+trait ExprOneTac_22_Enum[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1, Entity2] {
+  def apply(             ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(NoValue, Nil                                      )
+  def apply(v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(Eq     , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def apply(vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(Eq     , vs       .map(_.toString.asInstanceOf[t]))
+  def not  (v : t, vs: t*): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(Neq    , (v +: vs).map(_.toString.asInstanceOf[t]))
+  def not  (vs: Seq[t]   ): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(Neq    , vs       .map(_.toString.asInstanceOf[t]))
+
+  def apply(v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(Eq , Nil, true)
+  def not  (v : qm): Entity1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] & CardOne = _exprOneTac(Neq, Nil, true)
 }
 
 trait ExprOneTac_22_Integer[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _], Entity2[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]] extends ExprOneTac_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Entity1, Entity2] {

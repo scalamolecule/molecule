@@ -27,8 +27,8 @@ abstract class DeleteAction(
 
 
   private def prepareQueryAndActions: Seq[() => DeleteEntity] = {
-    entityMap(entity).attrs.collect {
-      case MetaAttribute(refAttr, card, _, Some(refEnt), options, _, _, _, _, _)
+    entityMap(entity).attributes.collect {
+      case MetaAttribute(refAttr, card, _, _, Some(refEnt), _, options, _, _, _, _, _)
         if options.contains("owner") =>
         if (card.isInstanceOf[CardOne]) {
           cols += entity + "." + refAttr

@@ -1,6 +1,6 @@
 package molecule.db.core.transaction.ops
 
-import molecule.base.metaModel.Card
+import molecule.base.metaModel.Cardinality
 import molecule.core.dataModel.{Attr, Element}
 
 trait InsertOps extends BaseOps {
@@ -93,7 +93,7 @@ trait InsertOps extends BaseOps {
     ent: String,
     refAttr: String,
     ref: String,
-    card: Card
+    card: Cardinality
   ): Product => Unit
 
   protected def addBackRef(
