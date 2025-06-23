@@ -381,6 +381,7 @@ trait Keywords {
     override def toString = "stddev"
   }
 
-  @targetName("Keywords.qm")
-  object ? extends Keywords.qm
+//  @targetName("Keywords.qm")
+//  object ? extends Keywords.qm
+  def ? : Keywords.qm = new Keywords.qm{}
 }

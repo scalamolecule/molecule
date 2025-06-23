@@ -8,6 +8,7 @@ import molecule.db.core.spi.Conn
 trait DbProviders_h2 extends DbProviders with DbConnection_h2 with Platform {
   override val database: String = "h2"
 
+  override def community(test: Conn => Any): Any = run(test, CommunitySchema_h2)
   override def types(test: Conn => Any): Any = run(test, TypesSchema_h2)
   override def refs(test: Conn => Any): Any = run(test, RefsSchema_h2)
   override def unique(test: Conn => Any): Any = run(test, UniquesSchema_h2)

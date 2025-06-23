@@ -30,7 +30,7 @@ case class InsertCardMap(
       _ <- Entity.intMap.insert(Map.empty[String, Int]).transact
       _ <- Entity.intMap.query.get.map(_ ==> List())
 
-      _ <- Entity.i.stringMap.insert(1, Map(pstring1, pstring2)).transact
+      _ <- Entity.i.stringMap.insert((1, Map(pstring1, pstring2))).transact
       _ <- Entity.i.intMap.insert(1, Map(pint1, pint2)).transact
       _ <- Entity.i.longMap.insert(1, Map(plong1, plong2)).transact
       _ <- Entity.i.floatMap.insert(1, Map(pfloat1, pfloat2)).transact

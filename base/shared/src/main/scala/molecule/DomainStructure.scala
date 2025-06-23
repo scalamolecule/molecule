@@ -318,7 +318,7 @@ abstract class DomainStructure(maxArity: Int) {
     def apply(description: String): Self = ???
 
     // Allowed values (like enumerations)
-    def allowedValues(vs: BaseTpe*): Self = ???
+    def allowedValues(v: BaseTpe, vs: BaseTpe*): Self = ???
     def allowedValues(vs: Seq[BaseTpe], failureMsg: String): Self = ???
 
     /** Alias to non-compatible attribute name like `type` or `first-name` etc.
@@ -403,6 +403,7 @@ abstract class DomainStructure(maxArity: Int) {
      * @return
      */
     def apply[Ref](description: String): refOptions[Self] = ???
+    def descr(description: String): Self = ???
 
     /** Owner option.
      *

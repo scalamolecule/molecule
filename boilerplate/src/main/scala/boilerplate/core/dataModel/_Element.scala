@@ -66,6 +66,8 @@ object _Element extends CoreBase("Element", "/dataModel") {
           s"""map: Map[String, $baseTpe] = Map.empty[String, $baseTpe],
              |  override val keys: Seq[String] = Nil,
              |  values: Seq[$baseTpe] = Nil""".stripMargin
+
+        case unexpected => throw Exception("Unexpected card/mode/baseTpe combination: " + unexpected)
       }
       val format_?  = !List("Int", "Double", "Boolean").contains(baseTpe)
       val format    = baseTpe match {

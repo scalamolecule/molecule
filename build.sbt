@@ -1,9 +1,10 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.22.0"
+val moleculeVersion = "0.23.0-SNAPSHOT"
 
 val scala212 = "2.12.20"
 val scala3   = "3.3.6"
+//val scala3   = "3.7.1"
 
 val catsVersion              = "3.6.0"
 val tapirVersion             = "1.11.25"
@@ -29,9 +30,40 @@ inThisBuild(
     scalaVersion := scala3,
     publishTo := localStaging.value,
 
-    // Run tests for all systems sequentially to avoid data locks with db
+    // Run tests for all systems sequentially to avoid data locks with dbs.
     // Only applies on JVM. On the JS platform there's no parallelism anyway.
     Test / parallelExecution := false,
+
+    //    javaOptions ++= Seq(
+    //      "-Xms8G",
+    //      "-Xmx40G",
+    //      "-Xss8M",
+    //      "-XX:+UseG1GC",
+    //      "-XX:+ParallelRefProcEnabled",
+    //      "-XX:MaxGCPauseMillis=200",
+    ////      "-XX:MaxGCPauseMillis=100",
+    //      "-XX:G1HeapRegionSize=32m",
+    //      "-XX:InitiatingHeapOccupancyPercent=45",
+    //    )
+
+    /*
+-Xms8G
+-Xmx40G
+-Xss8M
+-XX:+UseG1GC
+-XX:+UseZGC
+-XX:MaxGCPauseMillis=200
+-XX:+ParallelRefProcEnabled
+-XX:+UseStringDeduplication
+-XX:+UnlockExperimentalVMOptions
+-XX:G1HeapRegionSize=32m
+-XX:InitiatingHeapOccupancyPercent=45
+-Xlog:gc*:file=gc.log
+     */
+
+//    Compile / compile / scalacOptions += "-Xmax-inlines:32",
+//    maxErrors := 1000,
+//    Global / concurrentRestrictions += Tags.limit(Tags.Compile, 2)
   )
 )
 

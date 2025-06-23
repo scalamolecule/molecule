@@ -50,7 +50,7 @@ case class SyncApi(
     )
 
     A.i(2).B.i(3).s("b").save.transact
-
+def ?? = 7
     // Optional card-one ref (SQL left join)
     A.i.a1.B.?(B.i.s).query.i.get ==> List(
       (1, None),
