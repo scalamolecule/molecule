@@ -21,6 +21,41 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |
        |  private def unexpected(element: Element) = throw ModelError("Unexpected element: " + element)
        |
+       |  def attrsOnly(dataModel: DataModel): List[Attr] = dataModel.elements.map {
+       |    case a: Attr => a
+       |    case _       => throw ModelError("Only attributes allowed.")
+       |  }
+       |
+       |  def addOptRef(self: Molecule, optRef: Molecule): DataModel = {
+       |    val dataModel       = self.dataModel
+       |    val optRefDataModel = optRef.dataModel
+       |    DataModel(
+       |      dataModel.elements.init :+ OptRef(dataModel.elements.last.asInstanceOf[Ref], optRefDataModel.elements),
+       |      dataModel.attrIndexes ++ optRefDataModel.attrIndexes,
+       |      binds = dataModel.binds + optRefDataModel.binds
+       |    )
+       |  }
+       |
+       |  def addNested(self: Molecule, nestedMolecule: Molecule): DataModel = {
+       |    val dataModel       = self.dataModel
+       |    val nestedDataModel = nestedMolecule.dataModel
+       |    DataModel(
+       |      dataModel.elements.init :+ Nested(dataModel.elements.last.asInstanceOf[Ref], nestedDataModel.elements),
+       |      dataModel.attrIndexes ++ nestedDataModel.attrIndexes,
+       |      binds = dataModel.binds + nestedDataModel.binds
+       |    )
+       |  }
+       |
+       |  def addOptNested(self: Molecule, nestedMolecule: Molecule): DataModel = {
+       |    val dataModel       = self.dataModel
+       |    val nestedDataModel = nestedMolecule.dataModel
+       |    DataModel(
+       |      dataModel.elements.init :+ OptNested(dataModel.elements.last.asInstanceOf[Ref], nestedDataModel.elements),
+       |      dataModel.attrIndexes ++ nestedDataModel.attrIndexes,
+       |      binds = dataModel.binds + nestedDataModel.binds
+       |    )
+       |  }
+       |
        |  protected def toInt(dataModel: DataModel, kw: Kw): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
@@ -75,7 +110,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean): DataModel = {
+       |  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean = false): DataModel = {
        |    val es    = dataModel.elements
        |    val last  = es.last match {
        |      case a: AttrOneMan => a match {

@@ -77,51 +77,51 @@ case class InsertCardOne(
 
   "Optional" - types { implicit conn =>
     for {
-      _ <- Entity.i.string_?.insert(1, Some(string1)).transact
-      _ <- Entity.i.int_?.insert(1, Some(int1)).transact
-      _ <- Entity.i.long_?.insert(1, Some(long1)).transact
-      _ <- Entity.i.float_?.insert(1, Some(float1)).transact
-      _ <- Entity.i.double_?.insert(1, Some(double1)).transact
-      _ <- Entity.i.boolean_?.insert(1, Some(boolean1)).transact
-      _ <- Entity.i.bigInt_?.insert(1, Some(bigInt1)).transact
-      _ <- Entity.i.bigDecimal_?.insert(1, Some(bigDecimal1)).transact
-      _ <- Entity.i.date_?.insert(1, Some(date1)).transact
-      _ <- Entity.i.duration_?.insert(1, Some(duration1)).transact
-      _ <- Entity.i.instant_?.insert(1, Some(instant1)).transact
-      _ <- Entity.i.localDate_?.insert(1, Some(localDate1)).transact
-      _ <- Entity.i.localTime_?.insert(1, Some(localTime1)).transact
-      _ <- Entity.i.localDateTime_?.insert(1, Some(localDateTime1)).transact
-      _ <- Entity.i.offsetTime_?.insert(1, Some(offsetTime1)).transact
-      _ <- Entity.i.offsetDateTime_?.insert(1, Some(offsetDateTime1)).transact
-      _ <- Entity.i.zonedDateTime_?.insert(1, Some(zonedDateTime1)).transact
-      _ <- Entity.i.uuid_?.insert(1, Some(uuid1)).transact
-      _ <- Entity.i.uri_?.insert(1, Some(uri1)).transact
-      _ <- Entity.i.byte_?.insert(1, Some(byte1)).transact
-      _ <- Entity.i.short_?.insert(1, Some(short1)).transact
-      _ <- Entity.i.char_?.insert(1, Some(char1)).transact
+      _ <- Entity.i.string_?.insert((1, Some(string1))).transact
+      _ <- Entity.i.int_?.insert((1, Some(int1))).transact
+      _ <- Entity.i.long_?.insert((1, Some(long1))).transact
+      _ <- Entity.i.float_?.insert((1, Some(float1))).transact
+      _ <- Entity.i.double_?.insert((1, Some(double1))).transact
+      _ <- Entity.i.boolean_?.insert((1, Some(boolean1))).transact
+      _ <- Entity.i.bigInt_?.insert((1, Some(bigInt1))).transact
+      _ <- Entity.i.bigDecimal_?.insert((1, Some(bigDecimal1))).transact
+      _ <- Entity.i.date_?.insert((1, Some(date1))).transact
+      _ <- Entity.i.duration_?.insert((1, Some(duration1))).transact
+      _ <- Entity.i.instant_?.insert((1, Some(instant1))).transact
+      _ <- Entity.i.localDate_?.insert((1, Some(localDate1))).transact
+      _ <- Entity.i.localTime_?.insert((1, Some(localTime1))).transact
+      _ <- Entity.i.localDateTime_?.insert((1, Some(localDateTime1))).transact
+      _ <- Entity.i.offsetTime_?.insert((1, Some(offsetTime1))).transact
+      _ <- Entity.i.offsetDateTime_?.insert((1, Some(offsetDateTime1))).transact
+      _ <- Entity.i.zonedDateTime_?.insert((1, Some(zonedDateTime1))).transact
+      _ <- Entity.i.uuid_?.insert((1, Some(uuid1))).transact
+      _ <- Entity.i.uri_?.insert((1, Some(uri1))).transact
+      _ <- Entity.i.byte_?.insert((1, Some(byte1))).transact
+      _ <- Entity.i.short_?.insert((1, Some(short1))).transact
+      _ <- Entity.i.char_?.insert((1, Some(char1))).transact
 
-      _ <- Entity.i.string_?.insert(1, Option.empty[String]).transact
-      _ <- Entity.i.int_?.insert(1, Option.empty[Int]).transact
-      _ <- Entity.i.long_?.insert(1, Option.empty[Long]).transact
-      _ <- Entity.i.float_?.insert(1, Option.empty[Float]).transact
-      _ <- Entity.i.double_?.insert(1, Option.empty[Double]).transact
-      _ <- Entity.i.boolean_?.insert(1, Option.empty[Boolean]).transact
-      _ <- Entity.i.bigInt_?.insert(1, Option.empty[BigInt]).transact
-      _ <- Entity.i.bigDecimal_?.insert(1, Option.empty[BigDecimal]).transact
-      _ <- Entity.i.date_?.insert(1, Option.empty[Date]).transact
-      _ <- Entity.i.duration_?.insert(1, Option.empty[Duration]).transact
-      _ <- Entity.i.instant_?.insert(1, Option.empty[Instant]).transact
-      _ <- Entity.i.localDate_?.insert(1, Option.empty[LocalDate]).transact
-      _ <- Entity.i.localTime_?.insert(1, Option.empty[LocalTime]).transact
-      _ <- Entity.i.localDateTime_?.insert(1, Option.empty[LocalDateTime]).transact
-      _ <- Entity.i.offsetTime_?.insert(1, Option.empty[OffsetTime]).transact
-      _ <- Entity.i.offsetDateTime_?.insert(1, Option.empty[OffsetDateTime]).transact
-      _ <- Entity.i.zonedDateTime_?.insert(1, Option.empty[ZonedDateTime]).transact
-      _ <- Entity.i.uuid_?.insert(1, Option.empty[UUID]).transact
-      _ <- Entity.i.uri_?.insert(1, Option.empty[URI]).transact
-      _ <- Entity.i.byte_?.insert(1, Option.empty[Byte]).transact
-      _ <- Entity.i.short_?.insert(1, Option.empty[Short]).transact
-      _ <- Entity.i.char_?.insert(1, Option.empty[Char]).transact
+      _ <- Entity.i.string_?.insert((1, Option.empty[String])).transact
+      _ <- Entity.i.int_?.insert((1, Option.empty[Int])).transact
+      _ <- Entity.i.long_?.insert((1, Option.empty[Long])).transact
+      _ <- Entity.i.float_?.insert((1, Option.empty[Float])).transact
+      _ <- Entity.i.double_?.insert((1, Option.empty[Double])).transact
+      _ <- Entity.i.boolean_?.insert((1, Option.empty[Boolean])).transact
+      _ <- Entity.i.bigInt_?.insert((1, Option.empty[BigInt])).transact
+      _ <- Entity.i.bigDecimal_?.insert((1, Option.empty[BigDecimal])).transact
+      _ <- Entity.i.date_?.insert((1, Option.empty[Date])).transact
+      _ <- Entity.i.duration_?.insert((1, Option.empty[Duration])).transact
+      _ <- Entity.i.instant_?.insert((1, Option.empty[Instant])).transact
+      _ <- Entity.i.localDate_?.insert((1, Option.empty[LocalDate])).transact
+      _ <- Entity.i.localTime_?.insert((1, Option.empty[LocalTime])).transact
+      _ <- Entity.i.localDateTime_?.insert((1, Option.empty[LocalDateTime])).transact
+      _ <- Entity.i.offsetTime_?.insert((1, Option.empty[OffsetTime])).transact
+      _ <- Entity.i.offsetDateTime_?.insert((1, Option.empty[OffsetDateTime])).transact
+      _ <- Entity.i.zonedDateTime_?.insert((1, Option.empty[ZonedDateTime])).transact
+      _ <- Entity.i.uuid_?.insert((1, Option.empty[UUID])).transact
+      _ <- Entity.i.uri_?.insert((1, Option.empty[URI])).transact
+      _ <- Entity.i.byte_?.insert((1, Option.empty[Byte])).transact
+      _ <- Entity.i.short_?.insert((1, Option.empty[Short])).transact
+      _ <- Entity.i.char_?.insert((1, Option.empty[Char])).transact
 
       _ <- Entity.i_.string_?.a1.query.get.map(_ ==> List(None, Some(string1)))
       _ <- Entity.i_.int_?.a1.query.get.map(_ ==> List(None, Some(int1)))
@@ -147,8 +147,8 @@ case class InsertCardOne(
       _ <- Entity.i_.char_?.a1.query.get.map(_ ==> List(None, Some(char1)))
 
       r1 <- Ref.i.insert(1, 2).transact.map(_.id)
-      _ <- Entity.i.ref_?.insert(1, Option.empty[Long]).transact
-      _ <- Entity.i.ref_?.insert(1, Some(r1)).transact
+      _ <- Entity.i.ref_?.insert((1, Option.empty[Long])).transact
+      _ <- Entity.i.ref_?.insert((1, Some(r1))).transact
       _ <- Entity.i_.ref_?.a1.query.get.map(_ ==> List(None, Some(r1)))
     } yield ()
   }

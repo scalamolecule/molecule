@@ -191,7 +191,7 @@ trait ModelTransformations_ {
     dataModel.copy(elements = es.init :+ last)
   }
 
-  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean): DataModel = {
+  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean = false): DataModel = {
     val es    = dataModel.elements
     val last  = es.last match {
       case a: AttrOneMan => a match {

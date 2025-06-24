@@ -48,6 +48,6 @@ type ReverseOnto[From <: Tuple, +To <: Tuple] <: Tuple = From match
 
 
 
-sealed trait NotTuple[T]
-object NotTuple:
-  given scalar[T](using ev: T <:< Tuple =:= false): NotTuple[T] = new NotTuple[T] {}
+//sealed trait NotTuple[T]
+//object NotTuple:
+//  given scalar[T](using ev: T <:< Tuple =:= false): NotTuple[T] = new NotTuple[T] {}

@@ -497,6 +497,8 @@ lazy val compilerArgs = Def.settings(
         "-explain-types",
         //        "-explain",
         //    "-Xfatal-warnings",
+//        "-Xprint:typer",
+//        "-Ylog:typer",
       )
     case _            => Nil // 2.12 base module for sbt-molecule plugin
   })

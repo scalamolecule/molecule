@@ -29,10 +29,10 @@ case class InsertRefs(
         (2, "b"),
       ))
 
-      _ <- A.i.B.i.insert(1, 2).transact
+      _ <- A.i.B.i.insert((1, 2)).transact
       _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
 
-      _ <- A.i.B.i.C.i.insert(1, 2, 3).transact
+      _ <- A.i.B.i.C.i.insert((1, 2, 3)).transact
       _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
     } yield ()
   }
@@ -40,10 +40,10 @@ case class InsertRefs(
 
   "card many" - refs { implicit conn =>
     for {
-      _ <- A.i.Bb.i.insert(1, 2).transact
+      _ <- A.i.Bb.i.insert((1, 2)).transact
       _ <- A.i.Bb.i.query.get.map(_ ==> List((1, 2)))
 
-      _ <- A.i.Bb.i.Cc.i.insert(1, 2, 3).transact
+      _ <- A.i.Bb.i.Cc.i.insert((1, 2, 3)).transact
       _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
     } yield ()
   }
@@ -51,7 +51,7 @@ case class InsertRefs(
 
   "card one/many" - refs { implicit conn =>
     for {
-      _ <- A.i.B.i.Cc.i.insert(1, 2, 3).transact
+      _ <- A.i.B.i.Cc.i.insert((1, 2, 3)).transact
       _ <- A.i.B.i.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
     } yield ()
   }
@@ -59,7 +59,7 @@ case class InsertRefs(
 
   "card many/one" - refs { implicit conn =>
     for {
-      _ <- A.i.Bb.i.C.i.insert(1, 2, 3).transact
+      _ <- A.i.Bb.i.C.i.insert((1, 2, 3)).transact
       _ <- A.i.Bb.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
     } yield ()
   }
@@ -68,40 +68,40 @@ case class InsertRefs(
   "backref, card one" - refs { implicit conn =>
     for {
       // Can't go back from empty entities
-      _ <- A.i.B._A.s.insert(1, "a").transact
+      _ <- A.i.B._A.s.insert((1, "a")).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Please add attributes to entity B before going back to entity A"
         }
 
-      _ <- A.i.B.i._A.s.insert(1, 2, "a").transact
+      _ <- A.i.B.i._A.s.insert((1, 2, "a")).transact
       _ <- A.i.B.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
 
-      _ <- A.i.B.i._A.s.C.i.insert(1, 2, "a", 3).transact
+      _ <- A.i.B.i._A.s.C.i.insert((1, 2, "a", 3)).transact
       _ <- A.i.B.i._A.s.C.i.query.get.map(_ ==> List((1, 2, "a", 3)))
 
-      _ <- A.i.B.i._A.C.i.insert(1, 2, 3).transact
+      _ <- A.i.B.i._A.C.i.insert((1, 2, 3)).transact
       _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-      _ <- A.i.B.i.C.i._B.s.insert(1, 2, 3, "a").transact
+      _ <- A.i.B.i.C.i._B.s.insert((1, 2, 3, "a")).transact
       _ <- A.i.B.i.C.i._B.s.query.get.map(_ ==> List((1, 2, 3, "a")))
 
-      _ <- A.i.B.i.C.i._B.s.D.i.insert(1, 2, 3, "a", 4).transact
+      _ <- A.i.B.i.C.i._B.s.D.i.insert((1, 2, 3, "a", 4)).transact
       _ <- A.i.B.i.C.i._B.s.D.i.query.get.map(_ ==> List((1, 2, 3, "a", 4)))
 
-      _ <- A.i.B.i.C.i._B.s._A.s.insert(1, 2, 3, "a", "b").transact
+      _ <- A.i.B.i.C.i._B.s._A.s.insert((1, 2, 3, "a", "b")).transact
       _ <- A.i.B.i.C.i._B.s._A.s.query.get.map(_ ==> List((1, 2, 3, "a", "b")))
 
-      _ <- A.i.B.i.C.i._B._A.s.insert(1, 2, 3, "b").transact
+      _ <- A.i.B.i.C.i._B._A.s.insert((1, 2, 3, "b")).transact
       _ <- A.i.B.i.C.i._B._A.s.query.get.map(_ ==> List((1, 2, 3, "b")))
 
-      _ <- A.i.B.i.C.i._B.s._A.s.D.i.insert(1, 2, 3, "a", "b", 4).transact
+      _ <- A.i.B.i.C.i._B.s._A.s.D.i.insert((1, 2, 3, "a", "b", 4)).transact
       _ <- A.i.B.i.C.i._B.s._A.s.D.i.query.get.map(_ ==> List((1, 2, 3, "a", "b", 4)))
 
       // Distinguish separate relationships to same entity
-      _ <- A.i.B.i._A.B1.i.insert(1, 2, 3).transact
+      _ <- A.i.B.i._A.B1.i.insert((1, 2, 3)).transact
       _ <- A.i.B.i._A.B1.i.query.get.map(_ ==> List((1, 2, 3)))
 
-      _ <- A.i.B.i._A.B1.i._A.B2.i.insert(1, 2, 3, 4).transact
+      _ <- A.i.B.i._A.B1.i._A.B2.i.insert((1, 2, 3, 4)).transact
       _ <- A.i.B.i._A.B1.i._A.B2.i.query.get.map(_ ==> List((1, 2, 3, 4)))
     } yield ()
   }
@@ -109,36 +109,36 @@ case class InsertRefs(
 
   "backref, card many" - refs { implicit conn =>
     for {
-      _ <- A.i.Bb.i._A.s.insert(1, 2, "a").transact
+      _ <- A.i.Bb.i._A.s.insert((1, 2, "a")).transact
       _ <- A.i.Bb.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
 
-      _ <- A.i.Bb.i._A.s.insert(1, 2, "a").transact
+      _ <- A.i.Bb.i._A.s.insert((1, 2, "a")).transact
       _ <- A.i.Bb.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
 
-      _ <- A.i.Bb.i._A.s.C.i.insert(1, 2, "a", 3).transact
+      _ <- A.i.Bb.i._A.s.C.i.insert((1, 2, "a", 3)).transact
       _ <- A.i.Bb.i._A.s.C.i.query.get.map(_ ==> List((1, 2, "a", 3)))
 
-      _ <- A.i.Bb.i._A.C.i.insert(1, 2, 3).transact
+      _ <- A.i.Bb.i._A.C.i.insert((1, 2, 3)).transact
       _ <- A.i.Bb.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-      _ <- A.i.Bb.i.Cc.i._B.s.insert(1, 2, 3, "a").transact
+      _ <- A.i.Bb.i.Cc.i._B.s.insert((1, 2, 3, "a")).transact
       _ <- A.i.Bb.i.Cc.i._B.s.query.get.map(_ ==> List((1, 2, 3, "a")))
 
-      _ <- A.i.Bb.i.Cc.i._B.s.D.i.insert(1, 2, 3, "a", 4).transact
+      _ <- A.i.Bb.i.Cc.i._B.s.D.i.insert((1, 2, 3, "a", 4)).transact
       _ <- A.i.Bb.i.Cc.i._B.s.D.i.query.get.map(_ ==> List((1, 2, 3, "a", 4)))
 
-      _ <- A.i.Bb.i.Cc.i._B.s._A.s.insert(1, 2, 3, "a", "b").transact
+      _ <- A.i.Bb.i.Cc.i._B.s._A.s.insert((1, 2, 3, "a", "b")).transact
       _ <- A.i.Bb.i.Cc.i._B.s._A.s.query.get.map(_ ==> List((1, 2, 3, "a", "b")))
 
-      _ <- A.i.Bb.i.Cc.i._B._A.s.insert(1, 2, 3, "b").transact
+      _ <- A.i.Bb.i.Cc.i._B._A.s.insert((1, 2, 3, "b")).transact
       _ <- A.i.Bb.i.Cc.i._B._A.s.query.get.map(_ ==> List((1, 2, 3, "b")))
 
-      _ <- A.i.Bb.i.Cc.i._B.s._A.s.D.i.insert(1, 2, 3, "a", "b", 4).transact
+      _ <- A.i.Bb.i.Cc.i._B.s._A.s.D.i.insert((1, 2, 3, "a", "b", 4)).transact
       _ <- A.i.Bb.i.Cc.i._B.s._A.s.D.i.query.get.map(_ ==> List((1, 2, 3, "a", "b", 4)))
 
       // Distinguish separate relationships to same entity
       // card-many B and card-one B should be distinguished from each other
-      _ <- A.i.Bb.i._A.s.B.s.insert(1, 2, "a", "b").transact
+      _ <- A.i.Bb.i._A.s.B.s.insert((1, 2, "a", "b")).transact
       _ <- A.i.Bb.i._A.s.B.s.query.get.map(_ ==> List((1, 2, "a", "b")))
 
       _ <- A.i.s.B.i.s.Cc.i._B.C.i.s._B._A.Bb.i.insert(
@@ -156,16 +156,16 @@ case class InsertRefs(
 
   "self-join, one" - refs { implicit conn =>
     for {
-      _ <- A.i.A.i.insert(1, 2).transact
+      _ <- A.i.A.i.insert((1, 2)).transact
       _ <- A.i.A.i.query.get.map(_ ==> List((1, 2)))
 
-      _ <- A.i.A.i.B.i.insert(1, 2, 3).transact
+      _ <- A.i.A.i.B.i.insert((1, 2, 3)).transact
       _ <- A.i.A.i.B.i.query.get.map(_ ==> List((1, 2, 3)))
 
-      _ <- A.i.B.i.A.i.insert(1, 2, 3).transact
+      _ <- A.i.B.i.A.i.insert((1, 2, 3)).transact
       _ <- A.i.B.i.A.i.query.get.map(_ ==> List((1, 2, 3)))
 
-      _ <- A.i.B.i.B.i.insert(1, 2, 3).transact
+      _ <- A.i.B.i.B.i.insert((1, 2, 3)).transact
       _ <- A.i.B.i.B.i.query.get.map(_ ==> List((1, 2, 3)))
     } yield ()
   }
@@ -173,16 +173,16 @@ case class InsertRefs(
 
   "self-join, many" - refs { implicit conn =>
     for {
-      _ <- A.i.Aa.i.insert(1, 2).transact
+      _ <- A.i.Aa.i.insert((1, 2)).transact
       _ <- A.i.Aa.i.query.get.map(_ ==> List((1, 2)))
 
-      _ <- A.i.Aa.i.Bb.i.insert(1, 2, 3).transact
+      _ <- A.i.Aa.i.Bb.i.insert((1, 2, 3)).transact
       _ <- A.i.Aa.i.Bb.i.query.get.map(_ ==> List((1, 2, 3)))
 
-      _ <- A.i.Bb.i.Aa.i.insert(1, 2, 3).transact
+      _ <- A.i.Bb.i.Aa.i.insert((1, 2, 3)).transact
       _ <- A.i.Bb.i.Aa.i.query.get.map(_ ==> List((1, 2, 3)))
 
-      _ <- A.i.Bb.i.Bb.i.insert(1, 2, 3).transact
+      _ <- A.i.Bb.i.Bb.i.insert((1, 2, 3)).transact
       _ <- A.i.Bb.i.Bb.i.query.get.map(_ ==> List((1, 2, 3)))
     } yield ()
   }
