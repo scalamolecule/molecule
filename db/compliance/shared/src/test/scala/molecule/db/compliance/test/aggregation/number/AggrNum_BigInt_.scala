@@ -34,7 +34,7 @@ case class AggrNum_BigInt_(
         _.head ==~ bigInt1 + bigInt2 + bigInt2 + bigInt3 + bigInt4
       )
 
-      _ <- Entity.i.bigInt(sum).query.get.map(_.map {
+      _ <- Entity.i.bigInt(sum).query.get.map(_.collect {
         case (1, sum) => sum ==~ bigInt1 + bigInt2
         case (2, sum) => sum ==~ bigInt2 + bigInt3 + bigInt4
       })
@@ -61,7 +61,7 @@ case class AggrNum_BigInt_(
           //       ^
           _ <- Entity.bigInt(median).query.get.map(_.head ==~ bigInt2.toString.toDouble) // middle number
 
-          _ <- Entity.i.bigInt(median).query.get.map(_.map {
+          _ <- Entity.i.bigInt(median).query.get.map(_.collect {
             case (1, median) => median ==~ bigInt1.toDouble.floor // lower whole number
             case (2, median) => median ==~ bigInt5.toString.toDouble // middle number
           })
@@ -79,7 +79,7 @@ case class AggrNum_BigInt_(
 
           _ <- Entity.bigInt(median).query.get.map(_.head ==~ bigInt2.toString.toDouble) // middle number
 
-          _ <- Entity.i.bigInt(median).query.get.map(_.map {
+          _ <- Entity.i.bigInt(median).query.get.map(_.collect {
             case (1, median) => median ==~ (bigInt1 + bigInt2).toDouble / 2.0 // average of 2 middle numbers
             case (2, median) => median ==~ bigInt5.toString.toDouble // middle number
           })
@@ -104,7 +104,7 @@ case class AggrNum_BigInt_(
         _.head ==~ (bigInt1 + bigInt2 + bigInt2 + bigInt3 + bigInt4).toDouble / 5.0
       )
 
-      _ <- Entity.i.bigInt(avg).query.get.map(_.map {
+      _ <- Entity.i.bigInt(avg).query.get.map(_.collect {
         case (1, avg) => avg ==~ (bigInt1 + bigInt2).toDouble / 2.0
         case (2, avg) => avg ==~ (bigInt2 + bigInt3 + bigInt4).toDouble / 3.0
       })
@@ -128,7 +128,7 @@ case class AggrNum_BigInt_(
         _.head ==~ varianceOf(bigInt1, bigInt2, bigInt2, bigInt3, bigInt4)
       )
 
-      _ <- Entity.i.bigInt(variance).query.get.map(_.map {
+      _ <- Entity.i.bigInt(variance).query.get.map(_.collect {
         case (1, variance) => variance ==~ varianceOf(bigInt1, bigInt2)
         case (2, variance) => variance ==~ varianceOf(bigInt2, bigInt3, bigInt4)
       })
@@ -152,7 +152,7 @@ case class AggrNum_BigInt_(
         _.head ==~ stdDevOf(bigInt1, bigInt2, bigInt2, bigInt3, bigInt4)
       )
 
-      _ <- Entity.i.bigInt(stddev).query.get.map(_.map {
+      _ <- Entity.i.bigInt(stddev).query.get.map(_.collect {
         case (1, stddev) => stddev ==~ stdDevOf(bigInt1, bigInt2)
         case (2, stddev) => stddev ==~ stdDevOf(bigInt2, bigInt3, bigInt4)
       })

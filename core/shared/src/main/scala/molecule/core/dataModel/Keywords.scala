@@ -342,7 +342,7 @@ trait KeywordsStable {
 
 object Keywords extends KeywordsStable
 
-
+object Keywords_direct extends Keywords
 trait Keywords {
   // Common for all types
   object distinct extends Keywords.distinct {

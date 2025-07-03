@@ -18,20 +18,20 @@ trait Spi_datomic_io
   override def query_get[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn): IO[List[Tpl]] = {
-    IO(Spi_datomic_sync.query_get(q)(conn))
+    IO(Spi_datomic_sync.query_get(q)(using conn))
   }
 
   override def query_inspect[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn): IO[String] = {
-    IO(Spi_datomic_sync.query_inspect(q)(conn))
+    IO(Spi_datomic_sync.query_inspect(q)(using conn))
   }
 
 
   override def queryOffset_get[Tpl](
     q: QueryOffset[Tpl]
   )(implicit conn: Conn): IO[(List[Tpl], Int, Boolean)] = {
-    IO(Spi_datomic_sync.queryOffset_get(q)(conn))
+    IO(Spi_datomic_sync.queryOffset_get(q)(using conn))
   }
 
   override def queryOffset_inspect[Tpl](
@@ -44,7 +44,7 @@ trait Spi_datomic_io
   override def queryCursor_get[Tpl](
     q: QueryCursor[Tpl]
   )(implicit conn: Conn): IO[(List[Tpl], String, Boolean)] = {
-    IO(Spi_datomic_sync.queryCursor_get(q)(conn))
+    IO(Spi_datomic_sync.queryCursor_get(q)(using conn))
   }
 
   override def queryCursor_inspect[Tpl](
@@ -59,7 +59,7 @@ trait Spi_datomic_io
   )(implicit conn0: Conn): fs2.Stream[IO, Tpl] = {
     fs2streamDatomic(
       q, chunkSize,
-      (q: Query[Tpl], conn: Conn) => Spi_datomic_sync.query_inspect[Tpl](q)(conn),
+      (q: Query[Tpl], conn: Conn) => Spi_datomic_sync.query_inspect[Tpl](q)(using conn),
       Spi_datomic_sync.getJavaStreamAndRowResolver[Tpl]
     )
   }
@@ -68,13 +68,13 @@ trait Spi_datomic_io
   override def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit
   )(implicit conn: Conn): IO[Unit] = {
-    IO(Spi_datomic_sync.query_subscribe(q, callback)(conn))
+    IO(Spi_datomic_sync.query_subscribe(q, callback)(using conn))
   }
 
   override def query_unsubscribe[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn): IO[Unit] = {
-    IO(Spi_datomic_sync.query_unsubscribe(q)(conn))
+    IO(Spi_datomic_sync.query_unsubscribe(q)(using conn))
   }
 
 
@@ -83,12 +83,12 @@ trait Spi_datomic_io
   override def save_transact(save: Save)(implicit conn: Conn): IO[TxReport] = {
     IO.fromFuture {
       IO.blocking {
-        Spi_datomic_sync.save_validate(save)(conn) match {
+        Spi_datomic_sync.save_validate(save)(using conn) match {
           case errors if errors.isEmpty =>
             val cleanElements  = keywordsSuffixed(save.dataModel.elements, conn.proxy)
             val cleanDataModel = save.dataModel.copy(elements = cleanElements)
             val saveClean      = save.copy(dataModel = cleanDataModel)
-            Spi_datomic_async.save_transact(saveClean)(conn, ec)
+            Spi_datomic_async.save_transact(saveClean)(using conn, ec)
           case errors                   => throw ValidationErrors(errors)
         }
       }
@@ -96,11 +96,11 @@ trait Spi_datomic_io
   }
 
   override def save_inspect(save: Save)(implicit conn: Conn): IO[String] = {
-    IO(Spi_datomic_sync.save_inspect(save)(conn))
+    IO(Spi_datomic_sync.save_inspect(save)(using conn))
   }
 
   override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = {
-    IO(Spi_datomic_sync.save_validate(save)(conn))
+    IO(Spi_datomic_sync.save_validate(save)(using conn))
   }
 
 
@@ -109,12 +109,12 @@ trait Spi_datomic_io
   override def insert_transact(insert: Insert)(implicit conn: Conn): IO[TxReport] = {
     IO.fromFuture {
       IO.blocking {
-        Spi_datomic_sync.insert_validate(insert)(conn) match {
+        Spi_datomic_sync.insert_validate(insert)(using conn) match {
           case errors if errors.isEmpty =>
             val cleanElements  = keywordsSuffixed(insert.dataModel.elements, conn.proxy)
             val cleanDataModel = insert.dataModel.copy(elements = cleanElements)
             val insertClean    = insert.copy(dataModel = cleanDataModel)
-            Spi_datomic_async.insert_transact(insertClean)(conn, ec)
+            Spi_datomic_async.insert_transact(insertClean)(using conn, ec)
           case errors                   => throw InsertErrors(errors)
         }
       }
@@ -122,11 +122,11 @@ trait Spi_datomic_io
   }
 
   override def insert_inspect(insert: Insert)(implicit conn: Conn): IO[String] = {
-    IO(Spi_datomic_sync.insert_inspect(insert)(conn))
+    IO(Spi_datomic_sync.insert_inspect(insert)(using conn))
   }
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): IO[Seq[(Int, Seq[InsertError])]] = {
-    IO(Spi_datomic_sync.insert_validate(insert)(conn))
+    IO(Spi_datomic_sync.insert_validate(insert)(using conn))
   }
 
 
@@ -135,12 +135,12 @@ trait Spi_datomic_io
   override def update_transact(update: Update)(implicit conn: Conn): IO[TxReport] = {
     IO.fromFuture {
       IO.blocking {
-        Spi_datomic_sync.update_validate(update)(conn) match {
+        Spi_datomic_sync.update_validate(update)(using conn) match {
           case errors if errors.isEmpty =>
             val cleanElements  = keywordsSuffixed(update.dataModel.elements, conn.proxy)
             val cleanDataModel = update.dataModel.copy(elements = cleanElements)
             val updateClean    = update.copy(dataModel = cleanDataModel)
-            Spi_datomic_async.update_transact(updateClean)(conn, ec)
+            Spi_datomic_async.update_transact(updateClean)(using conn, ec)
           case errors                   => throw ValidationErrors(errors)
         }
       }
@@ -148,11 +148,11 @@ trait Spi_datomic_io
   }
 
   override def update_inspect(update: Update)(implicit conn: Conn): IO[String] = {
-    IO(Spi_datomic_sync.update_inspect(update)(conn))
+    IO(Spi_datomic_sync.update_inspect(update)(using conn))
   }
 
   override def update_validate(update: Update)(implicit conn: Conn): IO[Map[String, Seq[String]]] = {
-    IO(Spi_datomic_sync.update_validate(update)(conn))
+    IO(Spi_datomic_sync.update_validate(update)(using conn))
   }
 
 
@@ -164,13 +164,13 @@ trait Spi_datomic_io
         val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
         val cleanDataModel = delete.dataModel.copy(elements = cleanElements)
         val deleteClean    = delete.copy(dataModel = cleanDataModel)
-        Spi_datomic_async.delete_transact(deleteClean)(conn, ec)
+        Spi_datomic_async.delete_transact(deleteClean)(using conn, ec)
       }
     }
   }
 
   override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[String] = {
-    IO(Spi_datomic_sync.delete_inspect(delete)(conn))
+    IO(Spi_datomic_sync.delete_inspect(delete)(using conn))
   }
 
 
@@ -180,7 +180,7 @@ trait Spi_datomic_io
     query: String,
     debug: Boolean = false,
   )(implicit conn: Conn): IO[List[List[Any]]] = {
-    IO(Spi_datomic_sync.fallback_rawQuery(query, debug)(conn))
+    IO(Spi_datomic_sync.fallback_rawQuery(query, debug)(using conn))
   }
 
   override def fallback_rawTransact(

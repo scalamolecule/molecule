@@ -20,14 +20,22 @@ object _CastBranch extends DbSqlBase("CastBranch", "/query/casting") {
        |    firstIndex: ParamIndex
        |  ): (RS, Nested) => Any = {
        |    casts.length match {
-       |      case 0  => cast0
+       |      case 0  => (_, nested: Nested) => nested
        |      $caseX
+       |      case n  =>
+       |        val i0 = firstIndex + n
+       |        val j0 = n - 1
+       |        (row: RS, nested: Nested) =>
+       |          var i          = i0
+       |          var j          = j0
+       |          var tpl: Tuple = Tuple1(nested) // adding nested tuples last
+       |          while (j >= 0) {
+       |            i -= 1
+       |            tpl = casts(j)(row, i) *: tpl
+       |            j -= 1
+       |          }
+       |          tpl
        |    }
-       |  }
-       |
-       |  final private def cast0: (RS, Nested) => Any = {
-       |    (_: RS, nested: Nested) =>
-       |      nested
        |  }
        |
        |  final private def cast1(
@@ -35,12 +43,11 @@ object _CastBranch extends DbSqlBase("CastBranch", "/query/casting") {
        |    firstIndex: ParamIndex
        |  ): (RS, Nested) => Any = {
        |    val c1 = casts.head
-       |    (row: RS, nested: Nested) => {
+       |    (row: RS, nested: Nested) =>
        |      (
        |        c1(row, firstIndex),
        |        nested
        |      )
-       |    }
        |  }
        |$resolveMethods
        |}""".stripMargin

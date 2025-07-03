@@ -30,7 +30,7 @@ case class Delete_filter(
   "Filter by multiple non-ns value" - refs { implicit conn =>
     import molecule.db.compliance.domains.dsl.Refs.*
     for {
-      List(e1, e2, e3) <- A.i.insert(1, 2, 2).transact.map(_.ids)
+      case List(e1, e2, e3) <- A.i.insert(1, 2, 2).transact.map(_.ids)
       _ <- A.id.a1.i.query.get.map(_ ==> List(
         (e1, 1),
         (e2, 2),
@@ -378,28 +378,19 @@ case class Delete_filter(
     } yield ()
   }
 
-
-  "Only tacit attributes" - refs { implicit conn =>
+  "Only tacit card-one attributes" - refs { implicit conn =>
     for {
-      _ <- A.i.<=(int1).delete.transact
-        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can only filter delete by values applied to tacit card-one attributes (A.i)."
-        }
-
-      _ <- A.iSet(Set(int1)).delete.transact
+      _ <- A.iSet_(Set(int1)).delete.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can only filter delete by values applied to tacit card-one attributes (A.iSet)."
         }
 
-      _ <- A.iSeq(List(int1)).delete.transact
+      _ <- A.iSeq_(List(int1)).delete.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can only filter delete by values applied to tacit card-one attributes (A.iSeq)."
         }
 
-      _ <- A.iMap(Map(pint1)).delete.transact
-        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can only filter delete by values applied to tacit card-one attributes (A.iMap)."
-        }
+      _ = compileErrors("A.iMap_(Map(pint1))")
     } yield ()
   }
 }

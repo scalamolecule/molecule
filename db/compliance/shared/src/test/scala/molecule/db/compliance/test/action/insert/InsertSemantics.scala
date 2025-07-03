@@ -60,7 +60,7 @@ case class InsertSemantics(
 
   "Empty Sets: Optional with other attribute" - refs { implicit conn =>
     for {
-      List(a, b, c, d) <- A.i.iSet_?.insert(
+      case List(a, b, c, d) <- A.i.iSet_?.insert(
         (1, None),
         (1, Some(Set(2))),
         (1, Some(Set(3))),

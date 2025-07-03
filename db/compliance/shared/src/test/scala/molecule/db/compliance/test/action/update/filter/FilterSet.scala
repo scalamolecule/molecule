@@ -23,7 +23,7 @@ case class FilterSet(
 
   "Set asserted" - types { implicit conn =>
     for {
-      List(a, b, c) <- Entity.iSet_?.int.insert(
+      case List(a, b, c) <- Entity.iSet_?.int.insert(
         (None, 0),
         (Some(Set(1, 2)), 1),
         (Some(Set(2, 3)), 2),
@@ -55,7 +55,7 @@ case class FilterSet(
 
   "Set not asserted" - types { implicit conn =>
     for {
-      List(a, b, c) <- Entity.iSet_?.int.insert(
+      case List(a, b, c) <- Entity.iSet_?.int.insert(
         (None, 0),
         (Some(Set(1, 2)), 1),
         (Some(Set(2, 3)), 2),
@@ -88,7 +88,7 @@ case class FilterSet(
 
   "Has value" - types { implicit conn =>
     for {
-      List(a, b) <- Entity.iSet.int.insert(
+      case List(a, b) <- Entity.iSet.int.insert(
         (Set(0, 1, 2), 1),
         (Set(2, 3, 4), 2),
       ).transact.map(_.ids)
@@ -121,7 +121,7 @@ case class FilterSet(
 
   "Doesn't have value" - types { implicit conn =>
     for {
-      List(a, b) <- Entity.iSet.int.insert(
+      case List(a, b) <- Entity.iSet.int.insert(
         (Set(1, 2), 1),
         (Set(2, 3), 2),
       ).transact.map(_.ids)

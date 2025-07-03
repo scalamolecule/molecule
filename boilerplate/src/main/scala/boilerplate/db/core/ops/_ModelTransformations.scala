@@ -56,7 +56,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    )
        |  }
        |
-       |  protected def toInt(dataModel: DataModel, kw: Kw): DataModel = {
+       |  def toInt(dataModel: DataModel, kw: Kw): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneMan => AttrOneManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
@@ -78,7 +78,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def toDouble(dataModel: DataModel, kw: Kw): DataModel = {
+       |  def toDouble(dataModel: DataModel, kw: Kw): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneMan => AttrOneManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
@@ -90,7 +90,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def asIs(dataModel: DataModel, kw: Kw, n: Option[Int] = None): DataModel = {
+       |  def asIs(dataModel: DataModel, kw: Kw, n: Option[Int] = None): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneMan => a match {
@@ -110,7 +110,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean = false): DataModel = {
+       |  def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean = false): DataModel = {
        |    val es    = dataModel.elements
        |    val last  = es.last match {
        |      case a: AttrOneMan => a match {
@@ -125,7 +125,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last, binds = binds)
        |  }
        |
-       |  protected def addOneOpt[T](dataModel: DataModel, op: Op, v: Option[T]): DataModel = {
+       |  def addOneOpt[T](dataModel: DataModel, op: Op, v: Option[T]): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneOpt => a match {
@@ -136,7 +136,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSet[T](dataModel: DataModel, op: Op, vs: Set[T]): DataModel = {
+       |  def addSet[T](dataModel: DataModel, op: Op, vs: Set[T]): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrSetMan => a match {
@@ -150,7 +150,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSetOpt[T](dataModel: DataModel, op: Op, vs: Option[Set[T]]): DataModel = {
+       |  def addSetOpt[T](dataModel: DataModel, op: Op, vs: Option[Set[T]]): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrSetOpt => a match {
@@ -161,7 +161,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSeq[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+       |  def addSeq[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrSeqMan => a match {
@@ -179,7 +179,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSeqOpt[T](dataModel: DataModel, op: Op, vs: Option[Seq[T]]): DataModel = {
+       |  def addSeqOpt[T](dataModel: DataModel, op: Op, vs: Option[Seq[T]]): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrSeqOpt => a match {
@@ -192,7 +192,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addBAr[T](dataModel: DataModel, op: Op, ba: Array[T]): DataModel = {
+       |  def addBAr[T](dataModel: DataModel, op: Op, ba: Array[T]): DataModel = {
        |    val es          = dataModel.elements
        |    val newElements = es.init :+ (es.last match {
        |      case a: AttrSeqManByte => a.copy(op = op, vs = ba.asInstanceOf[Array[Byte]])
@@ -202,7 +202,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = newElements)
        |  }
        |
-       |  protected def addBArOpt[T](dataModel: DataModel, op: Op, optBA: Option[Array[T]]): DataModel = {
+       |  def addBArOpt[T](dataModel: DataModel, op: Op, optBA: Option[Array[T]]): DataModel = {
        |    val es          = dataModel.elements
        |    val newElements = es.init :+ (es.last match {
        |      case a: AttrSeqOptByte => a.copy(op = op, vs = optBA.asInstanceOf[Option[Array[Byte]]])
@@ -211,7 +211,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = newElements)
        |  }
        |
-       |  protected def addMap[T](dataModel: DataModel, op: Op, vs: Map[String, T]): DataModel = {
+       |  def addMap[T](dataModel: DataModel, op: Op, vs: Map[String, T]): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrMapMan => a match {
@@ -225,7 +225,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addMapKs(dataModel: DataModel, op: Op, ks: Seq[String]): DataModel = {
+       |  def addMapKs(dataModel: DataModel, op: Op, ks: Seq[String]): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrMapMan => a match {
@@ -242,7 +242,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addMapVs[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
+       |  def addMapVs[T](dataModel: DataModel, op: Op, vs: Seq[T]): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrMapMan => a match {
@@ -256,7 +256,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addMapOpt[T](dataModel: DataModel, op: Op, vs: Option[Map[String, T]]): DataModel = {
+       |  def addMapOpt[T](dataModel: DataModel, op: Op, vs: Option[Map[String, T]]): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrMapOpt => a match {
@@ -267,7 +267,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  protected def addSort(dataModel: DataModel, sort: String): DataModel = {
+       |  def addSort(dataModel: DataModel, sort: String): DataModel = {
        |    val es             = dataModel.elements
        |    val sortedElements = es.size match {
        |      case 1 =>
@@ -333,7 +333,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    }
        |  }
        |
-       |  protected def filterAttr(dataModel: DataModel, op: Op, filterAttrMolecule: Molecule): DataModel = {
+       |  def filterAttr(dataModel: DataModel, op: Op, filterAttrMolecule: Molecule): DataModel = {
        |    val es          = dataModel.elements
        |    val filterAttr0 = filterAttrMolecule.dataModel.elements.last.asInstanceOf[Attr]
        |    val attrs       = es.last match {
@@ -413,7 +413,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    dataModel.copy(elements = es.init ++ attrs)
        |  }
        |
-       |  protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
+       |  def reverseTopLevelSorting(es: List[Element]): List[Element] = {
        |    es.map {
        |      case attr: AttrOneMan => attr match {
        |        ${reverseTopLevelSorting("Man")}
@@ -432,7 +432,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |    case 'd' => "a" + sort.last
        |  }
        |
-       |  protected def topLevelAttrCount(elements: List[Element], count: Int = 0): Int = {
+       |  def topLevelAttrCount(elements: List[Element], count: Int = 0): Int = {
        |    elements match {
        |      case Nil       => count
        |      case e :: tail => e match {

@@ -1,19 +1,15 @@
 package molecule.db.core.api.expression
 
+import molecule.base.metaModel.CardSeq
 import molecule.core.dataModel.*
+import molecule.db.core.api.Molecule
+import molecule.db.core.ops.ModelTransformations_.*
 
 
-trait ExprSeqOptOps[Tpl <: Tuple, T, This[_ <: Tuple, _], Next[_ <: Tuple, _]]
-  extends FilterAttr[Tpl, T, This, Next] {
-  protected def _exprSeqOpt(op: Op, optSeq: Option[Seq[T]]): This[Tpl, T] = ???
+trait ExprSeqOpt[T, Entity](entity: DataModel => Entity) extends CardSeq { self: Molecule =>
+  def apply(optSeq: Option[Seq[T]]) = entity(addSeqOpt(dataModel, Eq, optSeq))
 }
 
-trait ExprSeqOpt[Tpl <: Tuple, T, This[_ <: Tuple, _], Next[_ <: Tuple, _]]
-  extends ExprSeqOptOps[Tpl, T, This, Next]{
-  def apply(optSeq: Option[Seq[T]]): This[Tpl, T] = _exprSeqOpt(Eq, optSeq)
-}
-
-trait ExprSeqOpt_Enum[Tpl <: Tuple, T, This[_ <: Tuple, _], Next[_ <: Tuple, _]]
-  extends ExprSeqOptOps[Tpl, T, This, Next]{
-  def apply(optSeq: Option[Seq[T]]) = _exprSeqOpt(Eq, optSeq.map(_.map(_.toString.asInstanceOf[T])))
+trait ExprSeqOpt_Enum[T, Entity](entity: DataModel => Entity) { self: Molecule =>
+  def apply(optSeq: Option[Seq[T]]) = entity(addSeqOpt(dataModel, Eq, optSeq.map(_.map(_.toString.asInstanceOf[T]))))
 }

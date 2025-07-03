@@ -72,7 +72,7 @@ case class SaveCardSet(
       _ <- Entity.shortSet.query.get.map(_.head ==> Set(short1, short2))
       _ <- Entity.charSet.query.get.map(_.head ==> Set(char1, char2))
 
-      List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+      case List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
       _ <- Entity.refs(Set(r1, r2)).save.transact
       _ <- Entity.refs.query.get.map(_.head ==> Set(r1, r2))
     } yield ()
@@ -177,7 +177,7 @@ case class SaveCardSet(
       _ <- Entity.int_(21).i.a1.shortSet_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(short1, short2)))))
       _ <- Entity.int_(22).i.a1.charSet_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(char1, char2)))))
 
-      List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+      case List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(23).i(1).refs_?(Option.empty[Set[Long]]).save.transact
       _ <- Entity.int(23).i(2).refs_?(Some(Set.empty[Long])).save.transact
       _ <- Entity.int(23).i(3).refs_?(Some(Set(r1, r2))).save.transact
@@ -235,7 +235,7 @@ case class SaveCardSet(
       _ <- Entity.i.shortSet_.query.get.map(_.head ==> 21)
       _ <- Entity.i.charSet_.query.get.map(_.head ==> 22)
 
-      List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+      case List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
       _ <- Entity.i(23).refs_(Set(r1, r2)).save.transact
       _ <- Entity.i.refs_.query.get.map(_.head ==> 23)
     } yield ()

@@ -52,7 +52,7 @@ class Adhoc_datomic_jvm_async extends MUnit with DbProviders_datomic with TestUt
   //    "validation" - validation { implicit conn =>
   //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
-  //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
+  //        case List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
   //
   //        id <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.ids)
   //

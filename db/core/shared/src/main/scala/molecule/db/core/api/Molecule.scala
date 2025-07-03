@@ -3,6 +3,7 @@ package molecule.db.core.api
 import molecule.base.error.ModelError
 import molecule.core.dataModel.DataModel
 import molecule.db.core.action.*
+import scala.annotation.compileTimeOnly
 
 trait Molecule {
   val dataModel: DataModel
@@ -14,7 +15,23 @@ trait Molecule {
 }
 
 trait Molecule_0 extends Molecule {
-  def delete = Delete(dataModel)
+  def delete: Delete = {
+    noBinding("Delete")
+    Delete(dataModel)
+  }
+
+  // Avoid stack overflow from overload resolution
+  @compileTimeOnly("Save by applying data to mandatory attributes only.")
+  def save: Save = ???
+
+  @compileTimeOnly("Insert by applying data to mandatory attributes only.")
+  def insert: Insert = ???
+
+  @compileTimeOnly("Update by applying data to mandatory attributes only.")
+  def update: Update = ???
+
+  @compileTimeOnly("Upsert by applying data to mandatory attributes only.")
+  def upsert: Update = ???
 }
 
 trait NonEmptyMolecule[Tpl <: Tuple] extends Molecule {
@@ -33,10 +50,9 @@ trait NonEmptyMolecule[Tpl <: Tuple] extends Molecule {
     Update(dataModel, true)
   }
 
-  def delete: Delete = {
-    noBinding("Delete")
-    Delete(dataModel)
-  }
+  // Avoid stack overflow from overload resolution
+  @compileTimeOnly("Mandatory attributes not allowed in delete molecules.")
+  def delete: Delete = ???
 }
 
 
@@ -49,9 +65,9 @@ trait Molecule_1[T] extends NonEmptyMolecule[Tuple1[T]] {
 }
 
 trait Molecule_n[Tpl <: Tuple] extends NonEmptyMolecule[Tpl] {
-  def insert: Insert_n[Reverse[Tpl]] = {
+  def insert: Insert_n[Tpl] = {
     noBinding("Insert")
-    Insert_n[Reverse[Tpl]](dataModel)
+    Insert_n[Tpl](dataModel)
   }
-  def query: Query[Reverse[Tpl]] = Query[Reverse[Tpl]](dataModel)
+  def query: Query[Tpl] = Query[Tpl](dataModel)
 }

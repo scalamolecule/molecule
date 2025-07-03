@@ -23,7 +23,7 @@ case class FilterSeq(
 
   "Seq asserted" - types { implicit conn =>
     for {
-      List(a, b, c) <- Entity.iSeq_?.int.insert(
+      case List(a, b, c) <- Entity.iSeq_?.int.insert(
         (None, 0),
         (Some(List(1, 2)), 1),
         (Some(List(2, 3)), 2),
@@ -55,7 +55,7 @@ case class FilterSeq(
 
   "Seq not asserted" - types { implicit conn =>
     for {
-      List(a, b, c) <- Entity.iSeq_?.int.insert(
+      case List(a, b, c) <- Entity.iSeq_?.int.insert(
         (None, 0),
         (Some(List(1, 2)), 1),
         (Some(List(2, 3)), 2),
@@ -88,7 +88,7 @@ case class FilterSeq(
 
   "Has value" - types { implicit conn =>
     for {
-      List(a, b) <- Entity.iSeq.int.insert(
+      case List(a, b) <- Entity.iSeq.int.insert(
         (List(0, 1, 2), 1),
         (List(2, 3, 4), 2),
       ).transact.map(_.ids)

@@ -12,7 +12,7 @@ class Adhoc_h2_js_async extends MUnit with DbProviders_h2 with TestUtils {
 
   //  "types" - types { implicit conn =>
   //    for {
-  //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+  //      case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
   //      _ <- Entity.int(3).save.transact
   //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
   //      _ <- Entity(a).int(10).update.transact

@@ -97,11 +97,11 @@ class RawQuery extends MUnit with DbProviders_h2 with TestUtils {
 
       // Set's are saved as JDBC Arrays in H2
       _ <- rawQuery(q("stringSet")).map(_.head.head
-        .asInstanceOf[JdbcArray].getArray.asInstanceOf[Array[_]].toSet ==> Set(string1, string2)
+        .asInstanceOf[JdbcArray].getArray.asInstanceOf[Array[?]].toSet ==> Set(string1, string2)
       )
 
       _ <- rawQuery(q("intSet")).map(_.head.head
-        .asInstanceOf[JdbcArray].getArray.asInstanceOf[Array[_]].toSet ==> Set(int1, int2)
+        .asInstanceOf[JdbcArray].getArray.asInstanceOf[Array[?]].toSet ==> Set(int1, int2)
       )
     } yield ()
   }
@@ -115,11 +115,11 @@ class RawQuery extends MUnit with DbProviders_h2 with TestUtils {
 
       // Set's are saved as JDBC Arrays in H2
       _ <- rawQuery(q("stringSet")).map(_.head.head
-        .asInstanceOf[JdbcArray].getArray.asInstanceOf[Array[_]].toSeq ==> Seq(string1, string2)
+        .asInstanceOf[JdbcArray].getArray.asInstanceOf[Array[?]].toSeq ==> Seq(string1, string2)
       )
 
       _ <- rawQuery(q("intSet")).map(_.head.head
-        .asInstanceOf[JdbcArray].getArray.asInstanceOf[Array[_]].toSeq ==> Seq(int1, int2)
+        .asInstanceOf[JdbcArray].getArray.asInstanceOf[Array[?]].toSeq ==> Seq(int1, int2)
       )
       // etc..
     } yield ()

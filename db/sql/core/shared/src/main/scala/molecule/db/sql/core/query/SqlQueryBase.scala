@@ -110,6 +110,26 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
     path = path.dropRight(2)
   }
 
+
+  protected def hasEmptyValue(row: RS, i: Int, v: Any): Boolean = {
+    v != None && (row.getObject(i) match {
+      case null                          => true
+      case set: Set[_] if set.isEmpty    => true
+      case seq: Seq[_] if seq.isEmpty    => true
+      case map: Map[_, _] if map.isEmpty => true
+
+      case sqlArray: java.sql.Array
+        if sqlArray.getArray.asInstanceOf[Array[?]].head == null =>
+        true
+
+      case "[null]" => true // json array with empty Seq
+
+      case x =>
+        //          println(s"-------- $x  " + x.getClass.getSimpleName)
+        false
+    })
+  }
+
   protected def hasEmpty(row: RS, firstIndex: Int, vs: List[Any]): Boolean = {
     var i = firstIndex - 1
     vs.exists { v =>

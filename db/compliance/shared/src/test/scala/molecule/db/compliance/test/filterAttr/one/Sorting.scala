@@ -16,7 +16,7 @@ case class Sorting(
   import api.*
   import suite.*
 
-  "Adjacent" - types { implicit conn =>
+  "Same entity" - types { implicit conn =>
     for {
       _ <- Entity.i.int.insert(
         (2, 3),
@@ -25,52 +25,27 @@ case class Sorting(
         (7, 3)
       ).transact
 
-      // Sort by Entity.i ASC, then Entity.int ASC
-      // Sort marker for Entity.i is still primary even though it "comes after"
-      // the expression having the secondary sort marker
-      //           ------------------
-      //          |                  |
-      _ <- Entity.i.<(Entity.int.a2).a1.query.get.map(_ ==> List((1, 3), (1, 4), (2, 3)))
-      //                         |   |
-      //                          ---
-      // Secondary sort marker for Entity.int (even though it "comes before" the primary sort marker)
+      _ <- Entity.i.<(Entity.int_).a1.int.a2.query.get.map(_ ==> List((1, 3), (1, 4), (2, 3)))
+      _ <- Entity.i.<(Entity.int_).a1.int.d2.query.get.map(_ ==> List((1, 4), (1, 3), (2, 3)))
+      _ <- Entity.i.<(Entity.int_).d1.int.a2.query.get.map(_ ==> List((2, 3), (1, 3), (1, 4)))
+      _ <- Entity.i.<(Entity.int_).d1.int.d2.query.get.map(_ ==> List((2, 3), (1, 4), (1, 3)))
 
-      _ <- Entity.i.<(Entity.int.d2).a1.query.get.map(_ ==> List(
-        (1, 4),
-        (1, 3),
-        (2, 3),
-      ))
-      _ <- Entity.i.<(Entity.int.a2).d1.query.get.map(_ ==> List(
-        (2, 3),
-        (1, 3),
-        (1, 4),
-      ))
-      _ <- Entity.i.<(Entity.int.d2).d1.query.get.map(_ ==> List(
-        (2, 3),
-        (1, 4),
-        (1, 3),
-      ))
+      _ <- Entity.i.<(Entity.int_).a2.int.a1.query.get.map(_ ==> List((1, 3), (2, 3), (1, 4)))
+      _ <- Entity.i.<(Entity.int_).a2.int.d1.query.get.map(_ ==> List((1, 4), (1, 3), (2, 3)))
+      _ <- Entity.i.<(Entity.int_).d2.int.a1.query.get.map(_ ==> List((2, 3), (1, 3), (1, 4)))
+      _ <- Entity.i.<(Entity.int_).d2.int.d1.query.get.map(_ ==> List((1, 4), (2, 3), (1, 3)))
 
-      _ <- Entity.i.<(Entity.int.a1).a2.query.get.map(_ ==> List(
-        (1, 3),
-        (2, 3),
-        (1, 4),
-      ))
-      _ <- Entity.i.<(Entity.int.d1).a2.query.get.map(_ ==> List(
-        (1, 4),
-        (1, 3),
-        (2, 3),
-      ))
-      _ <- Entity.i.<(Entity.int.a1).d2.query.get.map(_ ==> List(
-        (2, 3),
-        (1, 3),
-        (1, 4),
-      ))
-      _ <- Entity.i.<(Entity.int.d1).d2.query.get.map(_ ==> List(
-        (1, 4),
-        (2, 3),
-        (1, 3),
-      ))
+      // Same as
+
+      _ <- Entity.i.a1.int.>(Entity.i_).a2.query.get.map(_ ==> List((1, 3), (1, 4), (2, 3)))
+      _ <- Entity.i.a1.int.>(Entity.i_).d2.query.get.map(_ ==> List((1, 4), (1, 3), (2, 3)))
+      _ <- Entity.i.d1.int.>(Entity.i_).a2.query.get.map(_ ==> List((2, 3), (1, 3), (1, 4)))
+      _ <- Entity.i.d1.int.>(Entity.i_).d2.query.get.map(_ ==> List((2, 3), (1, 4), (1, 3)))
+
+      _ <- Entity.i.a2.int.>(Entity.i_).a1.query.get.map(_ ==> List((1, 3), (2, 3), (1, 4)))
+      _ <- Entity.i.a2.int.>(Entity.i_).d1.query.get.map(_ ==> List((1, 4), (1, 3), (2, 3)))
+      _ <- Entity.i.d2.int.>(Entity.i_).a1.query.get.map(_ ==> List((2, 3), (1, 3), (1, 4)))
+      _ <- Entity.i.d2.int.>(Entity.i_).d1.query.get.map(_ ==> List((1, 4), (2, 3), (1, 3)))
     } yield ()
   }
 

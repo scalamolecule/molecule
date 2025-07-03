@@ -18,7 +18,7 @@ case class Bind_Ref(
 
   "Mandatory" - types { implicit conn =>
     for {
-      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+      case List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
       a = (1, ref1)
       b = (2, ref2)
       c = (3, ref3)
@@ -60,7 +60,7 @@ case class Bind_Ref(
 
   "Tacit" - types { implicit conn =>
     for {
-      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+      case List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
       a = (1, ref1)
       b = (2, ref2)
       c = (3, ref3)

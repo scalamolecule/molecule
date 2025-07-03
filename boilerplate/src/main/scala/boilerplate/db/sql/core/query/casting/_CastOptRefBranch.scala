@@ -20,14 +20,26 @@ object _CastOptRefBranch extends DbSqlBase("CastOptRefBranch", "/query/casting")
        |    firstIndex: ParamIndex
        |  ): (RS, Option[Any]) => Option[Any] = {
        |    casts.length match {
-       |      case 0  => cast0
+       |      case 0  => (_, nestedOption: Option[Any]) => nestedOption
        |      $caseX
-       |    }
-       |  }
+       |      case n =>
+       |        (row: RS, nestedOption: Option[Any]) =>
+       |          var i          = firstIndex + n
+       |          var j          = n - 1
+       |          var hasEmpty   = false
+       |          var tpl: Tuple = Tuple1(nestedOption)
        |
-       |  final private def cast0: (RS, Option[Any]) => Option[Any] = {
-       |    (_: RS, nestedOption: Option[Any]) =>
-       |      nestedOption
+       |          while (j >= 0 && !hasEmpty) {
+       |            val cast = casts(j)
+       |            i -= 1
+       |            val v = cast(row, i)
+       |            hasEmpty = hasEmptyValue(row, i, v)
+       |            if (!hasEmpty)
+       |              tpl = v *: tpl
+       |            j -= 1
+       |          }
+       |          if (hasEmpty) Option.empty[Any] else Some(tpl)
+       |    }
        |  }
        |
        |  final private def cast1(
@@ -48,11 +60,13 @@ object _CastOptRefBranch extends DbSqlBase("CastOptRefBranch", "/query/casting")
   }
 
   case class Chunk(i: Int) extends TemplateVals(i) {
-    val casters  = (1 to i).map("c" + _).mkString(", ")
-    val indexes  = (1 to i).map("i" + _).mkString(", ")
-    val values   = (1 to i).map("v" + _).mkString(", ")
-    val castings = (1 to i).map { j => s"c$j(row, i$j)" }.mkString(",\n        ")
-    val body     =
+    val casters     = (1 to i).map("c" + _).mkString(", ")
+    val indexes     = (1 to i).map("i" + _).mkString(", ")
+    val values      = (1 to i).map(j => s"val v$j = c$j(row, i$j)").mkString("\n      ")
+    val checks      = (1 to i).map(j => s"hasEmptyValue(row, i$j, v$j)").mkString(" ||\n          ")
+    val tupleValues = (1 to i).map("v" + _).mkString(", ")
+
+    val body =
       s"""
          |  final private def cast$i(
          |    casts: List[(RS, ParamIndex) => Any],
@@ -61,13 +75,11 @@ object _CastOptRefBranch extends DbSqlBase("CastOptRefBranch", "/query/casting")
          |    val List($casters) = casts
          |    val List($indexes) = (firstIndex until firstIndex + $i).toList
          |    (row: RS, nestedOption: Option[Any]) => {
-         |      val ($values) = (
-         |        $castings
-         |      )
-         |      if (hasEmpty(row, firstIndex, List($values)))
-         |        Option.empty[Any]
-         |      else
-         |        Some(($values, nestedOption))
+         |      $values
+         |      if (
+         |        $checks
+         |      ) Option.empty[Any] else
+         |        Some(($tupleValues, nestedOption))
          |    }
          |  }""".stripMargin
   }

@@ -18,7 +18,7 @@ case class FlatRef(
 
   "ref" - refs { implicit conn =>
     for {
-      _ <- A.i.B.i.insert(1, 2).transact
+      _ <- A.i.B.i.insert((1, 2)).transact
       _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
     } yield ()
   }
@@ -75,7 +75,7 @@ case class FlatRef(
 
   "backref" - refs { implicit conn =>
     for {
-      _ <- A.i.B.i._A.Bb.i.insert(1, 2, 3).transact
+      _ <- A.i.B.i._A.Bb.i.insert((1, 2, 3)).transact
       _ <- A.i.B.i._A.Bb.i.query.get.map(_ ==> List((1, 2, 3)))
     } yield ()
   }
@@ -83,7 +83,7 @@ case class FlatRef(
 
   "Adjacent ref without attribute" - refs { implicit conn =>
     for {
-      _ <- A.i.B.i.C.i.insert(1, 2, 3).transact
+      _ <- A.i.B.i.C.i.insert((1, 2, 3)).transact
       _ <- A.i.B.C.i.query.get.map(_ ==> List((1, 3)))
     } yield ()
   }

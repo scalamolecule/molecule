@@ -318,7 +318,7 @@ case class FormatConstants(
 
   "Multiple attribute validations" - validation { implicit conn =>
     for {
-      _ <- Constants.errorMsg.multipleErrors.insert(1, 0).transact
+      _ <- Constants.errorMsg.multipleErrors.insert((1, 0)).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2 ==> Seq(

@@ -176,18 +176,18 @@ case class NestedRef(
 
   "Backref, 1 step back" - refs { implicit conn =>
     for {
-      _ <- A.i.Bb.*(B.i.C.i._B.C1.s.D.i).insert(0, List((1, 2, "a", 3))).transact
+      _ <- A.i.Bb.*(B.i.C.i._B.C1.s.D.i).insert((0, List((1, 2, "a", 3)))).transact
       _ <- A.i_.Bb.*(B.i.C.i._B.C1.s.D.i).query.get.map(_ ==> List(List((1, 2, "a", 3))))
       _ <- A.i_.Bb.*?(B.i.C.i._B.C1.s.D.i).query.get.map(_ ==> List(List((1, 2, "a", 3))))
 
       _ <- A.i_.Bb.*(B.i.C.i._B.C1.D.i).query.get.map(_ ==> List(List((1, 2, 3))))
       _ <- A.i_.Bb.*?(B.i.C.i._B.C1.D.i).query.get.map(_ ==> List(List((1, 2, 3))))
 
-      _ <- A.i.Bb.*(B.i.C.i._B.C1.s.D.i.Ee.*(E.i.F.i)).insert(1, List((1, 2, "a", 3, List((4, 5))))).transact
+      _ <- A.i.Bb.*(B.i.C.i._B.C1.s.D.i.Ee.*(E.i.F.i)).insert((1, List((1, 2, "a", 3, List((4, 5)))))).transact
       _ <- A.i_(1).Bb.*(B.i.C.i._B.C1.s.D.i.Ee.*(E.i.F.i)).query.get.map(_ ==> List(List((1, 2, "a", 3, List((4, 5))))))
       _ <- A.i_(1).Bb.*?(B.i.C.i._B.C1.s.D.i.Ee.*?(E.i.F.i)).query.get.map(_ ==> List(List((1, 2, "a", 3, List((4, 5))))))
 
-      _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i._D.E1.s.F.i)).insert(2, List((1, 2, List((3, 4, "a", 5))))).transact
+      _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i._D.E1.s.F.i)).insert((2, List((1, 2, List((3, 4, "a", 5)))))).transact
       _ <- A.i_(2).Bb.*(B.i.C.i.Dd.*(D.i.E.i._D.E1.s.F.i)).query.get.map(_ ==> List(List((1, 2, List((3, 4, "a", 5))))))
       _ <- A.i_(2).Bb.*?(B.i.C.i.Dd.*?(D.i.E.i._D.E1.s.F.i)).query.get.map(_ ==> List(List((1, 2, List((3, 4, "a", 5))))))
     } yield ()
@@ -196,15 +196,15 @@ case class NestedRef(
 
   "Backref, 2 steps back" - refs { implicit conn =>
     for {
-      _ <- A.i.Bb.*(B.i.C.i.D.i._C._B.C1.s.D.i).insert(0, List((1, 2, 3, "a", 33))).transact
+      _ <- A.i.Bb.*(B.i.C.i.D.i._C._B.C1.s.D.i).insert((0, List((1, 2, 3, "a", 33)))).transact
       _ <- A.i_.Bb.*(B.i.C.i.D.i._C._B.C1.s.D.i).query.get.map(_ ==> List(List((1, 2, 3, "a", 33))))
       _ <- A.i_.Bb.*?(B.i.C.i.D.i._C._B.C1.s.D.i).query.get.map(_ ==> List(List((1, 2, 3, "a", 33))))
 
-      _ <- A.i.Bb.*(B.i.C.i.D.i._C._B.C1.s.D.i.Ee.*(E.i.F.i)).insert(1, List((1, 2, 3, "a", 3, List((4, 5))))).transact
+      _ <- A.i.Bb.*(B.i.C.i.D.i._C._B.C1.s.D.i.Ee.*(E.i.F.i)).insert((1, List((1, 2, 3, "a", 3, List((4, 5)))))).transact
       _ <- A.i_(1).Bb.*(B.i.C.i.D.i._C._B.C1.s.D.i.Ee.*(E.i.F.i)).query.get.map(_ ==> List(List((1, 2, 3, "a", 3, List((4, 5))))))
       _ <- A.i_(1).Bb.*?(B.i.C.i.D.i._C._B.C1.s.D.i.Ee.*?(E.i.F.i)).query.get.map(_ ==> List(List((1, 2, 3, "a", 3, List((4, 5))))))
 
-      _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i.F.i._E._D.E1.s.F.i)).insert(2, List((1, 2, List((3, 4, 5, "a", 55))))).transact
+      _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i.F.i._E._D.E1.s.F.i)).insert((2, List((1, 2, List((3, 4, 5, "a", 55)))))).transact
       _ <- A.i_(2).Bb.*(B.i.C.i.Dd.*(D.i.E.i.F.i._E._D.E1.s.F.i)).query.get.map(_ ==> List(List((1, 2, List((3, 4, 5, "a", 55))))))
       _ <- A.i_(2).Bb.*?(B.i.C.i.Dd.*?(D.i.E.i.F.i._E._D.E1.s.F.i)).query.get.map(_ ==> List(List((1, 2, List((3, 4, 5, "a", 55))))))
     } yield ()
@@ -212,7 +212,7 @@ case class NestedRef(
 
   "Backref before nested" - refs { implicit conn =>
     for {
-      _ <- A.i.B.i._A.Bb.*(B.i).insert(0, 1, List(2)).transact
+      _ <- A.i.B.i._A.Bb.*(B.i).insert((0, 1, List(2))).transact
       _ <- A.i.B.i._A.Bb.*(B.i).query.get.map(_ ==> List((0, 1, List(2))))
       _ <- A.i.B.i._A.Bb.*?(B.i).query.get.map(_ ==> List((0, 1, List(2))))
     } yield ()
@@ -220,12 +220,12 @@ case class NestedRef(
 
   "Backref insert: no ref re-use after" - refs { implicit conn =>
     for {
-      _ <- A.i.Bb.*(B.i.C.i._B.C.s).insert(0, List((1, 2, "a"))).transact
+      _ <- A.i.Bb.*(B.i.C.i._B.C.s).insert((0, List((1, 2, "a")))).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't re-use previous entity C after backref _B."
         }
 
-      _ <- A.i.Bb.*(B.i.C.i.D.i._C._B.C.s).insert(0, List((1, 2, 3, "a"))).transact
+      _ <- A.i.Bb.*(B.i.C.i.D.i._C._B.C.s).insert((0, List((1, 2, 3, "a")))).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't re-use previous entity C after backref _B."
         }

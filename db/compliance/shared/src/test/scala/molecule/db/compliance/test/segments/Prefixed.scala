@@ -19,7 +19,7 @@ case class Prefixed(
   "Nested 2 levels" - segments { implicit conn =>
     for {
       _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)
-        .insert("book", "Jan", List("Musician")).transact
+        .insert(("book", "Jan", List("Musician"))).transact
 
       _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)
         .query.get.map(_ ==> List(("book", "Jan", List("Musician"))))
@@ -43,7 +43,7 @@ case class Prefixed(
   "Adjacent" - segments { implicit conn =>
     for {
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name
-        .insert("book", "John", "Marc").transact
+        .insert(("book", "John", "Marc")).transact
 
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name
         .query.get.map(_ ==> List(("book", "John", "Marc")))
@@ -57,7 +57,7 @@ case class Prefixed(
   "Nested" - segments { implicit conn =>
     for {
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(gen_Person.name)
-        .insert("book", "John", List("Marc")).transact
+        .insert(("book", "John", List("Marc"))).transact
 
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name
         .query.get.map(_ ==> List(("book", "John", "Marc")))
@@ -72,7 +72,7 @@ case class Prefixed(
     for {
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(
         gen_Person.name.Professions.name
-      ).insert("book", "John", List(("Marc", "Musician"))).transact
+      ).insert(("book", "John", List(("Marc", "Musician")))).transact
 
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name.Professions.name
         .query.get.map(_ ==> List(("book", "John", "Marc", "Musician")))
@@ -88,7 +88,7 @@ case class Prefixed(
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(
           gen_Person.name.Professions.*(
             gen_Profession.name))
-        .insert("book", "John", List(("Marc", List("Musician")))).transact
+        .insert(("book", "John", List(("Marc", List("Musician"))))).transact
 
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name.Professions.name
         .query.get.map(_ ==> List(("book", "John", "Marc", "Musician")))

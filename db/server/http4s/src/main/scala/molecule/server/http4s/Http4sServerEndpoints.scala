@@ -47,7 +47,7 @@ abstract class Http4sServerEndpoints(rpc: MoleculeRpc) extends ServerEndpoints_i
         webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream](Fs2Streams[IO])
       )
       .serverLogicSuccess(_ => IO.pure(
-        moleculeWebsocketHandler_fs2Pipe(cats.effect.unsafe.implicits.global)
+        moleculeWebsocketHandler_fs2Pipe(using cats.effect.unsafe.implicits.global)
       ))
   }
 }

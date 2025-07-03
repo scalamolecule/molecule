@@ -148,7 +148,7 @@ case class OpsSet(
 
   "Update multiple values" - types { implicit conn =>
     for {
-      List(a, b, c) <- Entity.i.intSet_?.insert(
+      case List(a, b, c) <- Entity.i.intSet_?.insert(
         (1, None),
         (1, Some(Set(1))),
         (2, Some(Set(2))),
@@ -179,7 +179,7 @@ case class OpsSet(
 
   "Types apply" - types { implicit conn =>
     for {
-      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+      case List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
 
       id1 <- Entity.stringSet(Set(string1)).save.transact.map(_.id)
       id2 <- Entity.intSet(Set(int1)).save.transact.map(_.id)
@@ -310,7 +310,7 @@ case class OpsSet(
 
   "Types add" - types { implicit conn =>
     for {
-      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+      case List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
 
       id1 <- Entity.stringSet(Set(string1)).save.transact.map(_.id)
       id2 <- Entity.intSet(Set(int1)).save.transact.map(_.id)

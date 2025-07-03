@@ -18,28 +18,28 @@ case class NestedTypes(
 
   "Card one mandatory" - types { implicit conn =>
     for {
-      _ <- Ref.i.Entities.*(Entity.string).insert(1, List(string1, string2)).transact
-      _ <- Ref.i.Entities.*(Entity.int).insert(2, List(int1, int2)).transact
-      _ <- Ref.i.Entities.*(Entity.long).insert(3, List(long1, long2)).transact
-      _ <- Ref.i.Entities.*(Entity.float).insert(4, List(float1, float2)).transact
-      _ <- Ref.i.Entities.*(Entity.double).insert(5, List(double1, double2)).transact
-      _ <- Ref.i.Entities.*(Entity.boolean).insert(6, List(boolean1, boolean2)).transact
-      _ <- Ref.i.Entities.*(Entity.bigInt).insert(7, List(bigInt1, bigInt2)).transact
-      _ <- Ref.i.Entities.*(Entity.bigDecimal).insert(8, List(bigDecimal1, bigDecimal2)).transact
-      _ <- Ref.i.Entities.*(Entity.date).insert(9, List(date1, date2)).transact
-      _ <- Ref.i.Entities.*(Entity.duration).insert(10, List(duration1, duration2)).transact
-      _ <- Ref.i.Entities.*(Entity.instant).insert(11, List(instant1, instant2)).transact
-      _ <- Ref.i.Entities.*(Entity.localDate).insert(12, List(localDate1, localDate2)).transact
-      _ <- Ref.i.Entities.*(Entity.localTime).insert(13, List(localTime1, localTime2)).transact
-      _ <- Ref.i.Entities.*(Entity.localDateTime).insert(14, List(localDateTime1, localDateTime2)).transact
-      _ <- Ref.i.Entities.*(Entity.offsetTime).insert(15, List(offsetTime1, offsetTime2)).transact
-      _ <- Ref.i.Entities.*(Entity.offsetDateTime).insert(16, List(offsetDateTime1, offsetDateTime2)).transact
-      _ <- Ref.i.Entities.*(Entity.zonedDateTime).insert(17, List(zonedDateTime1, zonedDateTime2)).transact
-      _ <- Ref.i.Entities.*(Entity.uuid).insert(18, List(uuid1, uuid2)).transact
-      _ <- Ref.i.Entities.*(Entity.uri).insert(19, List(uri1, uri2)).transact
-      _ <- Ref.i.Entities.*(Entity.byte).insert(20, List(byte1, byte2)).transact
-      _ <- Ref.i.Entities.*(Entity.short).insert(21, List(short1, short2)).transact
-      _ <- Ref.i.Entities.*(Entity.char).insert(22, List(char1, char2)).transact
+      _ <- Ref.i.Entities.*(Entity.string).insert((1, List(string1, string2))).transact
+      _ <- Ref.i.Entities.*(Entity.int).insert((2, List(int1, int2))).transact
+      _ <- Ref.i.Entities.*(Entity.long).insert((3, List(long1, long2))).transact
+      _ <- Ref.i.Entities.*(Entity.float).insert((4, List(float1, float2))).transact
+      _ <- Ref.i.Entities.*(Entity.double).insert((5, List(double1, double2))).transact
+      _ <- Ref.i.Entities.*(Entity.boolean).insert((6, List(boolean1, boolean2))).transact
+      _ <- Ref.i.Entities.*(Entity.bigInt).insert((7, List(bigInt1, bigInt2))).transact
+      _ <- Ref.i.Entities.*(Entity.bigDecimal).insert((8, List(bigDecimal1, bigDecimal2))).transact
+      _ <- Ref.i.Entities.*(Entity.date).insert((9, List(date1, date2))).transact
+      _ <- Ref.i.Entities.*(Entity.duration).insert((10, List(duration1, duration2))).transact
+      _ <- Ref.i.Entities.*(Entity.instant).insert((11, List(instant1, instant2))).transact
+      _ <- Ref.i.Entities.*(Entity.localDate).insert((12, List(localDate1, localDate2))).transact
+      _ <- Ref.i.Entities.*(Entity.localTime).insert((13, List(localTime1, localTime2))).transact
+      _ <- Ref.i.Entities.*(Entity.localDateTime).insert((14, List(localDateTime1, localDateTime2))).transact
+      _ <- Ref.i.Entities.*(Entity.offsetTime).insert((15, List(offsetTime1, offsetTime2))).transact
+      _ <- Ref.i.Entities.*(Entity.offsetDateTime).insert((16, List(offsetDateTime1, offsetDateTime2))).transact
+      _ <- Ref.i.Entities.*(Entity.zonedDateTime).insert((17, List(zonedDateTime1, zonedDateTime2))).transact
+      _ <- Ref.i.Entities.*(Entity.uuid).insert((18, List(uuid1, uuid2))).transact
+      _ <- Ref.i.Entities.*(Entity.uri).insert((19, List(uri1, uri2))).transact
+      _ <- Ref.i.Entities.*(Entity.byte).insert((20, List(byte1, byte2))).transact
+      _ <- Ref.i.Entities.*(Entity.short).insert((21, List(short1, short2))).transact
+      _ <- Ref.i.Entities.*(Entity.char).insert((22, List(char1, char2))).transact
 
       _ <- Ref.i_.Entities.*(Entity.string.a1).query.get.map(_ ==> List(List(string1, string2)))
       _ <- Ref.i_.Entities.*(Entity.int.a1).query.get.map(_ ==> List(List(int1, int2)))
@@ -97,28 +97,28 @@ case class NestedTypes(
 
   "Card one optional" - types { implicit conn =>
     for {
-      _ <- Ref.i.Entities.*(Entity.i.string_?).insert(1, List((1, Some(string1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.int_?).insert(2, List((1, Some(int1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.long_?).insert(3, List((1, Some(long1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.float_?).insert(4, List((1, Some(float1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.double_?).insert(5, List((1, Some(double1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.boolean_?).insert(6, List((1, Some(boolean1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.bigInt_?).insert(7, List((1, Some(bigInt1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.bigDecimal_?).insert(8, List((1, Some(bigDecimal1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.date_?).insert(9, List((1, Some(date1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.duration_?).insert(10, List((1, Some(duration1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.instant_?).insert(11, List((1, Some(instant1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.localDate_?).insert(12, List((1, Some(localDate1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.localTime_?).insert(13, List((1, Some(localTime1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.localDateTime_?).insert(14, List((1, Some(localDateTime1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.offsetTime_?).insert(15, List((1, Some(offsetTime1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.offsetDateTime_?).insert(16, List((1, Some(offsetDateTime1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.zonedDateTime_?).insert(17, List((1, Some(zonedDateTime1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.uuid_?).insert(18, List((1, Some(uuid1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.uri_?).insert(19, List((1, Some(uri1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.byte_?).insert(20, List((1, Some(byte1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.short_?).insert(21, List((1, Some(short1)), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.char_?).insert(22, List((1, Some(char1)), (2, None))).transact
+      _ <- Ref.i.Entities.*(Entity.i.string_?).insert((1, List((1, Some(string1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.int_?).insert((2, List((1, Some(int1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.long_?).insert((3, List((1, Some(long1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.float_?).insert((4, List((1, Some(float1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.double_?).insert((5, List((1, Some(double1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.boolean_?).insert((6, List((1, Some(boolean1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.bigInt_?).insert((7, List((1, Some(bigInt1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.bigDecimal_?).insert((8, List((1, Some(bigDecimal1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.date_?).insert((9, List((1, Some(date1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.duration_?).insert((10, List((1, Some(duration1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.instant_?).insert((11, List((1, Some(instant1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.localDate_?).insert((12, List((1, Some(localDate1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.localTime_?).insert((13, List((1, Some(localTime1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.localDateTime_?).insert((14, List((1, Some(localDateTime1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.offsetTime_?).insert((15, List((1, Some(offsetTime1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.offsetDateTime_?).insert((16, List((1, Some(offsetDateTime1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.zonedDateTime_?).insert((17, List((1, Some(zonedDateTime1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.uuid_?).insert((18, List((1, Some(uuid1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.uri_?).insert((19, List((1, Some(uri1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.byte_?).insert((20, List((1, Some(byte1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.short_?).insert((21, List((1, Some(short1)), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.char_?).insert((22, List((1, Some(char1)), (2, None)))).transact
 
       _ <- Ref.i(1).Entities.*(Entity.i.a1.string_?).query.get.map(_ ==> List((1, List((1, Some(string1)), (2, None)))))
       _ <- Ref.i(2).Entities.*(Entity.i.a1.int_?).query.get.map(_ ==> List((2, List((1, Some(int1)), (2, None)))))
@@ -176,28 +176,28 @@ case class NestedTypes(
 
   "Card set mandatory" - types { implicit conn =>
     for {
-      _ <- Ref.i.Entities.*(Entity.stringSet).insert(1, List(Set(string1, string2))).transact
-      _ <- Ref.i.Entities.*(Entity.intSet).insert(2, List(Set(int1, int2))).transact
-      _ <- Ref.i.Entities.*(Entity.longSet).insert(3, List(Set(long1, long2))).transact
-      _ <- Ref.i.Entities.*(Entity.floatSet).insert(4, List(Set(float1, float2))).transact
-      _ <- Ref.i.Entities.*(Entity.doubleSet).insert(5, List(Set(double1, double2))).transact
-      _ <- Ref.i.Entities.*(Entity.booleanSet).insert(6, List(Set(boolean1, boolean2))).transact
-      _ <- Ref.i.Entities.*(Entity.bigIntSet).insert(7, List(Set(bigInt1, bigInt2))).transact
-      _ <- Ref.i.Entities.*(Entity.bigDecimalSet).insert(8, List(Set(bigDecimal1, bigDecimal2))).transact
-      _ <- Ref.i.Entities.*(Entity.dateSet).insert(9, List(Set(date1, date2))).transact
-      _ <- Ref.i.Entities.*(Entity.durationSet).insert(10, List(Set(duration1, duration2))).transact
-      _ <- Ref.i.Entities.*(Entity.instantSet).insert(11, List(Set(instant1, instant2))).transact
-      _ <- Ref.i.Entities.*(Entity.localDateSet).insert(12, List(Set(localDate1, localDate2))).transact
-      _ <- Ref.i.Entities.*(Entity.localTimeSet).insert(13, List(Set(localTime1, localTime2))).transact
-      _ <- Ref.i.Entities.*(Entity.localDateTimeSet).insert(14, List(Set(localDateTime1, localDateTime2))).transact
-      _ <- Ref.i.Entities.*(Entity.offsetTimeSet).insert(15, List(Set(offsetTime1, offsetTime2))).transact
-      _ <- Ref.i.Entities.*(Entity.offsetDateTimeSet).insert(16, List(Set(offsetDateTime1, offsetDateTime2))).transact
-      _ <- Ref.i.Entities.*(Entity.zonedDateTimeSet).insert(17, List(Set(zonedDateTime1, zonedDateTime2))).transact
-      _ <- Ref.i.Entities.*(Entity.uuidSet).insert(18, List(Set(uuid1, uuid2))).transact
-      _ <- Ref.i.Entities.*(Entity.uriSet).insert(19, List(Set(uri1, uri2))).transact
-      _ <- Ref.i.Entities.*(Entity.byteSet).insert(20, List(Set(byte1, byte2))).transact
-      _ <- Ref.i.Entities.*(Entity.shortSet).insert(21, List(Set(short1, short2))).transact
-      _ <- Ref.i.Entities.*(Entity.charSet).insert(22, List(Set(char1, char2))).transact
+      _ <- Ref.i.Entities.*(Entity.stringSet).insert((1, List(Set(string1, string2)))).transact
+      _ <- Ref.i.Entities.*(Entity.intSet).insert((2, List(Set(int1, int2)))).transact
+      _ <- Ref.i.Entities.*(Entity.longSet).insert((3, List(Set(long1, long2)))).transact
+      _ <- Ref.i.Entities.*(Entity.floatSet).insert((4, List(Set(float1, float2)))).transact
+      _ <- Ref.i.Entities.*(Entity.doubleSet).insert((5, List(Set(double1, double2)))).transact
+      _ <- Ref.i.Entities.*(Entity.booleanSet).insert((6, List(Set(boolean1, boolean2)))).transact
+      _ <- Ref.i.Entities.*(Entity.bigIntSet).insert((7, List(Set(bigInt1, bigInt2)))).transact
+      _ <- Ref.i.Entities.*(Entity.bigDecimalSet).insert((8, List(Set(bigDecimal1, bigDecimal2)))).transact
+      _ <- Ref.i.Entities.*(Entity.dateSet).insert((9, List(Set(date1, date2)))).transact
+      _ <- Ref.i.Entities.*(Entity.durationSet).insert((10, List(Set(duration1, duration2)))).transact
+      _ <- Ref.i.Entities.*(Entity.instantSet).insert((11, List(Set(instant1, instant2)))).transact
+      _ <- Ref.i.Entities.*(Entity.localDateSet).insert((12, List(Set(localDate1, localDate2)))).transact
+      _ <- Ref.i.Entities.*(Entity.localTimeSet).insert((13, List(Set(localTime1, localTime2)))).transact
+      _ <- Ref.i.Entities.*(Entity.localDateTimeSet).insert((14, List(Set(localDateTime1, localDateTime2)))).transact
+      _ <- Ref.i.Entities.*(Entity.offsetTimeSet).insert((15, List(Set(offsetTime1, offsetTime2)))).transact
+      _ <- Ref.i.Entities.*(Entity.offsetDateTimeSet).insert((16, List(Set(offsetDateTime1, offsetDateTime2)))).transact
+      _ <- Ref.i.Entities.*(Entity.zonedDateTimeSet).insert((17, List(Set(zonedDateTime1, zonedDateTime2)))).transact
+      _ <- Ref.i.Entities.*(Entity.uuidSet).insert((18, List(Set(uuid1, uuid2)))).transact
+      _ <- Ref.i.Entities.*(Entity.uriSet).insert((19, List(Set(uri1, uri2)))).transact
+      _ <- Ref.i.Entities.*(Entity.byteSet).insert((20, List(Set(byte1, byte2)))).transact
+      _ <- Ref.i.Entities.*(Entity.shortSet).insert((21, List(Set(short1, short2)))).transact
+      _ <- Ref.i.Entities.*(Entity.charSet).insert((22, List(Set(char1, char2)))).transact
 
       _ <- Ref.i_.Entities.*(Entity.stringSet).query.get.map(_ ==> List(List(Set(string1, string2))))
       _ <- Ref.i_.Entities.*(Entity.intSet).query.get.map(_ ==> List(List(Set(int1, int2))))
@@ -250,28 +250,28 @@ case class NestedTypes(
 
   "Card set optional" - types { implicit conn =>
     for {
-      _ <- Ref.i.Entities.*(Entity.i.stringSet_?).insert(1, List((1, Some(Set(string1, string2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.intSet_?).insert(2, List((1, Some(Set(int1, int2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.longSet_?).insert(3, List((1, Some(Set(long1, long2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.floatSet_?).insert(4, List((1, Some(Set(float1, float2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.doubleSet_?).insert(5, List((1, Some(Set(double1, double2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.booleanSet_?).insert(6, List((1, Some(Set(boolean1, boolean2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.bigIntSet_?).insert(7, List((1, Some(Set(bigInt1, bigInt2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.bigDecimalSet_?).insert(8, List((1, Some(Set(bigDecimal1, bigDecimal2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.dateSet_?).insert(9, List((1, Some(Set(date1, date2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.durationSet_?).insert(10, List((1, Some(Set(duration1, duration2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.instantSet_?).insert(11, List((1, Some(Set(instant1, instant2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.localDateSet_?).insert(12, List((1, Some(Set(localDate1, localDate2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.localTimeSet_?).insert(13, List((1, Some(Set(localTime1, localTime2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.localDateTimeSet_?).insert(14, List((1, Some(Set(localDateTime1, localDateTime2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.offsetTimeSet_?).insert(15, List((1, Some(Set(offsetTime1, offsetTime2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.offsetDateTimeSet_?).insert(16, List((1, Some(Set(offsetDateTime1, offsetDateTime2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.zonedDateTimeSet_?).insert(17, List((1, Some(Set(zonedDateTime1, zonedDateTime2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.uuidSet_?).insert(18, List((1, Some(Set(uuid1, uuid2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.uriSet_?).insert(19, List((1, Some(Set(uri1, uri2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.byteSet_?).insert(20, List((1, Some(Set(byte1, byte2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.shortSet_?).insert(21, List((1, Some(Set(short1, short2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.charSet_?).insert(22, List((1, Some(Set(char1, char2))), (2, None))).transact
+      _ <- Ref.i.Entities.*(Entity.i.stringSet_?).insert((1, List((1, Some(Set(string1, string2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.intSet_?).insert((2, List((1, Some(Set(int1, int2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.longSet_?).insert((3, List((1, Some(Set(long1, long2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.floatSet_?).insert((4, List((1, Some(Set(float1, float2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.doubleSet_?).insert((5, List((1, Some(Set(double1, double2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.booleanSet_?).insert((6, List((1, Some(Set(boolean1, boolean2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.bigIntSet_?).insert((7, List((1, Some(Set(bigInt1, bigInt2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.bigDecimalSet_?).insert((8, List((1, Some(Set(bigDecimal1, bigDecimal2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.dateSet_?).insert((9, List((1, Some(Set(date1, date2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.durationSet_?).insert((10, List((1, Some(Set(duration1, duration2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.instantSet_?).insert((11, List((1, Some(Set(instant1, instant2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.localDateSet_?).insert((12, List((1, Some(Set(localDate1, localDate2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.localTimeSet_?).insert((13, List((1, Some(Set(localTime1, localTime2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.localDateTimeSet_?).insert((14, List((1, Some(Set(localDateTime1, localDateTime2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.offsetTimeSet_?).insert((15, List((1, Some(Set(offsetTime1, offsetTime2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.offsetDateTimeSet_?).insert((16, List((1, Some(Set(offsetDateTime1, offsetDateTime2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.zonedDateTimeSet_?).insert((17, List((1, Some(Set(zonedDateTime1, zonedDateTime2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.uuidSet_?).insert((18, List((1, Some(Set(uuid1, uuid2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.uriSet_?).insert((19, List((1, Some(Set(uri1, uri2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.byteSet_?).insert((20, List((1, Some(Set(byte1, byte2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.shortSet_?).insert((21, List((1, Some(Set(short1, short2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.charSet_?).insert((22, List((1, Some(Set(char1, char2))), (2, None)))).transact
 
       _ <- Ref.i(1).Entities.*(Entity.i.a1.stringSet_?).query.get.map(_ ==> List((1, List((1, Some(Set(string1, string2))), (2, None)))))
       _ <- Ref.i(2).Entities.*(Entity.i.a1.intSet_?).query.get.map(_ ==> List((2, List((1, Some(Set(int1, int2))), (2, None)))))
@@ -324,28 +324,28 @@ case class NestedTypes(
 
   "Card seq mandatory" - types { implicit conn =>
     for {
-      _ <- Ref.i.Entities.*(Entity.stringSeq).insert(1, List(List(string1, string2))).transact
-      _ <- Ref.i.Entities.*(Entity.intSeq).insert(2, List(List(int1, int2))).transact
-      _ <- Ref.i.Entities.*(Entity.longSeq).insert(3, List(List(long1, long2))).transact
-      _ <- Ref.i.Entities.*(Entity.floatSeq).insert(4, List(List(float1, float2))).transact
-      _ <- Ref.i.Entities.*(Entity.doubleSeq).insert(5, List(List(double1, double2))).transact
-      _ <- Ref.i.Entities.*(Entity.booleanSeq).insert(6, List(List(boolean1, boolean2))).transact
-      _ <- Ref.i.Entities.*(Entity.bigIntSeq).insert(7, List(List(bigInt1, bigInt2))).transact
-      _ <- Ref.i.Entities.*(Entity.bigDecimalSeq).insert(8, List(List(bigDecimal1, bigDecimal2))).transact
-      _ <- Ref.i.Entities.*(Entity.dateSeq).insert(9, List(List(date1, date2))).transact
-      _ <- Ref.i.Entities.*(Entity.durationSeq).insert(10, List(List(duration1, duration2))).transact
-      _ <- Ref.i.Entities.*(Entity.instantSeq).insert(11, List(List(instant1, instant2))).transact
-      _ <- Ref.i.Entities.*(Entity.localDateSeq).insert(12, List(List(localDate1, localDate2))).transact
-      _ <- Ref.i.Entities.*(Entity.localTimeSeq).insert(13, List(List(localTime1, localTime2))).transact
-      _ <- Ref.i.Entities.*(Entity.localDateTimeSeq).insert(14, List(List(localDateTime1, localDateTime2))).transact
-      _ <- Ref.i.Entities.*(Entity.offsetTimeSeq).insert(15, List(List(offsetTime1, offsetTime2))).transact
-      _ <- Ref.i.Entities.*(Entity.offsetDateTimeSeq).insert(16, List(List(offsetDateTime1, offsetDateTime2))).transact
-      _ <- Ref.i.Entities.*(Entity.zonedDateTimeSeq).insert(17, List(List(zonedDateTime1, zonedDateTime2))).transact
-      _ <- Ref.i.Entities.*(Entity.uuidSeq).insert(18, List(List(uuid1, uuid2))).transact
-      _ <- Ref.i.Entities.*(Entity.uriSeq).insert(19, List(List(uri1, uri2))).transact
-      _ <- Ref.i.Entities.*(Entity.byteArray).insert(20, List(Array(byte1, byte2))).transact
-      _ <- Ref.i.Entities.*(Entity.shortSeq).insert(21, List(List(short1, short2))).transact
-      _ <- Ref.i.Entities.*(Entity.charSeq).insert(22, List(List(char1, char2))).transact
+      _ <- Ref.i.Entities.*(Entity.stringSeq).insert((1, List(List(string1, string2)))).transact
+      _ <- Ref.i.Entities.*(Entity.intSeq).insert((2, List(List(int1, int2)))).transact
+      _ <- Ref.i.Entities.*(Entity.longSeq).insert((3, List(List(long1, long2)))).transact
+      _ <- Ref.i.Entities.*(Entity.floatSeq).insert((4, List(List(float1, float2)))).transact
+      _ <- Ref.i.Entities.*(Entity.doubleSeq).insert((5, List(List(double1, double2)))).transact
+      _ <- Ref.i.Entities.*(Entity.booleanSeq).insert((6, List(List(boolean1, boolean2)))).transact
+      _ <- Ref.i.Entities.*(Entity.bigIntSeq).insert((7, List(List(bigInt1, bigInt2)))).transact
+      _ <- Ref.i.Entities.*(Entity.bigDecimalSeq).insert((8, List(List(bigDecimal1, bigDecimal2)))).transact
+      _ <- Ref.i.Entities.*(Entity.dateSeq).insert((9, List(List(date1, date2)))).transact
+      _ <- Ref.i.Entities.*(Entity.durationSeq).insert((10, List(List(duration1, duration2)))).transact
+      _ <- Ref.i.Entities.*(Entity.instantSeq).insert((11, List(List(instant1, instant2)))).transact
+      _ <- Ref.i.Entities.*(Entity.localDateSeq).insert((12, List(List(localDate1, localDate2)))).transact
+      _ <- Ref.i.Entities.*(Entity.localTimeSeq).insert((13, List(List(localTime1, localTime2)))).transact
+      _ <- Ref.i.Entities.*(Entity.localDateTimeSeq).insert((14, List(List(localDateTime1, localDateTime2)))).transact
+      _ <- Ref.i.Entities.*(Entity.offsetTimeSeq).insert((15, List(List(offsetTime1, offsetTime2)))).transact
+      _ <- Ref.i.Entities.*(Entity.offsetDateTimeSeq).insert((16, List(List(offsetDateTime1, offsetDateTime2)))).transact
+      _ <- Ref.i.Entities.*(Entity.zonedDateTimeSeq).insert((17, List(List(zonedDateTime1, zonedDateTime2)))).transact
+      _ <- Ref.i.Entities.*(Entity.uuidSeq).insert((18, List(List(uuid1, uuid2)))).transact
+      _ <- Ref.i.Entities.*(Entity.uriSeq).insert((19, List(List(uri1, uri2)))).transact
+      _ <- Ref.i.Entities.*(Entity.byteArray).insert((20, List(Array(byte1, byte2)))).transact
+      _ <- Ref.i.Entities.*(Entity.shortSeq).insert((21, List(List(short1, short2)))).transact
+      _ <- Ref.i.Entities.*(Entity.charSeq).insert((22, List(List(char1, char2)))).transact
 
       _ <- Ref.i_.Entities.*(Entity.stringSeq).query.get.map(_ ==> List(List(List(string1, string2))))
       _ <- Ref.i_.Entities.*(Entity.intSeq).query.get.map(_ ==> List(List(List(int1, int2))))
@@ -398,28 +398,28 @@ case class NestedTypes(
 
   "Card seq optional" - types { implicit conn =>
     for {
-      _ <- Ref.i.Entities.*(Entity.i.stringSeq_?).insert(1, List((1, Some(List(string1, string2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.intSeq_?).insert(2, List((1, Some(List(int1, int2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.longSeq_?).insert(3, List((1, Some(List(long1, long2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.floatSeq_?).insert(4, List((1, Some(List(float1, float2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.doubleSeq_?).insert(5, List((1, Some(List(double1, double2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.booleanSeq_?).insert(6, List((1, Some(List(boolean1, boolean2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.bigIntSeq_?).insert(7, List((1, Some(List(bigInt1, bigInt2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.bigDecimalSeq_?).insert(8, List((1, Some(List(bigDecimal1, bigDecimal2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.dateSeq_?).insert(9, List((1, Some(List(date1, date2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.durationSeq_?).insert(10, List((1, Some(List(duration1, duration2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.instantSeq_?).insert(11, List((1, Some(List(instant1, instant2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.localDateSeq_?).insert(12, List((1, Some(List(localDate1, localDate2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.localTimeSeq_?).insert(13, List((1, Some(List(localTime1, localTime2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.localDateTimeSeq_?).insert(14, List((1, Some(List(localDateTime1, localDateTime2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.offsetTimeSeq_?).insert(15, List((1, Some(List(offsetTime1, offsetTime2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.offsetDateTimeSeq_?).insert(16, List((1, Some(List(offsetDateTime1, offsetDateTime2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.zonedDateTimeSeq_?).insert(17, List((1, Some(List(zonedDateTime1, zonedDateTime2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.uuidSeq_?).insert(18, List((1, Some(List(uuid1, uuid2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.uriSeq_?).insert(19, List((1, Some(List(uri1, uri2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.byteArray_?).insert(20, List((1, Some(Array(byte1, byte2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.shortSeq_?).insert(21, List((1, Some(List(short1, short2))), (2, None))).transact
-      _ <- Ref.i.Entities.*(Entity.i.charSeq_?).insert(22, List((1, Some(List(char1, char2))), (2, None))).transact
+      _ <- Ref.i.Entities.*(Entity.i.stringSeq_?).insert((1, List((1, Some(List(string1, string2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.intSeq_?).insert((2, List((1, Some(List(int1, int2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.longSeq_?).insert((3, List((1, Some(List(long1, long2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.floatSeq_?).insert((4, List((1, Some(List(float1, float2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.doubleSeq_?).insert((5, List((1, Some(List(double1, double2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.booleanSeq_?).insert((6, List((1, Some(List(boolean1, boolean2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.bigIntSeq_?).insert((7, List((1, Some(List(bigInt1, bigInt2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.bigDecimalSeq_?).insert((8, List((1, Some(List(bigDecimal1, bigDecimal2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.dateSeq_?).insert((9, List((1, Some(List(date1, date2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.durationSeq_?).insert((10, List((1, Some(List(duration1, duration2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.instantSeq_?).insert((11, List((1, Some(List(instant1, instant2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.localDateSeq_?).insert((12, List((1, Some(List(localDate1, localDate2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.localTimeSeq_?).insert((13, List((1, Some(List(localTime1, localTime2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.localDateTimeSeq_?).insert((14, List((1, Some(List(localDateTime1, localDateTime2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.offsetTimeSeq_?).insert((15, List((1, Some(List(offsetTime1, offsetTime2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.offsetDateTimeSeq_?).insert((16, List((1, Some(List(offsetDateTime1, offsetDateTime2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.zonedDateTimeSeq_?).insert((17, List((1, Some(List(zonedDateTime1, zonedDateTime2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.uuidSeq_?).insert((18, List((1, Some(List(uuid1, uuid2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.uriSeq_?).insert((19, List((1, Some(List(uri1, uri2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.byteArray_?).insert((20, List((1, Some(Array(byte1, byte2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.shortSeq_?).insert((21, List((1, Some(List(short1, short2))), (2, None)))).transact
+      _ <- Ref.i.Entities.*(Entity.i.charSeq_?).insert((22, List((1, Some(List(char1, char2))), (2, None)))).transact
 
       _ <- Ref.i(1).Entities.*(Entity.i.a1.stringSeq_?).query.get.map(_ ==> List((1, List((1, Some(List(string1, string2))), (2, None)))))
       _ <- Ref.i(2).Entities.*(Entity.i.a1.intSeq_?).query.get.map(_ ==> List((2, List((1, Some(List(int1, int2))), (2, None)))))

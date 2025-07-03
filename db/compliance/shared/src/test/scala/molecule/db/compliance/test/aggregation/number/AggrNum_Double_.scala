@@ -34,7 +34,7 @@ case class AggrNum_Double_(
         _.head ==~ double1 + double2 + double2 + double3 + double4
       )
 
-      _ <- Entity.i.double(sum).query.get.map(_.map {
+      _ <- Entity.i.double(sum).query.get.map(_.collect {
         case (1, sum) => sum ==~ double1 + double2
         case (2, sum) => sum ==~ double2 + double3 + double4
       })
@@ -61,7 +61,7 @@ case class AggrNum_Double_(
           //       ^
           _ <- Entity.double(median).query.get.map(_.head ==~ double2.toString.toDouble) // middle number
 
-          _ <- Entity.i.double(median).query.get.map(_.map {
+          _ <- Entity.i.double(median).query.get.map(_.collect {
             case (1, median) => median ==~ double1.toDouble.floor // lower whole number
             case (2, median) => median ==~ double5.toString.toDouble // middle number
           })
@@ -79,7 +79,7 @@ case class AggrNum_Double_(
 
           _ <- Entity.double(median).query.get.map(_.head ==~ double2.toString.toDouble) // middle number
 
-          _ <- Entity.i.double(median).query.get.map(_.map {
+          _ <- Entity.i.double(median).query.get.map(_.collect {
             case (1, median) => median ==~ (double1 + double2).toDouble / 2.0 // average of 2 middle numbers
             case (2, median) => median ==~ double5.toString.toDouble // middle number
           })
@@ -104,7 +104,7 @@ case class AggrNum_Double_(
         _.head ==~ (double1 + double2 + double2 + double3 + double4).toDouble / 5.0
       )
 
-      _ <- Entity.i.double(avg).query.get.map(_.map {
+      _ <- Entity.i.double(avg).query.get.map(_.collect {
         case (1, avg) => avg ==~ (double1 + double2).toDouble / 2.0
         case (2, avg) => avg ==~ (double2 + double3 + double4).toDouble / 3.0
       })
@@ -128,7 +128,7 @@ case class AggrNum_Double_(
         _.head ==~ varianceOf(double1, double2, double2, double3, double4)
       )
 
-      _ <- Entity.i.double(variance).query.get.map(_.map {
+      _ <- Entity.i.double(variance).query.get.map(_.collect {
         case (1, variance) => variance ==~ varianceOf(double1, double2)
         case (2, variance) => variance ==~ varianceOf(double2, double3, double4)
       })
@@ -152,7 +152,7 @@ case class AggrNum_Double_(
         _.head ==~ stdDevOf(double1, double2, double2, double3, double4)
       )
 
-      _ <- Entity.i.double(stddev).query.get.map(_.map {
+      _ <- Entity.i.double(stddev).query.get.map(_.collect {
         case (1, stddev) => stddev ==~ stdDevOf(double1, double2)
         case (2, stddev) => stddev ==~ stdDevOf(double2, double3, double4)
       })

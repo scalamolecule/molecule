@@ -47,7 +47,7 @@ trait SpiBaseJVM_sync
     val m2q            = getModel2SqlQuery(cleanElements)
     m2q.bindValues.addAll(query.bindValues)
     SqlQueryResolveOffset[Tpl](cleanDataModel, query.optLimit, None, m2q)
-      .getListFromOffset_sync(conn)._1
+      .getListFromOffset_sync(using conn)._1
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): String = {
@@ -65,7 +65,7 @@ trait SpiBaseJVM_sync
     val m2q           = getModel2SqlQuery(cleanElements)
     m2q.bindValues.addAll(query.bindValues)
     SqlQueryResolveOffset[Tpl](queryClean.dataModel, queryClean.optLimit, Some(queryClean.offset), m2q)
-      .getListFromOffset_sync(conn)
+      .getListFromOffset_sync(using conn)
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): String = {
@@ -82,7 +82,7 @@ trait SpiBaseJVM_sync
     val m2q            = getModel2SqlQuery(cleanElements)
     m2q.bindValues.addAll(query.bindValues)
     SqlQueryResolveCursor[Tpl](cleanDataModel, query.optLimit, Some(query.cursor), m2q)
-      .getListFromCursor_sync(conn)
+      .getListFromCursor_sync(using conn)
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): String = {
@@ -134,7 +134,7 @@ trait SpiBaseJVM_sync
     conn.addCallback(dataModel, () =>
       callback {
         SqlQueryResolveOffset(dataModel, query.optLimit, None, getModel2SqlQuery(elements))
-          .getListFromOffset_sync(conn)._1
+          .getListFromOffset_sync(using conn)._1
       }
     )
   }

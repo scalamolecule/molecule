@@ -40,7 +40,7 @@ case class NestedBasic(
   "Nested: one" - refs { implicit conn =>
 
     for {
-      _ <- A.i.Bb.*(B.i).insert(2, List(3, 4)).transact
+      _ <- A.i.Bb.*(B.i).insert((2, List(3, 4))).transact
       _ <- A.i.Bb.*(B.i.a1).query.get.map(_ ==> List((2, List(3, 4))))
     } yield ()
   }
@@ -57,7 +57,7 @@ case class NestedBasic(
   "Nested owned: one" - refs { implicit conn =>
 
     for {
-      _ <- A.i.OwnBb.*(B.i).insert(2, List(3, 4)).transact
+      _ <- A.i.OwnBb.*(B.i).insert((2, List(3, 4))).transact
       _ <- A.i.OwnBb.*(B.i.a1).query.get.map(_ ==> List((2, List(3, 4))))
     } yield ()
   }

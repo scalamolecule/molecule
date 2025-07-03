@@ -179,12 +179,12 @@ case class SaveRefs(
   "ids, ref" - refs { implicit conn =>
     for {
       // Card one
-      List(a1) <- A.i(1).B.i(2).save.transact.map(_.ids)
+      case List(a1) <- A.i(1).B.i(2).save.transact.map(_.ids)
 
       _ <- A(a1).i.query.get.map(_ ==> List(1))
 
       // Ref ids
-      List(b1) <- A(a1).b.query.get
+      case List(b1) <- A(a1).b.query.get
 
       _ <- B(b1).i.query.get.map(_ ==> List(2))
 
@@ -194,12 +194,12 @@ case class SaveRefs(
 
 
       // Card Set
-      List(a1) <- A.i(1).Bb.i(2).save.transact.map(_.ids)
+      case List(a1) <- A.i(1).Bb.i(2).save.transact.map(_.ids)
 
       _ <- A(a1).i.query.get.map(_ ==> List(1))
 
       // Getting head of each Set ref ids (card-set)
-      List(b1) <- A(a1).bb.query.get.map(_.map(_.head))
+      case List(b1) <- A(a1).bb.query.get.map(_.map(_.head))
 
       _ <- B(b1).i.query.get.map(_ ==> List(2))
 

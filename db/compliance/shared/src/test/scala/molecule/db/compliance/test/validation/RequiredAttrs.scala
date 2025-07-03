@@ -79,7 +79,7 @@ case class RequiredAttrs(
 
   "Attr/ref" - validation { implicit conn =>
     for {
-      List(ref1) <- RefB.i.insert(1).transact.map(_.ids)
+      case List(ref1) <- RefB.i.insert(1).transact.map(_.ids)
 
       _ <- Require.int(1).save.transact
         .map(_ ==> "Unexpected success").recover {

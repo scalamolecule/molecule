@@ -34,7 +34,7 @@ case class AggrNum_Byte_(
         _.head ==~ byte1 + byte2 + byte2 + byte3 + byte4
       )
 
-      _ <- Entity.i.byte(sum).query.get.map(_.map {
+      _ <- Entity.i.byte(sum).query.get.map(_.collect {
         case (1, sum) => sum ==~ byte1 + byte2
         case (2, sum) => sum ==~ byte2 + byte3 + byte4
       })
@@ -61,7 +61,7 @@ case class AggrNum_Byte_(
           //       ^
           _ <- Entity.byte(median).query.get.map(_.head ==~ byte2.toString.toDouble) // middle number
 
-          _ <- Entity.i.byte(median).query.get.map(_.map {
+          _ <- Entity.i.byte(median).query.get.map(_.collect {
             case (1, median) => median ==~ byte1.toDouble.floor // lower whole number
             case (2, median) => median ==~ byte5.toString.toDouble // middle number
           })
@@ -79,7 +79,7 @@ case class AggrNum_Byte_(
 
           _ <- Entity.byte(median).query.get.map(_.head ==~ byte2.toString.toDouble) // middle number
 
-          _ <- Entity.i.byte(median).query.get.map(_.map {
+          _ <- Entity.i.byte(median).query.get.map(_.collect {
             case (1, median) => median ==~ (byte1 + byte2).toDouble / 2.0 // average of 2 middle numbers
             case (2, median) => median ==~ byte5.toString.toDouble // middle number
           })
@@ -104,7 +104,7 @@ case class AggrNum_Byte_(
         _.head ==~ (byte1 + byte2 + byte2 + byte3 + byte4).toDouble / 5.0
       )
 
-      _ <- Entity.i.byte(avg).query.get.map(_.map {
+      _ <- Entity.i.byte(avg).query.get.map(_.collect {
         case (1, avg) => avg ==~ (byte1 + byte2).toDouble / 2.0
         case (2, avg) => avg ==~ (byte2 + byte3 + byte4).toDouble / 3.0
       })
@@ -128,7 +128,7 @@ case class AggrNum_Byte_(
         _.head ==~ varianceOf(byte1, byte2, byte2, byte3, byte4)
       )
 
-      _ <- Entity.i.byte(variance).query.get.map(_.map {
+      _ <- Entity.i.byte(variance).query.get.map(_.collect {
         case (1, variance) => variance ==~ varianceOf(byte1, byte2)
         case (2, variance) => variance ==~ varianceOf(byte2, byte3, byte4)
       })
@@ -152,7 +152,7 @@ case class AggrNum_Byte_(
         _.head ==~ stdDevOf(byte1, byte2, byte2, byte3, byte4)
       )
 
-      _ <- Entity.i.byte(stddev).query.get.map(_.map {
+      _ <- Entity.i.byte(stddev).query.get.map(_.collect {
         case (1, stddev) => stddev ==~ stdDevOf(byte1, byte2)
         case (2, stddev) => stddev ==~ stdDevOf(byte2, byte3, byte4)
       })

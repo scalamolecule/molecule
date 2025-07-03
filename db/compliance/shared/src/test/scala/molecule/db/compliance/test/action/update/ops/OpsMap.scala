@@ -173,7 +173,7 @@ case class OpsMap(
 
   "Update multiple values" - types { implicit conn =>
     for {
-      List(a, b, c) <- Entity.i.intMap_?.insert(
+      case List(a, b, c) <- Entity.i.intMap_?.insert(
         (1, None),
         (1, Some(Map(pint1))),
         (2, Some(Map(pint2))),

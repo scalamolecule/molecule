@@ -23,7 +23,7 @@ case class FormatVariables(
 
   "Default msg" - validation { implicit conn =>
     for {
-      _ <- Variables.noErrorMsg.int.insert(1, 2).transact
+      _ <- Variables.noErrorMsg.int.insert((1, 2)).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
@@ -48,7 +48,7 @@ case class FormatVariables(
 
       // Same test
       // To shorten the following tests, we isolate the error messages
-      _ <- Variables.noErrorMsg.int.insert(1, 2).transact
+      _ <- Variables.noErrorMsg.int.insert((1, 2)).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
@@ -63,7 +63,7 @@ case class FormatVariables(
       _ <- Variables.noErrorMsg.query.get.map(_ ==> Nil)
 
       // Valid value can be saved
-      _ <- Variables.noErrorMsg.int.insert(3, 2).transact
+      _ <- Variables.noErrorMsg.int.insert((3, 2)).transact
       _ <- Variables.noErrorMsg.query.get.map(_ ==> List(3))
     } yield ()
   }
@@ -71,7 +71,7 @@ case class FormatVariables(
 
   "Msg" - validation { implicit conn =>
     for {
-      _ <- Variables.errorMsg.int1.insert(1, 2).transact
+      _ <- Variables.errorMsg.int1.insert((1, 2)).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
@@ -84,7 +84,7 @@ case class FormatVariables(
 
   "Msg with value" - validation { implicit conn =>
     for {
-      _ <- Variables.errorMsgWithValue.int2.insert(1, 2).transact
+      _ <- Variables.errorMsgWithValue.int2.insert((1, 2)).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
@@ -97,7 +97,7 @@ case class FormatVariables(
 
   "Multi-line msg with value 2" - validation { implicit conn =>
     for {
-      _ <- Variables.multilineMsg.int3.insert(1, 2).transact
+      _ <- Variables.multilineMsg.int3.insert((1, 2)).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
@@ -111,7 +111,7 @@ case class FormatVariables(
 
   "Multi-line test, default msg" - validation { implicit conn =>
     for {
-      _ <- Variables.multiLine.int4.insert(1, 10).transact
+      _ <- Variables.multiLine.int4.insert((1, 10)).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
@@ -129,7 +129,7 @@ case class FormatVariables(
 
   "Multi-line test, msg" - validation { implicit conn =>
     for {
-      _ <- Variables.multiLine2.int5.insert(1, 10).transact
+      _ <- Variables.multiLine2.int5.insert((1, 10)).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
@@ -142,7 +142,7 @@ case class FormatVariables(
 
   "Multi-line test, multi-line msg" - validation { implicit conn =>
     for {
-      _ <- Variables.multiLine3.int6.insert(1, 10).transact
+      _ <- Variables.multiLine3.int6.insert((1, 10)).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
@@ -156,7 +156,7 @@ case class FormatVariables(
 
   "Single test line with logic" - validation { implicit conn =>
     for {
-      _ <- Variables.logic.int7.insert(1, 7).transact
+      _ <- Variables.logic.int7.insert((1, 7)).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
@@ -170,10 +170,10 @@ case class FormatVariables(
   "Multiple validations, missing value attrs" - validation { implicit conn =>
     for {
       // Valid values passing all 5 tests
-      _ <- Variables.multipleErrors.int8.str.intSet.strs.insert(5, 3, "hello", Set(10), Set("hi", "there")).transact
+      _ <- Variables.multipleErrors.int8.str.intSet.strs.insert((5, 3, "hello", Set(10), Set("hi", "there"))).transact
 
       // Missing value attributes needed for tests
-      _ <- Variables.multipleErrors.int8.str.intSet.insert(7, 3, "hello", Set(10)).transact
+      _ <- Variables.multipleErrors.int8.str.intSet.insert((7, 3, "hello", Set(10))).transact
         .map(_ ==> "Unexpected success").recover {
           case ModelError(error) =>
             error ==>
@@ -184,7 +184,7 @@ case class FormatVariables(
                 |""".stripMargin
         }
 
-      _ <- Variables.multipleErrors.int8.str.insert(7, 3, "hello").transact
+      _ <- Variables.multipleErrors.int8.str.insert((7, 3, "hello")).transact
         .map(_ ==> "Unexpected success").recover {
           case ModelError(error) =>
             error ==>
@@ -195,7 +195,7 @@ case class FormatVariables(
                 |""".stripMargin
         }
 
-      _ <- Variables.multipleErrors.int8.insert(7, 3).transact
+      _ <- Variables.multipleErrors.int8.insert((7, 3)).transact
         .map(_ ==> "Unexpected success").recover {
           case ModelError(error) =>
             error ==>
@@ -222,7 +222,7 @@ case class FormatVariables(
 
   "Multiple validations" - validation { implicit conn =>
     for {
-      _ <- Variables.multipleErrors.int8.str.intSet.strs.insert(3, 3, "hello", Set(10), Set("hi", "there")).transact
+      _ <- Variables.multipleErrors.int8.str.intSet.strs.insert((3, 3, "hello", Set(10), Set("hi", "there"))).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
@@ -231,7 +231,7 @@ case class FormatVariables(
             )
         }
 
-      _ <- Variables.multipleErrors.int8.str.intSet.strs.insert(11, 3, "hello", Set(10), Set("hi", "there")).transact
+      _ <- Variables.multipleErrors.int8.str.intSet.strs.insert((11, 3, "hello", Set(10), Set("hi", "there"))).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
@@ -239,7 +239,7 @@ case class FormatVariables(
             )
         }
 
-      _ <- Variables.multipleErrors.int8.str.intSet.strs.insert(7, 3, "hello", Set(10), Set("hi", "there")).transact
+      _ <- Variables.multipleErrors.int8.str.intSet.strs.insert((7, 3, "hello", Set(10), Set("hi", "there"))).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
@@ -247,7 +247,7 @@ case class FormatVariables(
             )
         }
 
-      _ <- Variables.multipleErrors.int8.str.intSet.strs.insert(4, 3, "hello", Set(7), Set("hi", "there")).transact
+      _ <- Variables.multipleErrors.int8.str.intSet.strs.insert((4, 3, "hello", Set(7), Set("hi", "there"))).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(

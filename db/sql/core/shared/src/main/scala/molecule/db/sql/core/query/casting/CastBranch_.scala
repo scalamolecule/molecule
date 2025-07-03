@@ -11,7 +11,7 @@ class CastBranch_[Nested] extends SqlQueryBase {
     firstIndex: ParamIndex
   ): (RS, Nested) => Any = {
     casts.length match {
-      case 0  => cast0
+      case 0  => (_, nested: Nested) => nested
       case 1  => cast1(casts, firstIndex)
       case 2  => cast2(casts, firstIndex)
       case 3  => cast3(casts, firstIndex)
@@ -33,12 +33,20 @@ class CastBranch_[Nested] extends SqlQueryBase {
       case 19 => cast19(casts, firstIndex)
       case 20 => cast20(casts, firstIndex)
       case 21 => cast21(casts, firstIndex)
+      case n  =>
+        val i0 = firstIndex + n
+        val j0 = n - 1
+        (row: RS, nested: Nested) =>
+          var i          = i0
+          var j          = j0
+          var tpl: Tuple = Tuple1(nested) // adding nested tuples last
+          while (j >= 0) {
+            i -= 1
+            tpl = casts(j)(row, i) *: tpl
+            j -= 1
+          }
+          tpl
     }
-  }
-
-  final private def cast0: (RS, Nested) => Any = {
-    (_: RS, nested: Nested) =>
-      nested
   }
 
   final private def cast1(
@@ -46,12 +54,11 @@ class CastBranch_[Nested] extends SqlQueryBase {
     firstIndex: ParamIndex
   ): (RS, Nested) => Any = {
     val c1 = casts.head
-    (row: RS, nested: Nested) => {
+    (row: RS, nested: Nested) =>
       (
         c1(row, firstIndex),
         nested
       )
-    }
   }
 
   final private def cast2(

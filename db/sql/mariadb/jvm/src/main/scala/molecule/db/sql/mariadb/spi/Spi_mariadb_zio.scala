@@ -15,27 +15,27 @@ trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with StreamingJdb
   // Query --------------------------------------------------------
 
   override def query_get[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, List[Tpl]] = {
-    sync2zio[List[Tpl]]((conn: JdbcConn_JVM) => Spi_mariadb_sync.query_get(q)(conn))
+    sync2zio[List[Tpl]]((conn: JdbcConn_JVM) => Spi_mariadb_sync.query_get(q)(using conn))
   }
 
   override def query_inspect[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, String] = {
-    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.query_inspect(q)(conn))
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.query_inspect(q)(using conn))
   }
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl]): ZIO[Conn, MoleculeError, (List[Tpl], Int, Boolean)] = {
-    sync2zio[(List[Tpl], Int, Boolean)]((conn: JdbcConn_JVM) => Spi_mariadb_sync.queryOffset_get(q)(conn))
+    sync2zio[(List[Tpl], Int, Boolean)]((conn: JdbcConn_JVM) => Spi_mariadb_sync.queryOffset_get(q)(using conn))
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl]): ZIO[Conn, MoleculeError, String] = {
-    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.queryOffset_inspect(q)(conn))
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.queryOffset_inspect(q)(using conn))
   }
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl]): ZIO[Conn, MoleculeError, (List[Tpl], String, Boolean)] = {
-    sync2zio[(List[Tpl], String, Boolean)]((conn: JdbcConn_JVM) => Spi_mariadb_sync.queryCursor_get(q)(conn))
+    sync2zio[(List[Tpl], String, Boolean)]((conn: JdbcConn_JVM) => Spi_mariadb_sync.queryCursor_get(q)(using conn))
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl]): ZIO[Conn, MoleculeError, String] = {
-    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.queryCursor_inspect(q)(conn))
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.queryCursor_inspect(q)(using conn))
   }
 
 
@@ -45,18 +45,18 @@ trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with StreamingJdb
   ): ZStream[Conn, MoleculeError, Tpl] = {
     zioStream(
       q, chunkSize,
-      (q: Query[Tpl], conn: Conn) => Spi_mariadb_sync.query_inspect[Tpl](q)(conn),
+      (q: Query[Tpl], conn: Conn) => Spi_mariadb_sync.query_inspect[Tpl](q)(using conn),
       Spi_mariadb_sync.getResultSetAndRowResolver[Tpl]
     )
   }
 
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_mariadb_sync.query_subscribe(q, callback)(conn))
+    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_mariadb_sync.query_subscribe(q, callback)(using conn))
   }
 
   override def query_unsubscribe[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
-    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_mariadb_sync.query_unsubscribe(q)(conn))
+    sync2zio[Unit]((conn: JdbcConn_JVM) => Spi_mariadb_sync.query_unsubscribe(q)(using conn))
   }
 
 
@@ -70,7 +70,7 @@ trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with StreamingJdb
       txReport <- mapError(
         ZIO.attemptBlocking(
           errors match {
-            case errors if errors.isEmpty => Spi_mariadb_sync.save_transact(save)(conn)
+            case errors if errors.isEmpty => Spi_mariadb_sync.save_transact(save)(using conn)
             case errors                   => throw ValidationErrors(errors)
           }
         )
@@ -79,11 +79,11 @@ trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with StreamingJdb
   }
 
   override def save_inspect(save: Save): ZIO[Conn, MoleculeError, String] = {
-    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.save_inspect(save)(conn))
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.save_inspect(save)(using conn))
   }
 
   override def save_validate(save: Save): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
-    sync2zio[Map[String, Seq[String]]]((conn: JdbcConn_JVM) => Spi_mariadb_sync.save_validate(save)(conn))
+    sync2zio[Map[String, Seq[String]]]((conn: JdbcConn_JVM) => Spi_mariadb_sync.save_validate(save)(using conn))
   }
 
 
@@ -97,7 +97,7 @@ trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with StreamingJdb
       txReport <- mapError(
         ZIO.attemptBlocking(
           errors match {
-            case errors if errors.isEmpty => Spi_mariadb_sync.insert_transact(insert)(conn)
+            case errors if errors.isEmpty => Spi_mariadb_sync.insert_transact(insert)(using conn)
             case errors                   => throw InsertErrors(errors)
           }
         )
@@ -106,11 +106,11 @@ trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with StreamingJdb
   }
 
   override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, String] = {
-    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.insert_inspect(insert)(conn))
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.insert_inspect(insert)(using conn))
   }
 
   override def insert_validate(insert: Insert): ZIO[Conn, MoleculeError, Seq[(Int, Seq[InsertError])]] = {
-    sync2zio[Seq[(Int, Seq[InsertError])]]((conn: JdbcConn_JVM) => Spi_mariadb_sync.insert_validate(insert)(conn))
+    sync2zio[Seq[(Int, Seq[InsertError])]]((conn: JdbcConn_JVM) => Spi_mariadb_sync.insert_validate(insert)(using conn))
   }
 
 
@@ -124,7 +124,7 @@ trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with StreamingJdb
       txReport <- mapError(
         ZIO.attemptBlocking(
           errors match {
-            case errors if errors.isEmpty => Spi_mariadb_sync.update_transact(update)(conn)
+            case errors if errors.isEmpty => Spi_mariadb_sync.update_transact(update)(using conn)
             case errors                   => throw ValidationErrors(errors)
           }
         )
@@ -133,11 +133,11 @@ trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with StreamingJdb
   }
 
   override def update_inspect(update: Update): ZIO[Conn, MoleculeError, String] = {
-    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.update_inspect(update)(conn))
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.update_inspect(update)(using conn))
   }
 
   override def update_validate(update: Update): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
-    sync2zio[Map[String, Seq[String]]]((conn: JdbcConn_JVM) => Spi_mariadb_sync.update_validate(update)(conn))
+    sync2zio[Map[String, Seq[String]]]((conn: JdbcConn_JVM) => Spi_mariadb_sync.update_validate(update)(using conn))
   }
 
 
@@ -149,14 +149,14 @@ trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with StreamingJdb
       conn = conn0.asInstanceOf[JdbcConn_JVM]
       txReport <- mapError(
         ZIO.attemptBlocking(
-          Spi_mariadb_sync.delete_transact(delete)(conn)
+          Spi_mariadb_sync.delete_transact(delete)(using conn)
         )
       )
     } yield txReport
   }
 
   override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, String] = {
-    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.delete_inspect(delete)(conn))
+    sync2zio[String]((conn: JdbcConn_JVM) => Spi_mariadb_sync.delete_inspect(delete)(using conn))
   }
 
 
@@ -170,7 +170,7 @@ trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with StreamingJdb
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[JdbcConn_JVM]
       result <- mapError(ZIO.attemptBlocking(
-        Spi_mariadb_sync.fallback_rawQuery(query, debug)(conn)
+        Spi_mariadb_sync.fallback_rawQuery(query, debug)(using conn)
       ))
     } yield result
   }
@@ -183,7 +183,7 @@ trait Spi_mariadb_zio extends Spi_zio with SpiBase_mariadb_zio with StreamingJdb
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[JdbcConn_JVM]
       result <- mapError(ZIO.attemptBlocking(
-        Spi_mariadb_sync.fallback_rawTransact(txData, debug)(conn)
+        Spi_mariadb_sync.fallback_rawTransact(txData, debug)(using conn)
       ))
     } yield result
   }

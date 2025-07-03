@@ -1,5 +1,5 @@
-package molecule.graphql.client.spi
-
+//package molecule.graphql.client.spi
+//
 //package molecule.graphql.client.spi
 //
 //import molecule.base.error.InsertError

@@ -34,7 +34,7 @@ case class AggrNum_BigDecimal_(
         _.head ==~ bigDecimal1 + bigDecimal2 + bigDecimal2 + bigDecimal3 + bigDecimal4
       )
 
-      _ <- Entity.i.bigDecimal(sum).query.get.map(_.map {
+      _ <- Entity.i.bigDecimal(sum).query.get.map(_.collect {
         case (1, sum) => sum ==~ bigDecimal1 + bigDecimal2
         case (2, sum) => sum ==~ bigDecimal2 + bigDecimal3 + bigDecimal4
       })
@@ -61,7 +61,7 @@ case class AggrNum_BigDecimal_(
           //       ^
           _ <- Entity.bigDecimal(median).query.get.map(_.head ==~ bigDecimal2.toString.toDouble) // middle number
 
-          _ <- Entity.i.bigDecimal(median).query.get.map(_.map {
+          _ <- Entity.i.bigDecimal(median).query.get.map(_.collect {
             case (1, median) => median ==~ bigDecimal1.toDouble.floor // lower whole number
             case (2, median) => median ==~ bigDecimal5.toString.toDouble // middle number
           })
@@ -79,7 +79,7 @@ case class AggrNum_BigDecimal_(
 
           _ <- Entity.bigDecimal(median).query.get.map(_.head ==~ bigDecimal2.toString.toDouble) // middle number
 
-          _ <- Entity.i.bigDecimal(median).query.get.map(_.map {
+          _ <- Entity.i.bigDecimal(median).query.get.map(_.collect {
             case (1, median) => median ==~ (bigDecimal1 + bigDecimal2).toDouble / 2.0 // average of 2 middle numbers
             case (2, median) => median ==~ bigDecimal5.toString.toDouble // middle number
           })
@@ -104,7 +104,7 @@ case class AggrNum_BigDecimal_(
         _.head ==~ (bigDecimal1 + bigDecimal2 + bigDecimal2 + bigDecimal3 + bigDecimal4).toDouble / 5.0
       )
 
-      _ <- Entity.i.bigDecimal(avg).query.get.map(_.map {
+      _ <- Entity.i.bigDecimal(avg).query.get.map(_.collect {
         case (1, avg) => avg ==~ (bigDecimal1 + bigDecimal2).toDouble / 2.0
         case (2, avg) => avg ==~ (bigDecimal2 + bigDecimal3 + bigDecimal4).toDouble / 3.0
       })
@@ -128,7 +128,7 @@ case class AggrNum_BigDecimal_(
         _.head ==~ varianceOf(bigDecimal1, bigDecimal2, bigDecimal2, bigDecimal3, bigDecimal4)
       )
 
-      _ <- Entity.i.bigDecimal(variance).query.get.map(_.map {
+      _ <- Entity.i.bigDecimal(variance).query.get.map(_.collect {
         case (1, variance) => variance ==~ varianceOf(bigDecimal1, bigDecimal2)
         case (2, variance) => variance ==~ varianceOf(bigDecimal2, bigDecimal3, bigDecimal4)
       })
@@ -152,7 +152,7 @@ case class AggrNum_BigDecimal_(
         _.head ==~ stdDevOf(bigDecimal1, bigDecimal2, bigDecimal2, bigDecimal3, bigDecimal4)
       )
 
-      _ <- Entity.i.bigDecimal(stddev).query.get.map(_.map {
+      _ <- Entity.i.bigDecimal(stddev).query.get.map(_.collect {
         case (1, stddev) => stddev ==~ stdDevOf(bigDecimal1, bigDecimal2)
         case (2, stddev) => stddev ==~ stdDevOf(bigDecimal2, bigDecimal3, bigDecimal4)
       })

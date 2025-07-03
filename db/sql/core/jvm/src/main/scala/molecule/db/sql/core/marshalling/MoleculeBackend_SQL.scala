@@ -31,7 +31,7 @@ trait MoleculeBackend_SQL
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[AnyTpl]]] = either {
     getConn(proxy).map(conn =>
-      query_get[AnyTpl](Query(dataModel, limit))(conn)
+      query_get[AnyTpl](Query(dataModel, limit))(using conn)
     )
   }
 
@@ -42,7 +42,7 @@ trait MoleculeBackend_SQL
     offset: Int
   ): Future[Either[MoleculeError, (List[AnyTpl], Int, Boolean)]] = either {
     getConn(proxy).map(conn =>
-      queryOffset_get[AnyTpl](QueryOffset(dataModel, limit, offset))(conn)
+      queryOffset_get[AnyTpl](QueryOffset(dataModel, limit, offset))(using conn)
     )
   }
 
@@ -53,7 +53,7 @@ trait MoleculeBackend_SQL
     cursor: String
   ): Future[Either[MoleculeError, (List[AnyTpl], String, Boolean)]] = either {
     getConn(proxy).map(conn =>
-      queryCursor_get[AnyTpl](QueryCursor(dataModel, limit, cursor))(conn)
+      queryCursor_get[AnyTpl](QueryCursor(dataModel, limit, cursor))(using conn)
     )
   }
 
@@ -65,7 +65,7 @@ trait MoleculeBackend_SQL
     callback: List[AnyTpl] => Unit
   ): Future[Unit] = {
     getConn(proxy).map { conn =>
-      query_subscribe[AnyTpl](Query(dataModel, limit), callback)(conn)
+      query_subscribe[AnyTpl](Query(dataModel, limit), callback)(using conn)
     }
   }
   override def unsubscribe(
@@ -73,7 +73,7 @@ trait MoleculeBackend_SQL
     dataModel: DataModel
   ): Future[Either[MoleculeError, Unit]] = either {
     getConn(proxy).map { conn =>
-      query_unsubscribe[Unit](Query(dataModel))(conn)
+      query_unsubscribe[Unit](Query(dataModel))(using conn)
     }
   }
 
@@ -83,7 +83,7 @@ trait MoleculeBackend_SQL
   ): Future[Either[MoleculeError, TxReport]] = either {
     getConn(proxy).map(conn =>
       // Validation already done on JS side
-      save_transact(Save(dataModel, doValidate = false))(conn)
+      save_transact(Save(dataModel, doValidate = false))(using conn)
     )
   }
 
@@ -96,7 +96,7 @@ trait MoleculeBackend_SQL
       val tpls = UnpickleTpls[Any](dataModel, tplsSerialized).unpickleSeqOfProduct
 
       // Validation already done on JS side
-      insert_transact(Insert(dataModel, tpls, doValidate = false))(conn)
+      insert_transact(Insert(dataModel, tpls, doValidate = false))(using conn)
     }
   }
 
@@ -106,7 +106,7 @@ trait MoleculeBackend_SQL
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = either {
     getConn(proxy).map { conn =>
-      update_transact(Update(dataModel, isUpsert))(conn)
+      update_transact(Update(dataModel, isUpsert))(using conn)
     }
   }
 
@@ -115,7 +115,7 @@ trait MoleculeBackend_SQL
     dataModel: DataModel
   ): Future[Either[MoleculeError, TxReport]] = either {
     getConn(proxy).map { conn =>
-      delete_transact(Delete(dataModel))(conn)
+      delete_transact(Delete(dataModel))(using conn)
     }
   }
 }

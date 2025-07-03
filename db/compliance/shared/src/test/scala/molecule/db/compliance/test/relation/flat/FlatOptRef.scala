@@ -182,11 +182,11 @@ case class FlatOptRef(
       ).transact
 
       _ <- A.i.B.i.insert(
-        2, 2
+        (2, 2)
       ).transact
 
       _ <- A.i.B.i.C.i.insert(
-        3, 3, 3
+        (3, 3, 3)
       ).transact
 
 

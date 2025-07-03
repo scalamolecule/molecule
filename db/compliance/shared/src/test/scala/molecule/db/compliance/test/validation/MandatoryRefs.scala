@@ -131,7 +131,7 @@ case class MandatoryRefs(
 
   "Update, remove last card-many value" - validation { implicit conn =>
     for {
-      List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
+      case List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
 
       id <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.ids)
 
@@ -160,9 +160,9 @@ case class MandatoryRefs(
   "Deleting mandatory ref" - validation { implicit conn =>
     if (database == "datomic") {
       for {
-        List(e1) <- MandatoryRefB.i(1).RefB.i(1).save.transact.map(_.ids)
+        case List(e1) <- MandatoryRefB.i(1).RefB.i(1).save.transact.map(_.ids)
 
-        List(r1) <- MandatoryRefB(e1).refB.query.get
+        case List(r1) <- MandatoryRefB(e1).refB.query.get
 
         // Can't delete r1 since MandatoryRefB.refB is referencing it and is mandatory
         _ <- RefB(r1).delete.transact
@@ -175,7 +175,7 @@ case class MandatoryRefs(
           }
 
         // Let's add two other entities referencing RefB too
-        List(e2, e3) <- MandatoryRefsB.i.refsB.insert(
+        case List(e2, e3) <- MandatoryRefsB.i.refsB.insert(
           (4, Set(r1)),
           (5, Set(r1)),
         ).transact.map(_.ids)

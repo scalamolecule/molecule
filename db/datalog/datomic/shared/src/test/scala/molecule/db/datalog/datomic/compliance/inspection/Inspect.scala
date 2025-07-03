@@ -170,7 +170,7 @@ class Test_Inspect extends MUnit with DbProviders_datomic with TestUtils {
 
   "Inspect without deleting" - types { implicit conn =>
     for {
-      List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
+      case List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
 
       // Inspect delete action without deleting
       _ <- Entity(a).delete.inspect.map(_ ==>
@@ -197,7 +197,7 @@ class Test_Inspect extends MUnit with DbProviders_datomic with TestUtils {
 
   "Inspect and delete" - types { implicit conn =>
     for {
-      List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
+      case List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
 
       // Delete data and print inspection
       _ <- Entity(a).delete.i.transact

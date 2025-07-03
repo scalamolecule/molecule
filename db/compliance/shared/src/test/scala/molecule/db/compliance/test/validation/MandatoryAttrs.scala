@@ -47,7 +47,7 @@ case class MandatoryAttrs(
                 |  MandatoryAttr.hobbies
                 |""".stripMargin
         }
-      _ <- MandatoryAttr.name.age.insert("Bob", 42).transact
+      _ <- MandatoryAttr.name.age.insert(("Bob", 42)).transact
         .map(_ ==> "Unexpected success").recover {
           case ModelError(error) =>
             error ==>
@@ -58,7 +58,7 @@ case class MandatoryAttrs(
 
       // All mandatory attributes of entity are present and valid
       _ <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact
-      _ <- MandatoryAttr.name.age.hobbies.insert("Liz", 38, Set("climbing")).transact
+      _ <- MandatoryAttr.name.age.hobbies.insert(("Liz", 38, Set("climbing"))).transact
     } yield ()
   }
 
@@ -100,7 +100,7 @@ case class MandatoryAttrs(
 
       // All mandatory attributes of entity are present and valid
       _ <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact
-      _ <- MandatoryAttr.name.age.hobbies.insert("Liz", 38, Set("climbing")).transact
+      _ <- MandatoryAttr.name.age.hobbies.insert(("Liz", 38, Set("climbing"))).transact
     } yield ()
   }
 

@@ -48,7 +48,7 @@ abstract class PlayServerEndpoints(rpc: MoleculeRpc) extends PekkoServerEndpoint
     Flow.fromSinkAndSource(sink, source)
   }
 
-  def moleculeServerEndpoint_subscribe(implicit mat: Materializer): ServerEndpoint[PekkoStreams with WebSockets, Future] =
+  def moleculeServerEndpoint_subscribe(implicit mat: Materializer): ServerEndpoint[PekkoStreams & WebSockets, Future] =
     endpoint
       .in("molecule" / "subscribe")
       .out(

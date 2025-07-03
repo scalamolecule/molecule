@@ -13,12 +13,12 @@ import zio.test.TestAspect.*
 import scala.annotation.nowarn
 
 @nowarn
-case class ZioApi(api: Api_zio with Spi_zio with DbProviders_zio)
+case class ZioApi(api: Api_zio & Spi_zio & DbProviders_zio)
   extends ZIOSpecDefault with TestUtils {
 
   import api.*
 
-  @nowarn override def spec: Spec[TestEnvironment with Scope, Any] =
+  @nowarn override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("Molecule ZIO api")(
 
       test("Crud actions") {

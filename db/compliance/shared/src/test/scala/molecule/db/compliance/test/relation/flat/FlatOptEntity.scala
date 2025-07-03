@@ -237,11 +237,11 @@ case class FlatOptEntity(
         ).transact
 
         _ <- B.i.C.i.insert(
-          2, 2
+          (2, 2)
         ).transact
 
         _ <- A.i.B.i.C.i.insert(
-          3, 3, 3
+          (3, 3, 3)
         ).transact
 
 
@@ -513,19 +513,19 @@ case class FlatOptEntity(
         // Attributes only for optional entity
         // Caught already during molecule buildup
         _ = interceptMessage[ModelError](
-          "Only attributes allowed in optional entity."
+          "Only attributes allowed."
         )(A.?(A.i.s.B.i))
 
         _ = interceptMessage[ModelError](
-          "Only attributes allowed in optional entity."
+          "Only attributes allowed."
         )(A.?(A.i.s.B.?(B.i)))
 
         _ = interceptMessage[ModelError](
-          "Only attributes allowed in optional entity."
+          "Only attributes allowed."
         )(A.?(A.i.s.Bb.*(B.i)))
 
         _ = interceptMessage[ModelError](
-          "Only attributes allowed in optional entity."
+          "Only attributes allowed."
         )(A.?(A.i.s.Bb.*?(B.i)))
       } yield ()
     }

@@ -34,7 +34,7 @@ case class AggrNum_Short_(
         _.head ==~ short1 + short2 + short2 + short3 + short4
       )
 
-      _ <- Entity.i.short(sum).query.get.map(_.map {
+      _ <- Entity.i.short(sum).query.get.map(_.collect {
         case (1, sum) => sum ==~ short1 + short2
         case (2, sum) => sum ==~ short2 + short3 + short4
       })
@@ -61,7 +61,7 @@ case class AggrNum_Short_(
           //       ^
           _ <- Entity.short(median).query.get.map(_.head ==~ short2.toString.toDouble) // middle number
 
-          _ <- Entity.i.short(median).query.get.map(_.map {
+          _ <- Entity.i.short(median).query.get.map(_.collect {
             case (1, median) => median ==~ short1.toDouble.floor // lower whole number
             case (2, median) => median ==~ short5.toString.toDouble // middle number
           })
@@ -79,7 +79,7 @@ case class AggrNum_Short_(
 
           _ <- Entity.short(median).query.get.map(_.head ==~ short2.toString.toDouble) // middle number
 
-          _ <- Entity.i.short(median).query.get.map(_.map {
+          _ <- Entity.i.short(median).query.get.map(_.collect {
             case (1, median) => median ==~ (short1 + short2).toDouble / 2.0 // average of 2 middle numbers
             case (2, median) => median ==~ short5.toString.toDouble // middle number
           })
@@ -104,7 +104,7 @@ case class AggrNum_Short_(
         _.head ==~ (short1 + short2 + short2 + short3 + short4).toDouble / 5.0
       )
 
-      _ <- Entity.i.short(avg).query.get.map(_.map {
+      _ <- Entity.i.short(avg).query.get.map(_.collect {
         case (1, avg) => avg ==~ (short1 + short2).toDouble / 2.0
         case (2, avg) => avg ==~ (short2 + short3 + short4).toDouble / 3.0
       })
@@ -128,7 +128,7 @@ case class AggrNum_Short_(
         _.head ==~ varianceOf(short1, short2, short2, short3, short4)
       )
 
-      _ <- Entity.i.short(variance).query.get.map(_.map {
+      _ <- Entity.i.short(variance).query.get.map(_.collect {
         case (1, variance) => variance ==~ varianceOf(short1, short2)
         case (2, variance) => variance ==~ varianceOf(short2, short3, short4)
       })
@@ -152,7 +152,7 @@ case class AggrNum_Short_(
         _.head ==~ stdDevOf(short1, short2, short2, short3, short4)
       )
 
-      _ <- Entity.i.short(stddev).query.get.map(_.map {
+      _ <- Entity.i.short(stddev).query.get.map(_.collect {
         case (1, stddev) => stddev ==~ stdDevOf(short1, short2)
         case (2, stddev) => stddev ==~ stdDevOf(short2, short3, short4)
       })

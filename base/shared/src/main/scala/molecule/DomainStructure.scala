@@ -321,12 +321,6 @@ abstract class DomainStructure(maxArity: Int) {
     def allowedValues(v: BaseTpe, vs: BaseTpe*): Self = ???
     def allowedValues(vs: Seq[BaseTpe], failureMsg: String): Self = ???
 
-    /** Alias to non-compatible attribute name like `type` or `first-name` etc.
-     *
-     * Molecule then creates an alias to the special name in the schema so that
-     * queries will match both the attribute name and the alias.
-     * */
-    def alias(altAttrName: String): Self = ???
 
     /** Index option (defaults to true).
      * <br><br>

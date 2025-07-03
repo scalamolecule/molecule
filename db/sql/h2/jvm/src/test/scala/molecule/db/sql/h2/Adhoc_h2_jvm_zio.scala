@@ -11,7 +11,7 @@ import scala.annotation.nowarn
 
 object Adhoc_h2_jvm_zio extends ZIOSpecDefault with DbProviders_h2_zio {
 
-  @nowarn override def spec: Spec[TestEnvironment with Scope, Any] =
+  @nowarn override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("Molecule ZIO api")(
 
       test("Streaming") {

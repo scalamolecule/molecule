@@ -20,12 +20,12 @@ case class FilterAttr_id(
 
   "equal (apply)" - types { implicit conn =>
     for {
-      _ <- Entity.s.id(Entity.long).query.get
+      _ <- Entity.s.id(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }
 
-      _ <- Entity.s.long(Entity.id).query.get
+      _ <- Entity.s.long(Entity.id_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }
@@ -45,12 +45,12 @@ case class FilterAttr_id(
 
   "not equal" - types { implicit conn =>
     for {
-      _ <- Entity.s.id.not(Entity.long).query.get
+      _ <- Entity.s.id.not(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }
 
-      _ <- Entity.s.long.not(Entity.id).query.get
+      _ <- Entity.s.long.not(Entity.id_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }
@@ -60,12 +60,12 @@ case class FilterAttr_id(
 
   "<" - types { implicit conn =>
     for {
-      _ <- Entity.s.id.<(Entity.long).query.get
+      _ <- Entity.s.id.<(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }
 
-      _ <- Entity.s.long.<(Entity.id).query.get
+      _ <- Entity.s.long.<(Entity.id_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }
@@ -75,12 +75,12 @@ case class FilterAttr_id(
 
   "<=" - types { implicit conn =>
     for {
-      _ <- Entity.s.id.<=(Entity.long).query.get
+      _ <- Entity.s.id.<=(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }
 
-      _ <- Entity.s.long.<=(Entity.id).query.get
+      _ <- Entity.s.long.<=(Entity.id_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }
@@ -90,12 +90,12 @@ case class FilterAttr_id(
 
   ">" - types { implicit conn =>
     for {
-      _ <- Entity.s.id.>(Entity.long).query.get
+      _ <- Entity.s.id.>(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }
 
-      _ <- Entity.s.long.>(Entity.id).query.get
+      _ <- Entity.s.long.>(Entity.id_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }
@@ -105,12 +105,12 @@ case class FilterAttr_id(
 
   ">=" - types { implicit conn =>
     for {
-      _ <- Entity.s.id.>=(Entity.long).query.get
+      _ <- Entity.s.id.>=(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }
 
-      _ <- Entity.s.long.>=(Entity.id).query.get
+      _ <- Entity.s.long.>=(Entity.id_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attributes not allowed to involve entity ids."
         }

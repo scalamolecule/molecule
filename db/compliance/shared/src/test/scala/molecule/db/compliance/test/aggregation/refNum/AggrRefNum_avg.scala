@@ -31,7 +31,7 @@ case class AggrRefNum_avg(
       // Average of all (non-coalesced) values
       _ <- A.B.i(avg).query.get.map(_.head ==~ (1 + 2 + 2 + 3 + 4).toDouble / 5.0)
 
-      _ <- A.i.B.i(avg).query.get.map(_.map {
+      _ <- A.i.B.i(avg).query.get.map(_.collect {
         case (1, avg) => avg ==~ (1 + 2).toDouble / 2.0
         case (2, avg) => avg ==~ (2 + 3 + 4).toDouble / 3.0
       })
@@ -51,7 +51,7 @@ case class AggrRefNum_avg(
       )).transact
 
       _ <- A.B.C.i(avg).query.get.map(_.head ==~ (1 + 2 + 2 + 3 + 4).toDouble / 5.0)
-      _ <- A.i.a1.B.i.C.i(avg).query.get.map(_.map {
+      _ <- A.i.a1.B.i.C.i(avg).query.get.map(_.collect {
         case (1, 1, avg1) => avg1 ==~ (1 + 2).toDouble / 2.0
         case (2, 2, avg2) => avg2 ==~ (2 + 3 + 4).toDouble / 3.0
       })
@@ -70,7 +70,7 @@ case class AggrRefNum_avg(
         (2, 4, 4),
       )).transact
 
-      _ <- A.i.B.i(avg).C.i(avg).query.get.map(_.map {
+      _ <- A.i.B.i(avg).C.i(avg).query.get.map(_.collect {
         case (1, avgA, avgB) =>
           avgA ==~ (1 + 2).toDouble / 2.0
           avgB ==~ (1 + 2).toDouble / 2.0
@@ -93,7 +93,7 @@ case class AggrRefNum_avg(
         (2, 4, 4),
       )).transact
 
-      _ <- A.i.B.i(avg)._A.C.i(avg).query.get.map(_.map {
+      _ <- A.i.B.i(avg)._A.C.i(avg).query.get.map(_.collect {
         case (1, avgA, avgB) =>
           avgA ==~ (1 + 2).toDouble / 2.0
           avgB ==~ (1 + 2).toDouble / 2.0

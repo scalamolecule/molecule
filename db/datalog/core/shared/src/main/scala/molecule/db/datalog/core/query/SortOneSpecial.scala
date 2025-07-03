@@ -22,6 +22,7 @@ trait SortOneSpecial[Tpl]
       case (null, _)                        => -1
       case (_, null)                        => 1
       case (m1: jMap[_, _], m2: jMap[_, _]) => compareMapValues(m1, m2)
+      case pair                             => throw Exception("Unexpected pair: " + pair)
     }
   }
 

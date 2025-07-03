@@ -191,7 +191,7 @@ case class InsertRefs(
   "ids, ref, card-one" - refs { implicit conn =>
     for {
       // Ids of A entities returned
-      List(a1, a2) <- A.i.B.i.insert(
+      case List(a1, a2) <- A.i.B.i.insert(
         (1, 2),
         (3, 4),
       ).transact.map(_.ids)
@@ -200,7 +200,7 @@ case class InsertRefs(
       _ <- A(a2).i.query.get.map(_ ==> List(3))
 
       // Ref ids
-      List(b1, b2) <- A(a1, a2).b.query.get
+      case List(b1, b2) <- A(a1, a2).b.query.get
 
       _ <- B(b1).i.query.get.map(_ ==> List(2))
       _ <- B(b2).i.query.get.map(_ ==> List(4))
@@ -215,7 +215,7 @@ case class InsertRefs(
   "ids, ref, card-set" - refs { implicit conn =>
     for {
       // Ids of A entities returned
-      List(a1, a2) <- A.i.Bb.i.insert(
+      case List(a1, a2) <- A.i.Bb.i.insert(
         (1, 2),
         (3, 4),
       ).transact.map(_.ids)
@@ -224,8 +224,8 @@ case class InsertRefs(
       _ <- A(a2).i.query.get.map(_ ==> List(3))
 
       // Getting head of each Set ref ids (card-set)
-      List(b1) <- A(a1).bb.query.get.map(_.map(_.head))
-      List(b2) <- A(a2).bb.query.get.map(_.map(_.head))
+      case List(b1) <- A(a1).bb.query.get.map(_.map(_.head))
+      case List(b2) <- A(a2).bb.query.get.map(_.map(_.head))
 
       _ <- B(b1).i.query.get.map(_ ==> List(2))
       _ <- B(b2).i.query.get.map(_ ==> List(4))
@@ -242,7 +242,7 @@ case class InsertRefs(
 
     for {
       // ref - ref
-      List(a1, a2) <- A.i.B.i._A.C.i.insert(
+      case List(a1, a2) <- A.i.B.i._A.C.i.insert(
         (1, 2, 3),
         (4, 5, 6),
       ).transact.map(_.ids)
@@ -253,7 +253,7 @@ case class InsertRefs(
       ))
 
       // ref - own
-      List(a1, a2) <- A.i.B.i._A.OwnC.i.insert(
+      case List(a1, a2) <- A.i.B.i._A.OwnC.i.insert(
         (1, 2, 3),
         (4, 5, 6),
       ).transact.map(_.ids)
@@ -264,7 +264,7 @@ case class InsertRefs(
       ))
 
       // own - ref
-      List(a1, a2) <- A.i.OwnB.i._A.C.i.insert(
+      case List(a1, a2) <- A.i.OwnB.i._A.C.i.insert(
         (1, 2, 3),
         (4, 5, 6),
       ).transact.map(_.ids)
@@ -275,7 +275,7 @@ case class InsertRefs(
       ))
 
       // own - own
-      List(a1, a2) <- A.i.OwnB.i._A.OwnC.i.insert(
+      case List(a1, a2) <- A.i.OwnB.i._A.OwnC.i.insert(
         (1, 2, 3),
         (4, 5, 6),
       ).transact.map(_.ids)
@@ -291,7 +291,7 @@ case class InsertRefs(
 
     for {
       // 2 A entity ids returned (no Bb ref ids)
-      List(a1, a2) <- A.i.Bb.*(B.i).insert(
+      case List(a1, a2) <- A.i.Bb.*(B.i).insert(
         (1, List(1, 2)),
         (2, Nil),
       ).transact.map(_.ids)
@@ -307,7 +307,7 @@ case class InsertRefs(
 
     for {
       // Ids of A entities returned
-      List(a1, a2) <- A.i.Bb.*(B.i.C.i).insert(
+      case List(a1, a2) <- A.i.Bb.*(B.i.C.i).insert(
         (1, List((1, 2), (3, 4))),
         (2, Nil),
       ).transact.map(_.ids)
@@ -323,7 +323,7 @@ case class InsertRefs(
 
     for {
       // Ids of A entities returned
-      List(a1, a2) <- A.i.B.i.Cc.*(C.i.D.i).insert(
+      case List(a1, a2) <- A.i.B.i.Cc.*(C.i.D.i).insert(
         (1, 10, List((1, 2), (3, 4))),
         (2, 20, Nil),
       ).transact.map(_.ids)
@@ -339,7 +339,7 @@ case class InsertRefs(
 
     for {
       // Ids of A entities returned
-      List(a1, a2) <- A.i.A.i.Cc.*(C.i.D.i).insert(
+      case List(a1, a2) <- A.i.A.i.Cc.*(C.i.D.i).insert(
         (1, 10, List((1, 2), (3, 4))),
         (2, 20, Nil),
       ).transact.map(_.ids)
@@ -397,7 +397,7 @@ case class InsertRefs(
 
     "Optional entity 2 (right join)" - refs { implicit conn =>
       for {
-        _ <- A.?(A.i.s).B.s.insert(
+        _ <- A.?(A.i.s).B.s.insert.apply(
           (Some((1, "x")), "a"),
           (None, "b"),
         ).transact

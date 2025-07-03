@@ -31,7 +31,7 @@ case class AggrRefNum_stddev(
       // Standard deviation of all (non-coalesced) values
       _ <- A.B.i(stddev).query.get.map(_.head ==~ stdDevOf(1, 2, 2, 3, 4))
 
-      _ <- A.i.B.i(stddev).query.get.map(_.map {
+      _ <- A.i.B.i(stddev).query.get.map(_.collect {
         case (1, stddev) => stddev ==~ stdDevOf(1, 2)
         case (2, stddev) => stddev ==~ stdDevOf(2, 3, 4)
       })
@@ -52,7 +52,7 @@ case class AggrRefNum_stddev(
 
       _ <- A.B.C.i(stddev).query.get.map(_.head ==~ stdDevOf(1, 2, 2, 3, 4))
 
-      _ <- A.i.B.i.C.i(stddev).query.get.map(_.map {
+      _ <- A.i.B.i.C.i(stddev).query.get.map(_.collect {
         case (1, 1, stddev) => stddev ==~ stdDevOf(1, 2)
         case (2, 2, stddev) => stddev ==~ stdDevOf(2, 3, 4)
       })
@@ -71,7 +71,7 @@ case class AggrRefNum_stddev(
         (2, 4, 4),
       )).transact
 
-      _ <- A.i.B.i(stddev).C.i(stddev).query.get.map(_.map {
+      _ <- A.i.B.i(stddev).C.i(stddev).query.get.map(_.collect {
         case (1, stddevA, stddevB) =>
           stddevA ==~ stdDevOf(1, 2)
           stddevB ==~ stdDevOf(1, 2)
@@ -94,7 +94,7 @@ case class AggrRefNum_stddev(
         (2, 4, 4),
       )).transact
 
-      _ <- A.i.B.i(stddev)._A.C.i(stddev).query.get.map(_.map {
+      _ <- A.i.B.i(stddev)._A.C.i(stddev).query.get.map(_.collect {
         case (1, stddevA, stddevB) =>
           stddevA ==~ stdDevOf(1, 2)
           stddevB ==~ stdDevOf(1, 2)

@@ -75,7 +75,7 @@ case class FilterOne(
 
   "Equals id" - types { implicit conn =>
     for {
-      List(a, b, c) <- Entity.i.int.insert(
+      case List(a, b, c) <- Entity.i.int.insert(
         (1, 1),
         (1, 2),
         (2, 3),
@@ -104,7 +104,7 @@ case class FilterOne(
 
   "Equals value" - types { implicit conn =>
     for {
-      List(a, b, c) <- Entity.i.int.insert(
+      case List(a, b, c) <- Entity.i.int.insert(
         (1, 1),
         (1, 2),
         (2, 3),

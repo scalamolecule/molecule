@@ -190,7 +190,7 @@ case class UnpickleTpls[Tpl](
     //    def readFloat = dec.readFloat
     //    def readDouble = dec.readDouble
 
-    def readBoolean = BooleanPickler.unpickle(state)
+    def readBoolean = BooleanPickler.unpickle(using state)
     def readBigInt = {
       //      val len = dec.readInt
       //      val ba  = Array.ofDim[Byte](len)

@@ -22,6 +22,23 @@ object _CastOptRefLeaf extends DbSqlBase("CastOptRefLeaf", "/query/casting") {
        |    casts.length match {
        |      case 0  => (_: RS) => Option.empty[Any]
        |      $resolveX
+       |      case n =>
+       |        (row: RS) =>
+       |          var i          = firstIndex + n
+       |          var j          = n - 1
+       |          var hasEmpty   = false
+       |          var tpl: Tuple = EmptyTuple
+       |
+       |          while (j >= 0 && !hasEmpty) {
+       |            val cast = casts(j)
+       |            i -= 1
+       |            val v = cast(row, i)
+       |            hasEmpty = hasEmptyValue(row, i, v)
+       |            if (!hasEmpty)
+       |              tpl = v *: tpl
+       |            j -= 1
+       |          }
+       |          if (hasEmpty) Option.empty[Any] else Some(tpl)
        |    }
        |  }
        |
@@ -31,22 +48,21 @@ object _CastOptRefLeaf extends DbSqlBase("CastOptRefLeaf", "/query/casting") {
        |  ): RS => Option[Any] = {
        |    val List(c1) = casts
        |    (row: RS) =>
-       |      val v1 = c1(row, firstIndex)
-       |      if (hasEmpty(row, firstIndex, List(v1)))
-       |        Option.empty[Any]
-       |      else
-       |        Some(v1)
+       |      val v1 = cast(row, firstIndex)
+       |      if (hasEmptyValue(row, firstIndex, v1)) Option.empty[Any] else Some(v1)
        |  }
        |$resolveMethods
        |}""".stripMargin
   }
 
   case class Chunk(i: Int) extends TemplateVals(i) {
-    val casters  = (1 to i).map("c" + _).mkString(", ")
-    val indexes  = (1 to i).map("i" + _).mkString(", ")
-    val values   = (1 to i).map("v" + _).mkString(", ")
-    val castings = (1 to i).map { j => s"c$j(row, i$j)" }.mkString(",\n        ")
-    val body     =
+    val casters     = (1 to i).map("c" + _).mkString(", ")
+    val indexes     = (1 to i).map("i" + _).mkString(", ")
+    val values      = (1 to i).map(j => s"val v$j = c$j(row, i$j)").mkString("\n      ")
+    val checks      = (1 to i).map(j => s"hasEmptyValue(row, i$j, v$j)").mkString(" ||\n          ")
+    val tupleValues = (1 to i).map("v" + _).mkString(", ")
+
+    val body =
       s"""
          |  final private def cast$i(
          |    casts: List[(RS, ParamIndex) => Any],
@@ -55,13 +71,11 @@ object _CastOptRefLeaf extends DbSqlBase("CastOptRefLeaf", "/query/casting") {
          |    val List($casters) = casts
          |    val List($indexes) = (firstIndex until firstIndex + $i).toList
          |    (row: RS) => {
-         |      val ($values) = (
-         |        $castings
-         |      )
-         |      if (hasEmpty(row, firstIndex, List($values)))
-         |        Option.empty[Any]
-         |      else
-         |        Some(($values))
+         |      $values
+         |      if (
+         |        $checks
+         |      ) Option.empty[Any] else
+         |        Some(($tupleValues))
          |    }
          |  }""".stripMargin
   }

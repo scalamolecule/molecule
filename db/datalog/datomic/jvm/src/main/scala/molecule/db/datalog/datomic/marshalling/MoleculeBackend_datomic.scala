@@ -32,7 +32,7 @@ trait MoleculeBackend_datomic
   ): Future[Either[MoleculeError, List[AnyTpl]]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- Query[AnyTpl](dataModel, limit, proxy.dbView).get(conn, global)
+      tpls <- Query[AnyTpl](dataModel, limit, proxy.dbView).get(using conn, global)
     } yield tpls
   }
 
@@ -44,7 +44,7 @@ trait MoleculeBackend_datomic
   ): Future[Either[MoleculeError, (List[AnyTpl], Int, Boolean)]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- QueryOffset[AnyTpl](dataModel, limit, offset, proxy.dbView).get(conn, global)
+      tpls <- QueryOffset[AnyTpl](dataModel, limit, offset, proxy.dbView).get(using conn, global)
     } yield tpls
   }
 
@@ -56,7 +56,7 @@ trait MoleculeBackend_datomic
   ): Future[Either[MoleculeError, (List[AnyTpl], String, Boolean)]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- QueryCursor[AnyTpl](dataModel, limit, cursor, proxy.dbView).get(conn, global)
+      tpls <- QueryCursor[AnyTpl](dataModel, limit, cursor, proxy.dbView).get(using conn, global)
     } yield tpls
   }
 
@@ -68,7 +68,7 @@ trait MoleculeBackend_datomic
   ): Future[Unit] = {
     for {
       conn <- getConn(proxy)
-      _ <- Query[AnyTpl](dataModel, limit).subscribe(callback)(conn, global)
+      _ <- Query[AnyTpl](dataModel, limit).subscribe(callback)(using conn, global)
     } yield ()
   }
 
@@ -77,7 +77,7 @@ trait MoleculeBackend_datomic
     dataModel: DataModel
   ): Future[Either[MoleculeError, Unit]] = either {
     getConn(proxy).map { conn =>
-      query_unsubscribe[Unit](Query(dataModel))(conn, global)
+      query_unsubscribe[Unit](Query(dataModel))(using conn, global)
     }
   }
 
@@ -88,7 +88,7 @@ trait MoleculeBackend_datomic
     for {
       conn <- getConn(proxy)
       // Validation already done on JS side
-      txReport <- save_transact(Save(dataModel, doValidate = false))(conn, global)
+      txReport <- save_transact(Save(dataModel, doValidate = false))(using conn, global)
     } yield txReport
   }
 
@@ -102,7 +102,7 @@ trait MoleculeBackend_datomic
       tpls = UnpickleTpls[Any](dataModel, tplsSerialized).unpickleSeqOfProduct
 
       // Validation already done on JS side
-      txReport <- insert_transact(Insert(dataModel, tpls, doValidate = false))(conn, global)
+      txReport <- insert_transact(Insert(dataModel, tpls, doValidate = false))(using conn, global)
     } yield txReport
   }
 
@@ -113,7 +113,7 @@ trait MoleculeBackend_datomic
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      txReport <- update_transact(Update(dataModel, isUpsert))(conn, global)
+      txReport <- update_transact(Update(dataModel, isUpsert))(using conn, global)
     } yield txReport
   }
 
@@ -123,7 +123,7 @@ trait MoleculeBackend_datomic
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      txReport <- delete_transact(Delete(dataModel))(conn, global)
+      txReport <- delete_transact(Delete(dataModel))(using conn, global)
     } yield txReport
   }
 }

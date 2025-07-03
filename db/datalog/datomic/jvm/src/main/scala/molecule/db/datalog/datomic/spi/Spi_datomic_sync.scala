@@ -35,7 +35,7 @@ trait Spi_datomic_sync
     m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveOffset[Tpl](
       q.dataModel, q.optLimit, None, q.dbView, m2q
-    ).getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
+    ).getListFromOffset_sync(using conn.asInstanceOf[DatomicConn_JVM])._1
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): String = {
@@ -50,7 +50,7 @@ trait Spi_datomic_sync
     m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveOffset[Tpl](
       q.dataModel, q.optLimit, Some(q.offset), q.dbView, m2q
-    ).getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])
+    ).getListFromOffset_sync(using conn.asInstanceOf[DatomicConn_JVM])
   }
 
   override def queryOffset_inspect[Tpl](
@@ -67,7 +67,7 @@ trait Spi_datomic_sync
     m2q.bindValues.addAll(q.bindValues)
     DatomicQueryResolveCursor[Tpl](
       q.dataModel, q.optLimit, Some(q.cursor), q.dbView, m2q
-    ).getListFromCursor_sync(conn.asInstanceOf[DatomicConn_JVM])
+    ).getListFromCursor_sync(using conn.asInstanceOf[DatomicConn_JVM])
   }
 
   override def queryCursor_inspect[Tpl](
@@ -106,7 +106,7 @@ trait Spi_datomic_sync
       callback {
     val m2q  = new Model2DatomicQuery[Tpl](q.dataModel)
         val a = DatomicQueryResolveOffset(q.dataModel, q.optLimit, None, None, m2q)
-        a.getListFromOffset_sync(conn)._1
+        a.getListFromOffset_sync(using conn)._1
       }
     )
   }
@@ -119,7 +119,7 @@ trait Spi_datomic_sync
 
 
   override def save_transact(save: Save)(implicit conn: Conn): TxReport = {
-    await(Spi_datomic_async.save_transact(save)(conn, global))
+    await(Spi_datomic_async.save_transact(save)(using conn, global))
   }
 
   override def save_inspect(save: Save)(implicit conn: Conn): String = {
@@ -143,7 +143,7 @@ trait Spi_datomic_sync
   }
 
   override def insert_transact(insert: Insert)(implicit conn: Conn): TxReport = {
-    await(Spi_datomic_async.insert_transact(insert)(conn, global))
+    await(Spi_datomic_async.insert_transact(insert)(using conn, global))
   }
 
   override def insert_inspect(insert: Insert)(implicit conn: Conn): String = {
@@ -166,7 +166,7 @@ trait Spi_datomic_sync
   }
 
   override def update_transact(update: Update)(implicit conn: Conn): TxReport = {
-    await(Spi_datomic_async.update_transact(update)(conn, global))
+    await(Spi_datomic_async.update_transact(update)(using conn, global))
   }
 
   override def update_inspect(update: Update)(implicit conn: Conn): String = {
@@ -188,7 +188,7 @@ trait Spi_datomic_sync
   }
 
   override def delete_transact(delete: Delete)(implicit conn: Conn): TxReport = {
-    await(Spi_datomic_async.delete_transact(delete)(conn, global))
+    await(Spi_datomic_async.delete_transact(delete)(using conn, global))
   }
 
   override def delete_inspect(delete: Delete)(implicit conn: Conn): String = {
@@ -210,7 +210,7 @@ trait Spi_datomic_sync
     try {
       import molecule.db.core.util.Executor.global
       Await.result(
-        Spi_datomic_async.fallback_rawTransact(txData, debug)(conn, global),
+        Spi_datomic_async.fallback_rawTransact(txData, debug)(using conn, global),
         10.seconds
       )
     } catch {

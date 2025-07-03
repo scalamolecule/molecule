@@ -18,7 +18,7 @@ case class SortBasics(
 
   "Types" - types { implicit conn =>
     for {
-      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+      case List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
 
       _ <- Entity.string.insert(string3, string1, string2).transact
       _ <- Entity.int.insert(int3, int1, int2).transact
@@ -99,7 +99,7 @@ case class SortBasics(
 
   "Optional" - types { implicit conn =>
     for {
-      List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+      case List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
 
       _ <- Entity.i.string_?.insert((1, Some(string2)), (1, None), (1, Some(string1))).transact
       _ <- Entity.i.int_?.insert((2, Some(int2)), (2, None), (2, Some(int1))).transact

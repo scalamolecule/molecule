@@ -38,7 +38,7 @@ case class DatomicConn_JVM(
       IO(
         transact_async(
           readAll(new StringReader(edn)).get(0).asInstanceOf[Data]
-        )(Executor.global)
+        )(using Executor.global)
       )
     )
   }

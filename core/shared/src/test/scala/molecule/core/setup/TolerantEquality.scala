@@ -21,6 +21,7 @@ trait TolerantEquality extends TripleEquals {
                 } catch {
                   case _: Exception => hardCheck(lhs, rhs)
                 }
+              case pair                   => throw Exception("Unexpected pair: " + pair)
             }
           case _: Product2[_, _]    =>
             l.zip(r).foreach {
@@ -31,6 +32,7 @@ trait TolerantEquality extends TripleEquals {
                 } catch {
                   case _: Exception => hardCheck(lhs, rhs)
                 }
+              case pair             => throw Exception("Unexpected pair: " + pair)
             }
           case _                    =>
             l.zip(r).foreach {

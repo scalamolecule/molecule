@@ -415,7 +415,7 @@ case class One_One(
   "Delete individual ref value(s) with update" - refs { implicit conn =>
     for {
       refId <- B.i(7).save.transact.map(_.id)
-      id <- A.i.b.insert(1, refId).transact.map(_.id)
+      id <- A.i.b.insert((1, refId)).transact.map(_.id)
       _ <- A.i.b.query.get.map(_ ==> List((1, refId)))
 
       // Apply empty value to delete ref id of entity (entity remains)

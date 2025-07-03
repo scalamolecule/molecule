@@ -1,18 +1,18 @@
 package molecule.db.core.api.expression
 
+import molecule.base.metaModel.CardMap
 import molecule.core.dataModel.*
-import molecule.db.core.api.Tail
-//import scala.Tuple.Tail // requires NonEmptyTuple in scala 3.3.6, not in 3.7
+import molecule.db.core.api.*
+import molecule.db.core.ops.ModelTransformations_.*
+import scala.Tuple.{:*, Init}
 
 
-trait ExprMapOptOps[Tpl <: Tuple, T, This[_ <: Tuple, _], Next[_ <: Tuple, _]]
-  extends FilterAttr[Tpl, T, This, Next] {
-  protected def _exprMapOpt(op: Op, map: Option[Map[String, T]]): This[Tpl                   , T] = ???
-  protected def _exprMapOpK(op: Op, key: String                ): This[Option[T] *: Tail[Tpl], T] = ???
+trait ExprMapOpt_1[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends CardMap { self: Molecule  =>
+  def apply(map: Option[Map[String, T]]): Entity[Map[String, T]] = entity[Map[String, T]](addMapOpt(dataModel, Eq , map     ))
+  def apply(key: String                ): Entity[Option[T]     ] = entity[Option[T]     ](addMapKs (dataModel, Has, Seq(key)))
 }
 
-trait ExprMapOpt[Tpl <: Tuple, T, This[_ <: Tuple, _], Next[_ <: Tuple, _]]
-  extends ExprMapOptOps[Tpl, T, This, Next]{
-  def apply(map: Option[Map[String, T]]): This[Tpl                   , T] = _exprMapOpt(Eq , map)
-  def apply(key: String                ): This[Option[T] *: Tail[Tpl], T] = _exprMapOpK(Has, key)
+trait ExprMapOpt_n[T, Tpl <: Tuple, Entity[_ <: Tuple]](entity: [tpl <: Tuple] => DataModel => Entity[tpl]) extends CardMap { self: Molecule  =>
+  def apply(map: Option[Map[String, T]]): Entity[Tpl                   ] = entity[Tpl                   ](addMapOpt(dataModel, Eq , map     ))
+  def apply(key: String                ): Entity[Init[Tpl] :* Option[T]] = entity[Init[Tpl] :* Option[T]](addMapKs (dataModel, Has, Seq(key)))
 }

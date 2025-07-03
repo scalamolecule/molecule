@@ -43,7 +43,7 @@ trait Spi_mariadb_io extends Spi_io with StreamingJdbc with ModelUtils {
     chunkSize: Int
   )(implicit conn: Conn): fs2.Stream[IO, Tpl] = fs2stream(
     q, chunkSize,
-    (q: Query[Tpl], conn: Conn) => Spi_mariadb_sync.query_inspect[Tpl](q)(conn),
+    (q: Query[Tpl], conn: Conn) => Spi_mariadb_sync.query_inspect[Tpl](q)(using conn),
     Spi_mariadb_sync.getResultSetAndRowResolver[Tpl]
   )
 

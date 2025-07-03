@@ -12,7 +12,7 @@ class Adhoc_datomic_js_async extends MUnit with DbProviders_datomic with TestUti
   "types" - types { implicit conn =>
     for {
 
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(3).save.transact
       _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
       _ <- Entity(a).int(10).update.transact
@@ -66,7 +66,7 @@ class Adhoc_datomic_js_async extends MUnit with DbProviders_datomic with TestUti
   //    "validation" - validation { implicit conn =>
   //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
-  //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
+  //        case List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
   //
   //        id <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.ids)
   //

@@ -42,7 +42,7 @@ trait Spi_h2_io extends Spi_io with StreamingJdbc with ModelUtils {
     q: Query[Tpl], chunkSize: Int
   )(implicit conn: Conn): fs2.Stream[IO, Tpl] = fs2stream(
     q, chunkSize,
-    (q: Query[Tpl], conn: Conn) => Spi_h2_sync.query_inspect[Tpl](q)(conn),
+    (q: Query[Tpl], conn: Conn) => Spi_h2_sync.query_inspect[Tpl](q)(using conn),
     Spi_h2_sync.getResultSetAndRowResolver[Tpl]
   )
 

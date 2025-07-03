@@ -101,11 +101,11 @@ class RawQuery extends MUnit with DbProviders_postgres with TestUtils {
 
       // Set's are saved as PgArray's in Postgres
       _ <- rawQuery(q("stringSet")).map(_.head.head
-        .asInstanceOf[PgArray].getArray.asInstanceOf[Array[_]].toSet ==> Set(string1, string2)
+        .asInstanceOf[PgArray].getArray.asInstanceOf[Array[?]].toSet ==> Set(string1, string2)
       )
 
       _ <- rawQuery(q("intSet")).map(_.head.head
-        .asInstanceOf[PgArray].getArray.asInstanceOf[Array[_]].toSet ==> Set(int1, int2)
+        .asInstanceOf[PgArray].getArray.asInstanceOf[Array[?]].toSet ==> Set(int1, int2)
       )
     } yield ()
   }
@@ -119,11 +119,11 @@ class RawQuery extends MUnit with DbProviders_postgres with TestUtils {
 
       // Set's are saved as PgArray's in Postgres
       _ <- rawQuery(q("stringSet")).map(_.head.head
-        .asInstanceOf[PgArray].getArray.asInstanceOf[Array[_]].toSeq ==> Seq(string1, string2)
+        .asInstanceOf[PgArray].getArray.asInstanceOf[Array[?]].toSeq ==> Seq(string1, string2)
       )
 
       _ <- rawQuery(q("intSet")).map(_.head.head
-        .asInstanceOf[PgArray].getArray.asInstanceOf[Array[_]].toSeq ==> Seq(int1, int2)
+        .asInstanceOf[PgArray].getArray.asInstanceOf[Array[?]].toSeq ==> Seq(int1, int2)
       )
       // etc..
     } yield ()

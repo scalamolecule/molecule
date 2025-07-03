@@ -17,14 +17,14 @@ case class AttrOp_Boolean(
 
   "And" - types { implicit conn =>
     for {
-      List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
+      case List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
       _ <- Entity(a, b).boolean.&&(true).update.transact
       _ <- Entity.id(a, b).a1.boolean.query.get.map(_ ==> List(
         (a, true), // true && true
         (b, false), // false && true
       ))
 
-      List(c, d) <- Entity.boolean.insert(true, false).transact.map(_.ids)
+      case List(c, d) <- Entity.boolean.insert(true, false).transact.map(_.ids)
       _ <- Entity(c, d).boolean.&&(false).update.transact
       _ <- Entity.id(c, d).a1.boolean.query.get.map(_ ==> List(
         (c, false), // true && false
@@ -36,14 +36,14 @@ case class AttrOp_Boolean(
 
   "Or" - types { implicit conn =>
     for {
-      List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
+      case List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
       _ <- Entity(a, b).boolean.||(true).update.transact
       _ <- Entity.id(a, b).a1.boolean.query.get.map(_ ==> List(
         (a, true), // true || true
         (b, true), // false || true
       ))
 
-      List(c, d) <- Entity.boolean.insert(true, false).transact.map(_.ids)
+      case List(c, d) <- Entity.boolean.insert(true, false).transact.map(_.ids)
       _ <- Entity(c, d).boolean.||(false).update.transact
       _ <- Entity.id(c, d).a1.boolean.query.get.map(_ ==> List(
         (c, true), // true || false
@@ -55,7 +55,7 @@ case class AttrOp_Boolean(
 
   "Not" - types { implicit conn =>
     for {
-      List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
+      case List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
       _ <- Entity(a, b).boolean.!.update.transact
       _ <- Entity.id(a, b).a1.boolean.query.get.map(_ ==> List(
         (a, false), // !true

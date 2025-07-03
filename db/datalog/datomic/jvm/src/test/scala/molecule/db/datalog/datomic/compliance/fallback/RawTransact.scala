@@ -224,7 +224,7 @@ class RawTransact extends MUnit with DbProviders_datomic with TestUtils {
   "Delete" - types { implicit conn =>
     for {
       // Initial 2 rows
-      List(id1, _) <- Entity.string.insert(string1, string2).transact.map(_.ids)
+      case List(id1, _) <- Entity.string.insert(string1, string2).transact.map(_.ids)
 
       // Delete first row
       _ <- rawTransact(s"[[:db/retractEntity $id1]]")

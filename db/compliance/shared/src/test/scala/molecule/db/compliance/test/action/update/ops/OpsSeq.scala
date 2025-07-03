@@ -165,7 +165,7 @@ case class OpsSeq(
 
   "Update multiple values" - types { implicit conn =>
     for {
-      List(a, b, c) <- Entity.i.intSeq_?.insert(
+      case List(a, b, c) <- Entity.i.intSeq_?.insert(
         (1, None),
         (1, Some(Seq(1))),
         (2, Some(Seq(2))),

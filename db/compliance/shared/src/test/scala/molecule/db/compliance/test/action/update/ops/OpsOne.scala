@@ -67,7 +67,7 @@ case class OpsOne(
   "Delete individual ref value(s) with update" - refs { implicit conn =>
     for {
       refId <- B.i(7).save.transact.map(_.id)
-      id <- A.i.b.insert(1, refId).transact.map(_.id)
+      id <- A.i.b.insert((1, refId)).transact.map(_.id)
       _ <- A.i.b.query.get.map(_ ==> List((1, refId)))
 
       // Apply empty value to delete ref id of entity (entity remains)
@@ -78,7 +78,7 @@ case class OpsOne(
 
   "Update multiple values" - types { implicit conn =>
     for {
-      List(a, b, c) <- Entity.i.int_?.insert(
+      case List(a, b, c) <- Entity.i.int_?.insert(
         (1, None),
         (1, Some(1)),
         (2, Some(2)),
@@ -118,7 +118,7 @@ case class OpsOne(
 
   "Types apply" - types { implicit conn =>
     for {
-      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+      case List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
 
       id1 <- Entity.string(string1).save.transact.map(_.id)
       id2 <- Entity.int(int1).save.transact.map(_.id)

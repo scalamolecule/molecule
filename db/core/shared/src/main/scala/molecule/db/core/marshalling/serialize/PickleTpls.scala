@@ -72,7 +72,7 @@ case class PickleTpls(
       case Right(tpls) =>
         enc.writeInt(2) // Encode Right
         pickleTpls(tpls)
-      case Left(err)   => LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
+      case Left(err)   => LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(using state)
     }
     state.toByteBuffer.toArray
   }
@@ -82,7 +82,7 @@ case class PickleTpls(
       case Right(tpls) =>
         enc.writeInt(2) // Encode Right
         pickleTpls(tpls)
-      case Left(err)   => LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
+      case Left(err)   => LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(using state)
     }
     state.toByteBuffer
   }
@@ -237,7 +237,7 @@ case class PickleTpls(
     //    lazy val writeFloat : Float => Unit  = (value: Float) => enc.writeFloat(value)
     //    lazy val writeDouble: Double => Unit = (value: Double) => enc.writeDouble(value)
 
-    lazy val writeBoolean       : Boolean => Unit        = (value: Boolean) => BooleanPickler.pickle(value)(state)
+    lazy val writeBoolean       : Boolean => Unit        = (value: Boolean) => BooleanPickler.pickle(value)(using state)
     lazy val writeBigInt        : BigInt => Unit         = (value: BigInt) => {
       //      val ba = value.toByteArray
       //      enc.writeInt(ba.length)

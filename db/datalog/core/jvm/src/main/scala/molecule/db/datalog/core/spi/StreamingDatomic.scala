@@ -68,7 +68,7 @@ trait StreamingDatomic {
     def acquire(conn: Conn): ZIO[Any, MoleculeError, (jStream[jList[AnyRef]], jList[AnyRef] => Any)] =
       attemptBlockingMolecule(getStream(q, conn))
 
-    def release(stream: jStream[_]): UIO[Unit] =
+    def release(stream: jStream[?]): UIO[Unit] =
       ZIO.attemptBlocking(stream.close()).orDie
 
     def chunkify(

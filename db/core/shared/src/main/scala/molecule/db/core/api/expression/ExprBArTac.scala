@@ -1,16 +1,22 @@
 package molecule.db.core.api.expression
 
+import molecule.base.metaModel.CardSeq
 import molecule.core.dataModel.*
+import molecule.db.core.api.{Molecule, Molecule_0}
+import molecule.db.core.ops.ModelTransformations_.*
+import scala.annotation.compileTimeOnly
 
 
+trait ExprBArTac[T, Entity](entity: DataModel => Entity) extends CardSeq { self: Molecule =>
+  def apply(                   ) = entity(addBAr(dataModel, NoValue, Array.empty[Byte].asInstanceOf[Array[T]]))
+  def apply(byteArray: Array[T]) = entity(addBAr(dataModel, Eq     , byteArray                               ))
+  def not  (byteArray: Array[T]) = entity(addBAr(dataModel, Neq    , byteArray                               ))
 
-trait ExprBArTacOps[Tpl <: Tuple, T, This[_ <: Tuple, _], Next[_ <: Tuple, _]] {
-  protected def _exprBAr(op: Op, byteArray: Array[T]): This[Tpl, T] = ???
-}
 
-trait ExprBArTac[Tpl <: Tuple, T, This[_ <: Tuple, _], Next[_ <: Tuple, _]]
-  extends ExprBArTacOps[Tpl, T, This, Next] {
-  def apply(                   ): This[Tpl, T] = _exprBAr(NoValue, Array.empty[Byte].asInstanceOf[Array[T]])
-  def apply(byteArray: Array[T]): This[Tpl, T] = _exprBAr(Eq     , byteArray                               )
-  def not  (byteArray: Array[T]): This[Tpl, T] = _exprBAr(Neq    , byteArray                               )
+  // Avoid stack overflow from overload resolution
+  @compileTimeOnly("Byte arrays not allowed as filter attributes.")
+  def apply(a: Molecule_0 & CardSeq) = entity(filterAttr(dataModel, Eq, a))
+
+  @compileTimeOnly("Byte arrays not allowed as filter attributes.")
+  def not(a: Molecule_0 & CardSeq) = entity(filterAttr(dataModel, Neq, a))
 }

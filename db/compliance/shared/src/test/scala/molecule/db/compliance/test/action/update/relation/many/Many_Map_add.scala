@@ -17,7 +17,7 @@ case class Many_Map_add(
 
   "id-filter - ref - value" - refs { implicit conn =>
     for {
-      List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iMap_?).insert(
+      case List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iMap_?).insert(
         (1, List()),
         (2, List((Some("a"), None))),
         (3, List((Some("b"), None), (Some("c"), None))),

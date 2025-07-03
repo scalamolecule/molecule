@@ -82,7 +82,7 @@ case class SaveCardOne(
       _ <- Entity.short.a1.query.get.map(_ ==> List(short1))
       _ <- Entity.char.a1.query.get.map(_ ==> List(char1))
 
-      List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+      case List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
       _ <- Entity.ref(r1).save.transact
       _ <- Entity.ref(Seq(r2)).save.transact
       _ <- Entity.ref.a1.query.get.map(_ ==> List(r1, r2))
@@ -165,7 +165,7 @@ case class SaveCardOne(
       _ <- Entity.i_.short_?.a1.query.get.map(_ ==> List(None, Some(short1)))
       _ <- Entity.i_.char_?.a1.query.get.map(_ ==> List(None, Some(char1)))
 
-      List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+      case List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
       _ <- Entity.i(1).ref_?(Option.empty[Long]).save.transact
       _ <- Entity.i(1).ref_?(Some(r1)).save.transact
       _ <- Entity.i_.ref_?.a1.query.get.map(_ ==> List(None, Some(r1)))

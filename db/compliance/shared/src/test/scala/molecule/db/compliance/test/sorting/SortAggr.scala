@@ -25,7 +25,7 @@ case class SortAggr(
 
   "count" - types { implicit conn =>
     for {
-      List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+      case List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
 
       _ <- Entity.i.string.insert(
         (1, string1),
@@ -108,7 +108,7 @@ case class SortAggr(
 
   "countDistinct" - types { implicit conn =>
     for {
-      List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+      case List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
 
       _ <- Entity.i.string.insert(
         (1, string1),

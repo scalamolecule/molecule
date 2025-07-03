@@ -63,7 +63,7 @@ case class DirectionsOptional(
   "Forward, asc desc" - types { implicit conn =>
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs
-      .sortBy(p => (p._1, p._2))(Ordering.Tuple2(Ordering.Int, Ordering.Option[Int].reverse))
+      .sortBy(p => (p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))
     val query               = (cursor: String, limit: Int) => Entity.i.a1.int_?.d2.query.from(cursor).limit(limit)
     for {
       _ <- Entity.i.int_?.insert(pairs).transact
@@ -78,7 +78,7 @@ case class DirectionsOptional(
   "Forward, desc desc" - types { implicit conn =>
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs
-      .sortBy(p => (-p._1, p._2))(Ordering.Tuple2(Ordering.Int, Ordering.Option[Int].reverse))
+      .sortBy(p => (-p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))
     val query               = (cursor: String, limit: Int) => Entity.i.d1.int_?.d2.query.from(cursor).limit(limit)
     for {
       _ <- Entity.i.int_?.insert(pairs).transact
@@ -123,7 +123,7 @@ case class DirectionsOptional(
   "Backwards, asc desc" - types { implicit conn =>
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs
-      .sortBy(p => (p._1, p._2))(Ordering.Tuple2(Ordering.Int, Ordering.Option[Int].reverse))
+      .sortBy(p => (p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))
     val query               = (cursor: String, limit: Int) => Entity.i.a1.int_?.d2.query.from(cursor).limit(limit)
     for {
       _ <- Entity.i.int_?.insert(pairs).transact
@@ -138,7 +138,7 @@ case class DirectionsOptional(
   "Backwards, desc desc" - types { implicit conn =>
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs
-      .sortBy(p => (-p._1, p._2))(Ordering.Tuple2(Ordering.Int, Ordering.Option[Int].reverse))
+      .sortBy(p => (-p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))
     val query               = (cursor: String, limit: Int) => Entity.i.d1.int_?.d2.query.from(cursor).limit(limit)
     for {
       _ <- Entity.i.int_?.insert(pairs).transact

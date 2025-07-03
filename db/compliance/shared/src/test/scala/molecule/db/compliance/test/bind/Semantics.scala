@@ -65,10 +65,6 @@ case class Semantics(
     interceptMessage[ModelError](
       "Upsert action does not support bind parameters."
     )(Entity(42).i(?).upsert)
-
-    interceptMessage[ModelError](
-      "Delete action does not support bind parameters."
-    )(Entity.i(?).delete)
   }
 
 

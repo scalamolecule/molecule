@@ -31,7 +31,7 @@ case class AggrRefNum_variance(
       // Variance of all (non-coalesced) values
       _ <- A.B.i(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4))
 
-      _ <- A.i.B.i(variance).query.get.map(_.map {
+      _ <- A.i.B.i(variance).query.get.map(_.collect {
         case (1, variance) => variance ==~ varianceOf(1, 2)
         case (2, variance) => variance ==~ varianceOf(2, 3, 4)
       })
@@ -52,7 +52,7 @@ case class AggrRefNum_variance(
 
       _ <- A.B.C.i(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4))
 
-      _ <- A.i.B.i.C.i(variance).query.get.map(_.map {
+      _ <- A.i.B.i.C.i(variance).query.get.map(_.collect {
         case (1, 1, variance) => variance ==~ varianceOf(1, 2)
         case (2, 2, variance) => variance ==~ varianceOf(2, 3, 4)
       })
@@ -71,7 +71,7 @@ case class AggrRefNum_variance(
         (2, 4, 4),
       )).transact
 
-      _ <- A.i.B.i(variance).C.i(variance).query.get.map(_.map {
+      _ <- A.i.B.i(variance).C.i(variance).query.get.map(_.collect {
         case (1, varianceA, varianceB) =>
           varianceA ==~ varianceOf(1, 2)
           varianceB ==~ varianceOf(1, 2)
@@ -94,7 +94,7 @@ case class AggrRefNum_variance(
         (2, 4, 4),
       )).transact
 
-      _ <- A.i.B.i(variance)._A.C.i(variance).query.get.map(_.map {
+      _ <- A.i.B.i(variance)._A.C.i(variance).query.get.map(_.collect {
         case (1, varianceA, varianceB) =>
           varianceA ==~ varianceOf(1, 2)
           varianceB ==~ varianceOf(1, 2)

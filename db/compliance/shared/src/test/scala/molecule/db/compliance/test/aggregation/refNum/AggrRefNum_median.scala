@@ -42,7 +42,7 @@ case class AggrRefNum_median(
       // Median of all (non-coalesced) values
       _ <- A.B.i(median).query.get.map(_.head ==~ 2)
 
-      _ <- A.i.B.i(median).query.get.map(_.map {
+      _ <- A.i.B.i(median).query.get.map(_.collect {
         case (1, median) => median ==~ wholeOrAverage
         case (2, median) => median ==~ 3
       })
@@ -63,7 +63,7 @@ case class AggrRefNum_median(
 
       _ <- A.B.C.i(median).query.get.map(_.head ==~ 2)
 
-      _ <- A.i.B.i.C.i(median).query.get.map(_.map {
+      _ <- A.i.B.i.C.i(median).query.get.map(_.collect {
         case (1, 1, median) => median ==~ wholeOrAverage
         case (2, 2, median) => median ==~ 3
       })
@@ -82,7 +82,7 @@ case class AggrRefNum_median(
         (2, 9, 9),
       )).transact
 
-      _ <- A.i.a1.B.i(median).C.i(median).query.get.map(_.map {
+      _ <- A.i.a1.B.i(median).C.i(median).query.get.map(_.collect {
         case (1, median1, median2) =>
           median1 ==~ wholeOrAverage
           median2 ==~ wholeOrAverage
@@ -105,7 +105,7 @@ case class AggrRefNum_median(
         (2, 9, 9),
       )).transact
 
-      _ <- A.i.a1.B.i(median)._A.C.i(median).query.get.map(_.map {
+      _ <- A.i.a1.B.i(median)._A.C.i(median).query.get.map(_.collect {
         case (1, median1, median2) =>
           median1 ==~ wholeOrAverage
           median2 ==~ wholeOrAverage

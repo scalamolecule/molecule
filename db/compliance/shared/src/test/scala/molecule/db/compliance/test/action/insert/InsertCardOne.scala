@@ -67,7 +67,7 @@ case class InsertCardOne(
       _ <- Entity.short.a1.query.get.map(_ ==> List(shortMin, short1, shortMax))
       _ <- Entity.char.a1.query.get.map(_ ==> List(char1))
 
-      List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+      case List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
       _ <- Entity.ref.insert(r1).transact
       _ <- Entity.ref.insert(Seq(r2)).transact
       _ <- Entity.ref.a1.query.get.map(_ ==> List(r1, r2))

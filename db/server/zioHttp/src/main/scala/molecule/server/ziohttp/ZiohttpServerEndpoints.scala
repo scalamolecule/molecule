@@ -43,12 +43,12 @@ abstract class ZiohttpServerEndpoints(rpc: MoleculeRpc) extends ServerEndpoints_
     }
   }
 
-  val moleculeServerEndpoint_subscribe: ServerEndpoint[ZioStreams with WebSockets, Task] =
+  val moleculeServerEndpoint_subscribe: ServerEndpoint[ZioStreams & WebSockets, Task] =
     endpoint
       .in("molecule" / "subscribe")
       .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream](ZioStreams))
       .serverLogicSuccess(_ => ZIO.succeed(moleculeWebsocketHandler_zioPipe))
 
-  val moleculeServerEndpoints: List[ServerEndpoint[ZioStreams with WebSockets, Task]] =
+  val moleculeServerEndpoints: List[ServerEndpoint[ZioStreams & WebSockets, Task]] =
     moleculeServerEndpoints_ZIO :+ moleculeServerEndpoint_subscribe
 }

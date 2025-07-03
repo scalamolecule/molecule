@@ -3,8 +3,7 @@ import org.scalajs.linker.interface.ESVersion
 val moleculeVersion = "0.23.0-SNAPSHOT"
 
 val scala212 = "2.12.20"
-val scala3   = "3.3.6"
-//val scala3   = "3.7.1"
+val scala3   = "3.7.1"
 
 val catsVersion              = "3.6.0"
 val tapirVersion             = "1.11.25"
@@ -17,7 +16,6 @@ val testContainerVersion     = "1.20.6"
 val logbackVersion           = "1.5.0"
 val jacksonVersion           = "2.17.3"
 val calibanVersion           = "2.10.0"
-
 
 name := "molecule"
 inThisBuild(
@@ -33,40 +31,8 @@ inThisBuild(
     // Run tests for all systems sequentially to avoid data locks with dbs.
     // Only applies on JVM. On the JS platform there's no parallelism anyway.
     Test / parallelExecution := false,
-
-    //    javaOptions ++= Seq(
-    //      "-Xms8G",
-    //      "-Xmx40G",
-    //      "-Xss8M",
-    //      "-XX:+UseG1GC",
-    //      "-XX:+ParallelRefProcEnabled",
-    //      "-XX:MaxGCPauseMillis=200",
-    ////      "-XX:MaxGCPauseMillis=100",
-    //      "-XX:G1HeapRegionSize=32m",
-    //      "-XX:InitiatingHeapOccupancyPercent=45",
-    //    )
-
-    /*
--Xms8G
--Xmx40G
--Xss8M
--XX:+UseG1GC
--XX:+UseZGC
--XX:MaxGCPauseMillis=200
--XX:+ParallelRefProcEnabled
--XX:+UseStringDeduplication
--XX:+UnlockExperimentalVMOptions
--XX:G1HeapRegionSize=32m
--XX:InitiatingHeapOccupancyPercent=45
--Xlog:gc*:file=gc.log
-     */
-
-//    Compile / compile / scalacOptions += "-Xmax-inlines:32",
-//    maxErrors := 1000,
-//    Global / concurrentRestrictions += Tags.limit(Tags.Compile, 2)
   )
 )
-
 
 lazy val root = project
   .in(file("."))
@@ -208,9 +174,7 @@ lazy val dbCompliance = crossProject(JSPlatform, JVMPlatform)
       "org.slf4j" % "slf4j-nop" % "2.0.17" //% Test
     )
   )
-  //  .dependsOn(dbCore % "test->test")
   .dependsOn(dbCore % "compile->compile;test->test")
-//  .dependsOn(base, core, dbCore)
 
 
 lazy val dbDatalogCore = crossProject(JSPlatform, JVMPlatform)
@@ -496,9 +460,11 @@ lazy val compilerArgs = Def.settings(
         "-unchecked",
         "-explain-types",
         //        "-explain",
-        //    "-Xfatal-warnings",
-//        "-Xprint:typer",
-//        "-Ylog:typer",
+        //        "-Xfatal-warnings",
+        //        "-Xprint:typer",
+        //        "-Ylog:typer",
+        //        "-source:3.7-migration",
+        //        "-rewrite"
       )
     case _            => Nil // 2.12 base module for sbt-molecule plugin
   })

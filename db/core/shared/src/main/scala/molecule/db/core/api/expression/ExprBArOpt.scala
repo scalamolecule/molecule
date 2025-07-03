@@ -1,14 +1,16 @@
 package molecule.db.core.api.expression
 
+import molecule.base.metaModel.CardSeq
 import molecule.core.dataModel.*
+import molecule.db.core.api.{Molecule, Molecule_0}
+import molecule.db.core.ops.ModelTransformations_.*
+import scala.annotation.compileTimeOnly
 
+trait ExprBArOpt[T, Entity](entity: DataModel => Entity) extends CardSeq { self: Molecule =>
+  def apply(byteArray: Option[Array[T]]) = entity(addBArOpt(dataModel, Eq, byteArray))
 
-trait ExprBArOptOps[Tpl <: Tuple, T, This[_ <: Tuple, _], Next[_ <: Tuple, _]] {
-  protected def _exprBArOpt(op: Op, optByteArray: Option[Array[T]]): This[Tpl, T] = ???
-}
-
-trait ExprBArOpt[Tpl <: Tuple, T, This[_ <: Tuple, _], Next[_ <: Tuple, _]]
-  extends ExprBArOptOps[Tpl, T, This, Next]{
-  def apply(byteArray: Option[Array[T]]): This[Tpl, T] = _exprBArOpt(Eq, byteArray)
+  // Avoid stack overflow from overload resolution
+  @compileTimeOnly("Optional attributes not allowed to compare with filter attribute.")
+  def apply(a: Molecule_0 & CardSeq) = entity(filterAttr(dataModel, Eq, a))
 }
 

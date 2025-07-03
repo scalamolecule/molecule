@@ -33,6 +33,19 @@ object CastTpl_ extends SqlQueryBase {
       case 20 => cast20(casts, firstIndex)
       case 21 => cast21(casts, firstIndex)
       case 22 => cast22(casts, firstIndex)
+      case n  =>
+        val i0 = firstIndex + n
+        val j0 = n - 1
+        (row: RS) =>
+          var i          = i0
+          var j          = j0
+          var tpl: Tuple = EmptyTuple
+          while (j >= 0) {
+            i -= 1
+            tpl = casts(j)(row, i) *: tpl
+            j -= 1
+          }
+          tpl
     }
   }
 
@@ -40,7 +53,7 @@ object CastTpl_ extends SqlQueryBase {
     casts: List[(RS, ParamIndex) => Any],
     firstIndex: ParamIndex
   ): RS => Any = {
-    val List(c1) = casts
+    val c1 = casts.head
     (row: RS) =>
       c1(row, firstIndex)
   }

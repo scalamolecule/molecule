@@ -75,8 +75,8 @@ case class SaveSemantics(
         }
 
       // ok
-      _ <- A.i.Bb.*(B.i).insert(0, List(1)).transact
-      _ <- A.i.Bb.*?(B.i).insert(0, List(1)).transact
+      _ <- A.i.Bb.*(B.i).insert((0, List(1))).transact
+      _ <- A.i.Bb.*?(B.i).insert((0, List(1))).transact
     } yield ()
   }
 }

@@ -33,7 +33,7 @@ case class AggrNum_Int(
         _.head ==~ int1 + int2 + int2 + int3 + int4
       )
 
-      _ <- Entity.i.int(sum).query.get.map(_.map {
+      _ <- Entity.i.int.apply(sum).query.get.map(_.collect {
         case (1, sum) => sum ==~ int1 + int2
         case (2, sum) => sum ==~ int2 + int3 + int4
       })
@@ -60,7 +60,7 @@ case class AggrNum_Int(
           //       ^
           _ <- Entity.int(median).query.get.map(_.head ==~ int2.toString.toDouble) // middle number
 
-          _ <- Entity.i.int(median).query.get.map(_.map {
+          _ <- Entity.i.int(median).query.get.map(_.collect {
             case (1, median) => median ==~ int1.toDouble.floor // lower whole number
             case (2, median) => median ==~ int5.toString.toDouble // middle number
           })
@@ -78,7 +78,7 @@ case class AggrNum_Int(
 
           _ <- Entity.int(median).query.get.map(_.head ==~ int2.toString.toDouble) // middle number
 
-          _ <- Entity.i.int(median).query.get.map(_.map {
+          _ <- Entity.i.int(median).query.get.map(_.collect {
             case (1, median) => median ==~ (int1 + int2).toDouble / 2.0 // average of 2 middle numbers
             case (2, median) => median ==~ int5.toString.toDouble // middle number
           })
@@ -103,7 +103,7 @@ case class AggrNum_Int(
         _.head ==~ (int1 + int2 + int2 + int3 + int4).toDouble / 5.0
       )
 
-      _ <- Entity.i.int(avg).query.get.map(_.map {
+      _ <- Entity.i.int(avg).query.get.map(_.collect {
         case (1, avg) => avg ==~ (int1 + int2).toDouble / 2.0
         case (2, avg) => avg ==~ (int2 + int3 + int4).toDouble / 3.0
       })
@@ -127,7 +127,7 @@ case class AggrNum_Int(
         _.head ==~ varianceOf(int1, int2, int2, int3, int4)
       )
 
-      _ <- Entity.i.int(variance).query.get.map(_.map {
+      _ <- Entity.i.int(variance).query.get.map(_.collect {
         case (1, variance) => variance ==~ varianceOf(int1, int2)
         case (2, variance) => variance ==~ varianceOf(int2, int3, int4)
       })
@@ -151,7 +151,7 @@ case class AggrNum_Int(
         _.head ==~ stdDevOf(int1, int2, int2, int3, int4)
       )
 
-      _ <- Entity.i.int(stddev).query.get.map(_.map {
+      _ <- Entity.i.int(stddev).query.get.map(_.collect {
         case (1, stddev) => stddev ==~ stdDevOf(int1, int2)
         case (2, stddev) => stddev ==~ stdDevOf(int2, int3, int4)
       })

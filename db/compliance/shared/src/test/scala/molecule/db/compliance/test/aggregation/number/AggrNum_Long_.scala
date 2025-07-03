@@ -34,7 +34,7 @@ case class AggrNum_Long_(
         _.head ==~ long1 + long2 + long2 + long3 + long4
       )
 
-      _ <- Entity.i.long(sum).query.get.map(_.map {
+      _ <- Entity.i.long(sum).query.get.map(_.collect {
         case (1, sum) => sum ==~ long1 + long2
         case (2, sum) => sum ==~ long2 + long3 + long4
       })
@@ -61,7 +61,7 @@ case class AggrNum_Long_(
           //       ^
           _ <- Entity.long(median).query.get.map(_.head ==~ long2.toString.toDouble) // middle number
 
-          _ <- Entity.i.long(median).query.get.map(_.map {
+          _ <- Entity.i.long(median).query.get.map(_.collect {
             case (1, median) => median ==~ long1.toDouble.floor // lower whole number
             case (2, median) => median ==~ long5.toString.toDouble // middle number
           })
@@ -79,7 +79,7 @@ case class AggrNum_Long_(
 
           _ <- Entity.long(median).query.get.map(_.head ==~ long2.toString.toDouble) // middle number
 
-          _ <- Entity.i.long(median).query.get.map(_.map {
+          _ <- Entity.i.long(median).query.get.map(_.collect {
             case (1, median) => median ==~ (long1 + long2).toDouble / 2.0 // average of 2 middle numbers
             case (2, median) => median ==~ long5.toString.toDouble // middle number
           })
@@ -104,7 +104,7 @@ case class AggrNum_Long_(
         _.head ==~ (long1 + long2 + long2 + long3 + long4).toDouble / 5.0
       )
 
-      _ <- Entity.i.long(avg).query.get.map(_.map {
+      _ <- Entity.i.long(avg).query.get.map(_.collect {
         case (1, avg) => avg ==~ (long1 + long2).toDouble / 2.0
         case (2, avg) => avg ==~ (long2 + long3 + long4).toDouble / 3.0
       })
@@ -128,7 +128,7 @@ case class AggrNum_Long_(
         _.head ==~ varianceOf(long1, long2, long2, long3, long4)
       )
 
-      _ <- Entity.i.long(variance).query.get.map(_.map {
+      _ <- Entity.i.long(variance).query.get.map(_.collect {
         case (1, variance) => variance ==~ varianceOf(long1, long2)
         case (2, variance) => variance ==~ varianceOf(long2, long3, long4)
       })
@@ -152,7 +152,7 @@ case class AggrNum_Long_(
         _.head ==~ stdDevOf(long1, long2, long2, long3, long4)
       )
 
-      _ <- Entity.i.long(stddev).query.get.map(_.map {
+      _ <- Entity.i.long(stddev).query.get.map(_.collect {
         case (1, stddev) => stddev ==~ stdDevOf(long1, long2)
         case (2, stddev) => stddev ==~ stdDevOf(long2, long3, long4)
       })

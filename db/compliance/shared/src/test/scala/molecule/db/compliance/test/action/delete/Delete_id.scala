@@ -18,7 +18,7 @@ case class Delete_id(
 
   "1 entity" - refs { implicit conn =>
     for {
-      List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
+      case List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
       _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
       _ <- A(e1).delete.transact
       // or
@@ -30,7 +30,7 @@ case class Delete_id(
 
   "n entities vararg" - refs { implicit conn =>
     for {
-      List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
+      case List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
       _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
       _ <- A(e1, e2).delete.transact
       _ <- A.i.query.get.map(_ ==> List(3))
@@ -39,7 +39,7 @@ case class Delete_id(
 
   "n entities iterable" - refs { implicit conn =>
     for {
-      List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
+      case List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
       _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
       _ <- A(Seq(e1, e2)).delete.transact
       _ <- A.i.query.get.map(_ ==> List(3))

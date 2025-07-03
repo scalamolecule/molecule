@@ -22,7 +22,7 @@ case class FilterMap(
 
   "Map asserted" - types { implicit conn =>
     for {
-      List(a, b, c) <- Entity.iMap_?.int.insert(
+      case List(a, b, c) <- Entity.iMap_?.int.insert(
         (None, 0),
         (Some(Map("a" -> 1, "b" -> 2)), 1),
         (Some(Map("b" -> 2, "c" -> 3)), 2),
