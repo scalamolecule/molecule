@@ -51,7 +51,7 @@ trait Spi_mysql_sync extends SpiBaseJVM_sync {
   ): DeleteAction = {
     new SqlOps_mysql(conn)
       with ResolveDelete with Spi_mysql_sync with SqlDelete {}
-      .getDeleteAction(delete.dataModel.elements, conn.proxy.entityMap)
+      .getDeleteAction(delete.dataModel.elements, conn.proxy.metaDb)
   }
 
 

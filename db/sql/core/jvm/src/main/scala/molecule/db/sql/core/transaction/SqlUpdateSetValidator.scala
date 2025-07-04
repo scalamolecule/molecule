@@ -45,7 +45,7 @@ trait SqlUpdateSetValidator extends SpiHelpers with BaseHelpers {
         throw ExecutionError(
           s"Unexpected error trying to find current values of mandatory attribute ${a.name}")
     }
-    TxModelValidation(proxy.entityMap, proxy.attrMap, "update", Some(curSetValues)).validate(elements)
+    TxModelValidation(proxy.metaDb, "update", Some(curSetValues)).validate(elements)
   }
 
   protected def validateUpdateSet_json(
@@ -81,7 +81,7 @@ trait SqlUpdateSetValidator extends SpiHelpers with BaseHelpers {
         throw ExecutionError(
           s"Unexpected error trying to find current values of mandatory attribute ${a.name}")
     }
-    TxModelValidation(proxy.entityMap, proxy.attrMap, "update", Some(curSetValues)).validate(elements)
+    TxModelValidation(proxy.metaDb, "update", Some(curSetValues)).validate(elements)
   }
 
   protected def validateUpdateSet_sqlite(
@@ -120,7 +120,7 @@ trait SqlUpdateSetValidator extends SpiHelpers with BaseHelpers {
         throw ExecutionError(
           s"Unexpected error trying to find current values of mandatory attribute ${a.name}")
     }
-    TxModelValidation(proxy.entityMap, proxy.attrMap, "update", Some(curSetValues)).validate(elements)
+    TxModelValidation(proxy.metaDb, "update", Some(curSetValues)).validate(elements)
   }
 
   // Mysql data types

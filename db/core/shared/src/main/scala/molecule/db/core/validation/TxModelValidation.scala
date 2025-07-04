@@ -1,15 +1,14 @@
 package molecule.db.core.validation
 
-import molecule.base.metaModel.{Cardinality, MetaEntity}
 import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.dataModel.*
+import molecule.db.core.api.MetaDb
 import molecule.db.core.ops.ModelTransformations_
 import scala.annotation.tailrec
 
 
 case class TxModelValidation(
-  entityMap: Map[String, MetaEntity],
-  attrMap: Map[String, (Cardinality, String, Seq[String])],
+  metaDb: MetaDb,
   action: String,
   getCurSetValues: Option[Attr => Set[Any]] = None
 ) extends ModelTransformations_ {
@@ -18,20 +17,20 @@ case class TxModelValidation(
     throw ModelError(s"Can't transact duplicate attribute $element")
   }
 
-  private val isInsert        : Boolean                     = action == "insert"
-  private val isUpdate        : Boolean                     = action == "update"
-  private var prev            : Array[Array[Array[String]]] = Array(Array(Array.empty[String]))
-  private var level           : Int                         = 0
-  private var group           : Int                         = 0
-  private var refPath         : Seq[String]                 = Seq.empty[String]
-  private var prevEnt         : String                      = ""
-  private var mandatoryAttrs  : Set[String]                 = Set.empty[String]
-  private var mandatoryRefs   : Set[(String, String)]       = Set.empty[(String, String)]
-  private var requiredAttrs   : Set[String]                 = Set.empty[String]
-  private var presentAttrs    : Set[String]                 = Set.empty[String]
-  private var deletingAttrs   : Set[String]                 = Set.empty[String]
-  private var validationErrors: Map[String, Seq[String]]    = Map.empty[String, Seq[String]]
-  private var curElements     : List[Element]               = List.empty[Element]
+  private val isInsert         : Boolean                     = action == "insert"
+  private val isUpdate         : Boolean                     = action == "update"
+  private var prev             : Array[Array[Array[String]]] = Array(Array(Array.empty[String]))
+  private var level            : Int                         = 0
+  private var group            : Int                         = 0
+  private var refPath          : Seq[String]                 = Seq.empty[String]
+  private var prevEnt          : String                      = ""
+  private var mandatoryAttrsSet: Set[String]                 = Set.empty[String]
+  private var mandatoryRefsSet : Set[(String, String)]       = Set.empty[(String, String)]
+  private var requiredAttrsSet : Set[String]                 = Set.empty[String]
+  private var presentAttrs     : Set[String]                 = Set.empty[String]
+  private var deletingAttrs    : Set[String]                 = Set.empty[String]
+  private var validationErrors : Map[String, Seq[String]]    = Map.empty[String, Seq[String]]
+  private var curElements      : List[Element]               = List.empty[Element]
 
 
   @tailrec
@@ -62,7 +61,7 @@ case class TxModelValidation(
           noEmpty(r.ent, r.refAttr)
           prev(level) = prev(level) :+ Array(refAttr)
           group += 1
-          mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
+          mandatoryRefsSet = mandatoryRefsSet.filterNot(_._1 == refAttr)
           presentAttrs += r.refAttr
           refPath = refPath :+ refAttr
           validate(tail)
@@ -88,7 +87,7 @@ case class TxModelValidation(
             dup(refAttr)
           prev(level) = prev(level) :+ Array(refAttr)
           group += 1
-          mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
+          mandatoryRefsSet = mandatoryRefsSet.filterNot(_._1 == refAttr)
           presentAttrs += r.refAttr
           refPath = refPath :+ refAttr
           validate(es ++ tail)
@@ -127,16 +126,16 @@ case class TxModelValidation(
   private def register(a: Attr, attr: String) = {
     if (prevEnt != a.ent) {
       prevEnt = a.ent
-      mandatoryAttrs ++= entityMap(a.ent).mandatoryAttrs.map(attr => a.ent + "." + attr)
-      mandatoryRefs ++= entityMap(a.ent).mandatoryRefs.map { case (attr, ref) => (a.ent + "." + attr) -> ref }
+      metaDb.mandatoryAttrs.get(a.ent).foreach(mandatoryAttrsSet ++= _)
+      metaDb.mandatoryRefs.get(a.ent).foreach(mandatoryRefsSet ++= _)
     }
-    requiredAttrs ++= attrMap(attr)._3
+    metaDb.attrData.get(attr).foreach(requiredAttrsSet ++= _._3)
     presentAttrs += a.attr
 
-    if (mandatoryAttrs.contains(attr)) {
+    if (mandatoryAttrsSet.contains(attr)) {
       registerMandatoryAttr(a, attr)
     }
-    if (mandatoryRefs.map(_._1).contains(attr)) {
+    if (mandatoryRefsSet.map(_._1).contains(attr)) {
       registerMandatoryRefAttr(a, attr)
     }
   }
@@ -203,7 +202,7 @@ case class TxModelValidation(
         case a1: Attr if a1.attr == attr =>
           a1 match {
             case _: AttrOneMan | _: AttrSetMan | _: AttrSeqMan | _: AttrMapMan =>
-              requiredAttrs -= attr
+              requiredAttrsSet -= attr
               attr -> a1
 
             case a2 => onlyMandatory(a2)
@@ -288,7 +287,7 @@ case class TxModelValidation(
           case AttrSetManByte(_, _, _, set, _, Some(validator), _, _, _, _, _)           => val vr = validator.withAttrs(attrs); set.toSeq.flatMap(v => vr.validate(v))
           case AttrSetManShort(_, _, _, set, _, Some(validator), _, _, _, _, _)          => val vr = validator.withAttrs(attrs); set.toSeq.flatMap(v => vr.validate(v))
           case AttrSetManChar(_, _, _, set, _, Some(validator), _, _, _, _, _)           => val vr = validator.withAttrs(attrs); set.toSeq.flatMap(v => vr.validate(v))
-          case _                                                                            => err
+          case _                                                                         => err
         }
         case _: AttrSetTac | _: AttrSetOpt => onlyMandatory(a)
 
@@ -299,15 +298,15 @@ case class TxModelValidation(
   }
 
   private def checkMandatoryAndRequiredAttrs(): Unit = {
-    if (!isUpdate && mandatoryAttrs.nonEmpty) {
+    if (!isUpdate && mandatoryAttrsSet.nonEmpty) {
       throw ModelError(
         s"""Missing/empty mandatory attributes:
-           |  ${mandatoryAttrs.mkString("\n  ")}
+           |  ${mandatoryAttrsSet.mkString("\n  ")}
            |""".stripMargin
       )
     }
-    if (!isUpdate && mandatoryRefs.nonEmpty) {
-      val list = mandatoryRefs.map {
+    if (!isUpdate && mandatoryRefsSet.nonEmpty) {
+      val list = mandatoryRefsSet.map {
         case (a, ref) => s"$a pointing to entity $ref"
       }.mkString("\n  ")
       throw ModelError(
@@ -324,8 +323,8 @@ case class TxModelValidation(
            |""".stripMargin
       )
     }
-    if (requiredAttrs.nonEmpty) {
-      val requiredAttrs1       = requiredAttrs.toList.distinct
+    if (requiredAttrsSet.nonEmpty) {
+      val requiredAttrs1       = requiredAttrsSet.toList.distinct
       val presentAttrs1        = presentAttrs.toList.distinct
       val missingRequiredAttrs = requiredAttrs1.diff(presentAttrs1)
       if (missingRequiredAttrs.nonEmpty) {
@@ -351,7 +350,7 @@ case class TxModelValidation(
       }
     } else if (a.isInstanceOf[Mandatory] && !(a.isInstanceOf[AttrSet] && a.op == Eq && deletingAttr(a))) {
       // Mandatory attribute is ok - remove from watchlist
-      mandatoryAttrs -= attr
+      mandatoryAttrsSet -= attr
     }
   }
 
@@ -366,7 +365,7 @@ case class TxModelValidation(
       }
     } else if (a.isInstanceOf[Mandatory] && !(a.isInstanceOf[AttrSet] && a.op == Eq && deletingAttr(a))) {
       // Mandatory attribute is ok - remove from watchlist
-      mandatoryRefs = mandatoryRefs.filterNot(_._1 == attr)
+      mandatoryRefsSet = mandatoryRefsSet.filterNot(_._1 == attr)
     }
   }
 

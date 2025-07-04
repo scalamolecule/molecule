@@ -5,7 +5,6 @@ import molecule.base.util.BaseHelpers._
 case class MetaDomain(
   pkg: String,
   domain: String,
-  maxArity: Int,
   segments: List[MetaSegment]
 ) {
   def render(tabs: Int = 0): String = {
@@ -13,55 +12,10 @@ case class MetaDomain(
     val pad         = s"\n$p  "
     val segmentsStr = if (segments.isEmpty) "" else
       segments.map(_.render(tabs + 1)).mkString(pad, s",\n\n$pad", s"\n$p")
-    s"""MetaDomain("$pkg", "$domain", $maxArity, List($segmentsStr))"""
+    s"""MetaDomain("$pkg", "$domain", List($segmentsStr))"""
   }
 
-  override def toString: String = render(0)
-
-  def entityMap(tabs: Int = 0): String = {
-    val p        = indent(tabs)
-    val pad      = s"\n$p  "
-    val pairs    = for {
-      segment <- segments
-      entity <- segment.entities
-    } yield {
-      s""""${entity.entity}" -> $pad  ${entity.render(tabs + 2)}"""
-    }
-    val attrsStr = if (pairs.isEmpty) "" else pairs.mkString(pad, s",\n$pad", s"\n$p")
-    s"Map($attrsStr)"
-  }
-
-  def attrMap(tabs: Int = 0): String = {
-    val p        = indent(tabs)
-    val pad      = s"\n$p  "
-    val attrData = for {
-      segment <- segments
-      entity <- segment.entities
-      attr <- entity.attributes
-    } yield {
-      (s"${entity.entity}.${attr.attribute}", attr.cardinality, attr.baseTpe, attr.requiredAttrs)
-    }
-    val maxSp    = attrData.map(_._1.length).max
-    val attrs    = attrData.map {
-      case (a, card, tpe, reqAttrs) =>
-        val reqAttrsStr = reqAttrs.map(a => s""""$a"""").mkString(", ")
-        s""""$a"${padS(maxSp, a)} -> ($card, "$tpe"${padS(14, tpe)}, List($reqAttrsStr))"""
-    }
-    val attrsStr = if (attrs.isEmpty) "" else attrs.mkString(pad, s",$pad", s"\n$p")
-    s"Map($attrsStr)"
-  }
-
-  def uniqueAttrs: String = {
-    val attrs    = for {
-      segment <- segments
-      entity <- segment.entities
-      attr <- entity.attributes if attr.options.exists(s => s == "unique" || s == "uniqueIdentity")
-    } yield {
-      s""""${entity.entity}.${attr.attribute}""""
-    }
-    val attrsStr = if (attrs.isEmpty) "" else attrs.mkString("\n    ", s",\n    ", s"\n  ")
-    s"List($attrsStr)"
-  }
+  override def toString: String = render()
 }
 
 

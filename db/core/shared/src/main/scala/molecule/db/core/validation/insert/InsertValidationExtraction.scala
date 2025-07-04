@@ -1,10 +1,9 @@
 package molecule.db.core.validation.insert
 
-import molecule.base.metaModel.MetaEntity
 import molecule.base.error.{InsertError, ModelError}
 import molecule.core.dataModel.*
+import molecule.db.core.api.MetaDb
 import molecule.db.core.util.ModelUtils
-import scala.annotation.tailrec
 
 trait InsertValidationExtraction
   extends InsertValidators_
@@ -14,9 +13,9 @@ trait InsertValidationExtraction
   private var curElements: List[Element] = List.empty[Element]
   private def noEmpty(a: Attr) = throw new Exception("Can't use tacit attributes in insert molecule (${a.name}).")
 
-  @tailrec
+//  @tailrec
   final override def getValidators(
-    entityMap: Map[String, MetaEntity],
+    metaDb: MetaDb,
     elements: List[Element],
     validators: List[Product => Seq[InsertError]],
     tplIndex: Int,
@@ -33,10 +32,10 @@ trait InsertValidationExtraction
           }
           a match {
             case a: AttrOne => a match {
-              case a: AttrOneMan => getValidators(entityMap, tail, validators :+
+              case a: AttrOneMan => getValidators(metaDb, tail, validators :+
                 resolveAttrOneMan(a, tplIndex), tplIndex + 1, prevRefs)
 
-              case a: AttrOneOpt => getValidators(entityMap, tail, validators :+
+              case a: AttrOneOpt => getValidators(metaDb, tail, validators :+
                 resolveAttrOneOpt(a, tplIndex), tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
@@ -44,11 +43,11 @@ trait InsertValidationExtraction
 
             case a: AttrSet => a match {
               case a: AttrSetMan =>
-                val mandatory = entityMap(a.ent).mandatoryAttrs.contains(a.attr)
-                getValidators(entityMap, tail, validators :+
+                val mandatory = metaDb.mandatoryAttrs.get(a.ent).exists(_.contains(a.ent + "." + a.attr))
+                getValidators(metaDb, tail, validators :+
                   resolveAttrSetMan(a, tplIndex, mandatory), tplIndex + 1, prevRefs)
 
-              case a: AttrSetOpt => getValidators(entityMap, tail, validators :+
+              case a: AttrSetOpt => getValidators(metaDb, tail, validators :+
                 resolveAttrSetOpt(a, tplIndex), tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
@@ -56,11 +55,11 @@ trait InsertValidationExtraction
 
             case a: AttrSeq => a match {
               case a: AttrSeqMan =>
-                val mandatory = entityMap(a.ent).mandatoryAttrs.contains(a.attr)
-                getValidators(entityMap, tail, validators :+
+                val mandatory = metaDb.mandatoryAttrs.get(a.ent).exists(_.contains(a.attr))
+                getValidators(metaDb, tail, validators :+
                   resolveAttrSeqMan(a, tplIndex, mandatory), tplIndex + 1, prevRefs)
 
-              case a: AttrSeqOpt => getValidators(entityMap, tail, validators :+
+              case a: AttrSeqOpt => getValidators(metaDb, tail, validators :+
                 resolveAttrSeqOpt(a, tplIndex), tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
@@ -68,11 +67,11 @@ trait InsertValidationExtraction
 
             case a: AttrMap => a match {
               case a: AttrMapMan =>
-                val mandatory = entityMap(a.ent).mandatoryAttrs.contains(a.attr)
-                getValidators(entityMap, tail, validators :+
+                val mandatory = metaDb.mandatoryAttrs.get(a.ent).exists(_.contains(a.attr))
+                getValidators(metaDb, tail, validators :+
                   resolveAttrMapMan(a, tplIndex, mandatory), tplIndex + 1, prevRefs)
 
-              case a: AttrMapOpt => getValidators(entityMap, tail, validators :+
+              case a: AttrMapOpt => getValidators(metaDb, tail, validators :+
                 resolveAttrMapOpt(a, tplIndex), tplIndex + 1, prevRefs)
 
               case a => noEmpty(a)
@@ -80,34 +79,31 @@ trait InsertValidationExtraction
           }
 
         case Ref(_, refAttr, _, _, _, _) =>
-          getValidators(entityMap, tail, validators, tplIndex, prevRefs :+ refAttr)
+          getValidators(metaDb, tail, validators, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRef, _, _) =>
           noEntityReUseAfterBackref(tail.head, prevRefs, backRef)
-          getValidators(entityMap, tail, validators, tplIndex, prevRefs)
+          getValidators(metaDb, tail, validators, tplIndex, prevRefs)
 
         case OptRef(Ref(ent, refAttr, _, _, _, _), optRefElements) =>
           curElements = optRefElements
-          getValidators(entityMap, tail, validators :+
-            addOptRef(entityMap, tplIndex, ent, refAttr, optRefElements), tplIndex + 1, Nil)
+          getValidators(metaDb, tail, validators :+
+            addOptRef(metaDb, tplIndex, ent, refAttr, optRefElements), tplIndex + 1, Nil)
 
-        // todo: simply copied OptRef handling - does this work?
-//        case OptEntity(optRefElements, Ref(ent, refAttr, _, _, _, _)) =>
         case OptEntity(optRefElements) =>
           curElements = optRefElements
-//          val ent = fi
-          getValidators(entityMap, tail, validators :+
-            addOptRef(entityMap, tplIndex, "Optional", "entity", optRefElements), tplIndex + 1, Nil)
+          getValidators(metaDb, tail, validators :+
+            addOptRef(metaDb, tplIndex, "Optional", "entity", optRefElements), tplIndex + 1, Nil)
 
         case Nested(Ref(ent, refAttr, _, _, _, _), nestedElements) =>
           curElements = nestedElements
-          getValidators(entityMap, tail, validators :+
-            addNested(entityMap, tplIndex, ent, refAttr, nestedElements), tplIndex, Nil)
+          getValidators(metaDb, tail, validators :+
+            addNested(metaDb, tplIndex, ent, refAttr, nestedElements), tplIndex, Nil)
 
         case OptNested(Ref(ent, refAttr, _, _, _, _), nestedElements) =>
           curElements = nestedElements
-          getValidators(entityMap, tail, validators :+
-            addNested(entityMap, tplIndex, ent, refAttr, nestedElements), tplIndex, Nil)
+          getValidators(metaDb, tail, validators :+
+            addNested(metaDb, tplIndex, ent, refAttr, nestedElements), tplIndex, Nil)
       }
       case Nil             => validators
     }
@@ -115,14 +111,14 @@ trait InsertValidationExtraction
 
 
   private def addOptRef(
-    entityMap: Map[String, MetaEntity],
+    metaDb: MetaDb,
     tplIndex: Int,
     ent: String,
     refAttr: String,
     optElements: List[Element]
   ): Product => Seq[InsertError] = {
     // Recursively validate optional data
-    val validate    = getInsertValidator(entityMap, optElements)
+    val validate    = getInsertValidator(metaDb, optElements)
     val fullRefAttr = ent + "." + refAttr
     countValueAttrs(optElements) match {
       case 1 => // Nested arity-1 values
@@ -161,14 +157,14 @@ trait InsertValidationExtraction
   }
 
   private def addNested(
-    entityMap: Map[String, MetaEntity],
+    metaDb: MetaDb,
     tplIndex: Int,
     ent: String,
     refAttr: String,
     nestedElements: List[Element]
   ): Product => Seq[InsertError] = {
     // Recursively validate nested data
-    val validate    = getInsertValidator(entityMap, nestedElements)
+    val validate    = getInsertValidator(metaDb, nestedElements)
     val fullRefAttr = ent + "." + refAttr
     countValueAttrs(nestedElements) match {
       case 1 => // Nested arity-1 values

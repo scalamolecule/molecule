@@ -1,18 +1,18 @@
 package molecule.db.sql.core.transaction.strategy.delete
 
 import java.sql.Statement
-import molecule.base.metaModel.MetaEntity
+import molecule.db.core.api.MetaDb
 import molecule.db.sql.core.transaction.strategy.SqlOps
 
 case class DeleteEntity(
-  entityMap: Map[String, MetaEntity],
   parent: DeleteAction,
   sqlStmt: Statement,
   sqlOps: SqlOps,
   entity: String,
   refAttr: String,
   refEnt: String,
-) extends DeleteAction(entityMap, parent, sqlStmt, sqlOps, refEnt) {
+  metaDb:MetaDb,
+) extends DeleteAction(parent, sqlStmt, sqlOps, refEnt, metaDb) {
 
   override def process(): Unit = {
     buildExecutionGraph()

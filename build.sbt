@@ -429,7 +429,7 @@ lazy val graphqlTest = crossProject(JSPlatform, JVMPlatform)
   .in(file("graphql/test"))
   .settings(name := "molecule-graphql-test")
   .settings(withoutDocs)
-  .enablePlugins(MoleculePlugin)
+//  .enablePlugins(MoleculePlugin)
   .settings(
     publish / skip := true,
     //    testFrameworks += new TestFramework("munit.runner.Framework"),

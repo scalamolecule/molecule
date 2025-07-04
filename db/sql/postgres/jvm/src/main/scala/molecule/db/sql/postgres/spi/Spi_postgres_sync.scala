@@ -51,7 +51,7 @@ trait Spi_postgres_sync extends SpiBaseJVM_sync {
   ): DeleteAction = {
     new SqlOps_postgres(conn)
       with ResolveDelete with Spi_postgres_sync with SqlDelete {}
-      .getDeleteAction(delete.dataModel.elements, conn.proxy.entityMap)
+      .getDeleteAction(delete.dataModel.elements, conn.proxy.metaDb)
   }
 
 

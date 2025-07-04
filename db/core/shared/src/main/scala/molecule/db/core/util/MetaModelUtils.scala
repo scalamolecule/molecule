@@ -1,11 +1,8 @@
 package molecule.db.core.util
 
-import molecule.base.metaModel.MetaEntity
+import molecule.db.core.api.MetaDb
 
 trait MetaModelUtils {
 
-  def getHasMandatoryRefs(entityMap: Map[String, MetaEntity]): Boolean = entityMap.exists {
-    case (_, ent) if ent.mandatoryRefs.nonEmpty => true
-    case _                                      => false
-  }
+  def getHasMandatoryRefs(metaDb: MetaDb): Boolean = metaDb.mandatoryRefs.exists(_._2.nonEmpty)
 }

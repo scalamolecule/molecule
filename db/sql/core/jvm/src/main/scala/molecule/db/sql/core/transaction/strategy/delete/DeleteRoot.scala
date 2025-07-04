@@ -1,19 +1,19 @@
 package molecule.db.sql.core.transaction.strategy.delete
 
 import java.sql.{Connection, Statement}
-import molecule.base.metaModel.MetaEntity
+import molecule.db.core.api.MetaDb
 import molecule.db.sql.core.transaction.strategy.SqlOps
 
 case class DeleteRoot(
-  entityMap: Map[String, MetaEntity],
   sqlOps: SqlOps,
   sqlStmt: Statement,
-  ent: String
-) extends DeleteAction(entityMap, null, sqlStmt, sqlOps, ent) {
+  ent: String,
+  metaDb: MetaDb,
+) extends DeleteAction(null, sqlStmt, sqlOps, ent, metaDb) {
 
   val sqlConn: Connection = sqlOps.sqlConn
 
-  val firstEnt = DeleteEntity(entityMap, this, sqlStmt, sqlOps, "", "", ent)
+  val firstEnt = DeleteEntity(this, sqlStmt, sqlOps, "", "", ent, metaDb)
   children += firstEnt
 
   override def execute: List[Long] = {

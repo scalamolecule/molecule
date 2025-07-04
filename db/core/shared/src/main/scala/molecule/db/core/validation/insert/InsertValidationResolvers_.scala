@@ -1,14 +1,14 @@
 // GENERATED CODE ********************************
 package molecule.db.core.validation.insert
 
-import molecule.base.metaModel.MetaEntity
 import molecule.base.error.InsertError
 import molecule.core.dataModel.*
+import molecule.db.core.api.MetaDb
 
 trait InsertValidationResolvers_ {
 
   def getValidators(
-    entityMap: Map[String, MetaEntity],
+    metaDb: MetaDb,
     elements: List[Element],
     validators: List[Product => Seq[InsertError]],
     tplIndex: Int,
@@ -16,11 +16,11 @@ trait InsertValidationResolvers_ {
   ): List[Product => Seq[InsertError]]
 
   def getInsertValidator(
-    entityMap: Map[String, MetaEntity],
+    metaDb: MetaDb,
     elements: List[Element],
   ): Product => Seq[InsertError] = {
     val validators: List[Product => Seq[InsertError]] =
-      getValidators(entityMap, elements, Nil, 0, Nil)
+      getValidators(metaDb, elements, Nil, 0, Nil)
 
     validators.length match {
       case 1  => validate1(validators)

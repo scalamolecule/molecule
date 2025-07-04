@@ -1,3 +1,3 @@
 package molecule
 
-abstract class Graphql(maxArity: Int, urlOrSchemaFilePath: String = "")
+abstract class Graphql(urlOrSchemaFilePath: String = "")

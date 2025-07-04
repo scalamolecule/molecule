@@ -51,7 +51,7 @@ trait Spi_mariadb_sync extends SpiBaseJVM_sync {
   ): DeleteAction = {
     new SqlOps_mariadb(conn)
       with ResolveDelete with Spi_mariadb_sync with SqlDelete {}
-      .getDeleteAction(delete.dataModel.elements, conn.proxy.entityMap)
+      .getDeleteAction(delete.dataModel.elements, conn.proxy.metaDb)
   }
 
 

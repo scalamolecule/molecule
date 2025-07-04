@@ -179,8 +179,7 @@ trait SpiBaseJVM_sync
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
     if (save.doValidate) {
-      val proxy = conn.proxy
-      TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.dataModel.elements)
+      TxModelValidation(conn.proxy.metaDb, "save").validate(save.dataModel.elements)
     } else {
       Map.empty[String, Seq[String]]
     }

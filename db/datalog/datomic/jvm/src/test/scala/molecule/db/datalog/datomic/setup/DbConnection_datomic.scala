@@ -1,7 +1,7 @@
 package molecule.db.datalog.datomic.setup
 
 import molecule.db.compliance.setup.DbConnection
-import molecule.db.core.api.Schema_datomic
+import molecule.db.core.api.MetaDb_datomic
 import molecule.db.core.marshalling.DatomicProxy
 import molecule.db.core.spi.Conn
 import molecule.db.core.util.Executor.*
@@ -12,8 +12,8 @@ import scala.concurrent.duration.*
 
 trait DbConnection_datomic extends DbConnection {
 
-  def getConnection(schema: Schema_datomic): DatomicConn_JVM = {
-    val proxy = DatomicProxy("mem", "", schema)
+  def getConnection(metaDb: MetaDb_datomic): DatomicConn_JVM = {
+    val proxy = DatomicProxy("mem", "", metaDb)
 
     // Block to enable supplying Connection instead of Future[Connection] to tests
     Await.result(
@@ -22,14 +22,14 @@ trait DbConnection_datomic extends DbConnection {
     )
   }
 
-  def run(test: Conn => Any, schema: Schema_datomic): Any = {
-    test(getConnection(schema))
+  def run(test: Conn => Any, metaDb: MetaDb_datomic): Any = {
+    test(getConnection(metaDb))
   }
 
-  def connZLayer(schema: Schema_datomic): ZLayer[Any, Throwable, Conn] = {
+  def connZLayer(metaDb: MetaDb_datomic): ZLayer[Any, Throwable, Conn] = {
     ZLayer.scoped(
       ZIO.attemptBlocking {
-        getConnection(schema)
+        getConnection(metaDb)
       }
     )
   }

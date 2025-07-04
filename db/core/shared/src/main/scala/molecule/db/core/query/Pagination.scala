@@ -51,7 +51,7 @@ trait Pagination[Tpl] extends BaseHelpers {
   }
 
   protected def initialCursor(conn: Conn, elements: List[Element], tpls: List[Tpl]): String = {
-    val unique = conn.proxy.uniqueAttrs
+    val unique = conn.proxy.metaDb.uniqueAttrs
     @tailrec
     def checkSort(
       elements: List[Element],

@@ -44,8 +44,7 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
   protected lazy val retractEntity = kw("db", "retractEntity")
   protected lazy val dbId          = kw("db", "id")
 
-  protected lazy val bigInt2java  = (v: Any) =>
-    v.asInstanceOf[BigInt].bigInteger
+  protected lazy val bigInt2java  = (v: Any) => v.asInstanceOf[BigInt].bigInteger
   protected lazy val bigDec2java  = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal
   protected lazy val char2java    = (v: Any) => v.toString
   protected lazy val byte2java    = (v: Any) => v.asInstanceOf[Byte].toInt
@@ -116,7 +115,7 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
    */
   protected def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
     proxy match {
-      case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _) =>
+      case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _) =>
         protocol match {
           case "mem" =>
             DatomicPeer.recreateDb(proxy)

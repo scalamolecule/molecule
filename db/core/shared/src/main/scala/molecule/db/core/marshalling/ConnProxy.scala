@@ -1,37 +1,24 @@
 package molecule.db.core.marshalling
 
 import java.util.UUID
-import molecule.base.metaModel.{Cardinality, MetaEntity}
-import molecule.db.core.api.Schema
+import molecule.base.util.BaseHelpers
+import molecule.db.core.api.MetaDb
 import molecule.db.core.marshalling.dbView.DbView
+import scala.io.Source
+import scala.util.Using
 
 sealed trait ConnProxy {
 
   /** Unique internal identifier for cached proxy connection on server side */
   val uuid: UUID
 
+  /** Various meta-information about the database */
+  val metaDb: MetaDb
+
   /** String for transacting the schema of the database */
   val schemaStr: String
 
-  /** Entity name -> MetaEntity */
-  val entityMap: Map[String, MetaEntity]
-
-  /** Attribute name -> (Cardinality, Scala type, Required attributes) */
-  val attrMap: Map[String, (Cardinality, String, Seq[String])]
-
-  /** Attributes requiring unique values */
-  val uniqueAttrs: List[String]
-
-  /** Schema creation strings for databases */
-  val schemaData: List[String]
-
-  /** Indexed flags for reserved entity names */
-  val reservedEntities: IArray[Byte] = IArray.empty[Byte]
-
-  /** Indexed flags for reserved attribute names */
-  val reservedAttributes: IArray[Byte] = IArray.empty[Byte]
-
-  /** Internal holder of optional alternative Db view (asOf, since, widh). Used by Datomic only */
+  /** Internal holder of optional alternative Db view (asOf, since). Used by Datomic only */
   val dbView: Option[DbView] = None
 }
 
@@ -39,38 +26,34 @@ sealed trait ConnProxy {
 case class JdbcProxy(
   url: String,
   override val uuid: UUID,
+  override val metaDb: MetaDb,
   override val schemaStr: String,
-  override val entityMap: Map[String, MetaEntity],
-  override val attrMap: Map[String, (Cardinality, String, Seq[String])],
-  override val uniqueAttrs: List[String],
-  override val schemaData: List[String],
-  override val reservedEntities: IArray[Byte] = IArray.empty[Byte],
-  override val reservedAttributes: IArray[Byte] = IArray.empty[Byte]
 ) extends ConnProxy
 
-object JdbcProxy {
-  def apply(url: String, schema: Schema): JdbcProxy = JdbcProxy(
+
+trait SchemaLoader {
+  def getSchema(schemaResourcePath: String): String = {
+    Using(Source.fromResource(schemaResourcePath)) { source =>
+      source.mkString
+    }.getOrElse(throw new Exception(
+      s"Couldn't find database schema file resources/$schemaResourcePath."
+    ))
+  }
+}
+
+object JdbcProxy extends SchemaLoader with BaseHelpers {
+  def apply(url: String, metaDb: MetaDb): JdbcProxy = JdbcProxy(
     url,
     UUID.randomUUID(),
-    schema.schemaData.head,
-    schema.entityMap,
-    schema.attrMap,
-    schema.uniqueAttrs,
-    schema.schemaData,
-    schema.reservedEntities,
-    schema.reservedAttributes
+    metaDb,
+    getSchema(metaDb.schemaResourcePath)
   )
 
-  def apply(url: String, schema: Schema, initSql: String): JdbcProxy = JdbcProxy(
+  def apply(url: String, metaDb: MetaDb, initSql: String): JdbcProxy = JdbcProxy(
     url,
     UUID.randomUUID(),
-    if (initSql.isEmpty) schema.schemaData.head else initSql,
-    schema.entityMap,
-    schema.attrMap,
-    schema.uniqueAttrs,
-    schema.schemaData,
-    schema.reservedEntities,
-    schema.reservedAttributes,
+    metaDb,
+    if (initSql.isEmpty) getSchema(metaDb.schemaResourcePath) else initSql,
   )
 }
 
@@ -78,54 +61,38 @@ case class DatomicProxy(
   protocol: String,
   dbIdentifier: String,
   override val uuid: UUID,
-  override val dbView: Option[DbView] = None,
+  override val metaDb: MetaDb,
   override val schemaStr: String,
-  override val entityMap: Map[String, MetaEntity],
-  override val attrMap: Map[String, (Cardinality, String, Seq[String])],
-  override val uniqueAttrs: List[String],
-  override val schemaData: List[String],
-  override val reservedEntities: IArray[Byte] = IArray.empty[Byte],
-  override val reservedAttributes: IArray[Byte] = IArray.empty[Byte],
-
+  override val dbView: Option[DbView] = None,
 ) extends ConnProxy
 
 
-object DatomicProxy {
+object DatomicProxy extends SchemaLoader {
   def apply(
     protocol: String,
     dbIdentifier: String,
-    schema: Schema
+    metaDb: MetaDb
   ): DatomicProxy = DatomicProxy(
     protocol,
     dbIdentifier,
     UUID.randomUUID(),
+    metaDb,
+    getSchema(metaDb.schemaResourcePath),
     None,
-    schema.schemaData.head,
-    schema.entityMap,
-    schema.attrMap,
-    schema.uniqueAttrs,
-    schema.schemaData,
-    schema.reservedEntities,
-    schema.reservedAttributes
   )
 
   def apply(
     protocol: String,
     dbIdentifier: String,
-    schema: Schema,
+    metaDb: MetaDb,
     dbView: Option[DbView]
   ): DatomicProxy = DatomicProxy(
     protocol,
     dbIdentifier,
     UUID.randomUUID(),
+    metaDb,
+    getSchema(metaDb.schemaResourcePath),
     dbView,
-    schema.schemaData.head,
-    schema.entityMap,
-    schema.attrMap,
-    schema.uniqueAttrs,
-    schema.schemaData,
-    schema.reservedEntities,
-    schema.reservedAttributes
   )
 }
 

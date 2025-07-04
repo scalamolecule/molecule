@@ -130,8 +130,7 @@ trait Spi_datomic_sync
     save: Save
   )(implicit conn: Conn): Map[String, Seq[String]] = {
     if (save.doValidate) {
-      val proxy = conn.proxy
-      TxModelValidation(proxy.entityMap, proxy.attrMap, "save")
+      TxModelValidation(conn.proxy.metaDb, "save")
         .validate(save.dataModel.elements)
     } else {
       Map.empty[String, Seq[String]]

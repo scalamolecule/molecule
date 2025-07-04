@@ -746,13 +746,13 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleFileNotFoundException: CompositePickler[FileNotFoundException] =
     compositePickler[FileNotFoundException]
 
-  implicit val pickleSchema         : CompositePickler[Schema]          = compositePickler[Schema]
-  implicit val pickleSchema_datomic : CompositePickler[Schema_datomic]  = compositePickler[Schema_datomic]
-  implicit val pickleSchema_h2      : CompositePickler[Schema_h2]       = compositePickler[Schema_h2]
-  implicit val pickleSchema_mariadb : CompositePickler[Schema_mariadb]  = compositePickler[Schema_mariadb]
-  implicit val pickleSchema_mysql   : CompositePickler[Schema_mysql]    = compositePickler[Schema_mysql]
-  implicit val pickleSchema_postgres: CompositePickler[Schema_postgres] = compositePickler[Schema_postgres]
-  implicit val pickleSchema_sqlite  : CompositePickler[Schema_sqlite]   = compositePickler[Schema_sqlite]
+  implicit val pickleMetaDb         : CompositePickler[MetaDb]         = compositePickler[MetaDb]
+  implicit val pickleMetaDb_datomic : CompositePickler[MetaDb_datomic] = compositePickler[MetaDb_datomic]
+  implicit val pickleMetaDb_h2      : CompositePickler[MetaDb_h2]      = compositePickler[MetaDb_h2]
+  implicit val pickleMetaDb_mariadb : CompositePickler[MetaDb_mariadb] = compositePickler[MetaDb_mariadb]
+  implicit val pickleMetaDb_mysql   : CompositePickler[MetaDb_mysql]    = compositePickler[MetaDb_mysql]
+  implicit val pickleMetaDb_postgres: CompositePickler[MetaDb_postgres] = compositePickler[MetaDb_postgres]
+  implicit val pickleMetaDb_sqlite  : CompositePickler[MetaDb_sqlite]   = compositePickler[MetaDb_sqlite]
 
   implicit val pickleConnProxy: CompositePickler[ConnProxy] =
     compositePickler[ConnProxy]

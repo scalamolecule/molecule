@@ -2,7 +2,7 @@ package molecule.db.compliance.domains
 
 import molecule.DomainStructure
 
-object Community extends DomainStructure(10) {
+object Community extends DomainStructure {
 
   trait Person {
     val name = oneString

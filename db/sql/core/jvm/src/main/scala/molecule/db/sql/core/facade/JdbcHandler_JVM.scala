@@ -22,11 +22,7 @@ object JdbcHandler_JVM {
       sqlConn.setAutoCommit(false)
       val conn = JdbcConn_JVM(proxy, sqlConn)
       val stmt = use(conn.sqlConn.createStatement)
-      val sql  = if (proxy.schemaStr.nonEmpty)
-        proxy.schemaStr
-      else
-        proxy.schemaData.head
-      stmt.executeUpdate(sql)
+      stmt.executeUpdate(proxy.schemaStr)
       sqlConn.commit()
       conn
     }.get

@@ -13,8 +13,8 @@
 //  override val database              = "postgres"
 //  override val isJsPlatform: Boolean = false
 //
-//  override def inMem[T](test: Conn => T, schema: Schema): T = {
-//    val conn = schema match {
+//  override def inMem[T](test: Conn => T, metaDb: Schema): T = {
+//    val conn = metaDb match {
 //      case StarwarsSchema => ??? //JdbcHandler_JVM.recreateDb(c.conn_Types, c.recreateStmt_Types)
 //      //      case _              => ??? //JdbcHandler_JVM.recreateDb(c.conn_Types, c.recreateStmt_Types)
 //    }

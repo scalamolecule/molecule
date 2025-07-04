@@ -53,7 +53,7 @@ trait Spi_sqlite_sync extends SpiBaseJVM_sync {
   ): DeleteAction = {
     new SqlOps_sqlite(conn)
       with ResolveDelete with SqlDelete {}
-      .getDeleteAction(delete.dataModel.elements, conn.proxy.entityMap)
+      .getDeleteAction(delete.dataModel.elements, conn.proxy.metaDb)
   }
 
 

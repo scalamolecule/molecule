@@ -1,17 +1,18 @@
 package molecule.db.sql.core.transaction.strategy.delete
 
 import java.sql.Statement
-import molecule.base.metaModel.{CardOne, MetaAttribute, MetaEntity}
+import molecule.base.metaModel.CardOne
 import molecule.base.util.BaseHelpers
+import molecule.db.core.api.MetaDb
 import molecule.db.sql.core.transaction.strategy.{SqlAction, SqlOps}
 import scala.collection.mutable.ListBuffer
 
 abstract class DeleteAction(
-  entityMap: Map[String, MetaEntity],
   parent: DeleteAction,
   sqlStmt: Statement,
   sqlOps: SqlOps,
   entity: String,
+  metaDb: MetaDb,
 ) extends SqlAction(parent, sqlOps, entity)
   with BaseHelpers {
 
@@ -26,47 +27,40 @@ abstract class DeleteAction(
   }
 
 
-  private def prepareQueryAndActions: Seq[() => DeleteEntity] = {
-    entityMap(entity).attributes.collect {
-      case MetaAttribute(refAttr, card, _, _, Some(refEnt), _, options, _, _, _, _, _)
-        if options.contains("owner") =>
-        if (card.isInstanceOf[CardOne]) {
-          cols += entity + "." + refAttr
+  def prepareQueryAndActions: Seq[() => DeleteEntity] = metaDb.ownedRefs.getOrElse(entity, Nil).map {
+    case (refAttr, CardOne, refEnt) =>
+      cols += entity + "." + refAttr
+      () =>
+        // Make delete action if we find ref-one ids
+        DeleteEntity(
+          parent, sqlStmt, sqlOps, entity, refAttr, refEnt, metaDb
+        )
 
-          () => {
-            // Make delete action if we find ref-one ids
-            DeleteEntity(
-              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEnt
-            )
-          }
+    case (refAttr, _, refEnt) =>
+      val t          = refAttr + "_" + refEnt
+      val joinTable  = ss(entity, refAttr, refEnt)
+      val (eid, rid) = sqlOps.joinIdNames(entity, refEnt)
+      cols += s"$t.id"
+      joins ++= List(
+        s"LEFT JOIN $joinTable", "", s" ON $entity.id", s" = $joinTable.$eid",
+        s"LEFT JOIN $refEnt", s" AS $t", s" ON $joinTable.$rid", s" = $t.id"
+      )
+      () => {
+        // Make delete action if we find ref-many ids
+        val deleteRef  = DeleteEntity(
+          parent, sqlStmt, sqlOps, entity, refAttr, refEnt, metaDb
+        )
+        // Delete rows in join table
+        val deleteJoin = DeleteJoin(
+          parent, sqlStmt, sqlOps, entity, refAttr, refEnt, metaDb
+        )
+        // We can simply delete by the left ids of the parent entity
+        deleteJoin.ids = ids
 
-        } else {
-          val t          = refAttr + "_" + refEnt
-          val joinTable  = ss(entity, refAttr, refEnt)
-          val (eid, rid) = sqlOps.joinIdNames(entity, refEnt)
-          cols += s"$t.id"
-          joins ++= List(
-            s"LEFT JOIN $joinTable", "", s" ON $entity.id", s" = $joinTable.$eid",
-            s"LEFT JOIN $refEnt", s" AS $t", s" ON $joinTable.$rid", s" = $t.id"
-          )
-          () => {
-            // Make delete action if we find ref-many ids
-            val deleteRef  = DeleteEntity(
-              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEnt
-            )
-            // Delete rows in join table
-            val deleteJoin = DeleteJoin(
-              entityMap, parent, sqlStmt, sqlOps, entity, refAttr, refEnt
-            )
-            // We can simply delete by the left ids of the parent entity
-            deleteJoin.ids = ids
-
-            // Make join deletion a child of (delete before) ref deletion
-            deleteRef.addChild(deleteJoin)
-            deleteRef
-          }
-        }
-    }
+        // Make join deletion a child of (delete before) ref deletion
+        deleteRef.addChild(deleteJoin)
+        deleteRef
+      }
   }
 
 

@@ -1,6 +1,7 @@
 package molecule.db.sql.postgres.setup
 
-import molecule.db.core.api.Schema_postgres
+import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.api.MetaDb_postgres
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
@@ -8,7 +9,7 @@ import org.postgresql.ds.PGSimpleDataSource
 import org.testcontainers.containers.PostgreSQLContainer
 import zio.{ZIO, ZLayer}
 
-object DbConnection_postgres {
+object DbConnection_postgres extends DbConnection {
 
   private val baseUrl = "postgres:17"
 
@@ -33,23 +34,24 @@ object DbConnection_postgres {
        |""".stripMargin
 
 
-  def getConnection(schema: Schema_postgres): JdbcConn_JVM = {
-    val initSql = resetDb + schema.schemaData.head
-    val proxy   = JdbcProxy(baseUrl, schema, initSql)
+  def getConnection(metaDb: MetaDb_postgres): JdbcConn_JVM = {
+//    val initSql = resetDb + metaDb.schemaData.head
+    val initSql = resetDb + getFileContent(metaDb.schemaResourcePath)
+    val proxy   = JdbcProxy(baseUrl, metaDb, initSql)
 
     // Not closing the connection since we re-use it
     JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)
   }
 
-  def run(test: Conn => Any, schema: Schema_postgres): Any = {
-    test(getConnection(schema))
+  def run(test: Conn => Any, metaDb: MetaDb_postgres): Any = {
+    test(getConnection(metaDb))
   }
 
 
-  def connZLayer(schema: Schema_postgres): ZLayer[Any, Throwable, Conn] = {
+  def connZLayer(metaDb: MetaDb_postgres): ZLayer[Any, Throwable, Conn] = {
     ZLayer.scoped(
       ZIO.attemptBlocking {
-        getConnection(schema)
+        getConnection(metaDb)
       }
     )
   }

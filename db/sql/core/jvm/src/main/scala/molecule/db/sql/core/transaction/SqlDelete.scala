@@ -1,8 +1,9 @@
 package molecule.db.sql.core.transaction
 
-import molecule.base.metaModel.{CardOne, MetaEntity}
 import molecule.base.error.ModelError
+import molecule.base.metaModel.CardOne
 import molecule.core.dataModel.*
+import molecule.db.core.api.MetaDb
 import molecule.db.core.transaction.ResolveDelete
 import molecule.db.core.transaction.ops.DeleteOps
 import molecule.db.core.util.ModelUtils
@@ -27,11 +28,12 @@ trait SqlDelete
   }
 
   def getDeleteAction(
-    elements: List[Element], entityMap: Map[String, MetaEntity]
+    elements: List[Element],
+    metaDb: MetaDb,
   ): DeleteAction = {
     ent = getInitialEntity(elements)
     query.idCols += s"$ent.id"
-    root = DeleteRoot(entityMap, sqlOps, sqlConn.createStatement(), ent)
+    root = DeleteRoot(sqlOps, sqlConn.createStatement(), ent, metaDb)
     deleteAction = root.firstEnt
     resolve(elements, true)
     initRoot(sqlOps)

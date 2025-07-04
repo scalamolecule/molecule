@@ -1,6 +1,6 @@
 package molecule.db.sql.mariadb.setup
 
-import molecule.db.core.api.{Schema, Schema_mariadb}
+import molecule.db.core.api.{MetaDb, MetaDb_mariadb}
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS
@@ -9,7 +9,7 @@ import scala.util.Random
 
 object DbConnection_mariadb {
 
-  def run(test: Conn => Any, schema: Schema_mariadb): Any = {
+  def run(test: Conn => Any, metaDb: MetaDb_mariadb): Any = {
     // Since RPC calls run in parallel we need a new connection for
     // each test when using Docker containers.
     // This makes the test suite run slower compared to sequential runs
@@ -21,16 +21,16 @@ object DbConnection_mariadb {
       s"&user=root" +
       s"&password="
 
-    val proxy = JdbcProxy(url, schema)
+    val proxy = JdbcProxy(url, metaDb)
     val conn  = JdbcConn_JS(proxy, "localhost", 8080)
     test(conn)
   }
 
-  def connZLayer(schema: Schema): ZLayer[Any, Throwable, Conn] = {
+  def connZLayer(metaDb: MetaDb): ZLayer[Any, Throwable, Conn] = {
     val url = "jdbc:h2:mem:test" + Random.nextInt().abs
     ZLayer.scoped(
       ZIO.attemptBlocking {
-        val proxy = JdbcProxy(url, schema)
+        val proxy = JdbcProxy(url, metaDb)
         JdbcConn_JS(proxy, "localhost", 8080)
       }
     )

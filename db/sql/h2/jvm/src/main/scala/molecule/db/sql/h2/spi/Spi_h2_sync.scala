@@ -50,7 +50,7 @@ trait Spi_h2_sync extends SpiBaseJVM_sync {
   ): DeleteAction = {
     new SqlOps_h2(conn)
       with ResolveDelete with SqlDelete {}
-      .getDeleteAction(delete.dataModel.elements, conn.proxy.entityMap)
+      .getDeleteAction(delete.dataModel.elements, conn.proxy.metaDb)
   }
 
 

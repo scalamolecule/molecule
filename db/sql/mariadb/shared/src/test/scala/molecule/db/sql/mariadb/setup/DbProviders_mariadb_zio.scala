@@ -1,7 +1,10 @@
 package molecule.db.sql.mariadb.setup
 
 import boopickle.Default.*
-import molecule.db.compliance.domains.schema.*
+import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_MetaDb_mariadb
+import molecule.db.compliance.domains.dsl.Types.metadb.Types_MetaDb_mariadb
+import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_MetaDb_mariadb
+import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_MetaDb_mariadb
 import molecule.db.compliance.setup.{DbConnection, DbProviders_zio, Platform}
 import molecule.db.core.spi.Conn
 import zio.ZLayer
@@ -11,8 +14,8 @@ trait DbProviders_mariadb_zio extends DbProviders_zio with DbConnection with Pla
 
   private val db = DbConnection_mariadb
 
-  override def types: ZLayer[Any, Throwable, Conn] = db.connZLayer(TypesSchema_mariadb)
-  override def refs: ZLayer[Any, Throwable, Conn] = db.connZLayer(RefsSchema_mariadb)
-  override def unique: ZLayer[Any, Throwable, Conn] = db.connZLayer(UniquesSchema_mariadb)
-  override def validation: ZLayer[Any, Throwable, Conn] = db.connZLayer(ValidationSchema_mariadb)
+  override def types: ZLayer[Any, Throwable, Conn] = db.connZLayer(Types_MetaDb_mariadb)
+  override def refs: ZLayer[Any, Throwable, Conn] = db.connZLayer(Refs_MetaDb_mariadb)
+  override def unique: ZLayer[Any, Throwable, Conn] = db.connZLayer(Uniques_MetaDb_mariadb)
+  override def validation: ZLayer[Any, Throwable, Conn] = db.connZLayer(Validation_MetaDb_mariadb)
 }

@@ -94,8 +94,7 @@ trait Spi_datomic_async
 
   override def save_validate(save: Save)
                             (implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
-    val proxy = conn.proxy
-    TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.dataModel.elements)
+    TxModelValidation(conn.proxy.metaDb, "save").validate(save.dataModel.elements)
   }
 
 
@@ -148,8 +147,7 @@ trait Spi_datomic_async
 
   override def update_validate(update: Update)
                               (implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = future {
-    val proxy = conn.proxy
-    TxModelValidation(proxy.entityMap, proxy.attrMap, "update").validate(update.dataModel.elements)
+    TxModelValidation(conn.proxy.metaDb, "update").validate(update.dataModel.elements)
   }
 
 

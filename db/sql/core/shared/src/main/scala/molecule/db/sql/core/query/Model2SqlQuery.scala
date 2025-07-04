@@ -22,7 +22,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
     optProxy: Option[ConnProxy]
   ): String = {
     val elements1 = if (altElements.isEmpty) elements0 else altElements
-    optProxy.foreach(p => attrMap = p.attrMap)
+    optProxy.foreach(p => metaDb = p.metaDb)
     resolveElements(elements1)
     renderSqlQuery(optLimit, optOffset)
   }

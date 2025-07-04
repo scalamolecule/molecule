@@ -1,9 +1,11 @@
 package molecule.base.util
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.{Date, UUID}
+import scala.io.Source
+import scala.util.Try
 
 object BaseHelpers extends BaseHelpers
 trait BaseHelpers extends DateHandling {
@@ -164,5 +166,13 @@ trait BaseHelpers extends DateHandling {
       case 20 => "Twenty-first"
       case 21 => "Twenty-second"
     }
+  }
+
+
+  def getFileContent(filePath: String): String = {
+    val file = Try(
+      Source.fromFile(filePath)
+    ).getOrElse(throw new Exception(s"Couldn't find file $filePath in classpath."))
+    file.getLines().mkString("\n")
   }
 }

@@ -79,7 +79,7 @@ trait ModelUtils {
 
 
   protected def keywordsSuffixed(elements: List[Element], proxy: ConnProxy): List[Element] = {
-    if (proxy.reservedEntities.isEmpty)
+    if (proxy.metaDb.reservedEntities.isEmpty)
       return elements
 
     @tailrec
@@ -173,25 +173,25 @@ trait ModelUtils {
   private final def nonReservedAttr(a: Attr, proxy: ConnProxy): (String, String) = {
     val List(entityIndex, attrIndex) = a.coord.take(2)
     (
-      if (proxy.reservedEntities(entityIndex) == reserved) a.ent + "_" else a.ent,
-      if (proxy.reservedAttributes(attrIndex) == reserved) a.attr + "_" else a.attr
+      if (proxy.metaDb.reservedEntities(entityIndex) == reserved) a.ent + "_" else a.ent,
+      if (proxy.metaDb.reservedAttributes(attrIndex) == reserved) a.attr + "_" else a.attr
     )
   }
 
   private final def nonReservedRef(r: Ref, proxy: ConnProxy): (String, String, String) = {
     val List(entityIndex, refAttrIndex, refIndex) = r.coord
     (
-      if (proxy.reservedEntities(entityIndex) == reserved) r.ent + "_" else r.ent,
-      if (proxy.reservedAttributes(refAttrIndex) == reserved) r.refAttr + "_" else r.refAttr,
-      if (proxy.reservedEntities(refIndex) == reserved) r.ref + "_" else r.ref,
+      if (proxy.metaDb.reservedEntities(entityIndex) == reserved) r.ent + "_" else r.ent,
+      if (proxy.metaDb.reservedAttributes(refAttrIndex) == reserved) r.refAttr + "_" else r.refAttr,
+      if (proxy.metaDb.reservedEntities(refIndex) == reserved) r.ref + "_" else r.ref,
     )
   }
 
   private final def nonReservedBackRef(backRef: BackRef, proxy: ConnProxy): (String, String) = {
     val Seq(prevEntIndex, curEntIndex) = backRef.coord
     (
-      if (proxy.reservedEntities(prevEntIndex) == reserved) backRef.prev + "_" else backRef.prev,
-      if (proxy.reservedEntities(curEntIndex) == reserved) backRef.cur + "_" else backRef.cur
+      if (proxy.metaDb.reservedEntities(prevEntIndex) == reserved) backRef.prev + "_" else backRef.prev,
+      if (proxy.metaDb.reservedEntities(curEntIndex) == reserved) backRef.cur + "_" else backRef.cur
     )
   }
 

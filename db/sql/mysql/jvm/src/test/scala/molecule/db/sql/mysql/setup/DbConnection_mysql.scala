@@ -1,14 +1,15 @@
 package molecule.db.sql.mysql.setup
 
 import com.mysql.cj.jdbc.MysqlDataSource
-import molecule.db.core.api.Schema_mysql
+import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.api.MetaDb_mysql
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import org.testcontainers.containers.MySQLContainer
 import zio.{ZIO, ZLayer}
 
-object DbConnection_mysql {
+object DbConnection_mysql extends DbConnection{
 
   private val baseUrl = "mysql:9.0.0"
 
@@ -34,23 +35,24 @@ object DbConnection_mysql {
        |USE test;
        |""".stripMargin
 
-  def getConnection(schema: Schema_mysql): JdbcConn_JVM = {
-    val initSql = resetDb + schema.schemaData.head
-    val proxy   = JdbcProxy(baseUrl, schema, initSql)
+  def getConnection(metaDb: MetaDb_mysql): JdbcConn_JVM = {
+//    val initSql = resetDb + metaDb.schemaData.head
+    val initSql = resetDb + getFileContent(metaDb.schemaResourcePath)
+    val proxy   = JdbcProxy(baseUrl, metaDb, initSql)
 
     // Not closing the connection since we re-use it
     JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)
   }
 
-  def run(test: Conn => Any, schema: Schema_mysql): Any = {
-    test(getConnection(schema))
+  def run(test: Conn => Any, metaDb: MetaDb_mysql): Any = {
+    test(getConnection(metaDb))
   }
 
 
-  def connZLayer(schema: Schema_mysql): ZLayer[Any, Throwable, Conn] = {
+  def connZLayer(metaDb: MetaDb_mysql): ZLayer[Any, Throwable, Conn] = {
     ZLayer.scoped(
       ZIO.attemptBlocking {
-        getConnection(schema)
+        getConnection(metaDb)
       }
     )
   }

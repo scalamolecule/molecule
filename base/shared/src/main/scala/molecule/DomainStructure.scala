@@ -60,10 +60,8 @@ import java.util.{Date, UUID}
  *   // Additional segments...
  * }
  * }}}
- *
- * @param maxArity Number of possible attributes in molecule output.
  */
-abstract class DomainStructure(maxArity: Int) {
+abstract class DomainStructure {
 
   // Types ..................................................
 
@@ -321,6 +319,12 @@ abstract class DomainStructure(maxArity: Int) {
     def allowedValues(v: BaseTpe, vs: BaseTpe*): Self = ???
     def allowedValues(vs: Seq[BaseTpe], failureMsg: String): Self = ???
 
+    /** Alias to non-compatible attribute name like `type` or `first-name` etc.
+     *
+     * Molecule then creates an alias to the special name in the schema so that
+     * queries will match both the attribute name and the alias.
+     * */
+    def alias(altAttrName: String): Self = ???
 
     /** Index option (defaults to true).
      * <br><br>
@@ -374,7 +378,7 @@ abstract class DomainStructure(maxArity: Int) {
     // Enable fulltext search (for those data sources that support it)
     val fulltext: Self = ???
 
-    // Validation .................
+    // Validation
     val email: Self = ???
     def email(msg: String): Self = ???
     def regex(expr: String, msg: String = ""): Self = ???

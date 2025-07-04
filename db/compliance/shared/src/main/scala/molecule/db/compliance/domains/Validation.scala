@@ -4,7 +4,7 @@ import java.time.*
 import java.util.Date
 import molecule.DomainStructure
 
-object Validation extends DomainStructure(5) {
+object Validation extends DomainStructure {
 
   trait Strings {
     val email        = oneString.email

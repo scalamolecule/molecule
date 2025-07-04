@@ -2,14 +2,15 @@ package molecule.db.sql.mariadb.setup
 
 import java.sql.DriverManager
 import com.dimafeng.testcontainers.MariaDBContainer
-import molecule.db.core.api.Schema_mariadb
+import molecule.db.compliance.setup.DbConnection
+import molecule.db.core.api.MetaDb_mariadb
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import zio.{ZIO, ZLayer}
 
-//object DbConnection_mariadb extends DbConnection {
-object DbConnection_mariadb {
+object DbConnection_mariadb extends DbConnection {
+//object DbConnection_mariadb {
 
   private val url = s"jdbc:tc:mariadb:latest:///test" +
     s"?allowMultiQueries=true" +
@@ -32,23 +33,24 @@ object DbConnection_mariadb {
        |USE test;
        |""".stripMargin
 
-  def getConnection(schema: Schema_mariadb): JdbcConn_JVM = {
-    val initSql = resetDb + schema.schemaData.head
-    val proxy   = JdbcProxy(url, schema, initSql)
+  def getConnection(metaDb: MetaDb_mariadb): JdbcConn_JVM = {
+//    val initSql = resetDb + schema.schemaData.head
+    val initSql = resetDb + getFileContent(metaDb.schemaResourcePath)
+    val proxy   = JdbcProxy(url, metaDb, initSql)
 
     // Not closing the connection since we re-use it
     JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)
   }
 
-  def run(test: Conn => Any, schema: Schema_mariadb): Any = {
-    test(getConnection(schema))
+  def run(test: Conn => Any, metaDb: MetaDb_mariadb): Any = {
+    test(getConnection(metaDb))
   }
 
 
-  def connZLayer(schema: Schema_mariadb): ZLayer[Any, Throwable, Conn] = {
+  def connZLayer(metaDb: MetaDb_mariadb): ZLayer[Any, Throwable, Conn] = {
     ZLayer.scoped(
       ZIO.attemptBlocking {
-        getConnection(schema)
+        getConnection(metaDb)
       }
     )
   }

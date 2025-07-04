@@ -4,6 +4,7 @@ import molecule.base.metaModel.Cardinality
 import molecule.base.util.BaseHelpers
 import molecule.core.dataModel.*
 import molecule.core.util.JavaConversions
+import molecule.db.core.api.MetaDb
 import molecule.db.sql.core.javaSql.{PrepStmt, ResultSetInterface}
 import molecule.db.sql.core.query.casting.strategy.{CastStrategy, CastTuple}
 import scala.collection.mutable
@@ -16,22 +17,22 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   type Cast = (RS, ParamIndex) => Any
 
   // Lookup original type of aggregate attributes
-  final protected var attrMap = Map.empty[String, (Cardinality, String, Seq[String])]
+  final protected var metaDb: MetaDb = null
 
   // Main query
-  final protected val select      = new ListBuffer[String]
-  final protected var select2     = Map.empty[Int, (List[(String, String, String, List[String])], Set[String]) => String]
-  final protected var distinct    = true
-  final protected var from        = ""
-  final protected val joins       = new ListBuffer[(String, String, String, List[String])]
-  final protected val tempTables  = ListBuffer.empty[String]
-  final protected val where       = new ListBuffer[(String, String)]
-  final protected val groupBy     = new mutable.LinkedHashSet[String]
-  final protected val having      = new mutable.LinkedHashSet[String]
-  final protected var orderBy     = new ListBuffer[(Int, Int, String, String)]
-  final protected var aggregate   = false
-  final protected val groupByCols = new mutable.LinkedHashSet[String]
-  final protected var hardLimit   = 0
+  final val select      = new ListBuffer[String]
+  final var select2     = Map.empty[Int, (List[(String, String, String, List[String])], Set[String]) => String]
+  final var distinct    = true
+  final var from        = ""
+  final val joins       = new ListBuffer[(String, String, String, List[String])]
+  final val tempTables  = ListBuffer.empty[String]
+  final val where       = new ListBuffer[(String, String)]
+  final val groupBy     = new mutable.LinkedHashSet[String]
+  final val having      = new mutable.LinkedHashSet[String]
+  final var orderBy     = new ListBuffer[(Int, Int, String, String)]
+  final var aggregate   = false
+  final val groupByCols = new mutable.LinkedHashSet[String]
+  final var hardLimit   = 0
 
   final val binders    = new ListBuffer[PrepStmt => Unit]
   final var bindIndex  = -1

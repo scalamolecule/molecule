@@ -90,8 +90,7 @@ trait SpiBase_io
 
   override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = IO.blocking {
     if (save.doValidate) {
-      val proxy = conn.proxy
-      TxModelValidation(proxy.entityMap, proxy.attrMap, "save").validate(save.dataModel.elements)
+      TxModelValidation(conn.proxy.metaDb, "save").validate(save.dataModel.elements)
     } else {
       Map.empty[String, Seq[String]]
     }
@@ -156,8 +155,7 @@ trait SpiBase_io
 
   override def update_validate(update: Update)
                               (implicit conn: Conn): IO[Map[String, Seq[String]]] = IO.blocking {
-    val proxy = conn.proxy
-    TxModelValidation(proxy.entityMap, proxy.attrMap, "update").validate(update.dataModel.elements)
+    TxModelValidation(conn.proxy.metaDb, "update").validate(update.dataModel.elements)
   }
 
 

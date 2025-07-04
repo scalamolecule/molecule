@@ -10,12 +10,12 @@
 //object ClientWriterSpec extends StarWarsTest_zio {
 //
 //  //  def gen(
-//  //    schema: String,
+//  //    metaDb: String,
 //  //    scalarMappings: Map[String, String] = Map.empty,
 //  //    additionalImports: List[String] = List.empty,
 //  //    extensibleEnums: Boolean = false
 //  //  ): Task[String] = Parser
-//  //    .parseQuery(schema)
+//  //    .parseQuery(metaDb)
 //  //    .flatMap(doc =>
 //  //      Formatter.format(
 //  //        ClientWriter
@@ -32,10 +32,10 @@
 //  //    )
 //  //
 //  //  def genSplit(
-//  //    schema: String,
+//  //    metaDb: String,
 //  //    scalarMappings: Map[String, String] = Map.empty
 //  //  ): Task[List[(String, String)]] = Parser
-//  //    .parseQuery(schema)
+//  //    .parseQuery(metaDb)
 //  //    .flatMap(doc =>
 //  //      Formatter.format(
 //  //        ClientWriter.write(doc, packageName = Some("test"), splitFiles = true, scalarMappings = Some(scalarMappings)),
@@ -48,7 +48,7 @@
 //      test("simple object type") {
 //
 //
-//        val schema =
+//        val metaDb =
 //          """
 //             type Character {
 //               name: String!
@@ -56,7 +56,7 @@
 //             }
 //            """.stripMargin
 //
-//        Parser.parseQuery(schema).map { case doc@Document(x, y) =>
+//        Parser.parseQuery(metaDb).map { case doc@Document(x, y) =>
 //
 //          val xx = doc.definitions.collect {
 //            case ObjectTypeDefinition(a, name, b, c, d)    =>
@@ -85,7 +85,7 @@
 ////          )
 //        }
 //
-//        //        gen(schema).map { str =>
+//        //        gen(metaDb).map { str =>
 ////        hej.map { str =>
 ////          assertTrue(
 ////            str ==
