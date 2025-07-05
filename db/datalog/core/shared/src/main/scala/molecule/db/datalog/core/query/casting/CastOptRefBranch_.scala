@@ -35,6 +35,17 @@ trait CastOptRefBranch_ extends JavaConversions {
       case 19 => pullBranch19(pullCasts, refDepth)
       case 20 => pullBranch20(pullCasts, refDepth)
       case 21 => pullBranch21(pullCasts, refDepth)
+      case n  =>
+        val cast = (it: jIterator[?]) => {
+          var castIndex  = 0
+          var tpl: Tuple = EmptyTuple
+          while (castIndex < n) {
+            tpl = tpl :* pullCasts(castIndex)(it)
+            castIndex += 1
+          }
+          tpl
+        }
+        resolve(n, refDepth, cast)
     }
   }
 
@@ -78,12 +89,8 @@ trait CastOptRefBranch_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any],
     refDepth: Int
   ): jIterator[?] => Option[Any] = {
-    val List(c1) = pullCasts
-    resolve(1, refDepth, (it: java.util.Iterator[?]) =>
-      (
-        c1(it)
-        )
-    )
+    val c1 = pullCasts.head
+    resolve(1, refDepth, (it: java.util.Iterator[?]) => c1(it))
   }
 
   final private def pullBranch2(

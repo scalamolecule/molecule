@@ -6,7 +6,7 @@ object _CastOptRefLeaf extends DbDatalogBase("CastOptRefLeaf", "/query/casting")
 
   val content = {
     val pullLeafX      = (1 to 22).map(i => s"case ${caseN(i)} => pullLeaf$i(pullCasts)").mkString("\n      ")
-    val resolveMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
+    val resolveMethods = (2 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.db.datalog.core.query.casting
        |
@@ -21,6 +21,17 @@ object _CastOptRefLeaf extends DbDatalogBase("CastOptRefLeaf", "/query/casting")
        |  ): jIterator[?] => Option[Any] = {
        |    pullCasts.length match {
        |      $pullLeafX
+       |      case n  =>
+       |        val cast = (it: jIterator[?]) => {
+       |          var castIndex  = 0
+       |          var tpl: Tuple = EmptyTuple
+       |          while (castIndex < n) {
+       |            tpl = tpl :* pullCasts(castIndex)(it)
+       |            castIndex += 1
+       |          }
+       |          tpl
+       |        }
+       |        resolve(n, cast)
        |    }
        |  }
        |
@@ -37,7 +48,7 @@ object _CastOptRefLeaf extends DbDatalogBase("CastOptRefLeaf", "/query/casting")
        |
        |  final private def resolve(
        |    arity: Int,
-       |    cast: java.util.Iterator[?] => Any
+       |    cast: jIterator[?] => Any
        |  ): jIterator[?] => Option[Any] = {
        |    val list = new jArrayList[Any](arity)
        |    val handleMap = (optionalData: jMap[?, ?]) => {
@@ -55,6 +66,13 @@ object _CastOptRefLeaf extends DbDatalogBase("CastOptRefLeaf", "/query/casting")
        |        case e: Throwable          => throw e
        |      }
        |  }
+       |
+       |  final private def pullLeaf1(
+       |    pullCasts: List[jIterator[?] => Any]
+       |  ): jIterator[?] => Option[Any] = {
+       |    val cast = pullCasts.head
+       |    resolve(1, (it: jIterator[?]) => cast(it))
+       |  }
        |$resolveMethods
        |}""".stripMargin
   }
@@ -68,7 +86,7 @@ object _CastOptRefLeaf extends DbDatalogBase("CastOptRefLeaf", "/query/casting")
          |    pullCasts: List[jIterator[?] => Any]
          |  ): jIterator[?] => Option[Any] = {
          |    val List($casters) = pullCasts
-         |    resolve($i, (it: java.util.Iterator[?]) =>
+         |    resolve($i, (it: jIterator[?]) =>
          |      (
          |        $castings
          |      )

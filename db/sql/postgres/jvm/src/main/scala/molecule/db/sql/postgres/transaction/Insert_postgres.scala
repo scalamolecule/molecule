@@ -1,12 +1,12 @@
 package molecule.db.sql.postgres.transaction
 
 import java.sql.PreparedStatement as PS
-import molecule.db.core.transaction.{InsertResolvers_, ResolveInsert}
+import molecule.db.core.transaction.{InsertResolvers, ResolveInsert}
 import molecule.db.sql.core.transaction.SqlInsert
 import molecule.db.sql.core.transaction.strategy.SqlOps
 
 trait Insert_postgres
-  extends SqlInsert { self: ResolveInsert & InsertResolvers_ & SqlOps =>
+  extends SqlInsert { self: ResolveInsert & InsertResolvers & SqlOps =>
 
   override protected def addMap[T](
     ent: String,

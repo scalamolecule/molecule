@@ -10,9 +10,9 @@ object _InsertValidationResolvers extends DbCoreBase("InsertValidationResolvers"
     s"""// GENERATED CODE ********************************
        |package molecule.db.core.validation.insert
        |
-       |import molecule.base.metaModel.*
        |import molecule.base.error.InsertError
        |import molecule.core.dataModel.*
+       |import molecule.db.core.api.MetaDb
        |
        |trait $fileName_ {
        |
@@ -33,6 +33,15 @@ object _InsertValidationResolvers extends DbCoreBase("InsertValidationResolvers"
        |
        |    validators.length match {
        |      $validateX
+       |      case n  =>
+       |        (tpl: Product) =>
+       |          var i          = n - 1
+       |          var errorLists = List.empty[Seq[InsertError]]
+       |          while (i >= 0) {
+       |            errorLists = validators(i)(tpl) +: errorLists
+       |            i -= 1
+       |          }
+       |          errorLists.flatten
        |    }
        |  }
        |$validationMethods

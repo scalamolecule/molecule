@@ -7,7 +7,7 @@ import molecule.base.error.ModelError
 import molecule.core.dataModel.*
 import molecule.core.util.MoleculeLogging
 import molecule.db.core.transaction.ops.InsertOps
-import molecule.db.core.transaction.{InsertResolvers_, ResolveInsert}
+import molecule.db.core.transaction.{InsertResolvers, ResolveInsert}
 import molecule.db.core.util.ModelUtils
 
 trait Insert_datomic
@@ -15,7 +15,7 @@ trait Insert_datomic
     with InsertOps
     with DatomicDataType_JVM
     with ModelUtils
-    with MoleculeLogging { self: ResolveInsert & InsertResolvers_ =>
+    with MoleculeLogging { self: ResolveInsert & InsertResolvers =>
 
   def getStmts(
     elements: List[Element],

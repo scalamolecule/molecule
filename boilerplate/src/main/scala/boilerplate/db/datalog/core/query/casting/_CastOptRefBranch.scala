@@ -6,7 +6,7 @@ object _CastOptRefBranch extends DbDatalogBase("CastOptRefBranch", "/query/casti
 
   val content = {
     val pullBranchX    = (1 to 21).map(i => s"case ${caseN(i)} => pullBranch$i(pullCasts, refDepth)").mkString("\n      ")
-    val resolveMethods = (1 to 21).map(arity => Chunk(arity).body).mkString("\n")
+    val resolveMethods = (2 to 21).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.db.datalog.core.query.casting
        |
@@ -24,6 +24,17 @@ object _CastOptRefBranch extends DbDatalogBase("CastOptRefBranch", "/query/casti
        |    val pullCasts = pullCasts0 :+ pullNested
        |    pullCasts.length match {
        |      $pullBranchX
+       |      case n  =>
+       |        val cast = (it: jIterator[?]) => {
+       |          var castIndex  = 0
+       |          var tpl: Tuple = EmptyTuple
+       |          while (castIndex < n) {
+       |            tpl = tpl :* pullCasts(castIndex)(it)
+       |            castIndex += 1
+       |          }
+       |          tpl
+       |        }
+       |        resolve(n, refDepth, cast)
        |    }
        |  }
        |
@@ -61,6 +72,14 @@ object _CastOptRefBranch extends DbDatalogBase("CastOptRefBranch", "/query/casti
        |        case _: NullValueException => None
        |        case e: Throwable          => throw e
        |      }
+       |  }
+       |
+       |  final private def pullBranch1(
+       |    pullCasts: List[jIterator[?] => Any],
+       |    refDepth: Int
+       |  ): jIterator[?] => Option[Any] = {
+       |    val c1 = pullCasts.head
+       |    resolve(1, refDepth, (it: java.util.Iterator[?]) => c1(it))
        |  }
        |$resolveMethods
        |}""".stripMargin

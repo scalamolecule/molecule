@@ -47,6 +47,17 @@ object _CastOptNestedLeaf extends DbDatalogBase("CastOptNestedLeaf", "/query/cas
        |
        |    pullCasts.length match {
        |      $pullLeafX
+       |      case n  =>
+       |        val cast = (it: jIterator[?]) => {
+       |          var castIndex  = 0
+       |          var tpl: Tuple = EmptyTuple
+       |          while (castIndex < n) {
+       |            tpl = tpl :* pullCasts(castIndex)(it)
+       |            castIndex += 1
+       |          }
+       |          tpl
+       |        }
+       |        resolve(n, optComparator, cast)
        |    }
        |  }
        |

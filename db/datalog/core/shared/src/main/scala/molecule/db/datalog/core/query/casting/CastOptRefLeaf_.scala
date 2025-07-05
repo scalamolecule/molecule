@@ -33,6 +33,17 @@ trait CastOptRefLeaf_ extends JavaConversions {
       case 20 => pullLeaf20(pullCasts)
       case 21 => pullLeaf21(pullCasts)
       case 22 => pullLeaf22(pullCasts)
+      case n  =>
+        val cast = (it: jIterator[?]) => {
+          var castIndex  = 0
+          var tpl: Tuple = EmptyTuple
+          while (castIndex < n) {
+            tpl = tpl :* pullCasts(castIndex)(it)
+            castIndex += 1
+          }
+          tpl
+        }
+        resolve(n, cast)
     }
   }
 
@@ -49,7 +60,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
 
   final private def resolve(
     arity: Int,
-    cast: java.util.Iterator[?] => Any
+    cast: jIterator[?] => Any
   ): jIterator[?] => Option[Any] = {
     val list      = new jArrayList[Any](arity)
     val handleMap = (optionalData: jMap[?, ?]) => {
@@ -71,19 +82,15 @@ trait CastOptRefLeaf_ extends JavaConversions {
   final private def pullLeaf1(
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
-    val List(c1) = pullCasts
-    resolve(1, (it: java.util.Iterator[?]) =>
-      (
-        c1(it)
-        )
-    )
+    val cast = pullCasts.head
+    resolve(1, (it: jIterator[?]) => cast(it))
   }
 
   final private def pullLeaf2(
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2) = pullCasts
-    resolve(2, (it: java.util.Iterator[?]) =>
+    resolve(2, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it)
@@ -95,7 +102,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3) = pullCasts
-    resolve(3, (it: java.util.Iterator[?]) =>
+    resolve(3, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -108,7 +115,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4) = pullCasts
-    resolve(4, (it: java.util.Iterator[?]) =>
+    resolve(4, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -122,7 +129,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5) = pullCasts
-    resolve(5, (it: java.util.Iterator[?]) =>
+    resolve(5, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -137,7 +144,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6) = pullCasts
-    resolve(6, (it: java.util.Iterator[?]) =>
+    resolve(6, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -153,7 +160,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7) = pullCasts
-    resolve(7, (it: java.util.Iterator[?]) =>
+    resolve(7, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -170,7 +177,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = pullCasts
-    resolve(8, (it: java.util.Iterator[?]) =>
+    resolve(8, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -188,7 +195,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = pullCasts
-    resolve(9, (it: java.util.Iterator[?]) =>
+    resolve(9, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -207,7 +214,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = pullCasts
-    resolve(10, (it: java.util.Iterator[?]) =>
+    resolve(10, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -227,7 +234,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = pullCasts
-    resolve(11, (it: java.util.Iterator[?]) =>
+    resolve(11, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -248,7 +255,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = pullCasts
-    resolve(12, (it: java.util.Iterator[?]) =>
+    resolve(12, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -270,7 +277,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = pullCasts
-    resolve(13, (it: java.util.Iterator[?]) =>
+    resolve(13, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -293,7 +300,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = pullCasts
-    resolve(14, (it: java.util.Iterator[?]) =>
+    resolve(14, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -317,7 +324,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = pullCasts
-    resolve(15, (it: java.util.Iterator[?]) =>
+    resolve(15, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -342,7 +349,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = pullCasts
-    resolve(16, (it: java.util.Iterator[?]) =>
+    resolve(16, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -368,7 +375,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = pullCasts
-    resolve(17, (it: java.util.Iterator[?]) =>
+    resolve(17, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -395,7 +402,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = pullCasts
-    resolve(18, (it: java.util.Iterator[?]) =>
+    resolve(18, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -423,7 +430,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = pullCasts
-    resolve(19, (it: java.util.Iterator[?]) =>
+    resolve(19, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -452,7 +459,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = pullCasts
-    resolve(20, (it: java.util.Iterator[?]) =>
+    resolve(20, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -482,7 +489,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = pullCasts
-    resolve(21, (it: java.util.Iterator[?]) =>
+    resolve(21, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),
@@ -513,7 +520,7 @@ trait CastOptRefLeaf_ extends JavaConversions {
     pullCasts: List[jIterator[?] => Any]
   ): jIterator[?] => Option[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22) = pullCasts
-    resolve(22, (it: java.util.Iterator[?]) =>
+    resolve(22, (it: jIterator[?]) =>
       (
         c1(it),
         c2(it),

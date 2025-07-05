@@ -2,7 +2,7 @@ package boilerplate.db.core.validation.insert
 
 import boilerplate.db.core.DbCoreBase
 
-object _InsertValidators extends DbCoreBase("InsertValidators", "/transaction") {
+object _InsertValidators extends DbCoreBase("InsertValidators", "/validation/insert") {
 
   override val content = {
     s"""// GENERATED CODE ********************************

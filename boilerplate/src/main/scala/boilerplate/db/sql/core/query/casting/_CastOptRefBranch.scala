@@ -22,21 +22,21 @@ object _CastOptRefBranch extends DbSqlBase("CastOptRefBranch", "/query/casting")
        |    casts.length match {
        |      case 0  => (_, nestedOption: Option[Any]) => nestedOption
        |      $caseX
-       |      case n =>
+       |      case n  =>
+       |        val last = n - 1
        |        (row: RS, nestedOption: Option[Any]) =>
-       |          var i          = firstIndex + n
-       |          var j          = n - 1
+       |          var rowIndex   = firstIndex + last
+       |          var castIndex  = last
        |          var hasEmpty   = false
        |          var tpl: Tuple = Tuple1(nestedOption)
-       |
-       |          while (j >= 0 && !hasEmpty) {
-       |            val cast = casts(j)
-       |            i -= 1
-       |            val v = cast(row, i)
-       |            hasEmpty = hasEmptyValue(row, i, v)
+       |          while (castIndex >= 0 && !hasEmpty) {
+       |            val cast = casts(castIndex)
+       |            val v    = cast(row, rowIndex)
+       |            hasEmpty = hasEmptyValue(row, rowIndex, v)
        |            if (!hasEmpty)
        |              tpl = v *: tpl
-       |            j -= 1
+       |            rowIndex -= 1
+       |            castIndex -= 1
        |          }
        |          if (hasEmpty) Option.empty[Any] else Some(tpl)
        |    }

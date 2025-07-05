@@ -42,9 +42,22 @@ object _CastOptNestedBranch extends DbDatalogBase("CastOptNestedBranch", "/query
        |        )
        |      } else None
        |    }
-       |    val pullCasts     = pullCasts0 :+ pullNested
+       |
+       |    val pullCasts = pullCasts0 :+ pullNested
+       |
        |    pullCasts.length match {
        |      $pullBranchX
+       |      case n  =>
+       |        val cast = (it: jIterator[?]) => {
+       |          var castIndex  = 0
+       |          var tpl: Tuple = EmptyTuple
+       |          while (castIndex < n) {
+       |            tpl = tpl :* pullCasts(castIndex)(it)
+       |            castIndex += 1
+       |          }
+       |          tpl
+       |        }
+       |        resolve(optComparator, refDepth, cast, n)
        |    }
        |  }
        |
@@ -63,8 +76,33 @@ object _CastOptNestedBranch extends DbDatalogBase("CastOptNestedBranch", "/query
        |  }
        |
        |  final private def resolve(
-       |    handleMaps: jList[?] => List[Any]
+       |    optComparator: Option[Comparator[Row]],
+       |    refDepth: Int,
+       |    cast: jIterator[?] => Any,
+       |    arity: Int
        |  ): jIterator[?] => List[Any] = {
+       |    val handleMaps = {
+       |      optComparator.fold {
+       |        val list = new jArrayList[Any](arity)
+       |        (rows: jList[?]) =>
+       |          rows.asScala.toList.map {
+       |            case row: jMap[_, _] =>
+       |              list.clear()
+       |              cast(flatten(list, row, refDepth, 0).iterator)
+       |          }
+       |      } { comparator =>
+       |        (rows: jList[?]) =>
+       |          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+       |          rows.asScala.foreach {
+       |            case row: jMap[_, _] =>
+       |              val list = new jArrayList[Any](arity)
+       |              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
+       |          }
+       |          Collections.sort(sortedRows, comparator)
+       |          sortedRows.asScala.map { row => cast(row.iterator) }.toList
+       |      }
+       |    }
+       |
        |    (it: jIterator[?]) =>
        |      try {
        |        it.next match {
@@ -95,27 +133,7 @@ object _CastOptNestedBranch extends DbDatalogBase("CastOptNestedBranch", "/query
          |      (
          |        $castings
          |      )
-         |    resolve(
-         |      optComparator.fold {
-         |        val list = new jArrayList[Any]($i)
-         |        (rows: jList[?]) =>
-         |          rows.asScala.toList.map {
-         |            case row: jMap[_, _] =>
-         |              list.clear()
-         |              cast(flatten(list, row, refDepth, 0).iterator)
-         |          }
-         |      } { comparator =>
-         |        (rows: jList[?]) =>
-         |          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-         |          rows.asScala.foreach {
-         |            case row: jMap[_, _] =>
-         |              val list = new jArrayList[Any]($i)
-         |              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-         |          }
-         |          Collections.sort(sortedRows, comparator)
-         |          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-         |      }
-         |    )
+         |    resolve(optComparator, refDepth, cast, $i)
          |  }""".stripMargin
   }
 }

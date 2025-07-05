@@ -23,16 +23,15 @@ object _CastBranch extends DbSqlBase("CastBranch", "/query/casting") {
        |      case 0  => (_, nested: Nested) => nested
        |      $caseX
        |      case n  =>
-       |        val i0 = firstIndex + n
-       |        val j0 = n - 1
+       |        val last = n - 1
        |        (row: RS, nested: Nested) =>
-       |          var i          = i0
-       |          var j          = j0
+       |          var rowIndex   = firstIndex + last
+       |          var castIndex  = last
        |          var tpl: Tuple = Tuple1(nested) // adding nested tuples last
-       |          while (j >= 0) {
-       |            i -= 1
-       |            tpl = casts(j)(row, i) *: tpl
-       |            j -= 1
+       |          while (castIndex >= 0) {
+       |            tpl = casts(castIndex)(row, rowIndex) *: tpl
+       |            rowIndex -= 1
+       |            castIndex -= 1
        |          }
        |          tpl
        |    }

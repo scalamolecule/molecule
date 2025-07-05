@@ -22,16 +22,15 @@ object _CastTpl extends DbSqlBase("CastTpl", "/query/casting") {
        |    casts.length match {
        |      $caseX
        |      case n  =>
-       |        val i0 = firstIndex + n
-       |        val j0 = n - 1
+       |        val last = n - 1
        |        (row: RS) =>
-       |          var i          = i0
-       |          var j          = j0
+       |          var rowIndex   = firstIndex + last
+       |          var castIndex  = last
        |          var tpl: Tuple = EmptyTuple
-       |          while (j >= 0) {
-       |            i -= 1
-       |            tpl = casts(j)(row, i) *: tpl
-       |            j -= 1
+       |          while (castIndex >= 0) {
+       |            tpl = casts(castIndex)(row, rowIndex) *: tpl
+       |            rowIndex -= 1
+       |            castIndex -= 1
        |          }
        |          tpl
        |    }

@@ -45,6 +45,15 @@ trait InsertValidationResolvers_ {
       case 20 => validate20(validators)
       case 21 => validate21(validators)
       case 22 => validate22(validators)
+      case n  =>
+        (tpl: Product) =>
+          var i          = n - 1
+          var errorLists = List.empty[Seq[InsertError]]
+          while (i >= 0) {
+            errorLists = validators(i)(tpl) +: errorLists
+            i -= 1
+          }
+          errorLists.flatten
     }
   }
 

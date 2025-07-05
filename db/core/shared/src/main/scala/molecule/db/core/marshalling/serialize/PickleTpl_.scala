@@ -7,30 +7,39 @@ trait PickleTpl_ { self: PickleTpls =>
 
   def getPickler(elements: List[Element]): Product => Unit = {
     val picklers: List[Product => Unit] = resolvePicklers(elements, Nil, 0)
-    picklers.length match {
-      case 1  => resolve1(picklers)
-      case 2  => resolve2(picklers)
-      case 3  => resolve3(picklers)
-      case 4  => resolve4(picklers)
-      case 5  => resolve5(picklers)
-      case 6  => resolve6(picklers)
-      case 7  => resolve7(picklers)
-      case 8  => resolve8(picklers)
-      case 9  => resolve9(picklers)
-      case 10 => resolve10(picklers)
-      case 11 => resolve11(picklers)
-      case 12 => resolve12(picklers)
-      case 13 => resolve13(picklers)
-      case 14 => resolve14(picklers)
-      case 15 => resolve15(picklers)
-      case 16 => resolve16(picklers)
-      case 17 => resolve17(picklers)
-      case 18 => resolve18(picklers)
-      case 19 => resolve19(picklers)
-      case 20 => resolve20(picklers)
-      case 21 => resolve21(picklers)
-      case 22 => resolve22(picklers)
-    }
+    //    picklers.length match {
+    //      case 1  => resolve1(picklers)
+    //      case 2  => resolve2(picklers)
+    //      case 3  => resolve3(picklers)
+    //      case 4  => resolve4(picklers)
+    //      case 5  => resolve5(picklers)
+    //      case 6  => resolve6(picklers)
+    //      case 7  => resolve7(picklers)
+    //      case 8  => resolve8(picklers)
+    //      case 9  => resolve9(picklers)
+    //      case 10 => resolve10(picklers)
+    //      case 11 => resolve11(picklers)
+    //      case 12 => resolve12(picklers)
+    //      case 13 => resolve13(picklers)
+    //      case 14 => resolve14(picklers)
+    //      case 15 => resolve15(picklers)
+    //      case 16 => resolve16(picklers)
+    //      case 17 => resolve17(picklers)
+    //      case 18 => resolve18(picklers)
+    //      case 19 => resolve19(picklers)
+    //      case 20 => resolve20(picklers)
+    //      case 21 => resolve21(picklers)
+    //      case 22 => resolve22(picklers)
+    //      case n  =>
+    //        (tpl: Product) =>
+    //          var i = n - 1
+    //          while (i >= 0) {
+    //            picklers(i)(tpl)
+    //            i -= 1
+    //          }
+    //    }
+
+    (tpl: Product) => picklers.foreach(_(tpl))
   }
 
   final private def resolve1(picklers: List[Product => Unit]): Product => Unit = {

@@ -59,6 +59,17 @@ trait CastOptNestedLeaf_ { self: DatomicQueryBase =>
       case 20 => pullLeaf20(pullCasts, optComparator)
       case 21 => pullLeaf21(pullCasts, optComparator)
       case 22 => pullLeaf22(pullCasts, optComparator)
+      case n  =>
+        val cast = (it: jIterator[?]) => {
+          var castIndex  = 0
+          var tpl: Tuple = EmptyTuple
+          while (castIndex < n) {
+            tpl = tpl :* pullCasts(castIndex)(it)
+            castIndex += 1
+          }
+          tpl
+        }
+        resolve(n, optComparator, cast)
     }
   }
 

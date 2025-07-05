@@ -7,7 +7,7 @@ import molecule.db.core.validation.insert.InsertValidators_
 import scala.annotation.tailrec
 
 trait ResolveInsert
-  extends InsertResolvers_
+  extends InsertResolvers
     with InsertValidators_ { self: InsertOps =>
 
   @tailrec

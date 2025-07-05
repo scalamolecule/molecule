@@ -4,13 +4,13 @@ import java.sql.PreparedStatement as PS
 import molecule.base.metaModel.{Cardinality, CardOne}
 import molecule.core.dataModel.{Attr, Element}
 import molecule.db.core.transaction.ops.InsertOps
-import molecule.db.core.transaction.{InsertResolvers_, ResolveInsert}
+import molecule.db.core.transaction.{InsertResolvers, ResolveInsert}
 import molecule.db.sql.core.transaction.strategy.SqlOps
 import molecule.db.sql.core.transaction.strategy.insert.{InsertAction, InsertRoot}
 
 trait SqlInsert
   extends InsertOps
-    with SqlBaseOps { self: ResolveInsert & InsertResolvers_ & SqlOps =>
+    with SqlBaseOps { self: ResolveInsert & InsertResolvers & SqlOps =>
 
   protected var insertAction: InsertAction = null
 

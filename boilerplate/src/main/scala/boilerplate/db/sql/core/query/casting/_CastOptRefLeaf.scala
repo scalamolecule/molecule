@@ -22,21 +22,21 @@ object _CastOptRefLeaf extends DbSqlBase("CastOptRefLeaf", "/query/casting") {
        |    casts.length match {
        |      case 0  => (_: RS) => Option.empty[Any]
        |      $resolveX
-       |      case n =>
+       |      case n  =>
+       |        val last = n - 1
        |        (row: RS) =>
-       |          var i          = firstIndex + n
-       |          var j          = n - 1
+       |          var rowIndex   = firstIndex + last
+       |          var castIndex  = last
        |          var hasEmpty   = false
        |          var tpl: Tuple = EmptyTuple
-       |
-       |          while (j >= 0 && !hasEmpty) {
-       |            val cast = casts(j)
-       |            i -= 1
-       |            val v = cast(row, i)
-       |            hasEmpty = hasEmptyValue(row, i, v)
+       |          while (castIndex >= 0 && !hasEmpty) {
+       |            val cast = casts(castIndex)
+       |            val v    = cast(row, rowIndex)
+       |            hasEmpty = hasEmptyValue(row, rowIndex, v)
        |            if (!hasEmpty)
        |              tpl = v *: tpl
-       |            j -= 1
+       |            rowIndex -= 1
+       |            castIndex -= 1
        |          }
        |          if (hasEmpty) Option.empty[Any] else Some(tpl)
        |    }

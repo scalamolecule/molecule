@@ -8,16 +8,55 @@ import molecule.db.datalog.datomic.setup.DbProviders_datomic
 
 class Adhoc_datomic_jvm_async extends MUnit with DbProviders_datomic with TestUtils {
 
-    "types" - types { implicit conn =>
-      import molecule.db.compliance.domains.dsl.Types.*
-      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      for {
-        _ <- Entity.int(3).save.transact
-        _ <- Entity.int.query.get.map(_ ==> List(3))
+//  "types" - types { implicit conn =>
+//    import molecule.db.compliance.domains.dsl.Types.*
+//    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+//    for {
+//      _ <- Entity.int(3).save.transact
+//      _ <- Entity.int.query.get.map(_ ==> List(3))
+//
+//
+//    } yield ()
+//  }
 
+  "Basic adjacent optional refs" - refs { implicit conn =>
+    import molecule.db.compliance.domains.dsl.Refs.*
+    for {
+      _ <- A.i
+        .B.?(B.i.s)
+        .C.?(C.s.i).insert(List(
+          (1, None, None),
+          (2, Some((20, "b")), None),
+          (3, None, Some(("c", 300))),
+          (4, Some((40, "b")), Some(("c", 400))),
+        )).transact
 
-      } yield ()
-    }
+      _ <- A.i.a1
+        .B.?(B.i.s)
+        .C.?(C.s.i).query.get.map(_ ==> List(
+          (1, None, None),
+          (2, Some((20, "b")), None),
+          (3, None, Some(("c", 300))),
+          (4, Some((40, "b")), Some(("c", 400))),
+        ))
+    } yield ()
+  }
+
+//  "Nested 2 levels" - segments { implicit conn =>
+//    import molecule.db.compliance.domains.dsl.Segments.*
+//
+//    for {
+//      _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)
+//        .insert(("book", "Jan", List("Musician"))).i.transact
+//
+////      _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)
+////        .query.i.get.map(_ ==> List(("book", "Jan", List("Musician"))))
+////
+////      // Same as
+////      _ <- lit_Book.title.Reviewers.Professions.*(gen_Profession.name)
+////        .query.get.map(_ ==> List(("book", List("Musician"))))
+//    } yield ()
+//  }
 
 
   //    "unique" - unique { implicit conn =>

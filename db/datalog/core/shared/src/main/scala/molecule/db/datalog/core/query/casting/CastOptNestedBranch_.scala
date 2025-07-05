@@ -33,7 +33,9 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         )
       } else None
     }
-    val pullCasts     = pullCasts0 :+ pullNested
+
+    val pullCasts = pullCasts0 :+ pullNested
+
     pullCasts.length match {
       case 1  => pullBranch1(pullCasts, optComparator, refDepth)
       case 2  => pullBranch2(pullCasts, optComparator, refDepth)
@@ -56,6 +58,17 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
       case 19 => pullBranch19(pullCasts, optComparator, refDepth)
       case 20 => pullBranch20(pullCasts, optComparator, refDepth)
       case 21 => pullBranch21(pullCasts, optComparator, refDepth)
+      case n  =>
+        val cast = (it: jIterator[?]) => {
+          var castIndex  = 0
+          var tpl: Tuple = EmptyTuple
+          while (castIndex < n) {
+            tpl = tpl :* pullCasts(castIndex)(it)
+            castIndex += 1
+          }
+          tpl
+        }
+        resolve(optComparator, refDepth, cast, n)
     }
   }
 
@@ -74,8 +87,33 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
   }
 
   final private def resolve(
-    handleMaps: jList[?] => List[Any]
+    optComparator: Option[Comparator[Row]],
+    refDepth: Int,
+    cast: jIterator[?] => Any,
+    arity: Int
   ): jIterator[?] => List[Any] = {
+    val handleMaps = {
+      optComparator.fold {
+        val list = new jArrayList[Any](arity)
+        (rows: jList[?]) =>
+          rows.asScala.toList.map {
+            case row: jMap[_, _] =>
+              list.clear()
+              cast(flatten(list, row, refDepth, 0).iterator)
+          }
+      } { comparator =>
+        (rows: jList[?]) =>
+          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          rows.asScala.foreach {
+            case row: jMap[_, _] =>
+              val list = new jArrayList[Any](arity)
+              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
+          }
+          Collections.sort(sortedRows, comparator)
+          sortedRows.asScala.map { row => cast(row.iterator) }.toList
+      }
+    }
+
     (it: jIterator[?]) =>
       try {
         it.next match {
@@ -98,27 +136,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
       (
         c1(it)
         )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](1)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](1)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 1)
   }
 
   final private def pullBranch2(
@@ -132,27 +150,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c1(it),
         c2(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](2)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](2)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 2)
   }
 
   final private def pullBranch3(
@@ -167,27 +165,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c2(it),
         c3(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](3)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](3)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 3)
   }
 
   final private def pullBranch4(
@@ -203,27 +181,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c3(it),
         c4(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](4)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](4)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 4)
   }
 
   final private def pullBranch5(
@@ -240,27 +198,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c4(it),
         c5(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](5)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](5)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 5)
   }
 
   final private def pullBranch6(
@@ -278,27 +216,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c5(it),
         c6(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](6)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](6)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 6)
   }
 
   final private def pullBranch7(
@@ -317,27 +235,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c6(it),
         c7(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](7)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](7)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 7)
   }
 
   final private def pullBranch8(
@@ -357,27 +255,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c7(it),
         c8(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](8)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](8)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 8)
   }
 
   final private def pullBranch9(
@@ -398,27 +276,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c8(it),
         c9(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](9)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](9)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 9)
   }
 
   final private def pullBranch10(
@@ -440,27 +298,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c9(it),
         c10(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](10)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](10)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 10)
   }
 
   final private def pullBranch11(
@@ -483,27 +321,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c10(it),
         c11(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](11)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](11)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 11)
   }
 
   final private def pullBranch12(
@@ -527,27 +345,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c11(it),
         c12(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](12)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](12)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 12)
   }
 
   final private def pullBranch13(
@@ -572,27 +370,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c12(it),
         c13(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](13)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](13)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 13)
   }
 
   final private def pullBranch14(
@@ -618,27 +396,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c13(it),
         c14(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](14)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](14)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 14)
   }
 
   final private def pullBranch15(
@@ -665,27 +423,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c14(it),
         c15(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](15)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](15)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 15)
   }
 
   final private def pullBranch16(
@@ -713,27 +451,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c15(it),
         c16(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](16)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](16)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 16)
   }
 
   final private def pullBranch17(
@@ -762,27 +480,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c16(it),
         c17(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](17)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](17)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 17)
   }
 
   final private def pullBranch18(
@@ -812,27 +510,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c17(it),
         c18(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](18)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](18)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 18)
   }
 
   final private def pullBranch19(
@@ -863,27 +541,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c18(it),
         c19(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](19)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](19)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 19)
   }
 
   final private def pullBranch20(
@@ -915,27 +573,7 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c19(it),
         c20(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](20)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](20)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 20)
   }
 
   final private def pullBranch21(
@@ -968,26 +606,6 @@ trait CastOptNestedBranch_ { self: DatomicQueryBase =>
         c20(it),
         c21(it)
       )
-    resolve(
-      optComparator.fold {
-        val list = new jArrayList[Any](21)
-        (rows: jList[?]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row, refDepth, 0).iterator)
-          }
-      } { comparator =>
-        (rows: jList[?]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.asScala.foreach {
-            case row: jMap[_, _] =>
-              val list = new jArrayList[Any](21)
-              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
-          }
-          Collections.sort(sortedRows, comparator)
-          sortedRows.asScala.map { row => cast(row.iterator) }.toList
-      }
-    )
+    resolve(optComparator, refDepth, cast, 21)
   }
 }
