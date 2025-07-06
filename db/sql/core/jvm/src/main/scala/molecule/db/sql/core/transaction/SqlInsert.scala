@@ -279,6 +279,7 @@ trait SqlInsert
   }
 
   override protected def addNested(
+    optional: Boolean,
     tplIndex: Int,
     ent: String,
     refAttr: String,

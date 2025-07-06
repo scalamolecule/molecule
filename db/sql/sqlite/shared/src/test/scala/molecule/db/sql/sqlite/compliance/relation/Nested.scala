@@ -7,9 +7,6 @@ import molecule.db.sql.sqlite.setup.Api_sqlite_async
 class NestedBasicTest extends MUnit {
   NestedBasic(this, Api_sqlite_async)
 }
-class NestedExprTest extends MUnit {
-  NestedExpr(this, Api_sqlite_async)
-}
 class NestedLevelsTest extends MUnit {
   NestedLevels(this, Api_sqlite_async)
 }

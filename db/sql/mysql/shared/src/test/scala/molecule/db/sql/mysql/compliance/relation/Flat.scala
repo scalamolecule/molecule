@@ -4,6 +4,9 @@ import molecule.core.setup.MUnit
 import molecule.db.compliance.test.relation.flat.*
 import molecule.db.sql.mysql.setup.Api_mysql_async
 
+class FlatEntityTest extends MUnit {
+  FlatEntity(this, Api_mysql_async)
+}
 class FlatRefTest extends MUnit {
   FlatRef(this, Api_mysql_async)
 }

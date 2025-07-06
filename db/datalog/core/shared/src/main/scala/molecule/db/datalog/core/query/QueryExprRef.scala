@@ -1,8 +1,8 @@
 package molecule.db.datalog.core.query
 
 import java.lang.Long as jLong
-import molecule.base.metaModel.CardOne
 import molecule.base.error.ModelError
+import molecule.base.metaModel.CardOne
 import molecule.core.dataModel.*
 import molecule.db.core.query.QueryExpr
 
@@ -32,64 +32,70 @@ trait QueryExprRef[Tpl] extends QueryExpr { self: Model2DatomicQuery[Tpl] =>
   private var firstOptRef = true
 
   override protected def queryOptRef(ref: Ref, optElements: List[Element]): Unit = {
-    nestedOptRef = true
-    hasOptRef = true
-    firstOptRef = false
-
-    // Add opt ref caster
-    castss = castss.init :+ (castss.last :+ pullOptRefData(ref, optElements))
-
-    firstOptRef = true
+    throw ModelError(
+      "Optional ref not implemented for Datomic."
+    )
+    //    nestedOptRef = true
+    //    hasOptRef = true
+    //    firstOptRef = false
+    //
+    //    // Add opt ref caster
+    //    castss = castss.init :+ (castss.last :+ pullOptRefData(ref, optElements))
+    //
+    //    firstOptRef = true
   }
 
   override protected def queryOptEntity(optElements: List[Element]): Unit = {
     throw ModelError(
-      "Optional entity not implement for Datomic."
+      "Optional entity not implemented for Datomic."
     )
   }
 
 
   override protected def queryOptNested(nestedRef: Ref, nestedElements: List[Element]): Unit = {
-    isOptNested = true
-    if (isNested) {
-      noMixedNestedModes
-    }
-    if (expectedFilterAttrs.nonEmpty) {
-      throw ModelError("Filter attributes not allowed in optional nested queries.")
-    }
-    validateRefEntity(nestedRef, nestedElements)
-
-    // On top level, move past nested pull date to tx metadata (if any)
-    attrIndex += 1
-
-    val e        = es.last
-    val nestedId = "?id" + nestedIds.size
-    if (where.isEmpty) {
-      val Ref(ent, refAttrClean, ref, _, _, _) = nestedRef
-      val (refAttr, refId)                     = (s":$ent/$refAttrClean", vv)
-      varPath = varPath ++ List(refAttr, refId)
-      path = path ++ List(refAttrClean, ref)
-      where += s"[$e $refAttr $refId]" -> wClause
-    }
-    where += s"[(identity $e) $nestedId]" -> wGround
-
-    if (where.length == 2 && where.head._1.startsWith("[(identity")) {
-      /*
-      When only one identity function for single optional attribute and one for identity of pull entity id
-
-      ([(identity ?a) ?a-?b],1)
-      ([(identity ?a) ?id0],1)
-       */
-      throw ModelError("Single optional attribute before optional nested data structure is not allowed.")
-    }
-
-    // Add nested caster
-    castss = castss.init :+ (castss.last :+ pullOptNestedData)
-
-    // Start new level of casts
-    castss = castss :+ Nil
-
-    resolveOptNestedElements(nestedRef, nestedElements)
+    throw ModelError(
+      "Optional nested not implemented for Datomic."
+    )
+    //    isOptNested = true
+    //    if (isNested) {
+    //      noMixedNestedModes
+    //    }
+    //    if (expectedFilterAttrs.nonEmpty) {
+    //      throw ModelError("Filter attributes not allowed in optional nested queries.")
+    //    }
+    //    validateRefEntity(nestedRef, nestedElements)
+    //
+    //    // On top level, move past nested pull date to tx metadata (if any)
+    //    attrIndex += 1
+    //
+    //    val e        = es.last
+    //    val nestedId = "?id" + nestedIds.size
+    //    if (where.isEmpty) {
+    //      val Ref(ent, refAttrClean, ref, _, _, _) = nestedRef
+    //      val (refAttr, refId)                     = (s":$ent/$refAttrClean", vv)
+    //      varPath = varPath ++ List(refAttr, refId)
+    //      path = path ++ List(refAttrClean, ref)
+    //      where += s"[$e $refAttr $refId]" -> wClause
+    //    }
+    //    where += s"[(identity $e) $nestedId]" -> wGround
+    //
+    //    if (where.length == 2 && where.head._1.startsWith("[(identity")) {
+    //      /*
+    //      When only one identity function for single optional attribute and one for identity of pull entity id
+    //
+    //      ([(identity ?a) ?a-?b],1)
+    //      ([(identity ?a) ?id0],1)
+    //       */
+    //      throw ModelError("Single optional attribute before optional nested data structure is not allowed.")
+    //    }
+    //
+    //    // Add nested caster
+    //    castss = castss.init :+ (castss.last :+ pullOptNestedData)
+    //
+    //    // Start new level of casts
+    //    castss = castss :+ Nil
+    //
+    //    resolveOptNestedElements(nestedRef, nestedElements)
   }
 
 

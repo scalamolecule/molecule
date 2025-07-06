@@ -2,8 +2,8 @@ package molecule.db.datalog.datomic.transaction
 
 import java.time.*
 import java.util.{ArrayList as jArrayList, List as jList}
-import molecule.base.metaModel.{Cardinality, CardOne}
 import molecule.base.error.ModelError
+import molecule.base.metaModel.{CardOne, Cardinality}
 import molecule.core.dataModel.*
 import molecule.core.util.MoleculeLogging
 import molecule.db.core.transaction.ops.InsertOps
@@ -317,7 +317,7 @@ trait Insert_datomic
     attrs: List[Attr]
   ): Product => Unit = {
     throw ModelError(
-      "Optional entity not implement for Datomic."
+      "Optional entity not implemented for Datomic."
     )
   }
 
@@ -331,48 +331,59 @@ trait Insert_datomic
     ref: String,
     nestedElements: List[Element]
   ): Product => Unit = {
-    val useBaseId = firstOptRef
-    firstOptRef = false
+    throw ModelError(
+      "Optional ref not implemented for Datomic."
+    )
 
-    // Recursively resolve nested data
-    val nested2stmts = getResolver(nestedElements)
-    firstOptRef = true
-
-    countValueAttrs(nestedElements) match {
-      case 1 => // Nested arity-1 values
-        (tpl: Product) => {
-          val values = tpl.productElement(tplIndex).asInstanceOf[Option[Any]]
-          val baseId = if (useBaseId) e0 else e
-          values.foreach { value =>
-            e = baseId
-            val nestedTpl = Tuple1(value)
-            addRef(ent, refAttr, ref, CardOne)(nestedTpl)
-            unusedRefIds -= e
-            nested2stmts(nestedTpl)
-          }
-        }
-
-      case _ =>
-        (tpl: Product) => {
-          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Option[Product]]
-          val baseId     = if (useBaseId) e0 else e
-          nestedTpls.foreach { nestedTpl =>
-            e = baseId
-            addRef(ent, refAttr, ref, CardOne)(nestedTpl)
-            unusedRefIds -= e
-            nested2stmts(nestedTpl)
-          }
-        }
-    }
+    //    val useBaseId = firstOptRef
+    //    firstOptRef = false
+    //
+    //    // Recursively resolve nested data
+    //    val nested2stmts = getResolver(nestedElements)
+    //    firstOptRef = true
+    //
+    //    countValueAttrs(nestedElements) match {
+    //      case 1 => // Nested arity-1 values
+    //        (tpl: Product) => {
+    //          val values = tpl.productElement(tplIndex).asInstanceOf[Option[Any]]
+    //          val baseId = if (useBaseId) e0 else e
+    //          values.foreach { value =>
+    //            e = baseId
+    //            val nestedTpl = Tuple1(value)
+    //            addRef(ent, refAttr, ref, CardOne)(nestedTpl)
+    //            unusedRefIds -= e
+    //            nested2stmts(nestedTpl)
+    //          }
+    //        }
+    //
+    //      case _ =>
+    //        (tpl: Product) => {
+    //          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Option[Product]]
+    //          val baseId     = if (useBaseId) e0 else e
+    //          nestedTpls.foreach { nestedTpl =>
+    //            e = baseId
+    //            addRef(ent, refAttr, ref, CardOne)(nestedTpl)
+    //            unusedRefIds -= e
+    //            nested2stmts(nestedTpl)
+    //          }
+    //        }
+    //    }
   }
 
   override protected def addNested(
+    optional: Boolean,
     tplIndex: Int,
     ent: String,
     refAttr: String,
     ref: String,
     nestedElements: List[Element]
   ): Product => Unit = {
+    if (optional) {
+      throw ModelError(
+        "Optional nested not implemented for Datomic."
+      )
+    }
+
     // Recursively resolve nested data
     val nested2stmts = getResolver(nestedElements)
     val lastIsSet    = nestedElements.last.isInstanceOf[AttrSet]

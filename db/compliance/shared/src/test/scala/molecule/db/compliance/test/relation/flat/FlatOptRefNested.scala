@@ -1,8 +1,9 @@
 package molecule.db.compliance.test.relation.flat
 
-import molecule.core.setup.{MUnit, TestUtils}
+import molecule.core.setup.MUnit
 import molecule.db.compliance.domains.dsl.Refs.*
 import molecule.db.compliance.setup.DbProviders
+import molecule.db.compliance.test.relation.Arity23
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
@@ -11,7 +12,7 @@ import molecule.db.core.util.Executor.*
 case class FlatOptRefNested(
   suite: MUnit,
   api: Api_async & Spi_async & DbProviders
-) extends TestUtils {
+) extends Arity23 {
 
   import api.*
   import suite.*
@@ -118,5 +119,4 @@ case class FlatOptRefNested(
       ))
     } yield ()
   }
-
 }

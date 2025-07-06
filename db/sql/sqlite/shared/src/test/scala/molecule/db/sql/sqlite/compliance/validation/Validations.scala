@@ -1,27 +1,27 @@
-package molecule.db.sql.mysql.compliance.validation
+package molecule.db.sql.sqlite.compliance.validation
 
 import molecule.core.setup.{MUnit, MUnit_arrays}
 import molecule.db.compliance.test.validation.*
-import molecule.db.sql.mysql.setup.Api_mysql_async
+import molecule.db.sql.sqlite.setup.Api_sqlite_async
 
 class AliasedAttrsTest extends MUnit {
-  Aliased(this, Api_mysql_async)
+  Aliased(this, Api_sqlite_async)
 }
 class AllowedValuesTest extends MUnit {
-  AllowedValues(this, Api_mysql_async)
+  AllowedValues(this, Api_sqlite_async)
 }
 class KeywordSubstitutionTest extends MUnit {
-  KeywordSubstitution(this, Api_mysql_async)
+  KeywordSubstitution(this, Api_sqlite_async)
 }
 class MandatoryAttrsTest extends MUnit {
-  MandatoryAttrs(this, Api_mysql_async)
+  MandatoryAttrs(this, Api_sqlite_async)
 }
 class MandatoryRefsTest extends MUnit_arrays {
-  MandatoryRefs(this, Api_mysql_async)
+  MandatoryRefs(this, Api_sqlite_async)
 }
 class RequiredAttrsTest extends MUnit {
-  RequiredAttrs(this, Api_mysql_async)
+  RequiredAttrs(this, Api_sqlite_async)
 }
 class StringValidationFnsTest extends MUnit {
-  StringValidationFns(this, Api_mysql_async)
+  StringValidationFns(this, Api_sqlite_async)
 }

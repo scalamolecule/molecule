@@ -104,7 +104,7 @@ case class RequiredAttrs(
   "Ref/ref" - validation { implicit conn =>
     for {
       ref1 <- RefB.i.insert(1).transact.map(_.id)
-      ref2 <- Enum.luckyNumber.insert(7).transact.map(_.id)
+      ref2 <- AllowedAttrs.luckyNumber.insert(7).transact.map(_.id)
 
       _ <- Require.ref1(ref1).save.transact
         .map(_ ==> "Unexpected success").recover {

@@ -118,6 +118,11 @@ trait Model2Query extends QueryExpr with ModelUtils {
                   validate(es ++ tail, prevElements)
 
                 case OptEntity(attrs) =>
+                  if (tail.isEmpty)
+                    throw ModelError(
+                      "Query for optional entity only is not allowed. " +
+                        "Please use normal entity query, or continue after optional entity with other ref."
+                    )
                   validate(validateOptEntity(attrs) ++ tail, prevElements)
 
                 case Nested(r, es) =>

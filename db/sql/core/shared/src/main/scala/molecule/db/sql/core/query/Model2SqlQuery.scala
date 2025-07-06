@@ -1,5 +1,6 @@
 package molecule.db.sql.core.query
 
+import molecule.base.error.ModelError
 import molecule.core.dataModel.Element
 import molecule.core.util.MoleculeLogging
 import molecule.db.core.marshalling.ConnProxy

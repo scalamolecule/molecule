@@ -7,9 +7,6 @@ import molecule.db.sql.mariadb.setup.Api_mariadb_async
 class NestedBasicTest extends MUnit {
   NestedBasic(this, Api_mariadb_async)
 }
-class NestedExprTest extends MUnit {
-  NestedExpr(this, Api_mariadb_async)
-}
 class NestedLevelsTest extends MUnit {
   NestedLevels(this, Api_mariadb_async)
 }

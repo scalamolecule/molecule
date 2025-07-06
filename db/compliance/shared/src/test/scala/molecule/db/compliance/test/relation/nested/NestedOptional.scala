@@ -1,8 +1,10 @@
 package molecule.db.compliance.test.relation.nested
 
-import molecule.core.setup.{MUnit, TestUtils}
+import molecule.core.setup.MUnit
 import molecule.db.compliance.domains.dsl.Refs.*
+import molecule.db.compliance.domains.dsl.Types.{Entity, Ref}
 import molecule.db.compliance.setup.DbProviders
+import molecule.db.compliance.test.relation.Arity23
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
@@ -11,7 +13,7 @@ import molecule.db.core.util.Executor.*
 case class NestedOptional(
   suite: MUnit,
   api: Api_async & Spi_async & DbProviders
-) extends TestUtils {
+) extends Arity23 {
 
   import api.*
   import suite.*
@@ -300,6 +302,60 @@ case class NestedOptional(
             (20, None),
           )),
         )),
+      ))
+    } yield ()
+  }
+
+  "Expression inside optional nested" - refs { implicit conn =>
+    // In SQL, expressions in optional nested queries are ok
+    for {
+      _ <- A.i.Bb.*(B.i).insert(List((1, List(1, 2, 3)))).transact
+
+      _ <- A.i(1).Bb.*?(B.i.a1).query.get.map(_ ==> List((1, List(1, 2, 3))))
+      _ <- A.i_.Bb.*?(B.i(1)).query.get.map(_ ==> List(List(1)))
+      _ <- A.i_.Bb.*?(B.i.<(2)).query.get.map(_ ==> List(List(1)))
+      _ <- A.i_.Bb.*?(B.i.<=(2).a1).query.get.map(_ ==> List(List(1, 2)))
+      _ <- A.i_.Bb.*?(B.i.>(2)).query.get.map(_ ==> List(List(3)))
+      _ <- A.i_.Bb.*?(B.i.>=(2)).query.get.map(_ ==> List(List(2, 3)))
+    } yield ()
+  }
+
+
+  "Arity 23 optional nested" - types { implicit conn =>
+    for {
+      _ <- Entity.i.Refs.*?(ref23).insert(
+        (1, List(tpl23_1, tpl23_2)),
+        (2, Nil),
+      ).transact
+
+      _ <- Entity.i.a1.Refs.*?(
+        Ref
+          .string
+          .int
+          .long
+          .float
+          .double
+          .boolean
+          .bigInt
+          .bigDecimal
+          .date
+          .duration
+          .instant
+          .localDate
+          .localTime
+          .localDateTime
+          .offsetTime
+          .offsetDateTime
+          .zonedDateTime
+          .uuid
+          .uri
+          .byte
+          .short
+          .char
+          .i
+      ).query.get.map(_ ==> List(
+        (1, List(tpl23_1, tpl23_2)),
+        (2, Nil)
       ))
     } yield ()
   }

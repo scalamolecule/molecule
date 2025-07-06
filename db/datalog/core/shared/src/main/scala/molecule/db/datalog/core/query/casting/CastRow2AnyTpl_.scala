@@ -34,12 +34,13 @@ trait CastRow2AnyTpl_ { self: DatomicQueryBase =>
       case 21 => cast21(casts, attrIndex)
       case 22 => cast22(casts, attrIndex)
       case n  =>
+        val last = n - 1
         (row: Row) =>
-          var rowIndex   = n - 1
-          var castIndex  = attrIndex + n - 1
+          var rowIndex   = attrIndex + last
+          var castIndex  = last
           var tpl: Tuple = EmptyTuple
-          while (rowIndex >= 0) {
-            tpl = casts(rowIndex)(row.get(castIndex)) *: tpl
+          while (castIndex >= 0) {
+            tpl = casts(castIndex)(row.get(rowIndex)) *: tpl
             rowIndex -= 1
             castIndex -= 1
           }

@@ -17,42 +17,44 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
     for {
-      case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- Entity(a).int(10).update.transact
-      _ <- Entity(b).delete.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+//      case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+//      _ <- Entity.int(3).save.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+//      _ <- Entity(a).int(10).update.transact
+//      _ <- Entity(b).delete.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+
+      _ <- Entity.i.Ref.?(Ref.string.int).insert(
+        (1, Some((string1, int1))),
+        (2, None)
+      ).transact
+
+      _ <- Entity.i.Ref.?(Ref.string.int).query.get.map(_ ==> List(
+        (1, Some((string1, int1))),
+        (2, None)
+      ))
 
     } yield ()
   }
 
 
-//  "Owned entities: Card-one" - refs { implicit conn =>
+//  "refs" - refs { implicit conn =>
 //    import molecule.db.compliance.domains.dsl.Refs.*
 //
 //    for {
-//      e1 <- A.i.OwnB.i.insert(
-//        (1, 10),
-//        (2, 20)
-//      ).transact.map(_.id)
+//      _ <- A.?(A.i).B.i.insert(List(
+//        (None, 1),
+//        (Some(20), 2),
+//      )).transact
 //
-//      // 2 entities, each with an owned sub-entity
-//      _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List(
-//        (1, 10),
-//        (2, 20)
+//      _ <- A.?(A.i).B.i.a1.query.i.get.map(_ ==> List(
+//        (None, 1),
+//        (Some(20), 2),
 //      ))
 //
-//      // 2 sub-entities
-//      _ <- B.i.a1.query.get.map(_ ==> List(10, 20))
-//
-//      _ <- A(e1).delete.i.transact
-//
-//      // 1 entity with 1 owned sub-entity left
-//      _ <- A.i.OwnB.i.query.get.map(_ ==> List((2, 20)))
-//
-//      // 2 sub-entities
-//      _ <- B.i.query.get.map(_ ==> List(20))
+////      _ <- A.i.B.i.query.get.map(_ ==> List(
+////        (20, 2),
+////      ))
 //    } yield ()
 //  }
 

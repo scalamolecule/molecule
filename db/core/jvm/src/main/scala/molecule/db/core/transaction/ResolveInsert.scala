@@ -90,12 +90,12 @@ trait ResolveInsert
           resolve(tail, resolvers :+ optEntityResolver, tplIndex + 1, Nil)
 
         case Nested(Ref(ent, refAttr, ref, _, _, _), nestedElements) =>
-          val nestedResolver = addNested(tplIndex, ent, refAttr, ref, nestedElements)
+          val nestedResolver = addNested(true, tplIndex, ent, refAttr, ref, nestedElements)
           resolve(tail, resolvers :+ nestedResolver, tplIndex, Nil)
 
         case OptNested(Ref(ent, refAttr, ref, _, _, _), nestedElements) =>
           // (same behaviour as mandatory nested - the list can have data or not)
-          val optNestedResolver = addNested(tplIndex, ent, refAttr, ref, nestedElements)
+          val optNestedResolver = addNested(false, tplIndex, ent, refAttr, ref, nestedElements)
           resolve(tail, resolvers :+ optNestedResolver, tplIndex, Nil)
       }
       case Nil             => resolvers

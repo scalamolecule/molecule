@@ -9,7 +9,7 @@ import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
 
 
-case class InsertRefs(
+case class InsertRefs_Datomic(
   suite: MUnit,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
@@ -380,31 +380,33 @@ case class InsertRefs(
   }
 
 
-  "Optional entity (right join)" - refs { implicit conn =>
-    for {
-      _ <- A.?(A.i).B.s.insert(
-        (Some(1), "a"),
-        (None, "b"),
-      ).transact
+  if (database != "datomic") {
+    "Optional entity (right join)" - refs { implicit conn =>
+      for {
+        _ <- A.?(A.i).B.s.insert(
+          (Some(1), "a"),
+          (None, "b"),
+        ).transact
 
-      _ <- A.?(A.i).B.s.a1.query.get.map(_ ==> List(
-        (Some(1), "a"),
-        (None, "b"),
-      ))
-    } yield ()
-  }
+        _ <- A.?(A.i).B.s.a1.query.get.map(_ ==> List(
+          (Some(1), "a"),
+          (None, "b"),
+        ))
+      } yield ()
+    }
 
-  "Optional entity 2 (right join)" - refs { implicit conn =>
-    for {
-      _ <- A.?(A.i.s).B.s.insert.apply(
-        (Some((1, "x")), "a"),
-        (None, "b"),
-      ).transact
+    "Optional entity 2 (right join)" - refs { implicit conn =>
+      for {
+        _ <- A.?(A.i.s).B.s.insert.apply(
+          (Some((1, "x")), "a"),
+          (None, "b"),
+        ).transact
 
-      _ <- A.?(A.i.s).B.s.a1.query.get.map(_ ==> List(
-        (Some((1, "x")), "a"),
-        (None, "b"),
-      ))
-    } yield ()
+        _ <- A.?(A.i.s).B.s.a1.query.get.map(_ ==> List(
+          (Some((1, "x")), "a"),
+          (None, "b"),
+        ))
+      } yield ()
+    }
   }
 }

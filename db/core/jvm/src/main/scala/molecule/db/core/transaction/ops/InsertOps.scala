@@ -113,6 +113,7 @@ trait InsertOps extends BaseOps {
   ): Product => Unit
 
   protected def addNested(
+    optional: Boolean,
     tplIndex: Int,
     ent: String,
     refAttr: String,

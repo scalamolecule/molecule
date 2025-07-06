@@ -34,7 +34,7 @@ trait Molecule_0 extends Molecule {
   def upsert: Update = ???
 }
 
-trait NonEmptyMolecule[Tpl <: Tuple] extends Molecule {
+trait NonEmptyMolecule extends Molecule {
   def save: Save = {
     noBinding("Save")
     Save(dataModel)
@@ -56,7 +56,7 @@ trait NonEmptyMolecule[Tpl <: Tuple] extends Molecule {
 }
 
 
-trait Molecule_1[T] extends NonEmptyMolecule[Tuple1[T]] {
+trait Molecule_1[T] extends NonEmptyMolecule {
   def insert: Insert_1[T] = {
     noBinding("Insert")
     Insert_1[T](dataModel)
@@ -64,7 +64,7 @@ trait Molecule_1[T] extends NonEmptyMolecule[Tuple1[T]] {
   def query: Query[T] = Query[T](dataModel)
 }
 
-trait Molecule_n[Tpl <: Tuple] extends NonEmptyMolecule[Tpl] {
+trait Molecule_n[Tpl <: Tuple] extends NonEmptyMolecule {
   def insert: Insert_n[Tpl] = {
     noBinding("Insert")
     Insert_n[Tpl](dataModel)

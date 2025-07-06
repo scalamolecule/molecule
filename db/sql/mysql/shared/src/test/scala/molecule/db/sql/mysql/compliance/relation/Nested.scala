@@ -7,9 +7,6 @@ import molecule.db.sql.mysql.setup.Api_mysql_async
 class NestedBasicTest extends MUnit {
   NestedBasic(this, Api_mysql_async)
 }
-class NestedExprTest extends MUnit {
-  NestedExpr(this, Api_mysql_async)
-}
 class NestedLevelsTest extends MUnit {
   NestedLevels(this, Api_mysql_async)
 }

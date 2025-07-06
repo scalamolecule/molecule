@@ -7,9 +7,6 @@ import molecule.db.sql.postgres.setup.Api_postgres_async
 class NestedBasicTest extends MUnit {
   NestedBasic(this, Api_postgres_async)
 }
-class NestedExprTest extends MUnit {
-  NestedExpr(this, Api_postgres_async)
-}
 class NestedLevelsTest extends MUnit {
   NestedLevels(this, Api_postgres_async)
 }

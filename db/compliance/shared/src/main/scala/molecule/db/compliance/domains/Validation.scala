@@ -6,6 +6,17 @@ import molecule.DomainStructure
 
 object Validation extends DomainStructure {
 
+  enum Color:
+    case RED, BLUE, GREEN
+
+  // Test various options
+  trait Person {
+    val name   = oneString
+    val `type` = oneString.alias("tpe").descr("Use attr name in SQL and alias in Scala code")
+
+    val favoriteColor = oneEnum[Color]("Choose from static enums - basically typed String representations")
+  }
+
   trait Strings {
     val email        = oneString.email
     val emailWithMsg = oneString.email("Please provide a real email")
@@ -15,10 +26,10 @@ object Validation extends DomainStructure {
       "^[a-zA-Z0-9]+$",
       "Username cannot contain special characters."
     )
-    val enums        = many[Enum]
+    val allowedAttrs    = many[AllowedAttrs]
   }
 
-  trait Enum {
+  trait AllowedAttrs {
     val luckyNumber  = oneInt.allowedValues(7, 9, 13)
     val luckyNumber2 = oneInt.allowedValues(
       Seq(7, 9, 13),
@@ -347,6 +358,6 @@ object Validation extends DomainStructure {
 
     // Ref-only tuples
     val ref1 = one[RefB].require(ref2)
-    val ref2 = one[Enum]
+    val ref2 = one[AllowedAttrs]
   }
 }

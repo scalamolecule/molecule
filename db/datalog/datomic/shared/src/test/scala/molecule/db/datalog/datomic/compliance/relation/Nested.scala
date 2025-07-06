@@ -7,15 +7,12 @@ import molecule.db.datalog.datomic.setup.Api_datomic_async
 class NestedBasicTest extends MUnit {
   NestedBasic(this, Api_datomic_async)
 }
-class NestedExprTest extends MUnit {
-  NestedExpr(this, Api_datomic_async)
-}
 class NestedLevelsTest extends MUnit {
   NestedLevels(this, Api_datomic_async)
 }
-class NestedOptionalTest extends MUnit {
-  NestedOptional(this, Api_datomic_async)
-}
+//class NestedOptionalTest extends MUnit {
+//  NestedOptional(this, Api_datomic_async)
+//}
 class NestedRefTest extends MUnit {
   NestedRef(this, Api_datomic_async)
 }

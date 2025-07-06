@@ -342,7 +342,7 @@ case class Nested(
 
   "3 levels" - validation { implicit conn =>
     for {
-      _ <- Type.int.Refs.*(Strings.email.Enums.*(Enum.luckyNumber)).insert(
+      _ <- Type.int.Refs.*(Strings.email.AllowedAttrs.*(AllowedAttrs.luckyNumber)).insert(
           (1, List(
             ("a@aa.com", List(1, 7)),
             ("b@bb", List(9, 2))
@@ -374,7 +374,7 @@ case class Nested(
                         Seq(
                           InsertError(
                             0, // tuple index
-                            "Strings.enums",
+                            "Strings.allowedAttrs",
                             Seq(),
                             Seq(
                               (
@@ -382,7 +382,7 @@ case class Nested(
                                 Seq(
                                   InsertError(
                                     0, // tuple index
-                                    "Enum.luckyNumber",
+                                    "AllowedAttrs.luckyNumber",
                                     Seq(
                                       """Value `1` is not one of the allowed values in Seq(7, 9, 13)"""
                                     ),
@@ -407,7 +407,7 @@ case class Nested(
                           ),
                           InsertError(
                             0, // tuple index
-                            "Strings.enums",
+                            "Strings.allowedAttrs",
                             Seq(),
                             Seq(
                               (
@@ -415,7 +415,7 @@ case class Nested(
                                 Seq(
                                   InsertError(
                                     0, // tuple index
-                                    "Enum.luckyNumber",
+                                    "AllowedAttrs.luckyNumber",
                                     Seq(
                                       """Value `2` is not one of the allowed values in Seq(7, 9, 13)"""
                                     ),
