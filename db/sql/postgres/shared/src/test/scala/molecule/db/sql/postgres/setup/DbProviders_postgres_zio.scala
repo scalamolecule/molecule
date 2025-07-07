@@ -1,6 +1,5 @@
 package molecule.db.sql.postgres.setup
 
-import boopickle.Default.*
 import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_MetaDb_postgres
 import molecule.db.compliance.domains.dsl.Types.metadb.Types_MetaDb_postgres
 import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_MetaDb_postgres

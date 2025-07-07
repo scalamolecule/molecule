@@ -38,7 +38,7 @@ trait Spi_datomic_async
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = {
     val conn  = conn0.asInstanceOf[DatomicConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryOffset[Tpl](proxy, q.dataModel, q.optLimit, q.offset).future
+    conn.rpc.queryOffset[Tpl](proxy, q.dataModel, q.optLimit, q.offset, q.bindValues).future
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
@@ -51,7 +51,7 @@ trait Spi_datomic_async
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = {
     val conn  = conn0.asInstanceOf[DatomicConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryCursor[Tpl](proxy, q.dataModel, q.optLimit, q.cursor).future
+    conn.rpc.queryCursor[Tpl](proxy, q.dataModel, q.optLimit, q.cursor, q.bindValues).future
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])

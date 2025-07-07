@@ -7,9 +7,7 @@ import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
-import scala.annotation.nowarn
 
-@nowarn
 case class Widening(
   suite: MUnit,
   api: Api_async & Spi_async & DbProviders
@@ -234,23 +232,49 @@ case class Widening(
   }
 
   "BigDecimal, no decimals" - types { implicit conn =>
-    for {
-      _ <- Entity.bigDecimal(BigDecimal("1.0")).save.transact
-      eq = Entity.bigDecimal(?).a1.query
+    if (database == "sqlite")
+      for {
+        _ <- Entity.bigDecimal(BigDecimal("1.0")).save.transact
+        eq = Entity.bigDecimal(?).a1.query
 
-      // Accepted types
-      _ <- eq(byte1).get.map(_.head ==> BigDecimal("1.0"))
-      _ <- eq(short1).get.map(_.head ==> BigDecimal("1.0"))
-      _ <- eq(int1).get.map(_.head ==> BigDecimal("1.0"))
-      _ <- eq(long1).get.map(_.head ==> BigDecimal("1.0"))
-      _ <- eq(bigInt1).get.map(_.head ==> BigDecimal("1.0"))
+        // Comparing BigDecimal with BigDecimal ok
+        _ <- eq(BigDecimal("1.0")).get.map(_.head ==~ BigDecimal("1.0"))
 
-      // Other types rejected
-      _ <- eq(float1).get
-        .map(_ ==> "Unexpected success").recover {
-          case ModelError(error) =>
-            error ==> "First bind value `1.1` is of type Float but should be of type BigDecimal."
-        }
-    } yield ()
+        // No match since BigDecimal is saved as text in Sqlite ("1.0", not "1")
+        //      _ <- eq(byte1).get.map(_.head ==> BigDecimal("1.0"))
+        //      _ <- eq(short1).get.map(_.head ==> BigDecimal("1.0"))
+        //      _ <- eq(int1).get.map(_.head ==> BigDecimal("1.0"))
+        //      _ <- eq(long1).get.map(_.head ==> BigDecimal("1.0"))
+        //      _ <- eq(bigInt1).get.map(_.head ==> BigDecimal("1.0"))
+
+        // Other types rejected
+        _ <- eq(float1).get
+          .map(_ ==> "Unexpected success").recover {
+            case ModelError(error) =>
+              error ==> "First bind value `1.1` is of type Float but should be of type BigDecimal."
+          }
+      } yield ()
+    else
+      for {
+        _ <- Entity.bigDecimal(BigDecimal("1.0")).save.transact
+        eq = Entity.bigDecimal(?).a1.query
+
+        // Comparing BigDecimal with BigDecimal ok
+        _ <- eq(BigDecimal("1.0")).get.map(_.head ==~ BigDecimal("1.0"))
+
+        // Accepted types
+        _ <- eq(byte1).get.map(_.head ==> BigDecimal("1.0"))
+        _ <- eq(short1).get.map(_.head ==> BigDecimal("1.0"))
+        _ <- eq(int1).get.map(_.head ==> BigDecimal("1.0"))
+        _ <- eq(long1).get.map(_.head ==> BigDecimal("1.0"))
+        _ <- eq(bigInt1).get.map(_.head ==> BigDecimal("1.0"))
+
+        // Other types rejected
+        _ <- eq(float1).get
+          .map(_ ==> "Unexpected success").recover {
+            case ModelError(error) =>
+              error ==> "First bind value `1.1` is of type Float but should be of type BigDecimal."
+          }
+      } yield ()
   }
 }

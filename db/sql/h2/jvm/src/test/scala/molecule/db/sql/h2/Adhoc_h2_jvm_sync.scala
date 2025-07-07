@@ -1,6 +1,5 @@
 package molecule.db.sql.h2
 
-import boopickle.Default.*
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.sql.h2.setup.DbProviders_h2
 import molecule.db.sql.h2.sync.*

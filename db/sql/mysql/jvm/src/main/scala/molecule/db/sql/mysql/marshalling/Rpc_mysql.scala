@@ -1,7 +1,5 @@
 package molecule.db.sql.mysql.marshalling
 
-import boopickle.Default.*
-import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.sql.core.marshalling.MoleculeBackend_SQL
 import molecule.db.sql.mysql.spi.Spi_mysql_sync
 

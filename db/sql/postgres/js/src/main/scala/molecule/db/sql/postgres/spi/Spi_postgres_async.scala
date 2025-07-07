@@ -1,6 +1,5 @@
 package molecule.db.sql.postgres.spi
 
-import boopickle.Default.*
 import molecule.core.dataModel.DataModel
 import molecule.db.sql.core.spi.SpiBaseJS_async
 import molecule.db.sql.postgres.query.Model2SqlQuery_postgres

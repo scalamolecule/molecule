@@ -1,9 +1,7 @@
 package molecule.db.sql.h2
 
-import boopickle.Default.*
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.Entity
-import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2

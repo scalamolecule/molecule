@@ -1,43 +1,43 @@
 package molecule.db.sql.sqlite
 
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.core.util.Executor.*
-import molecule.db.sql.sqlite.async.*
 import molecule.db.sql.sqlite.setup.DbProviders_sqlite
+import molecule.db.sql.sqlite.async.*
+import molecule.db.core.util.Executor.*
 
 
 class Adhoc_sqlite_jvm_async extends MUnit with DbProviders_sqlite with TestUtils {
 
 
-    "types" - types { implicit conn =>
-      import molecule.db.compliance.domains.dsl.Types.*
-      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+  "types" - types { implicit conn =>
+    import molecule.db.compliance.domains.dsl.Types.*
+    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
-      for {
-        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-        _ <- Entity.int(3).save.transact
-        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Entity(a).int(10).update.transact
-        _ <- Entity(b).delete.transact
-        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-
-
-      } yield ()
-    }
+    for {
+      case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      _ <- Entity.int(3).save.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- Entity(a).int(10).update.transact
+      _ <- Entity(b).delete.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
 
+    } yield ()
+  }
 
-//  "refs" - refs { implicit conn =>
-//    import molecule.db.compliance.domains.dsl.Refs.*
-//    for {
-//      _ <- A.i.insert(1, 2).transact
-//      _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
-//        .compile
-//        .toList
-//        .map(_.sorted ==> List(1, 2))
-//        .unsafeToFuture()
-//    } yield ()
-//  }
+
+
+  //  "refs" - refs { implicit conn =>
+  //    import molecule.db.compliance.domains.dsl.Refs.*
+  //    for {
+  //      _ <- A.i.insert(1, 2).transact
+  //      _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
+  //        .compile
+  //        .toList
+  //        .map(_.sorted ==> List(1, 2))
+  //        .unsafeToFuture()
+  //    } yield ()
+  //  }
   //
   //
   //  //    "unique" - unique { implicit conn =>

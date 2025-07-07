@@ -1,13 +1,14 @@
 package molecule.db.sql.sqlite.setup
 
+import boopickle.Default.*
 import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_MetaDb_sqlite
 import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_MetaDb_sqlite
-import molecule.db.compliance.domains.dsl.Types.metadb.*
+import molecule.db.compliance.domains.dsl.Types.metadb.Types_MetaDb_sqlite
 import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_MetaDb_sqlite
 import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_MetaDb_sqlite
 import molecule.db.compliance.setup.DbConnection
 import molecule.db.core.api.MetaDb_sqlite
-import molecule.db.core.marshalling.Boopicklers.pickleMetaDb
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS

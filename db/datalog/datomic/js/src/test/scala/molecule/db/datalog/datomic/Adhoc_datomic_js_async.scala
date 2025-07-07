@@ -1,6 +1,5 @@
 package molecule.db.datalog.datomic
 
-import boopickle.Default.*
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.core.util.Executor.*

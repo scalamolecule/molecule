@@ -6,7 +6,6 @@ import molecule.db.compliance.domains.dsl.Types.metadb.*
 import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_MetaDb_sqlite
 import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_MetaDb_sqlite
 import molecule.db.compliance.setup.{DbProviders, Platform}
-import molecule.db.core.marshalling.Boopicklers.pickleMetaDb
 import molecule.db.core.spi.Conn
 
 trait DbProviders_sqlite extends DbProviders with DbConnection_sqlite with Platform {

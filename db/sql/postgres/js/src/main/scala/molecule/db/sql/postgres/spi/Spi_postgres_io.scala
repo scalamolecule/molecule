@@ -1,6 +1,5 @@
 package molecule.db.sql.postgres.spi
 
-import boopickle.Default.*
 import cats.effect.IO
 import molecule.core.dataModel.DataModel
 import molecule.db.sql.core.spi.SpiBase_io

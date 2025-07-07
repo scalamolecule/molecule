@@ -1,6 +1,5 @@
 package molecule.server.netty
 
-import boopickle.Default.*
 import cats.effect.*
 import cats.effect.kernel.Resource
 import molecule.db.core.marshalling.MoleculeRpc

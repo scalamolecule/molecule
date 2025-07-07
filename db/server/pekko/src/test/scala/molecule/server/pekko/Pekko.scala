@@ -1,6 +1,5 @@
 package molecule.server.pekko
 
-import boopickle.Default.*
 import molecule.db.core.marshalling.MoleculeRpc
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.Http

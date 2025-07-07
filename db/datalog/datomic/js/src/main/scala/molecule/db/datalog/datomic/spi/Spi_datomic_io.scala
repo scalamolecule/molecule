@@ -35,7 +35,7 @@ trait Spi_datomic_io
                                    (implicit conn0: Conn): IO[(List[Tpl], Int, Boolean)] = {
     val conn  = conn0.asInstanceOf[DatomicConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryOffset[Tpl](proxy, q.dataModel, q.optLimit, q.offset).io
+    conn.rpc.queryOffset[Tpl](proxy, q.dataModel, q.optLimit, q.offset, q.bindValues).io
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
@@ -47,7 +47,7 @@ trait Spi_datomic_io
                                    (implicit conn0: Conn): IO[(List[Tpl], String, Boolean)] = {
     val conn  = conn0.asInstanceOf[DatomicConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryCursor[Tpl](proxy, q.dataModel, q.optLimit, q.cursor).io
+    conn.rpc.queryCursor[Tpl](proxy, q.dataModel, q.optLimit, q.cursor, q.bindValues).io
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])

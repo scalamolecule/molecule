@@ -1,6 +1,5 @@
 package molecule.server.play
 
-import boopickle.Default.*
 import molecule.db.core.marshalling.MoleculeRpc
 import org.apache.pekko.actor.{ActorSystem, Terminated}
 import play.api.Mode

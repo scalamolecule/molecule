@@ -121,7 +121,7 @@ case class FilterSeq(
 
   "Doesn't have value" - types { implicit conn =>
     for {
-      List(a, b) <- Entity.iSeq.int.insert(
+      case List(a, b) <- Entity.iSeq.int.insert(
         (List(1, 2), 1),
         (List(2, 3), 2),
       ).transact.map(_.ids)

@@ -1,8 +1,6 @@
 package molecule.db.sql.h2
 
-import molecule.base.error.{InsertError, InsertErrors, ModelError}
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.Color.{Blue, Green, Red, White, Yellow}
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.h2.async.*
 import molecule.db.sql.h2.setup.DbProviders_h2

@@ -21,6 +21,7 @@ class Adhoc_mariadb_js_async extends MUnit with DbProviders_mariadb with TestUti
     } yield ()
   }
 
+  // testOnly molecule.db.sql.mariadb.Adhoc_mariadb_js_async
 
   //    "refs" - refs { implicit conn =>
   //      import molecule.db.compliance.domains.dsl.Refs._
