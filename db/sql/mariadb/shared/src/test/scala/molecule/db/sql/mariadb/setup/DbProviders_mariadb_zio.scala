@@ -11,11 +11,10 @@ import zio.ZLayer
 
 trait DbProviders_mariadb_zio extends DbProviders_zio with DbConnection with Platform {
   override val database: String = "mariadb"
+  private  val db               = DbConnection_mariadb
 
-  private val db = DbConnection_mariadb
-
-  override def types: ZLayer[Any, Throwable, Conn] = db.connZLayer(Types_MetaDb_mariadb)
-  override def refs: ZLayer[Any, Throwable, Conn] = db.connZLayer(Refs_MetaDb_mariadb)
-  override def unique: ZLayer[Any, Throwable, Conn] = db.connZLayer(Uniques_MetaDb_mariadb)
-  override def validation: ZLayer[Any, Throwable, Conn] = db.connZLayer(Validation_MetaDb_mariadb)
+  override def types: ZLayer[Any, Throwable, Conn] = db.connZLayer(Types_MetaDb_mariadb())
+  override def refs: ZLayer[Any, Throwable, Conn] = db.connZLayer(Refs_MetaDb_mariadb())
+  override def unique: ZLayer[Any, Throwable, Conn] = db.connZLayer(Uniques_MetaDb_mariadb())
+  override def validation: ZLayer[Any, Throwable, Conn] = db.connZLayer(Validation_MetaDb_mariadb())
 }

@@ -9,7 +9,7 @@ import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import org.testcontainers.containers.MySQLContainer
 import zio.{ZIO, ZLayer}
 
-object DbConnection_mysql extends DbConnection{
+object DbConnection_mysql extends DbConnection {
 
   private val baseUrl = "mysql:9.0.0"
 
@@ -36,9 +36,7 @@ object DbConnection_mysql extends DbConnection{
        |""".stripMargin
 
   def getConnection(metaDb: MetaDb_mysql): JdbcConn_JVM = {
-//    val initSql = resetDb + metaDb.schemaData.head
-    val initSql = resetDb + getFileContent(metaDb.schemaResourcePath)
-    val proxy   = JdbcProxy(baseUrl, metaDb, initSql)
+    val proxy = JdbcProxy(baseUrl, metaDb, resetDb)
 
     // Not closing the connection since we re-use it
     JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)

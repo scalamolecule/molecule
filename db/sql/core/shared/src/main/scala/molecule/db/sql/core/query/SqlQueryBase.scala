@@ -1,6 +1,5 @@
 package molecule.db.sql.core.query
 
-import molecule.base.metaModel.Cardinality
 import molecule.base.util.BaseHelpers
 import molecule.core.dataModel.*
 import molecule.core.util.JavaConversions
@@ -36,7 +35,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
 
   final val binders    = new ListBuffer[PrepStmt => Unit]
   final var bindIndex  = -1
-  final val bindValues = new ListBuffer[Any]
+  final val bindValues = new ListBuffer[Value]
 
   final var castStrategy: CastStrategy = CastTuple()
 
@@ -156,7 +155,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
 
   def addBinding(
     col: String,
-    bind: (PrepStmt, Int, Int, Any) => Unit,
+    bind: (PrepStmt, Int, Int, Value) => Unit,
     expr: String,
   ): Unit = {
     where += ((col, expr))

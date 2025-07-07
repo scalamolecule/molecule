@@ -1,6 +1,7 @@
 package molecule.db.sql.mariadb
 
 import molecule.core.setup.{MUnit, TestUtils}
+import molecule.db.compliance.domains.dsl.Types.Entity
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.mariadb.async.*
 import molecule.db.sql.mariadb.setup.DbProviders_mariadb
@@ -8,20 +9,15 @@ import molecule.db.sql.mariadb.setup.DbProviders_mariadb
 
 class Adhoc_mariadb_jvm_async extends MUnit with DbProviders_mariadb with TestUtils {
 
-
   "types" - types { implicit conn =>
-    import molecule.db.compliance.domains.dsl.Types.*
     for {
+      case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      _ <- Entity.int(3).save.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- Entity(a).int(10).update.transact
+      _ <- Entity(b).delete.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
-
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-
-
-      //      _ <- Entity.int(3).save.transact
-      //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      //      _ <- Entity(a).int(10).update.transact
-      //      _ <- Entity(b).delete.transact
-      //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
     } yield ()
   }
 

@@ -7,6 +7,7 @@ import molecule.base.util.BaseHelpers
 import molecule.db.core.api.MetaDb
 import molecule.db.core.marshalling.DatomicProxy
 import molecule.db.core.util.Executor.*
+import molecule.db.core.util.SchemaLoader
 import zio.{ZIO, ZLayer}
 import scala.concurrent.{ExecutionContext, Future, blocking}
 
@@ -15,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future, blocking}
  * @groupname database  Database operations
  * @groupprio 10
  * */
-trait DatomicPeer extends BaseHelpers {
+trait DatomicPeer extends SchemaLoader with BaseHelpers {
 
   def createDatabase(
     protocol: String = "mem",
@@ -67,7 +68,8 @@ trait DatomicPeer extends BaseHelpers {
     deleteDatabase(protocol, id)
     createDatabase(protocol, id)
     val conn = connect(proxy, protocol, id)
-    conn.transactEdn(proxy.schemaStr).map(_ => conn)
+    val schema = getSchema(proxy.metaDb.schemaResourcePath)
+    conn.transactEdn(schema).map(_ => conn)
   }
 
   def recreateDb(
@@ -90,7 +92,8 @@ trait DatomicPeer extends BaseHelpers {
     deleteDatabase(protocol, id)
     createDatabase(protocol, id)
     val conn = connect(proxy, protocol, id)
-    conn.transactEdnIO(proxy.schemaStr).map(_ => conn)
+    val schema = getSchema(proxy.metaDb.schemaResourcePath)
+    conn.transactEdnIO(schema).map(_ => conn)
   }
 
   def recreateDbIO(

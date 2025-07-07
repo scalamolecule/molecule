@@ -15,21 +15,24 @@ trait MoleculeRpc {
   def query[Tpl](
     proxy: ConnProxy,
     dataModel: DataModel,
-    limit: Option[Int]
+    limit: Option[Int],
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, List[Tpl]]]
 
   def queryOffset[Tpl](
     proxy: ConnProxy,
     dataModel: DataModel,
     limit: Option[Int],
-    offset: Int
+    offset: Int,
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, (List[Tpl], Int, Boolean)]]
 
   def queryCursor[Tpl](
     proxy: ConnProxy,
     dataModel: DataModel,
     limit: Option[Int],
-    cursor: String
+    cursor: String,
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, (List[Tpl], String, Boolean)]]
 
   def subscribe[Tpl](

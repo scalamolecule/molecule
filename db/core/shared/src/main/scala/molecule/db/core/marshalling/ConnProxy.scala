@@ -4,8 +4,6 @@ import java.util.UUID
 import molecule.base.util.BaseHelpers
 import molecule.db.core.api.MetaDb
 import molecule.db.core.marshalling.dbView.DbView
-import scala.io.Source
-import scala.util.Using
 
 sealed trait ConnProxy {
 
@@ -15,8 +13,8 @@ sealed trait ConnProxy {
   /** Various meta-information about the database */
   val metaDb: MetaDb
 
-  /** String for transacting the schema of the database */
-  val schemaStr: String
+  /** Initial SQL commands before schema transaction */
+  val initSql: String
 
   /** Internal holder of optional alternative Db view (asOf, since). Used by Datomic only */
   val dbView: Option[DbView] = None
@@ -27,33 +25,22 @@ case class JdbcProxy(
   url: String,
   override val uuid: UUID,
   override val metaDb: MetaDb,
-  override val schemaStr: String,
+  override val initSql: String = "",
 ) extends ConnProxy
 
 
-trait SchemaLoader {
-  def getSchema(schemaResourcePath: String): String = {
-    Using(Source.fromResource(schemaResourcePath)) { source =>
-      source.mkString
-    }.getOrElse(throw new Exception(
-      s"Couldn't find database schema file resources/$schemaResourcePath."
-    ))
-  }
-}
-
-object JdbcProxy extends SchemaLoader with BaseHelpers {
+object JdbcProxy extends BaseHelpers {
   def apply(url: String, metaDb: MetaDb): JdbcProxy = JdbcProxy(
     url,
     UUID.randomUUID(),
     metaDb,
-    getSchema(metaDb.schemaResourcePath)
   )
 
   def apply(url: String, metaDb: MetaDb, initSql: String): JdbcProxy = JdbcProxy(
     url,
     UUID.randomUUID(),
     metaDb,
-    if (initSql.isEmpty) getSchema(metaDb.schemaResourcePath) else initSql,
+    initSql
   )
 }
 
@@ -62,12 +49,12 @@ case class DatomicProxy(
   dbIdentifier: String,
   override val uuid: UUID,
   override val metaDb: MetaDb,
-  override val schemaStr: String,
+  override val initSql: String = "",
   override val dbView: Option[DbView] = None,
 ) extends ConnProxy
 
 
-object DatomicProxy extends SchemaLoader {
+object DatomicProxy {
   def apply(
     protocol: String,
     dbIdentifier: String,
@@ -77,8 +64,6 @@ object DatomicProxy extends SchemaLoader {
     dbIdentifier,
     UUID.randomUUID(),
     metaDb,
-    getSchema(metaDb.schemaResourcePath),
-    None,
   )
 
   def apply(
@@ -91,8 +76,7 @@ object DatomicProxy extends SchemaLoader {
     dbIdentifier,
     UUID.randomUUID(),
     metaDb,
-    getSchema(metaDb.schemaResourcePath),
-    dbView,
+    dbView = dbView,
   )
 }
 

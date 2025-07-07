@@ -11,11 +11,10 @@ import zio.ZLayer
 
 trait DbProviders_mysql_zio extends DbProviders_zio with DbConnection with Platform {
   override val database: String = "mysql"
+  private  val db               = DbConnection_mysql
 
-  private val db = DbConnection_mysql
-
-  override def types: ZLayer[Any, Throwable, Conn] = db.connZLayer(Types_MetaDb_mysql)
-  override def refs: ZLayer[Any, Throwable, Conn] = db.connZLayer(Refs_MetaDb_mysql)
-  override def unique: ZLayer[Any, Throwable, Conn] = db.connZLayer(Uniques_MetaDb_mysql)
-  override def validation: ZLayer[Any, Throwable, Conn] = db.connZLayer(Validation_MetaDb_mysql)
+  override def types: ZLayer[Any, Throwable, Conn] = db.connZLayer(Types_MetaDb_mysql())
+  override def refs: ZLayer[Any, Throwable, Conn] = db.connZLayer(Refs_MetaDb_mysql())
+  override def unique: ZLayer[Any, Throwable, Conn] = db.connZLayer(Uniques_MetaDb_mysql())
+  override def validation: ZLayer[Any, Throwable, Conn] = db.connZLayer(Validation_MetaDb_mysql())
 }

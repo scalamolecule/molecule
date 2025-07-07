@@ -1,9 +1,11 @@
 package molecule.db.sql.core.spi
 
+import java.nio.ByteBuffer
 import boopickle.Default.*
 import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
-import molecule.core.dataModel.DataModel
+import molecule.core.dataModel.{DataModel, OneInt, OneString}
 import molecule.db.core.action.*
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.serialize.PickleTpls
 import molecule.db.core.spi.{Conn, Renderer, Spi_async, TxReport}
 import molecule.db.core.util.FutureUtils
@@ -18,8 +20,8 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
   // Query --------------------------------------------------------
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn0: Conn, ec: EC): Future[List[Tpl]] = {
-    val conn = conn0.asInstanceOf[JdbcConn_JS]
-    conn.rpc.query[Tpl](conn.proxy, q.dataModel, q.optLimit).future
+    val conn   = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.query[Tpl](conn.proxy, q.dataModel, q.optLimit, q.bindValues).future
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn, ec: EC): Future[String] = {
@@ -30,7 +32,7 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
-    conn.rpc.queryOffset[Tpl](conn.proxy, q.dataModel, q.optLimit, q.offset).future
+    conn.rpc.queryOffset[Tpl](conn.proxy, q.dataModel, q.optLimit, q.offset, q.bindValues).future
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
@@ -42,7 +44,7 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
-    conn.rpc.queryCursor[Tpl](conn.proxy, q.dataModel, q.optLimit, q.cursor).future
+    conn.rpc.queryCursor[Tpl](conn.proxy, q.dataModel, q.optLimit, q.cursor, q.bindValues).future
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
@@ -104,7 +106,7 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
         if (insert.tpls.isEmpty) {
           Future(TxReport(Nil))
         } else {
-          val tplsSerialized = PickleTpls(insert.dataModel, true).getPickledTpls(insert.tpls)
+          val tplsSerialized: ByteBuffer = PickleTpls(insert.dataModel, true).getPickledTpls(insert.tpls)
           conn.rpc.insert(conn.proxy, insert.dataModel, tplsSerialized).future
         }
       } else {
@@ -169,8 +171,8 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
   // Util --------------------------------------
 
   private def renderInspectTx(label: String, dataModel: DataModel)
-                            (implicit ec: EC): Future[String] = {
-    Future(renderInspection("RPC " + label, dataModel))
+                             (implicit ec: EC): Future[String] = {
+    Future(renderInspection(label, dataModel))
   }
 
   protected def renderInspectQuery(label: String, dataModel: DataModel)

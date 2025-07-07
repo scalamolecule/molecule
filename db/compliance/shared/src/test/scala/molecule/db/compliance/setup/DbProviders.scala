@@ -6,7 +6,6 @@ trait DbProviders { self: DbConnection & Platform =>
   val database: String
   val platform: String
 
-  def community(test: Conn => Any): Any = ???
   def types(test: Conn => Any): Any = ???
   def refs(test: Conn => Any): Any = ???
   def unique(test: Conn => Any): Any = ???

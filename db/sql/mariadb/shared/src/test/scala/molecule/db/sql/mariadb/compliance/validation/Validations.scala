@@ -10,6 +10,9 @@ class AliasedAttrsTest extends MUnit {
 class AllowedValuesTest extends MUnit {
   AllowedValues(this, Api_mariadb_async)
 }
+class EnumsTest extends MUnit {
+  Enums(this, Api_mariadb_async)
+}
 class KeywordSubstitutionTest extends MUnit {
   KeywordSubstitution(this, Api_mariadb_async)
 }

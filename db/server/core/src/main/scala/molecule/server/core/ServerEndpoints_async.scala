@@ -3,6 +3,7 @@ package molecule.server.core
 import java.nio.ByteBuffer
 import boopickle.Default.*
 import molecule.base.error.*
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.MoleculeRpc
 import molecule.db.core.util.Executor.*
 import sttp.tapir.*

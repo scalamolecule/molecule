@@ -61,28 +61,42 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
   "Inspect without saving" - types { implicit conn =>
     for {
       // Inspect save action without saving
-      _ <- Entity.string("a").int(1).save.inspect.map(_ ==>
-        """========================================
-          |SAVE:
-          |DataModel(
-          |  List(
-          |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, false, List(0, 10)),
-          |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, false, List(0, 11))
-          |  ),
-          |  Set(10, 11), 0, 0, Nil
-          |)
-          |
-          |Save(
-          |  Entity(
-          |    INSERT INTO Entity (
-          |      string,
-          |      int_
-          |    ) VALUES (?, ?)
-          |  )
-          |)
-          |----------------------------------------
-          |""".stripMargin
-      )
+      _ <- Entity.string("a").int(1).save.inspect.map(_ ==> {
+        if (platform == "jvm") {
+          """========================================
+            |SAVE:
+            |DataModel(
+            |  List(
+            |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, false, List(0, 10)),
+            |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, false, List(0, 11))
+            |  ),
+            |  Set(10, 11), 0, 0, Nil
+            |)
+            |
+            |Save(
+            |  Entity(
+            |    INSERT INTO Entity (
+            |      string,
+            |      int_
+            |    ) VALUES (?, ?)
+            |  )
+            |)
+            |----------------------------------------
+            |""".stripMargin
+        } else {
+          """========================================
+            |SAVE:
+            |DataModel(
+            |  List(
+            |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, false, List(0, 10)),
+            |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, false, List(0, 11))
+            |  ),
+            |  Set(10, 11), 0, 0, Nil
+            |)
+            |----------------------------------------
+            |""".stripMargin
+        }
+      })
 
       // Save action was inspected without saving
       _ <- Entity.string.int.query.get.map(_ ==> Nil)
@@ -103,31 +117,45 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
   "Inspect without inserting" - types { implicit conn =>
     for {
       // Inspect insert action without inserting
-      _ <- Entity.string.int.insert(("a", 1), ("b", 2)).inspect.map(_ ==>
-        """========================================
-          |INSERT:
-          |DataModel(
-          |  List(
-          |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 10)),
-          |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 11))
-          |  ),
-          |  Set(10, 11), 0, 0, Nil
-          |)
-          |
-          |Insert(
-          |  Entity(
-          |    INSERT INTO Entity (
-          |      string,
-          |      int_
-          |    ) VALUES (?, ?)
-          |  )
-          |)
-          |
-          |(a,1)
-          |(b,2)
-          |----------------------------------------
-          |""".stripMargin
-      )
+      _ <- Entity.string.int.insert(("a", 1), ("b", 2)).inspect.map(_ ==> {
+        if (platform == "jvm") {
+          """========================================
+            |INSERT:
+            |DataModel(
+            |  List(
+            |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 10)),
+            |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 11))
+            |  ),
+            |  Set(10, 11), 0, 0, Nil
+            |)
+            |
+            |Insert(
+            |  Entity(
+            |    INSERT INTO Entity (
+            |      string,
+            |      int_
+            |    ) VALUES (?, ?)
+            |  )
+            |)
+            |
+            |(a,1)
+            |(b,2)
+            |----------------------------------------
+            |""".stripMargin
+        } else {
+          """========================================
+            |INSERT:
+            |DataModel(
+            |  List(
+            |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 10)),
+            |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 11))
+            |  ),
+            |  Set(10, 11), 0, 0, Nil
+            |)
+            |----------------------------------------
+            |""".stripMargin
+        }
+      })
 
       // Insert action was inspected without inserting
       _ <- Entity.string.int.query.get.map(_ ==> Nil)
@@ -150,30 +178,44 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
       id <- Entity.string("a").int(1).save.transact.map(_.id)
 
       // Inspect update action without updating
-      _ <- Entity(id).string("ZZZ").update.inspect.map(_ ==>
-        """========================================
-          |UPDATE:
-          |DataModel(
-          |  List(
-          |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0)),
-          |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, false, List(0, 10))
-          |  ),
-          |  Set(10), 0, 0
-          |)
-          |
-          |Update(
-          |  Entity(
-          |    UPDATE Entity
-          |    SET
-          |      string = ?
-          |    WHERE
-          |      Entity.id IN(1) AND
-          |      Entity.string IS NOT NULL
-          |  )
-          |)
-          |----------------------------------------
-          |""".stripMargin
-      )
+      _ <- Entity(id).string("ZZZ").update.inspect.map(_ ==> {
+        if (platform == "jvm") {
+          """========================================
+            |UPDATE:
+            |DataModel(
+            |  List(
+            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0)),
+            |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, false, List(0, 10))
+            |  ),
+            |  Set(10), 0, 0, Nil
+            |)
+            |
+            |Update(
+            |  Entity(
+            |    UPDATE Entity
+            |    SET
+            |      string = ?
+            |    WHERE
+            |      Entity.id IN(1) AND
+            |      Entity.string IS NOT NULL
+            |  )
+            |)
+            |----------------------------------------
+            |""".stripMargin
+        } else {
+          """========================================
+            |UPDATE:
+            |DataModel(
+            |  List(
+            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0)),
+            |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, false, List(0, 10))
+            |  ),
+            |  Set(10), 0, 0, Nil
+            |)
+            |----------------------------------------
+            |""".stripMargin
+        }
+      })
 
       // Update was inspected without updating
       _ <- Entity.string.int.query.get.map(_ ==> List(("a", 1)))
@@ -195,27 +237,40 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
 
   "Inspect without deleting" - types { implicit conn =>
     for {
-      List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
+      case List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
 
       // Inspect delete action without deleting
-      _ <- Entity(a).delete.inspect.map(_ ==>
-        """========================================
-          |DELETE:
-          |DataModel(
-          |  List(
-          |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0))
-          |  ),
-          |  Set(), 0, 0
-          |)
-          |
-          |Delete(
-          |  Entity (
-          |    DELETE FROM Entity WHERE id IN (1)
-          |  )
-          |)
-          |----------------------------------------
-          |""".stripMargin
-      )
+      _ <- Entity(a).delete.inspect.map(_ ==> {
+        if (platform == "jvm") {
+          """========================================
+            |DELETE:
+            |DataModel(
+            |  List(
+            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0))
+            |  ),
+            |  Set(), 0, 0, Nil
+            |)
+            |
+            |Delete(
+            |  Entity (
+            |    DELETE FROM Entity WHERE id IN (1)
+            |  )
+            |)
+            |----------------------------------------
+            |""".stripMargin
+        } else {
+          """========================================
+            |DELETE:
+            |DataModel(
+            |  List(
+            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0))
+            |  ),
+            |  Set(), 0, 0, Nil
+            |)
+            |----------------------------------------
+            |""".stripMargin
+        }
+      })
 
       // Deletion was inspected without deleting
       _ <- Entity.string.int.a1.query.get.map(_ ==> List(("a", 1), ("b", 2)))
@@ -224,7 +279,7 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
 
   "Inspect and delete" - types { implicit conn =>
     for {
-      List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
+      case List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
 
       // Delete data and print inspection
       _ <- Entity(a).delete.i.transact

@@ -25,7 +25,7 @@ trait Spi_datomic_async
                              (implicit conn0: Conn, ec: EC): Future[List[Tpl]] = {
     val conn  = conn0.asInstanceOf[DatomicConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.query[Tpl](proxy, q.dataModel, q.optLimit).future
+    conn.rpc.query[Tpl](proxy, q.dataModel, q.optLimit, q.bindValues).future
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])

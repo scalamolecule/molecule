@@ -1,6 +1,12 @@
 package molecule.db.sql.postgres.setup
 
+import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_MetaDb_postgres
+import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_MetaDb_postgres
+import molecule.db.compliance.domains.dsl.Types.metadb.Types_MetaDb_postgres
+import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_MetaDb_postgres
+import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_MetaDb_postgres
 import molecule.db.core.api.MetaDb_postgres
+import molecule.db.core.marshalling.Boopicklers.pickleMetaDb
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
 import molecule.db.sql.core.facade.JdbcConn_JS
@@ -8,6 +14,12 @@ import zio.{ZIO, ZLayer}
 import scala.util.Random
 
 object DbConnection_postgres {
+
+  pickleMetaDb.addConcreteType[Types_MetaDb_postgres]
+  pickleMetaDb.addConcreteType[Refs_MetaDb_postgres]
+  pickleMetaDb.addConcreteType[Uniques_MetaDb_postgres]
+  pickleMetaDb.addConcreteType[Validation_MetaDb_postgres]
+  pickleMetaDb.addConcreteType[Segments_MetaDb_postgres]
 
   def getConnection(metaDb: MetaDb_postgres): JdbcConn_JS = {
     // Since RPC calls run in parallel we need a new connection for

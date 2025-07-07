@@ -12,8 +12,8 @@ import zio.ZLayer
 trait DbProviders_sqlite_zio extends DbProviders_zio with DbConnection_sqlite with Platform {
   override val database: String = "sqlite"
 
-  override def types: ZLayer[Any, Throwable, Conn] = connZLayer(Types_MetaDb_sqlite)
-  override def refs: ZLayer[Any, Throwable, Conn] = connZLayer(Refs_MetaDb_sqlite)
-  override def unique: ZLayer[Any, Throwable, Conn] = connZLayer(Uniques_MetaDb_sqlite)
-  override def validation: ZLayer[Any, Throwable, Conn] = connZLayer(Validation_MetaDb_sqlite)
+  override def types: ZLayer[Any, Throwable, Conn] = connZLayer(Types_MetaDb_sqlite())
+  override def refs: ZLayer[Any, Throwable, Conn] = connZLayer(Refs_MetaDb_sqlite())
+  override def unique: ZLayer[Any, Throwable, Conn] = connZLayer(Uniques_MetaDb_sqlite())
+  override def validation: ZLayer[Any, Throwable, Conn] = connZLayer(Validation_MetaDb_sqlite())
 }

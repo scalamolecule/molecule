@@ -22,7 +22,7 @@ trait SpiBase_io
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn0: Conn): IO[List[Tpl]] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
-    conn.rpc.query[Tpl](conn.proxy, q.dataModel, q.optLimit).io
+    conn.rpc.query[Tpl](conn.proxy, q.dataModel, q.optLimit, q.bindValues).io
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): IO[String] = {
@@ -30,21 +30,10 @@ trait SpiBase_io
   }
 
 
-  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
-                                   (implicit conn0: Conn): IO[Unit] = {
-    val conn = conn0.asInstanceOf[JdbcConn_JS]
-    IO(conn.rpc.subscribe[Tpl](conn.proxy, q.dataModel, q.optLimit, callback))
-  }
-
-  override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn0: Conn): IO[Unit] = {
-    IO(conn0.removeCallback(q.dataModel))
-  }
-
-
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
                                    (implicit conn0: Conn): IO[(List[Tpl], Int, Boolean)] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
-    conn.rpc.queryOffset[Tpl](conn.proxy, q.dataModel, q.optLimit, q.offset).io
+    conn.rpc.queryOffset[Tpl](conn.proxy, q.dataModel, q.optLimit, q.offset, q.bindValues).io
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
@@ -56,12 +45,23 @@ trait SpiBase_io
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
                                    (implicit conn0: Conn): IO[(List[Tpl], String, Boolean)] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
-    conn.rpc.queryCursor[Tpl](conn.proxy, q.dataModel, q.optLimit, q.cursor).io
+    conn.rpc.queryCursor[Tpl](conn.proxy, q.dataModel, q.optLimit, q.cursor, q.bindValues).io
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
                                        (implicit conn: Conn): IO[String] = {
     renderInspectQuery("QUERY (cursor)", q.dataModel)
+  }
+
+
+  override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
+                                   (implicit conn0: Conn): IO[Unit] = {
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    IO(conn.rpc.subscribe[Tpl](conn.proxy, q.dataModel, q.optLimit, callback))
+  }
+
+  override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn0: Conn): IO[Unit] = {
+    IO(conn0.removeCallback(q.dataModel))
   }
 
 

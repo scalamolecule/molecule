@@ -3,7 +3,7 @@ package molecule.server.core
 import java.nio.ByteBuffer
 import boopickle.Default.*
 import molecule.base.error.MoleculeError
-import molecule.core.dataModel.DataModel
+import molecule.core.dataModel.{DataModel, Value}
 import molecule.core.util.MoleculeLogging
 import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.serialize.PickleTpls
@@ -25,10 +25,10 @@ abstract class Execution(rpc: MoleculeRpc)
    * */
 
   def executeQuery(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, dataModel, limit) =
-      Unpickle[(ConnProxy, DataModel, Option[Int])].fromBytes(args)
+    val (proxy, dataModel, limit, bindValues) =
+      Unpickle[(ConnProxy, DataModel, Option[Int], List[Value])].fromBytes(args)
     rpc
-      .query[Any](proxy, dataModel, limit)
+      .query[Any](proxy, dataModel, limit, bindValues)
       .map {
         case Right(result) => Right(PickleTpls(dataModel, false).getPickledTpls(result))
         case Left(err)     => Left(err)
@@ -36,10 +36,10 @@ abstract class Execution(rpc: MoleculeRpc)
   }
 
   def executeQueryOffset(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, dataModel, limit, offset) =
-      Unpickle[(ConnProxy, DataModel, Option[Int], Int)].fromBytes(args: ByteBuffer)
+    val (proxy, dataModel, limit, offset, bindValues) =
+      Unpickle[(ConnProxy, DataModel, Option[Int], Int, List[Value])].fromBytes(args: ByteBuffer)
     rpc
-      .queryOffset[Any](proxy, dataModel, limit, offset)
+      .queryOffset[Any](proxy, dataModel, limit, offset, bindValues)
       .map {
         case Right((tpls, limit, more)) =>
           Right(PickleTpls(dataModel, false).pickleOffset(tpls, limit, more))
@@ -48,10 +48,10 @@ abstract class Execution(rpc: MoleculeRpc)
   }
 
   def executeQueryCursor(args: ByteBuffer): Future[Either[MoleculeError, ByteBuffer]] = {
-    val (proxy, dataModel, limit, cursor) =
-      Unpickle[(ConnProxy, DataModel, Option[Int], String)].fromBytes(args: ByteBuffer)
+    val (proxy, dataModel, limit, cursor, bindValues) =
+      Unpickle[(ConnProxy, DataModel, Option[Int], String, List[Value])].fromBytes(args: ByteBuffer)
     rpc
-      .queryCursor[Any](proxy, dataModel, limit, cursor)
+      .queryCursor[Any](proxy, dataModel, limit, cursor, bindValues)
       .map {
         case Right((tpls, cursor, more)) =>
           Right(PickleTpls(dataModel, false).pickleCursor(tpls, cursor, more))

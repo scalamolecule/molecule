@@ -6,7 +6,6 @@ import molecule.db.compliance.setup.DbProviders
 import molecule.db.core.api.Api_async
 import molecule.db.core.spi.Spi_async
 import molecule.db.core.util.Executor.*
-import scala.concurrent.Future
 
 
 case class Enums(
@@ -17,23 +16,32 @@ case class Enums(
   import api.*
   import suite.*
 
-  "Aliased attribute name" - validation { implicit conn =>
-//    val x: Future[List[(String, Color)]] = Person.name.favoriteColor.query.get
+  "Enum type - value" - validation { implicit conn =>
+    for {
+      // Typed enum value saved
+      _ <- Person.name("Bob").favoriteColor(Color.BLUE).save.transact
 
-    val y = Color
+      // String value returned
+      _ <- Person.name.favoriteColor.query.get.map(_ ==> List(("Bob", "BLUE")))
+    } yield ()
+  }
 
-    val z = y.valueOf("BLUE")
-    z ==> Color.BLUE
 
+  "Comparing with typed enum" - validation { implicit conn =>
     for {
       _ <- Person.name("Bob").favoriteColor(Color.BLUE).save.transact
-      _ <- Person.name.favoriteColor.query.get.map(_ ==> List(("Bob", "BLUE")))
+
+      // Can't resolve Color type generically at runtime
+      // as long as we want to have a serializable DataModel for RPC
+      // _ <- Person.name.favoriteColor.query.get.map(_ ==> List(("Bob", Color.BLUE)))
+
+      // But we can simply compare with a String representation of the enum
       _ <- Person.name.favoriteColor.query.get.map(_ ==> List(("Bob", Color.BLUE.toString)))
 
-
-      // Enum as string returned
-//      _ <- Person.favoriteColor.query.get ==> List("BLUE")
-//      _ <- Person.favoriteColor.query.get ==> List(Color.BLUE.toString)
+      // Or generate enums from the result
+      _ <- Person.name.favoriteColor.query.get.map(_.map {
+        case (name, eStr) => (name, Color.valueOf(eStr))
+      } ==> List(("Bob", Color.BLUE)))
     } yield ()
   }
 }

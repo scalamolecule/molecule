@@ -11,11 +11,10 @@ import zio.ZLayer
 
 trait DbProviders_postgres_zio extends DbProviders_zio with DbConnection with Platform {
   override val database: String = "mariadb"
+  private  val db               = DbConnection_postgres
 
-  private val db = DbConnection_postgres
-
-  override def types: ZLayer[Any, Throwable, Conn] = db.connZLayer(Types_MetaDb_postgres)
-  override def refs: ZLayer[Any, Throwable, Conn] = db.connZLayer(Refs_MetaDb_postgres)
-  override def unique: ZLayer[Any, Throwable, Conn] = db.connZLayer(Uniques_MetaDb_postgres)
-  override def validation: ZLayer[Any, Throwable, Conn] = db.connZLayer(Validation_MetaDb_postgres)
+  override def types: ZLayer[Any, Throwable, Conn] = db.connZLayer(Types_MetaDb_postgres())
+  override def refs: ZLayer[Any, Throwable, Conn] = db.connZLayer(Refs_MetaDb_postgres())
+  override def unique: ZLayer[Any, Throwable, Conn] = db.connZLayer(Uniques_MetaDb_postgres())
+  override def validation: ZLayer[Any, Throwable, Conn] = db.connZLayer(Validation_MetaDb_postgres())
 }

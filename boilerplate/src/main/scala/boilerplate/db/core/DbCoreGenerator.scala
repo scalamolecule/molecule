@@ -6,4 +6,5 @@ object DbCoreGenerator extends App {
   //  validation.insert._InsertValueResolvers.generate()
   //  validation.insert._InsertValidators.generate()
   //  validation.insert._InsertValidationResolvers.generate()
+  //  action._QueryBind.generate()
 }

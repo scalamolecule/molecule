@@ -1,6 +1,7 @@
 package molecule.db.sql.sqlite.query
 
 import molecule.base.error.ModelError
+import molecule.core.dataModel.Value
 import molecule.db.core.query.Model2Query
 import molecule.db.sql.core.javaSql.PrepStmt
 import molecule.db.sql.core.query.{QueryExprOne, SqlQueryBase}
@@ -16,7 +17,7 @@ trait QueryExprOne_sqlite
     args: Seq[T],
     one2sql: T => String,
     binding: Boolean,
-    bind: (PrepStmt, Int, Int, Any) => Unit,
+    bind: (PrepStmt, Int, Int, Value) => Unit,
     tpe: String
   ): Unit = {
     if binding then {
@@ -42,7 +43,7 @@ trait QueryExprOne_sqlite
     args: Seq[T],
     one2sql: T => String,
     binding: Boolean,
-    bind: (PrepStmt, Int, Int, Any) => Unit,
+    bind: (PrepStmt, Int, Int, Value) => Unit,
     tpe: String
   ): Unit = {
     if binding then {
@@ -68,7 +69,7 @@ trait QueryExprOne_sqlite
     op: String,
     one2sql: T => String,
     binding: Boolean,
-    bind: (PrepStmt, Int, Int, Any) => Unit,
+    bind: (PrepStmt, Int, Int, Value) => Unit,
     tpe: String
   ): Unit = {
     if binding then {
@@ -88,7 +89,7 @@ trait QueryExprOne_sqlite
     col: String,
     args: Seq[T],
     binding: Boolean,
-    bind: (PrepStmt, Int, Int, Any) => Unit
+    bind: (PrepStmt, Int, Int, Value) => Unit
   ): Unit = {
     if binding then {
       addBinding(col, bind, "REGEXP ?")

@@ -35,9 +35,7 @@ object DbConnection_postgres extends DbConnection {
 
 
   def getConnection(metaDb: MetaDb_postgres): JdbcConn_JVM = {
-//    val initSql = resetDb + metaDb.schemaData.head
-    val initSql = resetDb + getFileContent(metaDb.schemaResourcePath)
-    val proxy   = JdbcProxy(baseUrl, metaDb, initSql)
+    val proxy = JdbcProxy(baseUrl, metaDb, resetDb)
 
     // Not closing the connection since we re-use it
     JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)

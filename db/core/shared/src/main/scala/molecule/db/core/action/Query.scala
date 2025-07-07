@@ -2,7 +2,7 @@ package molecule.db.core.action
 
 import java.util.Date
 import molecule.base.error.ModelError
-import molecule.core.dataModel.DataModel
+import molecule.core.dataModel.*
 import molecule.db.core.marshalling.dbView.*
 import molecule.db.core.spi.TxReport
 
@@ -11,8 +11,8 @@ case class Query[Tpl](
   private[molecule] val optLimit: Option[Int] = None,
   private[molecule] val dbView: Option[DbView] = None,
   private[molecule] val printInspect: Boolean = false,
-  private[molecule] val bindValues: List[Any] = Nil
-) extends Action with QueryBind[Tpl, Query] {
+  private[molecule] val bindValues: List[Value] = Nil
+) extends Action with QueryBind_[Tpl, Query] {
 
   // Common api
 
@@ -33,8 +33,7 @@ case class Query[Tpl](
   // Inspect also
   def i: Query[Tpl] = copy(printInspect = true)
 
-
-  protected override def bind(inputs: List[Any]): Query[Tpl] = {
+  protected override def bind(inputs: List[Value]): Query[Tpl] = {
     val found    = inputs.length
     val expected = dataModel.binds
     if found != expected then

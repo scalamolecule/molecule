@@ -100,11 +100,12 @@ case class MoleculeFrontend(host: String, port: Int, protocol: String)
   override def query[Tpl](
     proxy: ConnProxy,
     dataModel: DataModel,
-    limit: Option[Int]
+    limit: Option[Int],
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, List[Tpl]]] = {
     fetch[List[Tpl]](
       moleculeEndpoint_query,
-      Pickle.intoBytes((proxy, dataModel, limit)),
+      Pickle.intoBytes((proxy, dataModel, limit, bindValues)),
       (result: ByteBuffer) => UnpickleTpls[Tpl](dataModel, result).unpickleTpls
     )
   }
@@ -113,11 +114,12 @@ case class MoleculeFrontend(host: String, port: Int, protocol: String)
     proxy: ConnProxy,
     dataModel: DataModel,
     limit: Option[Int],
-    offset: Int
+    offset: Int,
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, (List[Tpl], Int, Boolean)]] = {
     fetch[(List[Tpl], Int, Boolean)](
       moleculeEndpoint_queryOffset,
-      Pickle.intoBytes((proxy, dataModel, limit, offset)),
+      Pickle.intoBytes((proxy, dataModel, limit, offset, bindValues)),
       (result: ByteBuffer) => UnpickleTpls[Tpl](dataModel, result).unpickleOffset
     )
   }
@@ -126,11 +128,12 @@ case class MoleculeFrontend(host: String, port: Int, protocol: String)
     proxy: ConnProxy,
     dataModel: DataModel,
     limit: Option[Int],
-    cursor: String
+    cursor: String,
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, (List[Tpl], String, Boolean)]] = {
     fetch[(List[Tpl], String, Boolean)](
       moleculeEndpoint_queryCursor,
-      Pickle.intoBytes((proxy, dataModel, limit, cursor)),
+      Pickle.intoBytes((proxy, dataModel, limit, cursor, bindValues)),
       (result: ByteBuffer) => UnpickleTpls[Tpl](dataModel, result).unpickleCursor
     )
   }

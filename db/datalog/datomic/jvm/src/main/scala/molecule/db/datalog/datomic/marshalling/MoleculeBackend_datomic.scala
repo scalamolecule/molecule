@@ -1,9 +1,11 @@
 package molecule.db.datalog.datomic.marshalling
 
 import java.nio.ByteBuffer
+import boopickle.Default.*
 import molecule.base.error.MoleculeError
-import molecule.core.dataModel.DataModel
+import molecule.core.dataModel.{DataModel, Value}
 import molecule.db.core.action.*
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.deserialize.UnpickleTpls
 import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.db.core.spi.TxReport
@@ -28,7 +30,8 @@ trait MoleculeBackend_datomic
   override def query[AnyTpl](
     proxy: ConnProxy,
     dataModel: DataModel,
-    limit: Option[Int]
+    limit: Option[Int],
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, List[AnyTpl]]] = either {
     for {
       conn <- getConn(proxy)
@@ -40,11 +43,12 @@ trait MoleculeBackend_datomic
     proxy: ConnProxy,
     dataModel: DataModel,
     limit: Option[Int],
-    offset: Int
+    offset: Int,
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, (List[AnyTpl], Int, Boolean)]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- QueryOffset[AnyTpl](dataModel, limit, offset, proxy.dbView).get(using conn, global)
+      tpls <- QueryOffset[AnyTpl](dataModel, limit, offset, proxy.dbView, bindValues = bindValues).get(using conn, global)
     } yield tpls
   }
 
@@ -52,11 +56,12 @@ trait MoleculeBackend_datomic
     proxy: ConnProxy,
     dataModel: DataModel,
     limit: Option[Int],
-    cursor: String
+    cursor: String,
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, (List[AnyTpl], String, Boolean)]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- QueryCursor[AnyTpl](dataModel, limit, cursor, proxy.dbView).get(using conn, global)
+      tpls <- QueryCursor[AnyTpl](dataModel, limit, cursor, proxy.dbView, bindValues = bindValues).get(using conn, global)
     } yield tpls
   }
 

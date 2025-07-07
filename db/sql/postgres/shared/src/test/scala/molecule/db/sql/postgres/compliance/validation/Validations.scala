@@ -10,6 +10,9 @@ class AliasedAttrsTest extends MUnit {
 class AllowedValuesTest extends MUnit {
   AllowedValues(this, Api_postgres_async)
 }
+class EnumsTest extends MUnit {
+  Enums(this, Api_postgres_async)
+}
 class KeywordSubstitutionTest extends MUnit {
   KeywordSubstitution(this, Api_postgres_async)
 }

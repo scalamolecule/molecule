@@ -6,6 +6,7 @@ import java.sql.{Date, PreparedStatement, Time, Timestamp}
 
 class PrepStmtImpl(val underlying: PreparedStatement) extends PrepStmt {
 
+  // Available JDBC setter types
   override def setNull(parameterIndex: Int, sqlType: Int): Unit = underlying.setNull(parameterIndex, sqlType)
   override def setBoolean(parameterIndex: Int, x: Boolean): Unit = underlying.setBoolean(parameterIndex, x)
   override def setByte(parameterIndex: Int, x: Byte): Unit = underlying.setByte(parameterIndex, x)
@@ -20,5 +21,4 @@ class PrepStmtImpl(val underlying: PreparedStatement) extends PrepStmt {
   override def setDate(parameterIndex: Int, x: Date): Unit = underlying.setDate(parameterIndex, x)
   override def setTime(parameterIndex: Int, x: Time): Unit = underlying.setTime(parameterIndex, x)
   override def setTimestamp(parameterIndex: Int, x: Timestamp): Unit = underlying.setTimestamp(parameterIndex, x)
-
 }

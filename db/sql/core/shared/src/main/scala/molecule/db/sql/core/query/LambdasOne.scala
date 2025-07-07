@@ -4,6 +4,7 @@ import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
 import molecule.base.error.ModelError
+import molecule.core.dataModel.*
 import molecule.db.sql.core.javaSql.PrepStmt
 
 trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
@@ -16,7 +17,7 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
     array2set: (RS, Int) => AnyRef,
     json2tpe: String => T,
     json2array: String => Array[T],
-    bind: (PrepStmt, Int, Int, Any) => Unit
+    bind: (PrepStmt, Int, Int, Value) => Unit
   )
 
   protected lazy val sql2oneId            : (RS, Int) => Long           = (row: RS, paramIndex: Int) => row.getLong(paramIndex)
@@ -43,34 +44,115 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   protected lazy val sql2oneShort         : (RS, Int) => Short          = (row: RS, paramIndex: Int) => row.getShort(paramIndex)
   protected lazy val sql2oneChar          : (RS, Int) => Char           = (row: RS, paramIndex: Int) => row.getString(paramIndex).charAt(0)
 
-  def typed[T](bindIndex: Int, rawValue: Any, tpe: String, correctType: Boolean): T = {
-    if correctType then rawValue.asInstanceOf[T] else throw ModelError(
-      s"${getNth(bindIndex)} bind value `$rawValue` is of type ${rawValue.getClass.getSimpleName} but should be of type $tpe."
-    )
+
+  def typed[T](bindIndex: Int, value: Value, tpe: String): T = {
+    def wrongType(v: Any): Nothing = {
+      throw ModelError(
+        s"${getNth(bindIndex)} bind value `$v` is of type ${value.getClass.getSimpleName.drop(3)} but should be of type $tpe."
+      )
+    }
+    def expect(expectedTpe: String, v: Any): Any = {
+      if (tpe == expectedTpe) v else wrongType(v)
+    }
+    (value match {
+      case OneString(v)         => expect("String", v)
+      case OneInt(v)            => tpe match {
+        case "Byte"       => v.toByte
+        case "Short"      => v.toShort
+        case "Int"        => v
+        case "Long"       => v.toLong
+        case "Float"      => v.toFloat
+        case "Double"     => v.toDouble
+        case "BigInt"     => BigInt(v)
+        case "BigDecimal" => BigDecimal(v)
+        case _            => wrongType(v)
+      }
+      case OneLong(v)           => tpe match {
+        case "Byte"       => v.toByte
+        case "Short"      => v.toShort
+        case "Int"        => v.toInt
+        case "Long"       => v
+        case "Float"      => v.toFloat
+        case "Double"     => v.toDouble
+        case "BigInt"     => BigInt(v)
+        case "BigDecimal" => BigDecimal(v)
+        case _            => wrongType(v)
+      }
+      case OneFloat(v)          => expect("Float", v)
+      case OneDouble(v)         => expect("Double", v)
+      case OneBoolean(v)        => expect("Boolean", v)
+      case OneBigInt(v)         => tpe match {
+        case "Byte"       => v.toByte
+        case "Short"      => v.toShort
+        case "Int"        => v.toInt
+        case "Long"       => v.toLong
+        case "Float"      => v.toFloat
+        case "Double"     => v.toDouble
+        case "BigInt"     => v
+        case "BigDecimal" => BigDecimal(v)
+        case _            => wrongType(v)
+      }
+      case OneBigDecimal(v)     => expect("BigDecimal", v)
+      case OneDate(v)           => expect("Date", v)
+      case OneDuration(v)       => expect("Duration", v)
+      case OneInstant(v)        => expect("Instant", v)
+      case OneLocalDate(v)      => expect("LocalDate", v)
+      case OneLocalTime(v)      => expect("LocalTime", v)
+      case OneLocalDateTime(v)  => expect("LocalDateTime", v)
+      case OneOffsetTime(v)     => expect("OffsetTime", v)
+      case OneOffsetDateTime(v) => expect("OffsetDateTime", v)
+      case OneZonedDateTime(v)  => expect("ZonedDateTime", v)
+      case OneUUID(v)           => expect("UUID", v)
+      case OneURI(v)            => expect("URI", v)
+      case OneByte(v)           => tpe match {
+        case "Byte"       => v
+        case "Short"      => v.toShort
+        case "Int"        => v.toInt
+        case "Long"       => v.toLong
+        case "Float"      => v.toFloat
+        case "Double"     => v.toDouble
+        case "BigInt"     => BigInt(v)
+        case "BigDecimal" => BigDecimal(v)
+        case _            => wrongType(v)
+      }
+      case OneShort(v)          => tpe match {
+        case "Byte"       => v.toByte
+        case "Short"      => v
+        case "Int"        => v.toInt
+        case "Long"       => v.toLong
+        case "Float"      => v.toFloat
+        case "Double"     => v.toDouble
+        case "BigInt"     => BigInt(v)
+        case "BigDecimal" => BigDecimal(v)
+        case _            => wrongType(v)
+      }
+      case OneChar(v)           => expect("Char", v)
+      case other                => throw new Exception("Unexpected Value type: " + other)
+    }).asInstanceOf[T]
   }
-  private lazy val bindID             = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Long](bindIndex, rawValue, "Long", rawValue.isInstanceOf[Long]))
-  private lazy val bindString         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[String](bindIndex, rawValue, "String", rawValue.isInstanceOf[String]))
-  private lazy val bindInt            = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setInt(paramIndex, typed[Int](bindIndex, rawValue, "Int", rawValue.isInstanceOf[Int]))
-  private lazy val bindLong           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Long](bindIndex, rawValue, "Long", rawValue.isInstanceOf[Long]))
-  private lazy val bindFloat          = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setFloat(paramIndex, typed[Float](bindIndex, rawValue, "Float", rawValue.isInstanceOf[Float]))
-  private lazy val bindDouble         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setDouble(paramIndex, typed[Double](bindIndex, rawValue, "Double", rawValue.isInstanceOf[Double]))
-  private lazy val bindBoolean        = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBoolean(paramIndex, typed[Boolean](bindIndex, rawValue, "Boolean", rawValue.isInstanceOf[Boolean]))
-  private lazy val bindBigInt         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBigDecimal(paramIndex, BigDecimal(typed[BigInt](bindIndex, rawValue, "BigInt", rawValue.isInstanceOf[BigInt])).bigDecimal)
-  private lazy val bindBigDecimal     = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setBigDecimal(paramIndex, typed[BigDecimal](bindIndex, rawValue, "BigDecimal", rawValue.isInstanceOf[BigDecimal]).bigDecimal)
-  private lazy val bindDate           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setLong(paramIndex, typed[Date](bindIndex, rawValue, "Date", rawValue.isInstanceOf[Date]).getTime)
-  private lazy val bindDuration       = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[Duration](bindIndex, rawValue, "Duration", rawValue.isInstanceOf[Duration]).toString)
-  private lazy val bindInstant        = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[Instant](bindIndex, rawValue, "Instant", rawValue.isInstanceOf[Instant]).toString)
-  private lazy val bindLocalDate      = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[LocalDate](bindIndex, rawValue, "LocalDate", rawValue.isInstanceOf[LocalDate]).toString)
-  private lazy val bindLocalTime      = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[LocalTime](bindIndex, rawValue, "LocalTime", rawValue.isInstanceOf[LocalTime]).toString)
-  private lazy val bindLocalDateTime  = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[LocalDateTime](bindIndex, rawValue, "LocalDateTime", rawValue.isInstanceOf[LocalDateTime]).toString)
-  private lazy val bindOffsetTime     = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[OffsetTime](bindIndex, rawValue, "OffsetTime", rawValue.isInstanceOf[OffsetTime]).toString)
-  private lazy val bindOffsetDateTime = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[OffsetDateTime](bindIndex, rawValue, "OffsetDateTime", rawValue.isInstanceOf[OffsetDateTime]).toString)
-  private lazy val bindZonedDateTime  = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[ZonedDateTime](bindIndex, rawValue, "ZonedDateTime", rawValue.isInstanceOf[ZonedDateTime]).toString)
-  private lazy val bindUUID           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[UUID](bindIndex, rawValue, "UUID", rawValue.isInstanceOf[UUID]).toString)
-  private lazy val bindURI            = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[URI](bindIndex, rawValue, "URI", rawValue.isInstanceOf[URI]).toString)
-  private lazy val bindByte           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setByte(paramIndex, typed[Byte](bindIndex, rawValue, "Byte", rawValue.isInstanceOf[Byte]))
-  private lazy val bindShort          = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setShort(paramIndex, typed[Short](bindIndex, rawValue, "Short", rawValue.isInstanceOf[Short]))
-  private lazy val bindChar           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, rawValue: Any) => ps.setString(paramIndex, typed[Char](bindIndex, rawValue, "Char", rawValue.isInstanceOf[Char]).toString)
+  private lazy val bindID             = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setLong(paramIndex, typed[Long](bindIndex, value, "Long"))
+  private lazy val bindString         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[String](bindIndex, value, "String"))
+  private lazy val bindInt            = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setInt(paramIndex, typed[Int](bindIndex, value, "Int"))
+  private lazy val bindLong           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setLong(paramIndex, typed[Long](bindIndex, value, "Long"))
+  private lazy val bindFloat          = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setFloat(paramIndex, typed[Float](bindIndex, value, "Float"))
+  private lazy val bindDouble         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setDouble(paramIndex, typed[Double](bindIndex, value, "Double"))
+  private lazy val bindBoolean        = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setBoolean(paramIndex, typed[Boolean](bindIndex, value, "Boolean"))
+  private lazy val bindBigInt         = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setBigDecimal(paramIndex, BigDecimal(typed[BigInt](bindIndex, value, "BigInt")).bigDecimal)
+  private lazy val bindBigDecimal     = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setBigDecimal(paramIndex, typed[BigDecimal](bindIndex, value, "BigDecimal").bigDecimal)
+  private lazy val bindDate           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setLong(paramIndex, typed[Date](bindIndex, value, "Date").getTime)
+  private lazy val bindDuration       = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[Duration](bindIndex, value, "Duration").toString)
+  private lazy val bindInstant        = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[Instant](bindIndex, value, "Instant").toString)
+  private lazy val bindLocalDate      = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[LocalDate](bindIndex, value, "LocalDate").toString)
+  private lazy val bindLocalTime      = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[LocalTime](bindIndex, value, "LocalTime").toString)
+  private lazy val bindLocalDateTime  = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[LocalDateTime](bindIndex, value, "LocalDateTime").toString)
+  private lazy val bindOffsetTime     = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[OffsetTime](bindIndex, value, "OffsetTime").toString)
+  private lazy val bindOffsetDateTime = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[OffsetDateTime](bindIndex, value, "OffsetDateTime").toString)
+  private lazy val bindZonedDateTime  = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[ZonedDateTime](bindIndex, value, "ZonedDateTime").toString)
+  private lazy val bindUUID           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[UUID](bindIndex, value, "UUID").toString)
+  private lazy val bindURI            = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[URI](bindIndex, value, "URI").toString)
+  private lazy val bindByte           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setByte(paramIndex, typed[Byte](bindIndex, value, "Byte"))
+  private lazy val bindShort          = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setShort(paramIndex, typed[Short](bindIndex, value, "Short"))
+  private lazy val bindChar           = (ps: PrepStmt, paramIndex: Int, bindIndex: Int, value: Value) => ps.setString(paramIndex, typed[Char](bindIndex, value, "Char").toString)
 
   protected lazy val resId1            : ResOne[Long]           = ResOne("Long", sql2oneId, sql2oneIdOrNull, one2sqlId, array2setId, json2oneId, json2arrayId, bindID)
   protected lazy val resString1        : ResOne[String]         = ResOne("String", sql2oneString, sql2oneStringOrNull, one2sqlString, array2setString, json2oneString, json2arrayString, bindString)

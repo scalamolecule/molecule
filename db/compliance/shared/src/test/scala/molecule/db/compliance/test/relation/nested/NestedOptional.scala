@@ -330,7 +330,7 @@ case class NestedOptional(
 
       _ <- Entity.i.a1.Refs.*?(
         Ref
-          .string
+          .string.a1
           .int
           .long
           .float

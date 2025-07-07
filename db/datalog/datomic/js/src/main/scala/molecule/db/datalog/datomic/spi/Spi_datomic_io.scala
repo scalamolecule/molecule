@@ -23,7 +23,7 @@ trait Spi_datomic_io
                              (implicit conn0: Conn): IO[List[Tpl]] = {
     val conn  = conn0.asInstanceOf[DatomicConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.query[Tpl](proxy, q.dataModel, q.optLimit).io
+    conn.rpc.query[Tpl](proxy, q.dataModel, q.optLimit, q.bindValues).io
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])

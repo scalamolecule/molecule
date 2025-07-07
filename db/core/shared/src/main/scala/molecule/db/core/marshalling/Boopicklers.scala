@@ -42,10 +42,11 @@ object Boopicklers extends MoleculeLogging {
   pickleCard.addConcreteType[CardSeq.type]
   pickleCard.addConcreteType[CardMap.type]
 
-  implicit val pickleMetaAttr   : Pickler[MetaAttribute] = generatePickler[MetaAttribute]
-  implicit val pickleMetaEntity : Pickler[MetaEntity]    = generatePickler[MetaEntity]
-  implicit val pickleMetaSegment: Pickler[MetaSegment]   = generatePickler[MetaSegment]
-  implicit val pickleMetaDomain : Pickler[MetaDomain]    = generatePickler[MetaDomain]
+  implicit val pickleMetaArgument: Pickler[MetaArgument]  = generatePickler[MetaArgument]
+  implicit val pickleMetaAttr    : Pickler[MetaAttribute] = generatePickler[MetaAttribute]
+  implicit val pickleMetaEntity  : Pickler[MetaEntity]    = generatePickler[MetaEntity]
+  implicit val pickleMetaSegment : Pickler[MetaSegment]   = generatePickler[MetaSegment]
+  implicit val pickleMetaDomain  : Pickler[MetaDomain]    = generatePickler[MetaDomain]
 
   implicit val pickleOp: CompositePickler[Op] = compositePickler[Op]
   pickleOp.addConcreteType[NoValue.type]
@@ -746,10 +747,10 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleFileNotFoundException: CompositePickler[FileNotFoundException] =
     compositePickler[FileNotFoundException]
 
-  implicit val pickleMetaDb         : CompositePickler[MetaDb]         = compositePickler[MetaDb]
-  implicit val pickleMetaDb_datomic : CompositePickler[MetaDb_datomic] = compositePickler[MetaDb_datomic]
-  implicit val pickleMetaDb_h2      : CompositePickler[MetaDb_h2]      = compositePickler[MetaDb_h2]
-  implicit val pickleMetaDb_mariadb : CompositePickler[MetaDb_mariadb] = compositePickler[MetaDb_mariadb]
+  implicit val pickleMetaDb         : CompositePickler[MetaDb]          = compositePickler[MetaDb]
+  implicit val pickleMetaDb_datomic : CompositePickler[MetaDb_datomic]  = compositePickler[MetaDb_datomic]
+  implicit val pickleMetaDb_h2      : CompositePickler[MetaDb_h2]       = compositePickler[MetaDb_h2]
+  implicit val pickleMetaDb_mariadb : CompositePickler[MetaDb_mariadb]  = compositePickler[MetaDb_mariadb]
   implicit val pickleMetaDb_mysql   : CompositePickler[MetaDb_mysql]    = compositePickler[MetaDb_mysql]
   implicit val pickleMetaDb_postgres: CompositePickler[MetaDb_postgres] = compositePickler[MetaDb_postgres]
   implicit val pickleMetaDb_sqlite  : CompositePickler[MetaDb_sqlite]   = compositePickler[MetaDb_sqlite]

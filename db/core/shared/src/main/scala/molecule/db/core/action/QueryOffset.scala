@@ -1,7 +1,7 @@
 package molecule.db.core.action
 
 import molecule.base.error.ModelError
-import molecule.core.dataModel.DataModel
+import molecule.core.dataModel.{DataModel, Value}
 import molecule.db.core.marshalling.dbView.DbView
 
 case class QueryOffset[Tpl](
@@ -10,15 +10,15 @@ case class QueryOffset[Tpl](
   private[molecule] val offset: Int,
   private[molecule] val dbView: Option[DbView] = None,
   private[molecule] val printInspect: Boolean = false,
-  private[molecule] val bindValues: List[Any] = Nil
-) extends Action with QueryBind[Tpl, QueryOffset] {
+  private[molecule] val bindValues: List[Value] = Nil
+) extends Action with QueryBind_[Tpl, QueryOffset] {
 
   def limit(l: Int): QueryOffset[Tpl] = copy(optLimit = Some(l))
 
   // Inspect Query
   def i: QueryOffset[Tpl] = copy(printInspect = true)
 
-  protected override def bind(inputs: List[Any]): QueryOffset[Tpl] = {
+  protected override def bind(inputs: List[Value]): QueryOffset[Tpl] = {
     val found    = inputs.length
     val expected = dataModel.binds
     if found != expected then

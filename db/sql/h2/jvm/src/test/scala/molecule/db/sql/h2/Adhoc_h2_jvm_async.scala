@@ -17,22 +17,12 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
     for {
-//      case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-//      _ <- Entity.int(3).save.transact
-//      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-//      _ <- Entity(a).int(10).update.transact
-//      _ <- Entity(b).delete.transact
-//      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-
-      _ <- Entity.i.Ref.?(Ref.string.int).insert(
-        (1, Some((string1, int1))),
-        (2, None)
-      ).transact
-
-      _ <- Entity.i.Ref.?(Ref.string.int).query.get.map(_ ==> List(
-        (1, Some((string1, int1))),
-        (2, None)
-      ))
+      case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      _ <- Entity.int(3).save.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- Entity(a).int(10).update.transact
+      _ <- Entity(b).delete.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
     } yield ()
   }

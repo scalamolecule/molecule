@@ -15,7 +15,7 @@ trait QueryExprOne_postgres
     args: Seq[T],
     one2sql: T => String,
     binding: Boolean,
-    bind: (PrepStmt, Int, Int, Any) => Unit,
+    bind: (PrepStmt, Int, Int, Value) => Unit,
     tpe: String
   ): Unit = {
     if binding then {
@@ -44,7 +44,7 @@ trait QueryExprOne_postgres
     args: Seq[T],
     one2sql: T => String,
     binding: Boolean = false,
-    bind: (PrepStmt, Int, Int, Any) => Unit = null,
+    bind: (PrepStmt, Int, Int, Value) => Unit = null,
     tpe: String = ""
   ): Unit = {
     if binding then {
@@ -73,7 +73,7 @@ trait QueryExprOne_postgres
     op: String,
     one2sql: T => String,
     binding: Boolean = false,
-    bind: (PrepStmt, Int, Int, Any) => Unit = null,
+    bind: (PrepStmt, Int, Int, Value) => Unit = null,
     tpe: String = ""
   ): Unit = {
     if binding then {

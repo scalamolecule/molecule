@@ -3,6 +3,7 @@ package molecule.db.sql.sqlite.facade
 import java.sql.Connection
 import java.util.regex.Pattern
 import molecule.db.core.marshalling.JdbcProxy
+import molecule.db.core.util.SchemaLoader
 import org.sqlite.Function
 import scala.util.Using.Manager
 
@@ -10,7 +11,7 @@ import scala.util.Using.Manager
  *
  * Can generate custom regex function (for in-mem)
  * */
-object JdbcHandlerSQlite_JVM {
+object JdbcHandlerSQlite_JVM extends SchemaLoader{
 
   def recreateDb(
     proxy: JdbcProxy,
@@ -34,7 +35,8 @@ object JdbcHandlerSQlite_JVM {
     Manager { use =>
       val conn = new JdbcConnSQlite_JVM(proxy, sqlConn)
       val stmt = use(conn.sqlConn.createStatement)
-      stmt.executeUpdate(proxy.schemaStr)
+      val schema = getSchema(proxy.metaDb.schemaResourcePath)
+      stmt.executeUpdate(schema)
       conn
     }.get
   }

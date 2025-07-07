@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 import boopickle.CompositePickler
 import boopickle.Default.*
 import molecule.base.error.{InsertError, MoleculeError}
+import molecule.db.core.marshalling.Boopicklers.*
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Info
 import sttp.tapir.RawBodyType.ByteBufferBody

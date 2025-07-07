@@ -198,7 +198,7 @@ lazy val dbDatalogDatomic = crossProject(JSPlatform, JVMPlatform)
     testFrameworks := testingFrameworks
   )
   .jsSettings(jsEnvironment)
-  .dependsOn(dbDatalogCore, dbCompliance % "test->test")
+  .dependsOn(dbDatalogCore, dbCompliance % "compile->compile;test->test")
 
 
 lazy val dbSqlCore = crossProject(JSPlatform, JVMPlatform)
@@ -229,7 +229,7 @@ lazy val dbSqlH2 = crossProject(JSPlatform, JVMPlatform)
     ),
     Test / fork := true // necessary for sbt testing
   )
-  .dependsOn(dbSqlCore, dbCompliance % "test->test")
+  .dependsOn(dbSqlCore, dbCompliance % "compile->compile;test->test")
 
 
 lazy val dbSqlMariaDB = crossProject(JSPlatform, JVMPlatform)
@@ -248,7 +248,7 @@ lazy val dbSqlMariaDB = crossProject(JSPlatform, JVMPlatform)
     ),
     Test / fork := true
   )
-  .dependsOn(dbSqlCore, dbCompliance % "test->test")
+  .dependsOn(dbSqlCore, dbCompliance % "compile->compile;test->test")
 
 
 lazy val dbSqlMySQL = crossProject(JSPlatform, JVMPlatform)
@@ -266,7 +266,7 @@ lazy val dbSqlMySQL = crossProject(JSPlatform, JVMPlatform)
     ),
     Test / fork := true
   )
-  .dependsOn(dbSqlCore, dbCompliance % "test->test")
+  .dependsOn(dbSqlCore, dbCompliance % "compile->compile;test->test")
 
 
 lazy val dbSqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
@@ -285,7 +285,7 @@ lazy val dbSqlPostgreSQL = crossProject(JSPlatform, JVMPlatform)
     ),
     Test / fork := true
   )
-  .dependsOn(dbSqlCore, dbCompliance % "test->test")
+  .dependsOn(dbSqlCore, dbCompliance % "compile->compile;test->test")
 
 
 lazy val dbSqlSQlite = crossProject(JSPlatform, JVMPlatform)
@@ -303,7 +303,7 @@ lazy val dbSqlSQlite = crossProject(JSPlatform, JVMPlatform)
     ),
     Test / fork := true
   )
-  .dependsOn(dbSqlCore, dbCompliance % "test->test")
+  .dependsOn(dbSqlCore, dbCompliance % "compile->compile;test->test")
 
 
 // CLI to run Tapir example backend servers

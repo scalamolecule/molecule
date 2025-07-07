@@ -3,6 +3,7 @@ package molecule.db.sql.mysql
 import boopickle.Default.*
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.util.Executor.*
 import molecule.db.sql.mysql.async.*
 import molecule.db.sql.mysql.setup.DbProviders_mysql

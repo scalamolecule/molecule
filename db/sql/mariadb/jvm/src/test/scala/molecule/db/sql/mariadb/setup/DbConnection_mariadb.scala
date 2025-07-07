@@ -6,11 +6,12 @@ import molecule.db.compliance.setup.DbConnection
 import molecule.db.core.api.MetaDb_mariadb
 import molecule.db.core.marshalling.JdbcProxy
 import molecule.db.core.spi.Conn
+import molecule.db.core.util.SchemaLoader
 import molecule.db.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import zio.{ZIO, ZLayer}
 
-object DbConnection_mariadb extends DbConnection {
-//object DbConnection_mariadb {
+object DbConnection_mariadb extends SchemaLoader with DbConnection {
+  //object DbConnection_mariadb {
 
   private val url = s"jdbc:tc:mariadb:latest:///test" +
     s"?allowMultiQueries=true" +
@@ -34,9 +35,7 @@ object DbConnection_mariadb extends DbConnection {
        |""".stripMargin
 
   def getConnection(metaDb: MetaDb_mariadb): JdbcConn_JVM = {
-//    val initSql = resetDb + schema.schemaData.head
-    val initSql = resetDb + getFileContent(metaDb.schemaResourcePath)
-    val proxy   = JdbcProxy(url, metaDb, initSql)
+    val proxy = JdbcProxy(url, metaDb, resetDb)
 
     // Not closing the connection since we re-use it
     JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)

@@ -1,6 +1,7 @@
 package molecule.db.sql.mysql.query
 
 import molecule.base.error.ModelError
+import molecule.core.dataModel.Value
 import molecule.db.core.query.Model2Query
 import molecule.db.sql.core.javaSql.PrepStmt
 import molecule.db.sql.core.query.{QueryExprOne, SqlQueryBase}
@@ -15,7 +16,7 @@ trait QueryExprOne_mysql
     col: String,
     args: Seq[T],
     binding: Boolean,
-    bind: (PrepStmt, Int, Int, Any) => Unit
+    bind: (PrepStmt, Int, Int, Value) => Unit
   ): Unit = {
     if binding then {
       addBinding(col, bind, "REGEXP ?")

@@ -1,9 +1,11 @@
 package molecule.db.sql.core.marshalling
 
 import java.nio.ByteBuffer
+import boopickle.Default.*
 import molecule.base.error.MoleculeError
-import molecule.core.dataModel.DataModel
+import molecule.core.dataModel.{DataModel, Value}
 import molecule.db.core.action.*
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.deserialize.UnpickleTpls
 import molecule.db.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.db.core.spi.{Spi_sync, TxReport}
@@ -28,10 +30,11 @@ trait MoleculeBackend_SQL
   override def query[AnyTpl](
     proxy: ConnProxy,
     dataModel: DataModel,
-    limit: Option[Int]
+    limit: Option[Int],
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, List[AnyTpl]]] = either {
     getConn(proxy).map(conn =>
-      query_get[AnyTpl](Query(dataModel, limit))(using conn)
+      query_get[AnyTpl](Query(dataModel, limit, bindValues = bindValues))(using conn)
     )
   }
 
@@ -39,10 +42,11 @@ trait MoleculeBackend_SQL
     proxy: ConnProxy,
     dataModel: DataModel,
     limit: Option[Int],
-    offset: Int
+    offset: Int,
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, (List[AnyTpl], Int, Boolean)]] = either {
     getConn(proxy).map(conn =>
-      queryOffset_get[AnyTpl](QueryOffset(dataModel, limit, offset))(using conn)
+      queryOffset_get[AnyTpl](QueryOffset(dataModel, limit, offset, bindValues = bindValues))(using conn)
     )
   }
 
@@ -50,10 +54,11 @@ trait MoleculeBackend_SQL
     proxy: ConnProxy,
     dataModel: DataModel,
     limit: Option[Int],
-    cursor: String
+    cursor: String,
+    bindValues: List[Value]
   ): Future[Either[MoleculeError, (List[AnyTpl], String, Boolean)]] = either {
     getConn(proxy).map(conn =>
-      queryCursor_get[AnyTpl](QueryCursor(dataModel, limit, cursor))(using conn)
+      queryCursor_get[AnyTpl](QueryCursor(dataModel, limit, cursor, bindValues = bindValues))(using conn)
     )
   }
 

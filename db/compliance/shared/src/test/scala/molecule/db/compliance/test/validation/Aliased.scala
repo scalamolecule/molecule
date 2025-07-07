@@ -22,27 +22,49 @@ case class Aliased(
       _ <- Person.name.tpe.query.get.map(_ ==> List(("Bob", "easy-going")))
 
       // Note how 'type' (and not the alias 'tpe') is used in the query
-      _ <- Person.name.tpe.query.inspect.map(_ ==>
-        s"""========================================
-           |QUERY:
-           |DataModel(
-           |  List(
-           |    AttrOneManString("Person", "name", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 1)),
-           |    AttrOneManString("Person", "type", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 2))
-           |  ),
-           |  Set(1, 2), 0, 0, Nil
-           |)
-           |
-           |SELECT DISTINCT
-           |  Person.name,
-           |  Person.type
-           |FROM Person
-           |WHERE
-           |  Person.name IS NOT NULL AND
-           |  Person.type IS NOT NULL;
-           |----------------------------------------
-           |""".stripMargin
-      )
+      _ <- Person.name.tpe.query.inspect.map(_ ==> {
+        if (database == "mysql") {
+          // Eeserved keywords in Mysql 'name' and 'type' are transparently resolved by Molecule with appended underscore
+          s"""========================================
+             |QUERY:
+             |DataModel(
+             |  List(
+             |    AttrOneManString("Person", "name", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 1)),
+             |    AttrOneManString("Person", "type", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 2))
+             |  ),
+             |  Set(1, 2), 0, 0, Nil
+             |)
+             |
+             |SELECT DISTINCT
+             |  Person.name_,
+             |  Person.type_
+             |FROM Person
+             |WHERE
+             |  Person.name_ IS NOT NULL AND
+             |  Person.type_ IS NOT NULL;
+             |----------------------------------------
+             |""".stripMargin
+        } else
+          s"""========================================
+             |QUERY:
+             |DataModel(
+             |  List(
+             |    AttrOneManString("Person", "name", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 1)),
+             |    AttrOneManString("Person", "type", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 2))
+             |  ),
+             |  Set(1, 2), 0, 0, Nil
+             |)
+             |
+             |SELECT DISTINCT
+             |  Person.name,
+             |  Person.type
+             |FROM Person
+             |WHERE
+             |  Person.name IS NOT NULL AND
+             |  Person.type IS NOT NULL;
+             |----------------------------------------
+             |""".stripMargin
+      })
     } yield ()
   }
 }

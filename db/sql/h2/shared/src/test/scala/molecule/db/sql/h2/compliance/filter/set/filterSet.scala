@@ -1,9 +1,9 @@
 package molecule.db.sql.h2.compliance.filter.set
 
 import molecule.core.setup.MUnit
-import molecule.db.compliance.test.filter.set.{FilterSet_Enum, SetSemantics}
 import molecule.db.compliance.test.filter.set.ref.{FilterRefSet_Card1Ref, FilterRefSet_Card2Ref}
 import molecule.db.compliance.test.filter.set.types.*
+import molecule.db.compliance.test.filter.set.{FilterSet_Enum, SetSemantics}
 import molecule.db.sql.h2.setup.Api_h2_async
 
 class FilterSet_String_Test extends MUnit {

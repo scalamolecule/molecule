@@ -4,6 +4,7 @@ import boopickle.Default.*
 import molecule.base.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.Entity
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.sql.h2.setup.DbProviders_h2
 import molecule.db.sql.h2.sync.*
 

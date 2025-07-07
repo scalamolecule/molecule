@@ -1,11 +1,10 @@
 package molecule.base.util
 
 import java.net.URI
+import java.nio.ByteBuffer
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.{Date, UUID}
-import scala.io.Source
-import scala.util.Try
 
 object BaseHelpers extends BaseHelpers
 trait BaseHelpers extends DateHandling {
@@ -88,7 +87,7 @@ trait BaseHelpers extends DateHandling {
       case set: Set[_]  => if (set.isEmpty) "Nil" else set.map(render).mkString("Set(", ", ", ")")
       case lst: List[_] => if (lst.isEmpty) "Nil" else lst.map(render).mkString("List(", ", ", ")")
       case (a, b)       => s"${render(a)} -> ${render(b)}"
-      case v           => render(v)
+      case v            => render(v)
     }.mkString("List(", ", ", ")")
   }
 
@@ -168,11 +167,10 @@ trait BaseHelpers extends DateHandling {
     }
   }
 
-
-  def getFileContent(filePath: String): String = {
-    val file = Try(
-      Source.fromFile(filePath)
-    ).getOrElse(throw new Exception(s"Couldn't find file $filePath in classpath."))
-    file.getLines().mkString("\n")
+  def byteBufferToArray(buf: ByteBuffer): Array[Byte] = {
+    val dup = buf.duplicate()
+    val arr = new Array[Byte](dup.remaining())
+    dup.get(arr)
+    arr
   }
 }

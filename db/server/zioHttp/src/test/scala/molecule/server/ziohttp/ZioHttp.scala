@@ -2,6 +2,7 @@ package molecule.server.ziohttp
 
 import java.io.IOException
 import boopickle.Default.*
+import molecule.db.core.marshalling.Boopicklers.*
 import molecule.db.core.marshalling.MoleculeRpc
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import zio.http.Server

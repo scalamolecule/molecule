@@ -20,6 +20,9 @@ class NestedTest extends MUnit {
 class StringOpsTest extends MUnit {
   StringOps(this, Api_h2_async)
 }
+class WideningTest extends MUnit {
+  Widening(this, Api_h2_async)
+}
 
 
 class Bind_String_Test extends MUnit {
