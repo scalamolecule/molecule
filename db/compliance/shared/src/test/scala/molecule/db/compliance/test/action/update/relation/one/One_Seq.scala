@@ -198,21 +198,4 @@ case class One_Seq(
       _ <- A.iSeq.B.iSeq._A.C.iSeq.query.get.map(_ ==> List((List(10), List(20), List(30))))
     } yield ()
   }
-
-
-  "no synthetic orphans" - refs { implicit conn =>
-    if (database == "datomic" && platform == "jvm") {
-      // Datomic uses synthetic index/value coordinates to maintain ordered Lists
-      for {
-        a <- A.iSeq(Seq(1, 2)).save.transact.map(_.id)
-        _ <- A(a).iSeq(Seq(3, 4)).update.transact
-        _ <- A(a).iSeq.query.get.map(_ ==> List(Seq(3, 4)))
-
-        // Only the new synthetic coordinates remain - no orphans left from Seq(1, 2) coordinates
-        _ <- rawQuery(s"[:find (count ?e) :where [_ :A/iSeq ?e]]").map(_.head ==> List(2))
-        _ <- rawQuery(s"[:find (count ?e) :where [?e :A.iSeq/i_ ?i]]").map(_.head ==> List(2))
-        _ <- rawQuery(s"[:find (count ?e) :where [?e :A.iSeq/v_ ?v]]").map(_.head ==> List(2))
-      } yield ()
-    }
-  }
 }

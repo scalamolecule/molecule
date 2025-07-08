@@ -1,11 +1,11 @@
 package molecule.db.compliance.test.aggregation.refNum
 
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Refs.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
+import molecule.db.compliance.domains.dsl.Refs.*
+import molecule.db.compliance.setup.DbProviders
 
 case class AggrRefNum_median(
   suite: MUnit,
@@ -17,16 +17,7 @@ case class AggrRefNum_median(
   import api.*
   import suite.*
 
-  // Different databases have different ways of calculating a median
-  // when the count of values is even and there's no middle value
-  val wholeOrAverage = if (List("datomic").contains(database)) {
-    // lower whole number
-    int1
-  } else {
-    // average
-    (int1 + int2).toDouble / 2.0
-  }
-
+  val average = (int1 + int2).toDouble / 2.0
 
   "ref" - refs { implicit conn =>
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
@@ -43,7 +34,7 @@ case class AggrRefNum_median(
       _ <- A.B.i(median).query.get.map(_.head ==~ 2)
 
       _ <- A.i.B.i(median).query.get.map(_.collect {
-        case (1, median) => median ==~ wholeOrAverage
+        case (1, median) => median ==~ average
         case (2, median) => median ==~ 3
       })
     } yield ()
@@ -64,7 +55,7 @@ case class AggrRefNum_median(
       _ <- A.B.C.i(median).query.get.map(_.head ==~ 2)
 
       _ <- A.i.B.i.C.i(median).query.get.map(_.collect {
-        case (1, 1, median) => median ==~ wholeOrAverage
+        case (1, 1, median) => median ==~ average
         case (2, 2, median) => median ==~ 3
       })
     } yield ()
@@ -84,8 +75,8 @@ case class AggrRefNum_median(
 
       _ <- A.i.a1.B.i(median).C.i(median).query.get.map(_.collect {
         case (1, median1, median2) =>
-          median1 ==~ wholeOrAverage
-          median2 ==~ wholeOrAverage
+          median1 ==~ average
+          median2 ==~ average
         case (2, median1, median2) =>
           median1 ==~ 3.0
           median2 ==~ 3.0
@@ -107,8 +98,8 @@ case class AggrRefNum_median(
 
       _ <- A.i.a1.B.i(median)._A.C.i(median).query.get.map(_.collect {
         case (1, median1, median2) =>
-          median1 ==~ wholeOrAverage
-          median2 ==~ wholeOrAverage
+          median1 ==~ average
+          median2 ==~ average
         case (2, median1, median2) =>
           median1 ==~ 3.0
           median2 ==~ 3.0

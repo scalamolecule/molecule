@@ -66,12 +66,7 @@ case class Delete_filter(
       _ <- Entity.string.insert(string1, string2).transact
       _ <- Entity.int.insert(int1, int2).transact
 
-      _ <- if (database == "datomic") {
-        // Datomic needs at least one present attribute (string_ here)
-        Entity.string_.int_().delete.transact
-      } else {
-        Entity.int_().delete.transact
-      }
+      _ <- Entity.int_().delete.transact
 
       _ <- Entity.string_?.int.query.get.map(_ ==> List(
         (None, int1),

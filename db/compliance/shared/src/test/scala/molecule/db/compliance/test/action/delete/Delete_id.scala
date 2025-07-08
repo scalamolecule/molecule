@@ -144,13 +144,7 @@ case class Delete_id(
       _ <- B(b).delete.transact
       _ <- B(b).i.query.get.map(_ ==> List())
 
-      _ <- if (database == "datomic") {
-        // In Datomic the ref id and the referenced entity id is the same and therefore gone
-        A.b.query.get.map(_ ==> List())
-      } else {
-        // Orphan ref to B remains in the SQL A table
-        A.b.query.get.map(_ ==> List(b))
-      }
+      _ <- A.b.query.get.map(_ ==> List(b))
 
       // But orphan ref points to nothing (the deleted ref entity)
       _ <- A.i.B.i.query.get.map(_ ==> List())

@@ -30,7 +30,6 @@ trait MetaDb {
   val reservedAttributes: IArray[Byte] = IArray.empty[Byte]
 }
 
-trait MetaDb_datomic extends MetaDb
 trait MetaDb_h2 extends MetaDb
 trait MetaDb_mariadb extends MetaDb
 trait MetaDb_mysql extends MetaDb

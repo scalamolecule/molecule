@@ -45,9 +45,6 @@ trait DateHandling extends RegexMatching {
     zdt.format(DateTimeFormatter.ofPattern(pattern))
   }
 
-  def date2datomic(date: Date): String =
-    getDateStr(date, ZoneOffset.ofTotalSeconds(0), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-
   def date2str(date: Date,
                zoneOffset: ZoneOffset = localZoneOffset): String = {
     val epochMs0 = date.getTime

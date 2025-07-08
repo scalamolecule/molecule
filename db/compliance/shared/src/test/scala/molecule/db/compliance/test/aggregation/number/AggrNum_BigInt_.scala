@@ -44,47 +44,22 @@ case class AggrNum_BigInt_(
 
   "median" - types { implicit futConn =>
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-    // Different databases have different ways of calculating a median
-    database match {
-      case "datomic" =>
-        for {
-          _ <- Entity.i.bigInt.insert(List(
-            (1, bigInt1),
-            (1, bigInt2),
-            (2, bigInt2),
-            (2, bigInt5),
-            (2, bigInt9),
-          )).transact
+    for {
+      _ <- Entity.i.bigInt.insert(List(
+        (1, bigInt1),
+        (1, bigInt2),
+        (2, bigInt2),
+        (2, bigInt5),
+        (2, bigInt9),
+      )).transact
 
-          // Median of all values - middle number used if odd number of values
-          // 1  2  2  5  9
-          //       ^
-          _ <- Entity.bigInt(median).query.get.map(_.head ==~ bigInt2.toString.toDouble) // middle number
+      _ <- Entity.bigInt(median).query.get.map(_.head ==~ bigInt2.toString.toDouble) // middle number
 
-          _ <- Entity.i.bigInt(median).query.get.map(_.collect {
-            case (1, median) => median ==~ bigInt1.toDouble.floor // lower whole number
-            case (2, median) => median ==~ bigInt5.toString.toDouble // middle number
-          })
-        } yield ()
-
-      case _ =>
-        for {
-          _ <- Entity.i.bigInt.insert(List(
-            (1, bigInt1),
-            (1, bigInt2),
-            (2, bigInt2),
-            (2, bigInt5),
-            (2, bigInt9),
-          )).transact
-
-          _ <- Entity.bigInt(median).query.get.map(_.head ==~ bigInt2.toString.toDouble) // middle number
-
-          _ <- Entity.i.bigInt(median).query.get.map(_.collect {
-            case (1, median) => median ==~ (bigInt1 + bigInt2).toDouble / 2.0 // average of 2 middle numbers
-            case (2, median) => median ==~ bigInt5.toString.toDouble // middle number
-          })
-        } yield ()
-    }
+      _ <- Entity.i.bigInt(median).query.get.map(_.collect {
+        case (1, median) => median ==~ (bigInt1 + bigInt2).toDouble / 2.0 // average of 2 middle numbers
+        case (2, median) => median ==~ bigInt5.toString.toDouble // middle number
+      })
+    } yield ()
   }
 
 

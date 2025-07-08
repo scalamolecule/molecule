@@ -44,47 +44,22 @@ case class AggrNum_Short_(
 
   "median" - types { implicit futConn =>
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-    // Different databases have different ways of calculating a median
-    database match {
-      case "datomic" =>
-        for {
-          _ <- Entity.i.short.insert(List(
-            (1, short1),
-            (1, short2),
-            (2, short2),
-            (2, short5),
-            (2, short9),
-          )).transact
+    for {
+      _ <- Entity.i.short.insert(List(
+        (1, short1),
+        (1, short2),
+        (2, short2),
+        (2, short5),
+        (2, short9),
+      )).transact
 
-          // Median of all values - middle number used if odd number of values
-          // 1  2  2  5  9
-          //       ^
-          _ <- Entity.short(median).query.get.map(_.head ==~ short2.toString.toDouble) // middle number
+      _ <- Entity.short(median).query.get.map(_.head ==~ short2.toString.toDouble) // middle number
 
-          _ <- Entity.i.short(median).query.get.map(_.collect {
-            case (1, median) => median ==~ short1.toDouble.floor // lower whole number
-            case (2, median) => median ==~ short5.toString.toDouble // middle number
-          })
-        } yield ()
-
-      case _ =>
-        for {
-          _ <- Entity.i.short.insert(List(
-            (1, short1),
-            (1, short2),
-            (2, short2),
-            (2, short5),
-            (2, short9),
-          )).transact
-
-          _ <- Entity.short(median).query.get.map(_.head ==~ short2.toString.toDouble) // middle number
-
-          _ <- Entity.i.short(median).query.get.map(_.collect {
-            case (1, median) => median ==~ (short1 + short2).toDouble / 2.0 // average of 2 middle numbers
-            case (2, median) => median ==~ short5.toString.toDouble // middle number
-          })
-        } yield ()
-    }
+      _ <- Entity.i.short(median).query.get.map(_.collect {
+        case (1, median) => median ==~ (short1 + short2).toDouble / 2.0 // average of 2 middle numbers
+        case (2, median) => median ==~ short5.toString.toDouble // middle number
+      })
+    } yield ()
   }
 
 

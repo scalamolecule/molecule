@@ -1,19 +1,13 @@
 ![](project/resources/Molecule-logo.png)
 
-Molecule is a Scala 3 library to query SQL and NoSQL databases with the words of your domain.
+Molecule is a Scala 3 library to use SQL databases with the words of your domain.
 
-Compose an immutable "molecule" data structure:
+Compose an immutable "molecule" data structure
 ```scala
 Person.name.age.Address.street
 ```
 
-instead of building queries
-<table>
-<tr>
-<td> SQL </td> <td> Datalog </td>
-</tr>
-<tr>
-<td valign="top">
+instead of building a query
 
 ```sql
 SELECT
@@ -24,19 +18,7 @@ FROM Person
   INNER JOIN Address 
     ON Person.address = Address.id;
 ```
-</td>
-<td valign="top">
 
-```clojure
-[:find ?name ?age ?street
- :where [?a :Person/name ?name]
-        [?a :Person/age ?age]
-        [?a :Ns/address ?b]
-        [?b :Address/street ?street]]
-```
-</td>
-</tr>
-</table>
 
 and get typed data matching the molecule from the database:
 
@@ -49,7 +31,7 @@ Data can also be fetched asynchronously in a `Future`, cats `IO` or `ZIO`.
 
 ## Main features of Molecule
 
-- Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com), [H2](https://h2database.com/html/main.html) and [Datomic](http://www.datomic.com) databases. More can easily be added
+- Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com) and [H2](https://h2database.com/html/main.html) databases. More can easily be added
 - Molecules for any database behave identically. Each db pass the same SPI compliance test suite (+1800 tests).
 - Targets Scala 3.7.1 on JVM and JS platforms
 - Synchronous, Asynchronous (Future), ZIO and cats.effect.IO APIs
@@ -96,15 +78,6 @@ object MyDomain extends DomainStructure {
 ## Examples
 
 Molecules using any Database/API combination return the same data, just in different wrappings:
-
-Synchronous API, Datomic
-
-```scala
-import molecule.db.datalog.datomic.sync._
-
-val persons: List[(String, Int, String)] =
-  Person.name.age.Address.street.query.get
-```
 
 Synchronous API, PostgreSQL
 
@@ -212,7 +185,6 @@ lazy val yourProject = project.in(file("app"))
       "org.scalamolecule" %% "molecule-db-sql-mysql" % "0.23.0",
       "org.scalamolecule" %% "molecule-db-sql-mariadb" % "0.23.0",
       "org.scalamolecule" %% "molecule-db-sql-h2" % "0.23.0",
-      "org.scalamolecule" %% "molecule-db-datalog-datomic" % "0.23.0",
     )
   )
 ```
@@ -245,7 +217,6 @@ Run the tests on the jvm with a databases of your choice:
     sbt dbSqlMysqlJVM/test
     sbt dbSqlMariadbJVM/test
     sbt dbSqlH2JVM/test
-    sbt dbDatalogDatomicJVM/test
 
 
 ### Run JS tests
@@ -264,7 +235,6 @@ Please choose a database and a server backend to test the Molecule RPC API:
   3  MySQL
   4  PostgreSQL
   5  SQlite
-  6  Datomic
 
 Database: 1
 
@@ -293,7 +263,6 @@ sbt dbSqlMariaDBJS/test
 sbt dbSqlMySQLJS/test
 sbt dbSqlPostgreSQLJS/test
 sbt dbSqlSQliteJS/test
-sbt dbDatalogDatomicJS/test
 ```
 The tests are then automatically fetching data from the running backend - Molecule takes care of marshalling and fetching transparently with boopickle binary serialization!
 

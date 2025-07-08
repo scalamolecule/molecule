@@ -1,12 +1,12 @@
 package molecule.db.compliance.test.sorting
 
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Refs.*
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
+import molecule.db.compliance.domains.dsl.Refs.*
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 import scala.concurrent.Future
 
 
@@ -76,12 +76,7 @@ case class SortNested(
       _ <- Ref.i_(3).Entities.*?(Entity.long.a1).query.get.map(_ ==> List(List(long1, long2)))
       _ <- Ref.i_(4).Entities.*?(Entity.float.a1).query.get.map(_ ==> List(List(float1, float2)))
       _ <- Ref.i_(5).Entities.*?(Entity.double.a1).query.get.map(_ ==> List(List(double1, double2)))
-      _ <- if (database == "datomic") {
-        // `false` wrongly becomes null in Datomic. Seems like a bug
-        Future.unit
-      } else {
-        Ref.i_(6).Entities.*?(Entity.boolean.a1).query.get.map(_ ==> List(List(boolean1, boolean2)))
-      }
+      _ <- Ref.i_(6).Entities.*?(Entity.boolean.a1).query.get.map(_ ==> List(List(boolean1, boolean2)))
       _ <- Ref.i_(7).Entities.*?(Entity.bigInt.a1).query.get.map(_ ==> List(List(bigInt1, bigInt2)))
       _ <- Ref.i_(8).Entities.*?(Entity.bigDecimal.a1).query.get.map(_ ==> List(List(bigDecimal1, bigDecimal2)))
       _ <- Ref.i_(9).Entities.*?(Entity.date.a1).query.get.map(_ ==> List(List(date1, date2)))
@@ -159,12 +154,7 @@ case class SortNested(
       _ <- Ref.i_(3).Entities.*?(Entity.long.d1).query.get.map(_ ==> List(List(long2, long1)))
       _ <- Ref.i_(4).Entities.*?(Entity.float.d1).query.get.map(_ ==> List(List(float2, float1)))
       _ <- Ref.i_(5).Entities.*?(Entity.double.d1).query.get.map(_ ==> List(List(double2, double1)))
-      _ <- if (database == "datomic") {
-        // `false` wrongly becomes null in Datomic. Seems like a bug
-        Future.unit
-      } else {
-        Ref.i_(6).Entities.*?(Entity.boolean.d1).query.get.map(_ ==> List(List(boolean2, boolean1)))
-      }
+      _ <- Ref.i_(6).Entities.*?(Entity.boolean.d1).query.get.map(_ ==> List(List(boolean2, boolean1)))
       _ <- Ref.i_(7).Entities.*?(Entity.bigInt.d1).query.get.map(_ ==> List(List(bigInt2, bigInt1)))
       _ <- Ref.i_(8).Entities.*?(Entity.bigDecimal.d1).query.get.map(_ ==> List(List(bigDecimal2, bigDecimal1)))
       _ <- Ref.i_(9).Entities.*?(Entity.date.d1).query.get.map(_ ==> List(List(date2, date1)))
@@ -257,19 +247,13 @@ case class SortNested(
       _ <- Ref.i.Entities.*(Entity.i.boolean_?).insert((6, List(
         (2, Some(true)),
         (3, None)))).transact
-      _ <- if (database == "datomic") {
-        // `false` wrongly becomes null in Datomic. Seems like a bug
-        Future.unit
-      } else {
-        for {
-          _ <- Ref.i_(6).Entities.*?(Entity.i.a2.boolean_?.a1).query.get.map(_ ==> List(List(
-            (3, None),
-            (2, Some(true)))))
-          _ <- Ref.i_(6).Entities.*?(Entity.i.d2.boolean_?.d1).query.get.map(_ ==> List(List(
-            (2, Some(true)),
-            (3, None))))
-        } yield ()
-      }
+      _ <- Ref.i_(6).Entities.*?(Entity.i.a2.boolean_?.a1).query.get.map(_ ==> List(List(
+        (3, None),
+        (2, Some(true)))))
+      _ <- Ref.i_(6).Entities.*?(Entity.i.d2.boolean_?.d1).query.get.map(_ ==> List(List(
+        (2, Some(true)),
+        (3, None))))
+
       _ <- Ref.i.Entities.*(Entity.i.bigInt_?).insert((7, List(
         (1, Some(bigInt1)),
         (2, Some(bigInt2)),

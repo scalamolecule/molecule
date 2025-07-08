@@ -44,47 +44,22 @@ case class AggrNum_Long_(
 
   "median" - types { implicit futConn =>
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-    // Different databases have different ways of calculating a median
-    database match {
-      case "datomic" =>
-        for {
-          _ <- Entity.i.long.insert(List(
-            (1, long1),
-            (1, long2),
-            (2, long2),
-            (2, long5),
-            (2, long9),
-          )).transact
+    for {
+      _ <- Entity.i.long.insert(List(
+        (1, long1),
+        (1, long2),
+        (2, long2),
+        (2, long5),
+        (2, long9),
+      )).transact
 
-          // Median of all values - middle number used if odd number of values
-          // 1  2  2  5  9
-          //       ^
-          _ <- Entity.long(median).query.get.map(_.head ==~ long2.toString.toDouble) // middle number
+      _ <- Entity.long(median).query.get.map(_.head ==~ long2.toString.toDouble) // middle number
 
-          _ <- Entity.i.long(median).query.get.map(_.collect {
-            case (1, median) => median ==~ long1.toDouble.floor // lower whole number
-            case (2, median) => median ==~ long5.toString.toDouble // middle number
-          })
-        } yield ()
-
-      case _ =>
-        for {
-          _ <- Entity.i.long.insert(List(
-            (1, long1),
-            (1, long2),
-            (2, long2),
-            (2, long5),
-            (2, long9),
-          )).transact
-
-          _ <- Entity.long(median).query.get.map(_.head ==~ long2.toString.toDouble) // middle number
-
-          _ <- Entity.i.long(median).query.get.map(_.collect {
-            case (1, median) => median ==~ (long1 + long2).toDouble / 2.0 // average of 2 middle numbers
-            case (2, median) => median ==~ long5.toString.toDouble // middle number
-          })
-        } yield ()
-    }
+      _ <- Entity.i.long(median).query.get.map(_.collect {
+        case (1, median) => median ==~ (long1 + long2).toDouble / 2.0 // average of 2 middle numbers
+        case (2, median) => median ==~ long5.toString.toDouble // middle number
+      })
+    } yield ()
   }
 
 

@@ -96,16 +96,7 @@ case class InsertSemantics(
 
       // B.ii was not inserted
       _ <- A.i.B.iSet_?.query.get.map(_ ==> List((1, None)))
-
-      // Datomic/SQL differs in whether a relationship is created
-      // when inserting empty collection
-      _ <- if (database == "datomic") {
-        // No relationship to B
-        A.i.b_.query.get.map(_ ==> Nil)
-      } else {
-        // Relationship to empty row in B
-        A.i.b_.query.get.map(_ ==> List(1))
-      }
+      _ <- A.i.b_.query.get.map(_ ==> List(1))
     } yield ()
   }
 
@@ -136,15 +127,7 @@ case class InsertSemantics(
       _ <- A.i.Bb.iSet_?.query.get.map(_ ==> List((1, None)))
       _ <- A.i.Bb.iSet.query.get.map(_ ==> Nil)
 
-      // Datomic/SQL differs in whether a relationship is created
-      // when inserting empty collection
-      _ <- if (database == "datomic") {
-        // No relationship to B
-        A.i.bb_.query.get.map(_ ==> Nil)
-      } else {
-        // Relationship to empty row in B
-        A.i.bb_.query.get.map(_ ==> List(1))
-      }
+      _ <- A.i.bb_.query.get.map(_ ==> List(1))
     } yield ()
   }
 

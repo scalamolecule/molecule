@@ -5,14 +5,11 @@ import molecule.db.common.action._
 import molecule.db.common.spi.{Conn, SpiZio, TxReport}
 import molecule.db.common.util.Executor._
 import molecule.rest.facade.GraphqlConn_JVM
-//import molecule.db.datalog.datomic.facade.DatomicConn_JVM
 import zio.ZIO
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 trait SpiZio_rest
   extends SpiZio
-//    with JVMDatomicSpiBase
-//    with DatomicSpiZioBase
     {
 
   // Query --------------------------------------------------------

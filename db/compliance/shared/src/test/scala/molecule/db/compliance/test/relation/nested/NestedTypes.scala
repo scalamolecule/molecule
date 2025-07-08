@@ -69,12 +69,7 @@ case class NestedTypes(
       _ <- Ref.i_(3).Entities.*?(Entity.long.a1).query.get.map(_ ==> List(List(long1, long2)))
       _ <- Ref.i_(4).Entities.*?(Entity.float.a1).query.get.map(_ ==> List(List(float1, float2)))
       _ <- Ref.i_(5).Entities.*?(Entity.double.a1).query.get.map(_ ==> List(List(double1, double2)))
-      _ <- if (database == "datomic") {
-        // `false` wrongly becomes null in Datomic. Seems like a bug
-        Future.unit
-      } else {
-        Ref.i_(6).Entities.*?(Entity.boolean.a1).query.get.map(_ ==> List(List(boolean1, boolean2)))
-      }
+      _ <- Ref.i_(6).Entities.*?(Entity.boolean.a1).query.get.map(_ ==> List(List(boolean1, boolean2)))
       _ <- Ref.i_(7).Entities.*?(Entity.bigInt.a1).query.get.map(_ ==> List(List(bigInt1, bigInt2)))
       _ <- Ref.i_(8).Entities.*?(Entity.bigDecimal.a1).query.get.map(_ ==> List(List(bigDecimal1, bigDecimal2)))
       _ <- Ref.i_(9).Entities.*?(Entity.date.a1).query.get.map(_ ==> List(List(date1, date2)))
@@ -148,12 +143,7 @@ case class NestedTypes(
       _ <- Ref.i(3).Entities.*?(Entity.i.a1.long_?).query.get.map(_ ==> List((3, List((1, Some(long1)), (2, None)))))
       _ <- Ref.i(4).Entities.*?(Entity.i.a1.float_?).query.get.map(_ ==> List((4, List((1, Some(float1)), (2, None)))))
       _ <- Ref.i(5).Entities.*?(Entity.i.a1.double_?).query.get.map(_ ==> List((5, List((1, Some(double1)), (2, None)))))
-      _ <- if (database == "datomic") {
-        // `false` wrongly becomes null in Datomic. Seems like a bug
-        Future.unit
-      } else {
-        Ref.i(6).Entities.*?(Entity.i.a1.boolean_?).query.get.map(_ ==> List((6, List((1, Some(boolean1)), (2, None)))))
-      }
+      _ <- Ref.i(6).Entities.*?(Entity.i.a1.boolean_?).query.get.map(_ ==> List((6, List((1, Some(boolean1)), (2, None)))))
       _ <- Ref.i(7).Entities.*?(Entity.i.a1.bigInt_?).query.get.map(_ ==> List((7, List((1, Some(bigInt1)), (2, None)))))
       _ <- Ref.i(8).Entities.*?(Entity.i.a1.bigDecimal_?).query.get.map(_ ==> List((8, List((1, Some(bigDecimal1)), (2, None)))))
       _ <- Ref.i(9).Entities.*?(Entity.i.a1.date_?).query.get.map(_ ==> List((9, List((1, Some(date1)), (2, None)))))

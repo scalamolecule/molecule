@@ -149,48 +149,4 @@ case class MandatoryRefs(
         }
     } yield ()
   }
-
-
-  // todo? This is easily done with Datomic. But from sql it seems that one would have to
-  //  - check every known table having a reference to the entity, or
-  //  - create some trigger on delete if possible? That would be much better to having the
-  //    db server automatically preventing orphaning mandatory relationships.
-  // So for now, this test is only implemented for Datomic.
-
-  "Deleting mandatory ref" - validation { implicit conn =>
-    if (database == "datomic") {
-      for {
-        case List(e1) <- MandatoryRefB.i(1).RefB.i(1).save.transact.map(_.ids)
-
-        case List(r1) <- MandatoryRefB(e1).refB.query.get
-
-        // Can't delete r1 since MandatoryRefB.refB is referencing it and is mandatory
-        _ <- RefB(r1).delete.transact
-          .map(_ ==> "Unexpected success").recover {
-            case ExecutionError(err) =>
-              err ==>
-                s"""Can't delete entities referenced by mandatory ref attributes of other entities:
-                   |  MandatoryRefB.refB: List($e1)
-                   |""".stripMargin
-          }
-
-        // Let's add two other entities referencing RefB too
-        case List(e2, e3) <- MandatoryRefsB.i.refsB.insert(
-          (4, Set(r1)),
-          (5, Set(r1)),
-        ).transact.map(_.ids)
-
-        // Now 3 entities would be rendered invalid if we deleted r1
-        _ <- RefB(r1).delete.transact
-          .map(_ ==> "Unexpected success").recover {
-            case ExecutionError(error) =>
-              error ==>
-                s"""Can't delete entities referenced by mandatory ref attributes of other entities:
-                   |  MandatoryRefB.refB: List($e1)
-                   |  MandatoryRefsB.refsB: List($e2, $e3)
-                   |""".stripMargin
-          }
-      } yield ()
-    }
-  }
 }

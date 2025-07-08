@@ -44,47 +44,22 @@ case class AggrNum_Float_(
 
   "median" - types { implicit futConn =>
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-    // Different databases have different ways of calculating a median
-    database match {
-      case "datomic" =>
-        for {
-          _ <- Entity.i.float.insert(List(
-            (1, float1),
-            (1, float2),
-            (2, float2),
-            (2, float5),
-            (2, float9),
-          )).transact
+    for {
+      _ <- Entity.i.float.insert(List(
+        (1, float1),
+        (1, float2),
+        (2, float2),
+        (2, float5),
+        (2, float9),
+      )).transact
 
-          // Median of all values - middle number used if odd number of values
-          // 1  2  2  5  9
-          //       ^
-          _ <- Entity.float(median).query.get.map(_.head ==~ float2.toString.toDouble) // middle number
+      _ <- Entity.float(median).query.get.map(_.head ==~ float2.toString.toDouble) // middle number
 
-          _ <- Entity.i.float(median).query.get.map(_.collect {
-            case (1, median) => median ==~ float1.toDouble.floor // lower whole number
-            case (2, median) => median ==~ float5.toString.toDouble // middle number
-          })
-        } yield ()
-
-      case _ =>
-        for {
-          _ <- Entity.i.float.insert(List(
-            (1, float1),
-            (1, float2),
-            (2, float2),
-            (2, float5),
-            (2, float9),
-          )).transact
-
-          _ <- Entity.float(median).query.get.map(_.head ==~ float2.toString.toDouble) // middle number
-
-          _ <- Entity.i.float(median).query.get.map(_.collect {
-            case (1, median) => median ==~ (float1 + float2).toDouble / 2.0 // average of 2 middle numbers
-            case (2, median) => median ==~ float5.toString.toDouble // middle number
-          })
-        } yield ()
-    }
+      _ <- Entity.i.float(median).query.get.map(_.collect {
+        case (1, median) => median ==~ (float1 + float2).toDouble / 2.0 // average of 2 middle numbers
+        case (2, median) => median ==~ float5.toString.toDouble // middle number
+      })
+    } yield ()
   }
 
 

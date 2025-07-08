@@ -2,11 +2,11 @@ package molecule.db.compliance.test.action.insert
 
 import molecule.base.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Refs.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
+import molecule.db.compliance.domains.dsl.Refs.*
+import molecule.db.compliance.setup.DbProviders
 
 
 case class InsertRefs_Datomic(
@@ -379,34 +379,31 @@ case class InsertRefs_Datomic(
     } yield ()
   }
 
+  "Optional entity (right join)" - refs { implicit conn =>
+    for {
+      _ <- A.?(A.i).B.s.insert(
+        (Some(1), "a"),
+        (None, "b"),
+      ).transact
 
-  if (database != "datomic") {
-    "Optional entity (right join)" - refs { implicit conn =>
-      for {
-        _ <- A.?(A.i).B.s.insert(
-          (Some(1), "a"),
-          (None, "b"),
-        ).transact
+      _ <- A.?(A.i).B.s.a1.query.get.map(_ ==> List(
+        (Some(1), "a"),
+        (None, "b"),
+      ))
+    } yield ()
+  }
 
-        _ <- A.?(A.i).B.s.a1.query.get.map(_ ==> List(
-          (Some(1), "a"),
-          (None, "b"),
-        ))
-      } yield ()
-    }
+  "Optional entity 2 (right join)" - refs { implicit conn =>
+    for {
+      _ <- A.?(A.i.s).B.s.insert.apply(
+        (Some((1, "x")), "a"),
+        (None, "b"),
+      ).transact
 
-    "Optional entity 2 (right join)" - refs { implicit conn =>
-      for {
-        _ <- A.?(A.i.s).B.s.insert.apply(
-          (Some((1, "x")), "a"),
-          (None, "b"),
-        ).transact
-
-        _ <- A.?(A.i.s).B.s.a1.query.get.map(_ ==> List(
-          (Some((1, "x")), "a"),
-          (None, "b"),
-        ))
-      } yield ()
-    }
+      _ <- A.?(A.i.s).B.s.a1.query.get.map(_ ==> List(
+        (Some((1, "x")), "a"),
+        (None, "b"),
+      ))
+    } yield ()
   }
 }
