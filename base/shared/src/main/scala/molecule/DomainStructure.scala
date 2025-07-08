@@ -7,20 +7,16 @@ import java.util.{Date, UUID}
 /**
  * Domain structure definition
  *
- * Define a Domain structure to be handled by Molecule in an object that extends this `Domain` class.
+ * Define a Domain structure to be handled by Molecule in an object that extends this `DomainStructure` class.
  *
  * A domain structure consists of traits describing real world entities. Each entity/trait is given a name and
  * defines a list of attributes that are the relevant properties of the entity.
- *
- * A `maxArity` number is applied to `Domain` to tell Molecule how many Attributes it should
- * create boilerplate code for, or how many attribute values are expected at most to be returned
- * from molecule queries. This is to generate a minimum of boilerplate code.
  *
  * {{{
  * package path.to.your.project
  * import molecule.Domain
  *
- * object Community extends Domain(8) { // "Community" domain
+ * object Community extends Domain { // "Community" domain
  *
  *   trait Person {          // "Person" entity
  *     val name = oneString  // Person "name" String attribute definition
@@ -33,7 +29,7 @@ import java.util.{Date, UUID}
  * For larger projects, it is recommended to organize the domain structure in
  * segments of related entity traits within objects:
  * {{{
- * object Seattle extends Domain(15) {
+ * object Seattle extends DomainStructure {
  *
  *   object customer { // "customer" segment
  *     trait Person {

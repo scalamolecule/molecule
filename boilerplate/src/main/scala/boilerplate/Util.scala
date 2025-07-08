@@ -15,19 +15,19 @@ abstract class Util(val fileName: String, dir: String, basePath: String) extends
     lazy val tpesSmall  = (0 until arity) map (n => (n + 'a').toChar)
     lazy val `A..V`     = tpes.mkString(", ")
     lazy val `(A..V)`   = if (arity == 1) "A" else tpes.mkString("(", ", ", ")")
-    lazy val `a..v`     = tpesSmall.mkString(", ")
-    lazy val `a:A..v:V` = tpesSmall.zip(tpes).map { case (a, aa) => s"$a: $aa" }.mkString(", ")
+//    lazy val `a..v`     = tpesSmall.mkString(", ")
+//    lazy val `a:A..v:V` = tpesSmall.zip(tpes).map { case (a, aa) => s"$a: $aa" }.mkString(", ")
     lazy val `A..V, `   = if (tpes.isEmpty) "" else tpes.mkString("", ", ", ", ")
-    lazy val `A..U, `   = if (tpes.size <= 1) "" else tpes.init.mkString("", ", ", ", ")
+//    lazy val `A..U, `   = if (tpes.size <= 1) "" else tpes.init.mkString("", ", ", ", ")
     lazy val `[A..V]`   = if (arity == 0) "" else tpes.mkString("[", ", ", "]")
-    lazy val `A..t`     = if (arity == 1) "t" else tpes.init.mkString("", ", ", ", t")
+//    lazy val `A..t`     = if (arity == 1) "t" else tpes.init.mkString("", ", ", ", t")
     lazy val `A..t, `   = arity match {
       case 0 => ""
       case 1 => "t, "
       case _ => tpes.init.mkString("", ", ", ", t, ")
     }
 
-    lazy val `_, _`    = Seq.fill(arity + 1)("_").mkString(", ")
+//    lazy val `_, _`    = Seq.fill(arity + 1)("_").mkString(", ")
     lazy val `_, _, _` = Seq.fill(arity + 2)("_").mkString(", ")
     lazy val a0        = "_" + arity
     lazy val a1        = "_" + (arity + 1)

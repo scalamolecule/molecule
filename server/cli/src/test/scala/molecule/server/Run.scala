@@ -13,8 +13,8 @@ import molecule.db.common.marshalling.MoleculeRpc
 import molecule.db.h2.marshalling.Rpc_h2
 import molecule.db.mariadb.marshalling.Rpc_mariadb
 import molecule.db.mysql.marshalling.Rpc_mysql
-import molecule.db.sql.postgres.marshalling.Rpc_postgres
-import molecule.db.sql.sqlite.marshalling.Rpc_sqlite
+import molecule.db.postgres.marshalling.Rpc_postgres
+import molecule.db.sqlite.marshalling.Rpc_sqlite
 import molecule.server.http4s.Http4s
 import molecule.server.netty.Netty
 import molecule.server.pekko.Pekko
@@ -40,7 +40,7 @@ import scala.io.StdIn
  * test
  *
  * or
- * testOnly molecule.db.sql.h2.Adhoc_js_h2_async
+ * testOnly molecule.db.h2.Adhoc_js_h2_async
  * etc.
  */
 object Run extends App {

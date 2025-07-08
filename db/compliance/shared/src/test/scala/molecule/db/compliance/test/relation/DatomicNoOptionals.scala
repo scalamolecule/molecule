@@ -18,9 +18,6 @@ case class DatomicNoOptionals(
   import suite.*
 
 
-  // Optional entities not implemented for Datomic.
-  // Doesn't seem viable in Datalog.
-
   "Optional entity" - refs { implicit conn =>
     for {
       _ <- A.?(A.i).B.i.insert(List((None, 1))).transact
@@ -52,5 +49,4 @@ case class DatomicNoOptionals(
         }
     } yield ()
   }
-
 }
