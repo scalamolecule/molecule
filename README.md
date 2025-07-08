@@ -51,7 +51,7 @@ Data can also be fetched asynchronously in a `Future`, cats `IO` or `ZIO`.
 
 - Support for [PostgreSQL](https://www.postgresql.org), [SQlite](https://sqlite.org), [MySQL](https://www.mysql.com), [MariaDB](https://mariadb.com), [H2](https://h2database.com/html/main.html) and [Datomic](http://www.datomic.com) databases. More can easily be added
 - Molecules for any database behave identically. Each db pass the same SPI compliance test suite (+1800 tests).
-- Targets Scala >=3.3.6 on JVM and JS platforms
+- Targets Scala 3.7.1 on JVM and JS platforms
 - Synchronous, Asynchronous (Future), ZIO and cats.effect.IO APIs
 - All Scala primitive types and collection types available as molecule attributes (!)
 - Typed methods to compose even complex molecules:
@@ -73,7 +73,7 @@ Data can also be fetched asynchronously in a `Future`, cats `IO` or `ZIO`.
 
 1) Define the entity names and attributes of your domain structure with Molecule's meta DSL
 ```scala
-object MyDomain extends DomainStructure(5) { 
+object MyDomain extends DomainStructure { 
 
   trait Person {
     val name     = oneString
@@ -190,13 +190,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```
-sbt.version = 1.11.2
+sbt.version = 1.11.3
 ```
 
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.17.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.18.0")
 ```
 
 `build.sbt`:
@@ -207,12 +207,12 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %% "molecule-db-sql-postgres" % "0.22.0",
-      "org.scalamolecule" %% "molecule-db-sql-sqlite" % "0.22.0",
-      "org.scalamolecule" %% "molecule-db-sql-mysql" % "0.22.0",
-      "org.scalamolecule" %% "molecule-db-sql-mariadb" % "0.22.0",
-      "org.scalamolecule" %% "molecule-db-sql-h2" % "0.22.0",
-      "org.scalamolecule" %% "molecule-db-datalog-datomic" % "0.22.0",
+      "org.scalamolecule" %% "molecule-db-sql-postgres" % "0.23.0",
+      "org.scalamolecule" %% "molecule-db-sql-sqlite" % "0.23.0",
+      "org.scalamolecule" %% "molecule-db-sql-mysql" % "0.23.0",
+      "org.scalamolecule" %% "molecule-db-sql-mariadb" % "0.23.0",
+      "org.scalamolecule" %% "molecule-db-sql-h2" % "0.23.0",
+      "org.scalamolecule" %% "molecule-db-datalog-datomic" % "0.23.0",
     )
   )
 ```

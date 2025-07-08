@@ -77,28 +77,30 @@ And lastly molecule for scala 3:
 
 Sonatype doesn't allow missing library dependencies. So we need to be careful to publish in the right order since we have a circular reference between molecule and sbt-molecule.
 
-1. Set new non-snapshot version in molecule, sbt-molecule and molecule-samples projects (search and replace for all occurencies in subproject sbt files). But keep keep sbt-molecule snapshot version in molecule plugins for now.
+1. Set new non-snapshot version in molecule, sbt-molecule and molecule-samples projects (search and replace for all occurrences in subproject sbt files). But keep sbt-molecule snapshot version in molecule plugins for now.
 
-2. Publish molecule 2.12 so that sbt-molecule can then refer to it:
+2. Publish molecule 2.12 first so that sbt-molecule can then refer to it:
 
 ```
-sbt ++2.12.20 "project baseJVM" publishSigned -Ddocs=true
+sbt ++2.12.20 "project baseJVM" clean publishSigned -Ddocs=true
 sbt sonaRelease
 ```
 
-3. Publish sbt-molecule (no need for scala version or setting -Ddocs):
+3. Publish sbt-molecule:
 
 ```
-sbt publishSigned
+sbt clean publishSigned
 sbt sonaRelease
 ```
 
 4. Set new sbt-molecule new version in molecule project/plugins. Publish molecule for scala 3 (depends on sbt-molecule):
 
 ```
-sbt ++3.3.6 publishSigned -Ddocs=true
+sbt ++3.7.1 clean publishSigned -Ddocs=true
 sbt sonaRelease
 ```
+
+`clean` is used to remove previously staged releases locally before uploading to Sonatype. Otherwise `sbt sonaRelease` tries to release both the old and new versions which will fail.
 
 If something goes wrong, then login to central.sonatype.com, chose Deployments and check the errors.
 
@@ -108,7 +110,7 @@ If something goes wrong, then login to central.sonatype.com, chose Deployments a
 
 7. Make release on github.
 
-
+    
 ## Publish without sbt-molecule update
 
 1) Set molecule build version to new version + "-SNAPSHOT"

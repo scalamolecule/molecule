@@ -1,6 +1,6 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.23.0-SNAPSHOT"
+val moleculeVersion = "0.23.0"
 
 val scala212 = "2.12.20"
 val scala3   = "3.7.1"
@@ -144,9 +144,9 @@ lazy val dbCompliance = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/compliance"))
   .enablePlugins(MoleculePlugin)
-  .settings(compilerArgs,
+  .settings(compilerArgs, checkPublishing,
     name := "molecule-db-compliance",
-    publish / skip := true,
+//    publish / skip := true,
     libraryDependencies ++= Seq(
       "com.zaxxer" % "HikariCP" % "6.2.1" % Test,
       "io.github.cquiroz" %%% "scala-java-time" % "2.6.0", // % Test, // we need main for time zone plugin
