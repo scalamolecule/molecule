@@ -5,8 +5,8 @@ import molecule.base.error.{InsertErrors, ValidationErrors}
 import molecule.core.setup.{MUnit_io, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.{DbProviders, Platform}
-import molecule.db.core.api.Api_io
-import molecule.db.core.spi.Spi_io
+import molecule.db.common.api.Api_io
+import molecule.db.common.spi.Spi_io
 import scala.annotation.nowarn
 import scala.concurrent.duration.DurationInt
 

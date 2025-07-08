@@ -1,7 +1,7 @@
 //package molecule.graphql.client.spi
 //
 //import molecule.base.error.ModelError
-//import molecule.db.core.spi.Spi_sync
+//import molecule.db.common.spi.Spi_sync
 //import molecule.graphql.client
 //
 //

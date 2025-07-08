@@ -1,6 +1,6 @@
 package molecule.db.compliance.setup
 
-import molecule.db.core.util.Executor.*
+import molecule.db.common.util.Executor.*
 import scala.concurrent.Future
 
 

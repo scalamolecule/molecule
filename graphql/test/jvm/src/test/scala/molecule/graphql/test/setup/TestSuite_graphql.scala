@@ -2,7 +2,7 @@
 //
 //import molecule.core.dataModel.Schema
 //import molecule.base.util.BaseHelpers
-//import molecule.db.core.spi.Conn
+//import molecule.db.common.spi.Conn
 //import molecule.db.compliance.domains.schema._
 //import molecule.db.compliance.setup.CoreTestSuite
 //import molecule.graphql.client.schema.StarwarsSchema

@@ -1,6 +1,6 @@
 package molecule.db.compliance.setup
 
-import molecule.db.core.spi.Conn
+import molecule.db.common.spi.Conn
 import zio.ZLayer
 
 trait DbProviders_zio { self: DbConnection & Platform =>

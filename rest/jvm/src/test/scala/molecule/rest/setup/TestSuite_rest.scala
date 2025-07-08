@@ -2,7 +2,7 @@ package molecule.rest.setup
 
 import molecule.base.util.BaseHelpers
 import molecule.core.dataModel.Schema
-import molecule.db.core.spi.Conn
+import molecule.db.common.spi.Conn
 import molecule.db.compliance.domains.schema._
 import molecule.db.compliance.setup.CoreTestSuite
 import molecule.rest.schema.StarwarsSchema

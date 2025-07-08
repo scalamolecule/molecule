@@ -1,6 +1,6 @@
 package molecule.rpc.grpc.transaction
 
-import molecule.db.core.spi.DataType
+import molecule.db.common.spi.DataType
 
 trait GrpcDataType_JS extends DataType {
 

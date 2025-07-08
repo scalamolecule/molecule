@@ -10,7 +10,7 @@ object _CastOptRefLeaf extends DbSqlBase("CastOptRefLeaf", "/query/casting") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.sql.core.query.casting
        |
-       |import molecule.db.sql.core.query.SqlQueryBase
+       |import molecule.db.common.query.SqlQueryBase
        |
        |
        |object $fileName_ extends SqlQueryBase {

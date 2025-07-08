@@ -3,12 +3,12 @@ package molecule.rpc.openapi.spi
 import boopickle.Default._
 import molecule.base.error.{InsertError, InsertErrors, ModelError, ValidationErrors}
 import molecule.core.dataModel._
-import molecule.db.core.action._
-import molecule.db.core.marshalling.serialize.PickleTpls
-import molecule.db.core.spi.{Conn, Renderer, SpiAsync, TxReport}
-import molecule.db.core.util.FutureUtils
-import molecule.db.core.validation.TxModelValidation
-import molecule.db.core.validation.insert.InsertValidation
+import molecule.db.common.action._
+import molecule.db.common.marshalling.serialize.PickleTpls
+import molecule.db.common.spi.{Conn, Renderer, SpiAsync, TxReport}
+import molecule.db.common.util.FutureUtils
+import molecule.db.common.validation.TxModelValidation
+import molecule.db.common.validation.insert.InsertValidation
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 

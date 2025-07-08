@@ -2,7 +2,7 @@ package molecule.rpc.openapi.setup
 
 import molecule.core.dataModel.Schema
 import molecule.base.util.BaseHelpers
-import molecule.db.core.spi.Conn
+import molecule.db.common.spi.Conn
 import molecule.db.compliance.domains.schema._
 import molecule.db.compliance.setup.CoreTestSuite
 import molecule.rpc.openapi.schema.StarwarsSchema

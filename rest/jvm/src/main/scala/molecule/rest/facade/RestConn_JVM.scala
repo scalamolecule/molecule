@@ -2,10 +2,10 @@ package molecule.rest.facade
 
 import java.sql
 import java.sql.{Connection, SQLException}
-import molecule.db.core.util.MoleculeLogging
-import molecule.db.core.marshalling.JdbcProxy
-import molecule.db.core.spi.{Conn, TxReport}
-import molecule.db.core.util.ModelUtils
+import molecule.db.common.util.MoleculeLogging
+import molecule.db.common.marshalling.JdbcProxy
+import molecule.db.common.spi.{Conn, TxReport}
+import molecule.db.common.util.ModelUtils
 import molecule.rest.transaction.GraphqlDataType_JVM
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal

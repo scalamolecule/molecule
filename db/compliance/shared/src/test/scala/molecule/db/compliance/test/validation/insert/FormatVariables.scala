@@ -4,9 +4,9 @@ import molecule.base.error.{InsertError, InsertErrors, ModelError}
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Validation.*
 import molecule.db.compliance.setup.DbProviders
-import molecule.db.core.api.Api_async
-import molecule.db.core.spi.Spi_async
-import molecule.db.core.util.Executor.*
+import molecule.db.common.api.Api_async
+import molecule.db.common.spi.Spi_async
+import molecule.db.common.util.Executor.*
 
 
 case class FormatVariables(

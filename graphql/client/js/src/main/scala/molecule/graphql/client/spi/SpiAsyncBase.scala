@@ -2,10 +2,10 @@
 //
 //import boopickle.Default.*
 //import molecule.base.error.InsertError
-//import molecule.db.core.action.*
+//import molecule.db.common.action.*
 //import molecule.core.dataModel.*
-//import molecule.db.core.spi.{Conn, Renderer, Spi_async, TxReport}
-//import molecule.db.core.util.FutureUtils
+//import molecule.db.common.spi.{Conn, Renderer, Spi_async, TxReport}
+//import molecule.db.common.util.FutureUtils
 //import molecule.graphql.client
 //import scala.concurrent.{Future, ExecutionContext as EC}
 //

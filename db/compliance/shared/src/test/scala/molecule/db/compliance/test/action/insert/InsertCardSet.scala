@@ -6,9 +6,9 @@ import java.util.{Date, UUID}
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.DbProviders
-import molecule.db.core.api.Api_async
-import molecule.db.core.spi.Spi_async
-import molecule.db.core.util.Executor.*
+import molecule.db.common.api.Api_async
+import molecule.db.common.spi.Spi_async
+import molecule.db.common.util.Executor.*
 import scala.concurrent.Future
 
 case class InsertCardSet(

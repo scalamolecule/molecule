@@ -1,6 +1,6 @@
 package molecule.rest.transaction
 
-import molecule.db.core.spi.DataType
+import molecule.db.common.spi.DataType
 
 trait RestDataType_JS extends DataType {
 

@@ -4,10 +4,10 @@
 //
 //import molecule.base.error.InsertError
 //import molecule.core.dataModel.*
-//import molecule.db.core.action.*
-//import molecule.db.core.marshalling.ConnProxy
-//import molecule.db.core.spi.{Conn, Renderer, SpiSync, Spi_async, TxReport}
-//import molecule.db.core.util.{FutureUtils, JavaConversions}
+//import molecule.db.common.action.*
+//import molecule.db.common.marshalling.ConnProxy
+//import molecule.db.common.spi.{Conn, Renderer, SpiSync, Spi_async, TxReport}
+//import molecule.db.common.util.{FutureUtils, JavaConversions}
 //import molecule.graphql.client.facade.GraphqlConn_JVM
 //import molecule.graphql.client.transaction.GraphqlDataType_JVM
 //
@@ -223,7 +223,7 @@
 //    debug: Boolean = false
 //  )(implicit conn: Conn): TxReport = {
 ////    try {
-////      import molecule.db.core.util.Executor.global
+////      import molecule.db.common.util.Executor.global
 ////      Await.result(Spi_datomic_async.fallback_rawTransact(txData, debug)(conn, global), 10.seconds)
 ////      ???
 ////    } catch {

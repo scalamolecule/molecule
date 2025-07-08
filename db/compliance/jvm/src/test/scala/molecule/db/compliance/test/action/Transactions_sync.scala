@@ -4,8 +4,8 @@ import molecule.base.error.ValidationErrors
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.DbProviders
-import molecule.db.core.api.{Api_sync, Api_sync_transact}
-import molecule.db.core.spi.{Conn, Spi_sync}
+import molecule.db.common.api.{Api_sync, Api_sync_transact}
+import molecule.db.common.spi.{Conn, Spi_sync}
 
 // Translated from
 // https://github.com/com-lihaoyi/scalasql/blob/main/scalasql/test/src/api/TransactionTests.scala

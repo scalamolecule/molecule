@@ -1,6 +1,6 @@
 package molecule.db.compliance.setup
 
-import molecule.db.core.spi.Conn
+import molecule.db.common.spi.Conn
 
 trait DbProviders { self: DbConnection & Platform =>
   val database: String

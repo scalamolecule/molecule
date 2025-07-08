@@ -1,10 +1,10 @@
 package molecule.rest.spi
 
 import molecule.base.error._
-import molecule.db.core.action._
-import molecule.db.core.marshalling.ConnProxy
-import molecule.db.core.spi.{Conn, SpiAsync, TxReport}
-import molecule.db.core.util.FutureUtils
+import molecule.db.common.action._
+import molecule.db.common.marshalling.ConnProxy
+import molecule.db.common.spi.{Conn, SpiAsync, TxReport}
+import molecule.db.common.util.FutureUtils
 import molecule.rest.facade.GraphqlConn_JVM
 import molecule.rest.transaction.GraphqlDataType_JVM
 //import molecule.db.datalog.datomic.facade.DatomicConn_JVM

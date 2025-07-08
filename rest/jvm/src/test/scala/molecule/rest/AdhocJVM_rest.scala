@@ -1,7 +1,7 @@
 package molecule.rest
 
 import molecule.rest.dsl.Starwars._
-import molecule.db.core.util.Executor._
+import molecule.db.common.util.Executor._
 import molecule.rest.async._
 import molecule.rest.setup.TestSuite_rest
 

@@ -10,7 +10,7 @@ object _CastBranch extends DbSqlBase("CastBranch", "/query/casting") {
     s"""// GENERATED CODE ********************************
        |package molecule.db.sql.core.query.casting
        |
-       |import molecule.db.sql.core.query.SqlQueryBase
+       |import molecule.db.common.query.SqlQueryBase
        |
        |
        |class $fileName_[Nested] extends SqlQueryBase {

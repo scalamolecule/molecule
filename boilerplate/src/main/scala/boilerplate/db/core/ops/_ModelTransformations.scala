@@ -14,7 +14,7 @@ object _ModelTransformations extends DbCoreBase("ModelTransformations", "/ops") 
        |import molecule.base.error.ModelError
        |import molecule.core.dataModel.*
        |import molecule.core.dataModel.Keywords.*
-       |import molecule.db.core.api.Molecule
+       |import molecule.db.common.api.Molecule
        |import scala.annotation.tailrec
        |
        |trait ModelTransformations_ {

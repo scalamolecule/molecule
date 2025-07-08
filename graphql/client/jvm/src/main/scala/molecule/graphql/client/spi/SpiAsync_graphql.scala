@@ -2,10 +2,10 @@
 //
 //import molecule.base.error.InsertError
 //import molecule.base.error.*
-//import molecule.db.core.action.*
-//import molecule.db.core.marshalling.ConnProxy
-//import molecule.db.core.spi.{Conn, Spi_async, TxReport}
-//import molecule.db.core.util.FutureUtils
+//import molecule.db.common.action.*
+//import molecule.db.common.marshalling.ConnProxy
+//import molecule.db.common.spi.{Conn, Spi_async, TxReport}
+//import molecule.db.common.util.FutureUtils
 //import molecule.graphql
 //import molecule.graphql.client.facade.GraphqlConn_JVM
 //import molecule.graphql.client.transaction.GraphqlDataType_JVM

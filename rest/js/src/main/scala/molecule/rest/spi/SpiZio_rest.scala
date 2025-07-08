@@ -1,8 +1,8 @@
 package molecule.rest.spi
 
 import molecule.base.error._
-import molecule.db.core.action._
-import molecule.db.core.spi.{Conn, SpiZio, TxReport}
+import molecule.db.common.action._
+import molecule.db.common.spi.{Conn, SpiZio, TxReport}
 import molecule.rest.facade.GraphqlConn_JS
 import zio._
 import scala.concurrent.{Future, ExecutionContext => EC}

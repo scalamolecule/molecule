@@ -12,7 +12,7 @@ object _InsertValidationResolvers extends DbCoreBase("InsertValidationResolvers"
        |
        |import molecule.base.error.InsertError
        |import molecule.core.dataModel.*
-       |import molecule.db.core.api.MetaDb
+       |import molecule.db.common.api.MetaDb
        |
        |trait $fileName_ {
        |
