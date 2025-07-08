@@ -39,7 +39,7 @@ import java.util.{Date, UUID}
  *       val bought  = many[products.Item]  // Cardinality-many relationship to products.Item
  *     }
  *     trait Address {
- *       val street = oneString.fulltext
+ *       val street = oneString
  *       val city   = oneInt
  *     }
  *     // ..more entities in the `customer` segment
@@ -325,21 +325,8 @@ abstract class DomainStructure {
     /** Index option (defaults to true).
      * <br><br>
      * Generated index for this attribute.
-     *
-     * For the Datomic database, all attributes are set by default with the indexed option
-     * automatically.
      * */
     lazy val index: Self = ???
-
-    /** Unique identity option.
-     * <br><br>
-     * Attribute value is unique to each entity and "upsert" is enabled.
-     * <br><br>
-     * Attempts to insert a duplicate value for a temporary entity id will cause all
-     * attributes associated with that temporary id to be merged with the entity
-     * already in the database.
-     * */
-    lazy val uniqueIdentity: Self = ???
 
     /** Unique value option.
      * <br><br>
@@ -356,11 +343,6 @@ abstract class DomainStructure {
 
     // Value accessor for validation code
     val value: Tpe = ???
-
-
-    /** No history option (effect in Datomic only). */
-    lazy val noHistory: Self = ???
-
   }
 
 
@@ -371,9 +353,6 @@ abstract class DomainStructure {
 
 
   trait stringOptions[Self, Tpe] extends Options[Self, Tpe, String] {
-    // Enable fulltext search (for those data sources that support it)
-    val fulltext: Self = ???
-
     // Validation
     val email: Self = ???
     def email(msg: String): Self = ???

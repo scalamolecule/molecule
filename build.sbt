@@ -1,6 +1,6 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.24.0-SNAPSHOT"
+val moleculeVersion = "0.24.0"
 
 val scala212 = "2.12.20"
 val scala3   = "3.7.1"
