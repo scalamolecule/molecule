@@ -11,8 +11,8 @@ import molecule.db.compliance.domains.dsl.Validation.metadb.*
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.MoleculeRpc
 import molecule.db.h2.marshalling.Rpc_h2
-import molecule.db.sql.mariadb.marshalling.Rpc_mariadb
-import molecule.db.sql.mysql.marshalling.Rpc_mysql
+import molecule.db.mariadb.marshalling.Rpc_mariadb
+import molecule.db.mysql.marshalling.Rpc_mysql
 import molecule.db.sql.postgres.marshalling.Rpc_postgres
 import molecule.db.sql.sqlite.marshalling.Rpc_sqlite
 import molecule.server.http4s.Http4s
