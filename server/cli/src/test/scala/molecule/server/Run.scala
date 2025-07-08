@@ -10,7 +10,7 @@ import molecule.db.compliance.domains.dsl.Uniques.metadb.*
 import molecule.db.compliance.domains.dsl.Validation.metadb.*
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.MoleculeRpc
-import molecule.db.sql.h2.marshalling.Rpc_h2
+import molecule.db.h2.marshalling.Rpc_h2
 import molecule.db.sql.mariadb.marshalling.Rpc_mariadb
 import molecule.db.sql.mysql.marshalling.Rpc_mysql
 import molecule.db.sql.postgres.marshalling.Rpc_postgres

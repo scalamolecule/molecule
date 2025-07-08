@@ -1,7 +1,5 @@
 package molecule.db.common.facade
 
-import boopickle.Default.*
-import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.{JdbcProxy, MoleculeFrontend, MoleculeRpc}
 import molecule.db.common.spi.Conn
 import molecule.db.common.transaction.JdbcDataType_JS
