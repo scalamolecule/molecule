@@ -5,7 +5,7 @@ import molecule.base.metaModel.Cardinality
 /** Metadata about the database */
 trait MetaDb {
 
-  /** Resource path to SQL schema file or Datomic EDN file to create the database */
+  /** Resource path to SQL schema file to create the database */
   val schemaResourcePath: String
 
   /** entity -> List[mandatory-attribute] */

@@ -180,11 +180,11 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %% "molecule-db-sql-postgres" % "0.23.0",
-      "org.scalamolecule" %% "molecule-db-sql-sqlite" % "0.23.0",
-      "org.scalamolecule" %% "molecule-db-sql-mysql" % "0.23.0",
-      "org.scalamolecule" %% "molecule-db-sql-mariadb" % "0.23.0",
-      "org.scalamolecule" %% "molecule-db-sql-h2" % "0.23.0",
+      "org.scalamolecule" %% "molecule-db-postgres" % "0.23.0",
+      "org.scalamolecule" %% "molecule-db-sqlite" % "0.23.0",
+      "org.scalamolecule" %% "molecule-db-mysql" % "0.23.0",
+      "org.scalamolecule" %% "molecule-db-mariadb" % "0.23.0",
+      "org.scalamolecule" %% "molecule-db-h2" % "0.23.0",
     )
   )
 ```
@@ -212,21 +212,21 @@ On a mac you can for instance start Docker Desktop.
 
 Run the tests on the jvm with a databases of your choice:
 
-    sbt dbSqlPostgresJVM/test
-    sbt dbSqlSQliteJVM/test
-    sbt dbSqlMysqlJVM/test
-    sbt dbSqlMariadbJVM/test
-    sbt dbSqlH2JVM/test
+    sbt dbPostgresJVM/test
+    sbt dbSQliteJVM/test
+    sbt dbMysqlJVM/test
+    sbt dbMariadbJVM/test
+    sbt dbH2JVM/test
 
 
 ### Run JS tests
 
 To test using molecules from ScalaJS, you need to have a ScalaJVM backend server running in a separate process that can receive the queries and send data back to ScalaJS.
 
-In the `dbServer` module you can see 5 different minimal Tapir backend setups that you can start out from. In one process you can start up one of those backends where you will be asked which backend and database that you want to use:
+In the `server` module you can see 5 different minimal Tapir backend setups that you can start out from. In one process you can start up one of those backends where you will be asked which backend and database that you want to use:
 
 ```
-sbt dbServer/Test/run
+sbt server/Test/run
 
 Please choose a database and a server backend to test the Molecule RPC API:
 
@@ -258,11 +258,11 @@ Now we have a backend running on ScalaJVM ready to take care of your molecule qu
 In another process you can then run one of the following commands to run the coreTests on ScalaJS with the database of your choice:
 
 ```
-sbt dbSqlH2JS/test
-sbt dbSqlMariaDBJS/test
-sbt dbSqlMySQLJS/test
-sbt dbSqlPostgreSQLJS/test
-sbt dbSqlSQliteJS/test
+sbt dbH2JS/test
+sbt dbMariaDBJS/test
+sbt dbMySQLJS/test
+sbt dbPostgreSQLJS/test
+sbt dbSQliteJS/test
 ```
 The tests are then automatically fetching data from the running backend - Molecule takes care of marshalling and fetching transparently with boopickle binary serialization!
 

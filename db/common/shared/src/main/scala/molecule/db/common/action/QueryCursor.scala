@@ -2,13 +2,11 @@ package molecule.db.common.action
 
 import molecule.base.error.ModelError
 import molecule.core.dataModel.{DataModel, Value}
-import molecule.db.common.marshalling.dbView.DbView
 
 case class QueryCursor[Tpl](
   private[molecule] val dataModel: DataModel,
   private[molecule] val optLimit: Option[Int],
   private[molecule] val cursor: String,
-  private[molecule] val dbView: Option[DbView] = None,
   private[molecule] val printInspect: Boolean = false,
   private[molecule] val bindValues: List[Value] = Nil
 ) extends Action with QueryBind_[Tpl, QueryCursor] {
