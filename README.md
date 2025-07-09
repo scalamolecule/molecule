@@ -1,6 +1,6 @@
 ![Molecule logo](project/resources/Molecule-logo.png)
 
-## Compose your Domain Data
+
 
 Molecule is a Scala 3 library for querying and updating SQL databases using a type-safe DSL — not one for SQL, but one generated from your own domain structure.
 
@@ -273,7 +273,7 @@ rawTransact(
 ```
 Note that only static input values are supported.
 
-Most of the time you'll likely have enough expressiveness With Molecule without having to resort to manual SQL writing.
+Most of the time you'll likely have enough expressiveness with Molecule without having to resort to manual SQL writing.
 
 
 #### Quick inspect
