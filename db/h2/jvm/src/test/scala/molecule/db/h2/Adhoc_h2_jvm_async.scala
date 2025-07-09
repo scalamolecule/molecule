@@ -2,9 +2,8 @@ package molecule.db.h2
 
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
-import async.*
+import molecule.db.h2.async.*
 import molecule.db.h2.setup.DbProviders_h2
-//import moleculeGen.molecule.db.compliance.domains.dsl.Types.Color
 
 
 class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
