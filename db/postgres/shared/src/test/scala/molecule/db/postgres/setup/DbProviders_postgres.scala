@@ -1,6 +1,5 @@
 package molecule.db.postgres.setup
 
-import molecule.db
 import molecule.db.common.spi.Conn
 import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_MetaDb_postgres
 import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_MetaDb_postgres
@@ -8,7 +7,6 @@ import molecule.db.compliance.domains.dsl.Types.metadb.Types_MetaDb_postgres
 import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_MetaDb_postgres
 import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_MetaDb_postgres
 import molecule.db.compliance.setup.{DbConnection, DbProviders, Platform}
-import molecule.db.postgres.setup.DbConnection_postgres
 
 trait DbProviders_postgres extends DbProviders with DbConnection with Platform {
   override val database: String = "postgres"

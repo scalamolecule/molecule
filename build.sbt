@@ -68,10 +68,10 @@ lazy val root = project
     serverPlay,
     serverZioHttp,
 
-    graphqlClient.js,
-    graphqlClient.jvm,
-    graphqlTest.js,
-    graphqlTest.jvm,
+    //    graphqlClient.js,
+    //    graphqlClient.jvm,
+    //    graphqlTest.js,
+    //    graphqlTest.jvm,
   )
 
 // Generate internal boilerplate code

@@ -22,6 +22,9 @@ project/plugins/project/
 *.idea
 *.bsp
 
+# Molecule-generated SQL schema files
+*.sql
+
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
