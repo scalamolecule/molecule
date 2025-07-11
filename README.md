@@ -291,7 +291,7 @@ sbt.version = 1.11.3
 
 `project/plugins.sbt`:
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.19.3")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.19.4")
 ```
 
 `build.sbt`:
@@ -300,11 +300,11 @@ lazy val yourProject = project.in(file("app"))
   .enablePlugins(MoleculePlugin)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule-db-h2" % "0.24.0",
-      "org.scalamolecule" %% "molecule-db-mariadb" % "0.24.0",
-      "org.scalamolecule" %% "molecule-db-mysql" % "0.24.0",
-      "org.scalamolecule" %% "molecule-db-postgresql" % "0.24.0",
-      "org.scalamolecule" %% "molecule-db-sqlite" % "0.24.0",
+      "org.scalamolecule" %% "molecule-db-h2" % "0.24.1",
+      "org.scalamolecule" %% "molecule-db-mariadb" % "0.24.1",
+      "org.scalamolecule" %% "molecule-db-mysql" % "0.24.1",
+      "org.scalamolecule" %% "molecule-db-postgresql" % "0.24.1",
+      "org.scalamolecule" %% "molecule-db-sqlite" % "0.24.1",
     )
   )
 ```
