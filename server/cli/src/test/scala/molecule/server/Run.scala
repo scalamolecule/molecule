@@ -13,7 +13,7 @@ import molecule.db.common.marshalling.MoleculeRpc
 import molecule.db.h2.marshalling.Rpc_h2
 import molecule.db.mariadb.marshalling.Rpc_mariadb
 import molecule.db.mysql.marshalling.Rpc_mysql
-import molecule.db.postgres.marshalling.Rpc_postgres
+import molecule.db.postgresql.marshalling.Rpc_postgresql
 import molecule.db.sqlite.marshalling.Rpc_sqlite
 import molecule.server.http4s.Http4s
 import molecule.server.netty.Netty
@@ -81,12 +81,12 @@ object Run extends App {
           (Rpc_mysql, "MySQL")
 
         case Some(4) =>
-          pickleMetaDb.addConcreteType[Types_MetaDb_postgres]
-          pickleMetaDb.addConcreteType[Refs_MetaDb_postgres]
-          pickleMetaDb.addConcreteType[Uniques_MetaDb_postgres]
-          pickleMetaDb.addConcreteType[Validation_MetaDb_postgres]
-          pickleMetaDb.addConcreteType[Segments_MetaDb_postgres]
-          (Rpc_postgres, "PostgreSQL")
+          pickleMetaDb.addConcreteType[Types_MetaDb_postgresql]
+          pickleMetaDb.addConcreteType[Refs_MetaDb_postgresql]
+          pickleMetaDb.addConcreteType[Uniques_MetaDb_postgresql]
+          pickleMetaDb.addConcreteType[Validation_MetaDb_postgresql]
+          pickleMetaDb.addConcreteType[Segments_MetaDb_postgresql]
+          (Rpc_postgresql, "PostgreSQL")
 
         case Some(5) =>
           pickleMetaDb.addConcreteType[Types_MetaDb_sqlite]

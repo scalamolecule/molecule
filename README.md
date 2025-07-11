@@ -300,11 +300,11 @@ lazy val yourProject = project.in(file("app"))
   .enablePlugins(MoleculePlugin)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule-db-postgres" % "0.24.0",
-      "org.scalamolecule" %% "molecule-db-sqlite" % "0.24.0",
-      "org.scalamolecule" %% "molecule-db-mysql" % "0.24.0",
-      "org.scalamolecule" %% "molecule-db-mariadb" % "0.24.0",
       "org.scalamolecule" %% "molecule-db-h2" % "0.24.0",
+      "org.scalamolecule" %% "molecule-db-mariadb" % "0.24.0",
+      "org.scalamolecule" %% "molecule-db-mysql" % "0.24.0",
+      "org.scalamolecule" %% "molecule-db-postgresql" % "0.24.0",
+      "org.scalamolecule" %% "molecule-db-sqlite" % "0.24.0",
     )
   )
 ```
@@ -333,11 +333,11 @@ On a mac you can for instance start Docker Desktop.
 
 Run the tests on the jvm with a databases of your choice:
 
-    sbt dbPostgresJVM/test
-    sbt dbSQliteJVM/test
-    sbt dbMysqlJVM/test
-    sbt dbMariadbJVM/test
     sbt dbH2JVM/test
+    sbt dbMariaDBJVM/test
+    sbt dbMySQLJVM/test
+    sbt dbPostgreSQLJVM/test
+    sbt dbSQliteJVM/test
 
 
 ### Run JS tests

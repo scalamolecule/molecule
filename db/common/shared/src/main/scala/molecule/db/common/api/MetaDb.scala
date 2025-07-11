@@ -33,5 +33,5 @@ trait MetaDb {
 trait MetaDb_h2 extends MetaDb
 trait MetaDb_mariadb extends MetaDb
 trait MetaDb_mysql extends MetaDb
-trait MetaDb_postgres extends MetaDb
+trait MetaDb_postgresql extends MetaDb
 trait MetaDb_sqlite extends MetaDb

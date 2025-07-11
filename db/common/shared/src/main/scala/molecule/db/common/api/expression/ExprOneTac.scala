@@ -7,9 +7,7 @@ import molecule.db.common.api.{Molecule_0, *}
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprOneTacBase[T, Entity] extends CardOne { self: Molecule   =>
-  val entity: DataModel => Entity
-
+trait ExprOneTac[T, Entity](entity: DataModel => Entity) extends CardOne { self: Molecule =>
   def apply(                ): Entity = entity(addOne(dataModel, NoValue, Nil         ))
   def apply(v    : T, vs: T*): Entity = entity(addOne(dataModel, Eq     , Seq(v) ++ vs))
   def apply(vs   : Seq[T]   ): Entity = entity(addOne(dataModel, Eq     , vs          ))
@@ -34,37 +32,3 @@ trait ExprOneTacBase[T, Entity] extends CardOne { self: Molecule   =>
   def >    (a: Molecule_0 & CardOne): Entity = entity(filterAttr(dataModel, Gt , a))
   def >=   (a: Molecule_0 & CardOne): Entity = entity(filterAttr(dataModel, Ge , a))
 }
-
-trait ExprOneTac[T, Entity] extends ExprOneTacBase[T, Entity] { self: Molecule => }
-
-trait ExprOneTac_String[T, Entity]
-  extends ExprOneTacBase[T, Entity] { self: Molecule  =>
-  def startsWith(prefix: T): Entity = entity(addOne(dataModel, StartsWith, Seq(prefix)))
-  def endsWith  (suffix: T): Entity = entity(addOne(dataModel, EndsWith  , Seq(suffix)))
-  def contains  (needle: T): Entity = entity(addOne(dataModel, Contains  , Seq(needle)))
-  def matches   (regex : T): Entity = entity(addOne(dataModel, Matches   , Seq(regex) ))
-
-  def startsWith(prefix: qm): Entity = entity(addOne(dataModel, StartsWith, Nil, true))
-  def endsWith  (suffix: qm): Entity = entity(addOne(dataModel, EndsWith  , Nil, true))
-  def contains  (needle: qm): Entity = entity(addOne(dataModel, Contains  , Nil, true))
-  def matches   (regex : qm): Entity = entity(addOne(dataModel, Matches   , Nil, true))
-}
-
-trait ExprOneTac_Enum[T, Entity](entity: DataModel => Entity) { self: Molecule =>
-  def apply(             ): Entity = entity(addOne(dataModel, NoValue, Nil                                      ))
-  def apply(v : T, vs: T*): Entity = entity(addOne(dataModel, Eq     , (v +: vs).map(_.toString.asInstanceOf[T])))
-  def apply(vs: Seq[T]   ): Entity = entity(addOne(dataModel, Eq     , vs       .map(_.toString.asInstanceOf[T])))
-  def not  (v : T, vs: T*): Entity = entity(addOne(dataModel, Neq    , (v +: vs).map(_.toString.asInstanceOf[T])))
-  def not  (vs: Seq[T]   ): Entity = entity(addOne(dataModel, Neq    , vs       .map(_.toString.asInstanceOf[T])))
-
-  def apply(v : qm): Entity = entity(addOne(dataModel, Eq , Nil, true))
-  def not  (v : qm): Entity = entity(addOne(dataModel, Neq, Nil, true))
-}
-
-trait ExprOneTac_Integer[T, Entity]
-  extends ExprOneTacBase[T, Entity] { self: Molecule  =>
-  def even                       : Entity = entity(addOne(dataModel, Even      , Nil                    ))
-  def odd                        : Entity = entity(addOne(dataModel, Odd       , Nil                    ))
-  def %(divider: T, remainder: T): Entity = entity(addOne(dataModel, Remainder , Seq(divider, remainder)))
-}
-

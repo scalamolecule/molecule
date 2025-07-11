@@ -1,6 +1,6 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.24.0"
+val moleculeVersion = "0.24.1-SNAPSHOT"
 
 val scala212 = "2.12.20"
 val scala3   = "3.7.1"
@@ -229,9 +229,9 @@ lazy val dbMySQL = crossProject(JSPlatform, JVMPlatform)
 
 lazy val dbPostgreSQL = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
-  .in(file("db/postgres"))
+  .in(file("db/postgresql"))
   .settings(compilerArgs, checkPublishing,
-    name := "molecule-db-postgres",
+    name := "molecule-db-postgresql",
     testFrameworks := testingFrameworks)
   .jsSettings(jsEnvironment)
   .jvmSettings(
