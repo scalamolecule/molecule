@@ -147,7 +147,7 @@ case class Types(
       _ <- Entity.long.<(Ref.long_).Ref.long.query.get.map(_ ==> List((long1, long2)))
       _ <- Entity.float.<(Ref.float_).Ref.float.query.get.map(_ ==> List((float1, float2)))
       _ <- Entity.double.<(Ref.double_).Ref.double.query.get.map(_ ==> List((double1, double2)))
-      _ <- Entity.boolean.<(Ref.boolean_).Ref.boolean.query.get.map(_ ==> List((boolean1, boolean2)))
+      // no Boolean comparison
       _ <- Entity.bigInt.<(Ref.bigInt_).Ref.bigInt.query.get.map(_ ==> List((bigInt1, bigInt2)))
       _ <- Entity.bigDecimal.<(Ref.bigDecimal_).Ref.bigDecimal.query.get.map(_ ==> List((bigDecimal1, bigDecimal2)))
       _ <- Entity.date.<(Ref.date_).Ref.date.query.get.map(_ ==> List((date1, date2)))
@@ -198,7 +198,7 @@ case class Types(
       _ <- Entity.long.<=(Ref.long_).Ref.long.query.get.map(_ ==> List((long1, long2)))
       _ <- Entity.float.<=(Ref.float_).Ref.float.query.get.map(_ ==> List((float1, float2)))
       _ <- Entity.double.<=(Ref.double_).Ref.double.query.get.map(_ ==> List((double1, double2)))
-      _ <- Entity.boolean.<=(Ref.boolean_).Ref.boolean.query.get.map(_ ==> List((boolean1, boolean2)))
+      // no Boolean comparison
       _ <- Entity.bigInt.<=(Ref.bigInt_).Ref.bigInt.query.get.map(_ ==> List((bigInt1, bigInt2)))
       _ <- Entity.bigDecimal.<=(Ref.bigDecimal_).Ref.bigDecimal.query.get.map(_ ==> List((bigDecimal1, bigDecimal2)))
       _ <- Entity.date.<=(Ref.date_).Ref.date.query.get.map(_ ==> List((date1, date2)))
@@ -249,7 +249,7 @@ case class Types(
       _ <- Entity.long.>(Ref.long_).Ref.long.query.get.map(_ ==> List((long2, long1)))
       _ <- Entity.float.>(Ref.float_).Ref.float.query.get.map(_ ==> List((float2, float1)))
       _ <- Entity.double.>(Ref.double_).Ref.double.query.get.map(_ ==> List((double2, double1)))
-      _ <- Entity.boolean.>(Ref.boolean_).Ref.boolean.query.get.map(_ ==> List((boolean2, boolean1)))
+      // no Boolean comparison
       _ <- Entity.bigInt.>(Ref.bigInt_).Ref.bigInt.query.get.map(_ ==> List((bigInt2, bigInt1)))
       _ <- Entity.bigDecimal.>(Ref.bigDecimal_).Ref.bigDecimal.query.get.map(_ ==> List((bigDecimal2, bigDecimal1)))
       _ <- Entity.date.>(Ref.date_).Ref.date.query.get.map(_ ==> List((date2, date1)))
@@ -300,7 +300,7 @@ case class Types(
       _ <- Entity.long.>=(Ref.long_).Ref.long.query.get.map(_ ==> List((long2, long1)))
       _ <- Entity.float.>=(Ref.float_).Ref.float.query.get.map(_ ==> List((float2, float1)))
       _ <- Entity.double.>=(Ref.double_).Ref.double.query.get.map(_ ==> List((double2, double1)))
-      _ <- Entity.boolean.>=(Ref.boolean_).Ref.boolean.query.get.map(_ ==> List((boolean2, boolean1)))
+      // no Boolean comparison
       _ <- Entity.bigInt.>=(Ref.bigInt_).Ref.bigInt.query.get.map(_ ==> List((bigInt2, bigInt1)))
       _ <- Entity.bigDecimal.>=(Ref.bigDecimal_).Ref.bigDecimal.query.get.map(_ ==> List((bigDecimal2, bigDecimal1)))
       _ <- Entity.date.>=(Ref.date_).Ref.date.query.get.map(_ ==> List((date2, date1)))
