@@ -131,10 +131,10 @@ trait SpiBaseJVM_sync
                                    (implicit conn0: Conn): Unit = {
     val conn      = conn0.asInstanceOf[JdbcConn_JVM]
     val elements  = keywordsSuffixed(query.dataModel.elements, conn.proxy)
-    val dataModel = query.dataModel.copy(elements = elements)
-    conn.addCallback(dataModel, () =>
+    val cleanDataModel = query.dataModel.copy(elements = elements)
+    conn.addCallback(query.dataModel, () =>
       callback {
-        SqlQueryResolveOffset(dataModel, query.optLimit, None, getModel2SqlQuery(elements))
+        SqlQueryResolveOffset(cleanDataModel, query.optLimit, None, getModel2SqlQuery(elements))
           .getListFromOffset_sync(using conn)._1
       }
     )
