@@ -7,13 +7,13 @@ import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprOneMan_1_Enum[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends CardOne { self: Molecule  =>
-  def apply(             ): Entity[T] = entity[T](addOne(dataModel, NoValue, Nil                                      ))
-  def apply(v : T, vs: T*): Entity[T] = entity[T](addOne(dataModel, Eq     , (v +: vs).map(_.toString.asInstanceOf[T])))
-  def apply(vs: Seq[T]   ): Entity[T] = entity[T](addOne(dataModel, Eq     , vs       .map(_.toString.asInstanceOf[T])))
-  def not  (v : T, vs: T*): Entity[T] = entity[T](addOne(dataModel, Neq    , (v +: vs).map(_.toString.asInstanceOf[T])))
-  def not  (vs: Seq[T]   ): Entity[T] = entity[T](addOne(dataModel, Neq    , vs       .map(_.toString.asInstanceOf[T])))
+trait ExprOneMan_1_Enum[T, Entity](entity: DataModel => Entity) extends CardOne { self: Molecule  =>
+  def apply(             ): Entity = entity(addOne(dataModel, NoValue, Nil                      ))
+  def apply(v : T, vs: T*): Entity = entity(addOne(dataModel, Eq     , (v +: vs).map(_.toString)))
+  def apply(vs: Seq[T]   ): Entity = entity(addOne(dataModel, Eq     , vs       .map(_.toString)))
+  def not  (v : T, vs: T*): Entity = entity(addOne(dataModel, Neq    , (v +: vs).map(_.toString)))
+  def not  (vs: Seq[T]   ): Entity = entity(addOne(dataModel, Neq    , vs       .map(_.toString)))
 
-  def apply(v : qm): Entity[T] = entity[T](addOne(dataModel, Eq , Nil, true))
-  def not  (v : qm): Entity[T] = entity[T](addOne(dataModel, Neq, Nil, true))
+  def apply(v : qm): Entity = entity(addOne(dataModel, Eq , Nil, true))
+  def not  (v : qm): Entity = entity(addOne(dataModel, Neq, Nil, true))
 }

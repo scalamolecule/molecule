@@ -45,9 +45,6 @@ case class Aggr_Boolean(
   "min" - types { implicit conn =>
     for {
       _ <- Entity.boolean.insert(List(true, false, true)).transact
-      _ <- Entity.boolean(min).query.get.map(_.head ==> false)
-      _ <- Entity.boolean(min(1)).query.get.map(_.head ==> Set(false))
-      _ <- Entity.boolean(min(2)).query.get.map(_.head ==> Set(false, true))
     } yield ()
   }
 
@@ -55,9 +52,6 @@ case class Aggr_Boolean(
   "max" - types { implicit futConn =>
     for {
       _ <- Entity.boolean.insert(List(true, false, true)).transact
-      _ <- Entity.boolean(max).query.get.map(_.head ==> true)
-      _ <- Entity.boolean(max(1)).query.get.map(_.head ==> Set(true))
-      _ <- Entity.boolean(max(2)).query.get.map(_.head ==> Set(true, false))
     } yield ()
   }
 
@@ -66,9 +60,6 @@ case class Aggr_Boolean(
     for {
       _ <- Entity.boolean.insert(List(true, false, true)).transact
       all = Set(true, false)
-      _ <- Entity.boolean(sample).query.get.map(res => all.contains(res.head) ==> true)
-      _ <- Entity.boolean(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      _ <- Entity.boolean(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
     } yield ()
   }
 

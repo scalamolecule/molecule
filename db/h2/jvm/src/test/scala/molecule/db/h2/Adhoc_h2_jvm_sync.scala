@@ -22,36 +22,36 @@ class Adhoc_h2_jvm_sync extends MUnit with DbProviders_h2 with TestUtils {
 
   "integer 0-1" - types { implicit conn =>
     // Mandatory
-    val a1: Long = Entity.long.query.get.head
-    val a2: Long = Entity.long.apply(long1).query.get.head
-    val a3: Long = Entity.long.apply(?).query(long1).get.head
-    val a4: Long = Entity.long.apply(Entity.i_).query.get.head
+    lazy val a1: Long = Entity.long.query.get.head
+    lazy val a2: Long = Entity.long.apply(long1).query.get.head
+    lazy val a3: Long = Entity.long.apply(?).query(long1).get.head
+    lazy val a4: Long = Entity.long.apply(Entity.i_).query.get.head
 
     // Adding sort should still return the same type
-    val a5: Long = Entity.long.a1.query.get.head
-    val a6: Long = Entity.long.apply(long1).a1.query.get.head
-    val a7: Long = Entity.long.apply(?).a1.query(long1).get.head
-    val a8: Long = Entity.long.apply(Entity.i_).a1.query.get.head
+    lazy val a5: Long = Entity.long.a1.query.get.head
+    lazy val a6: Long = Entity.long.apply(long1).a1.query.get.head
+    lazy val a7: Long = Entity.long.apply(?).a1.query(long1).get.head
+    lazy val a8: Long = Entity.long.apply(Entity.i_).a1.query.get.head
 
 
     // Aggregates, some change type
-    val b1: Int       = Entity.long.apply(count).query.get.head
-    val b2: Long      = Entity.long.apply(min).query.get.head
-    val b3: Set[Long] = Entity.long.apply(min(3)).query.get.head
-    val b4: Double    = Entity.long.apply(avg).query.get.head
+    lazy val b1: Int       = Entity.long.apply(count).query.get.head
+    lazy val b2: Long      = Entity.long.apply(min).query.get.head
+    lazy val b3: Set[Long] = Entity.long.apply(min(3)).query.get.head
+    lazy val b4: Double    = Entity.long.apply(avg).query.get.head
 
-    val b5: Int       = Entity.long.apply(count).a1.query.get.head
-    val b6: Long      = Entity.long.apply(min).a1.query.get.head
-    val b7: Set[Long] = Entity.long.apply(min(3)).a1.query.get.head
-    val b8: Double    = Entity.long.apply(avg).a1.query.get.head
+    lazy val b5: Int       = Entity.long.apply(count).a1.query.get.head
+    lazy val b6: Long      = Entity.long.apply(min).a1.query.get.head
+    lazy val b7: Set[Long] = Entity.long.apply(min(3)).a1.query.get.head
+    lazy val b8: Double    = Entity.long.apply(avg).a1.query.get.head
 
 
     // Optional
-    val c1: Option[Long] = Entity.long_?.query.get.head
-    val c2: Option[Long] = Entity.long_?.apply(Some(long1)).query.get.head
+    lazy val c1: Option[Long] = Entity.long_?.query.get.head
+    lazy val c2: Option[Long] = Entity.long_?.apply(Some(long1)).query.get.head
 
-    val c3: Option[Long] = Entity.long_?.a1.query.get.head
-    val c4: Option[Long] = Entity.long_?.apply(Some(long1)).a1.query.get.head
+    lazy val c3: Option[Long] = Entity.long_?.a1.query.get.head
+    lazy val c4: Option[Long] = Entity.long_?.apply(Some(long1)).a1.query.get.head
   }
 
 

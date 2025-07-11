@@ -46,11 +46,12 @@ case class FilterOne_Boolean(
       // Empty Seq of negation args matches all values
       _ <- Entity.i.a1.boolean.not(Seq.empty[Boolean]).query.get.map(_ ==> List(a, b))
 
-      // Find values in range
-      _ <- Entity.i.a1.boolean.<(true).query.get.map(_ ==> List(b))
-      _ <- Entity.i.a1.boolean.>(true).query.get.map(_ ==> List())
-      _ <- Entity.i.a1.boolean.<=(true).query.get.map(_ ==> List(a, b))
-      _ <- Entity.i.a1.boolean.>=(true).query.get.map(_ ==> List(a))
+      // Boolean operations
+      _ <- Entity.i.a1.boolean.&&(true).query.i.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.boolean.&&(false).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.boolean.||(true).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.boolean.||(false).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.boolean.!.query.i.get.map(_ ==> List(b))
     } yield ()
   }
 
@@ -92,11 +93,12 @@ case class FilterOne_Boolean(
       // Empty Seq of negation args matches all asserted values (non-null)
       _ <- Entity.i.a1.boolean_.not(Seq.empty[Boolean]).query.get.map(_ ==> List(a, b))
 
-      // Match value ranges without returning them
-      _ <- Entity.i.a1.boolean_.<(true).query.get.map(_ ==> List(b))
-      _ <- Entity.i.a1.boolean_.>(true).query.get.map(_ ==> List())
-      _ <- Entity.i.a1.boolean_.<=(true).query.get.map(_ ==> List(a, b))
-      _ <- Entity.i.a1.boolean_.>=(true).query.get.map(_ ==> List(a))
+      // Boolean operations
+      _ <- Entity.i.a1.boolean_.&&(true).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.boolean_.&&(false).query.get.map(_ ==> List())
+      _ <- Entity.i.a1.boolean_.||(true).query.i.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.boolean_.||(false).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.boolean_.!.query.get.map(_ ==> List(b))
     } yield ()
   }
 

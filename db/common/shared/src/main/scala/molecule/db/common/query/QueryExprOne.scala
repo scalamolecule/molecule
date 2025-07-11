@@ -2,6 +2,7 @@ package molecule.db.common.query
 
 import molecule.base.error.ModelError
 import molecule.core.dataModel.*
+import molecule.core.dataModel.AttrOp.*
 import molecule.db.common.javaSql.PrepStmt
 import scala.reflect.ClassTag
 
@@ -161,6 +162,9 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
       case Odd          => odd(col)
       case AttrOp.Ceil  => ceil(col)
       case AttrOp.Floor => floor(col)
+      case And          => and(col, args.head)
+      case Or           => or(col, args.head)
+      case Not          => not(col)
       case other        => unexpectedOp(other)
     }
   }
@@ -405,6 +409,16 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   protected def floor(col: String): Unit = {
     select -= col
     select += s"FLOOR($col)"
+  }
+
+  protected def and[T](col: String, arg: T): Unit = {
+    where += ((col, s" AND $arg"))
+  }
+  protected def or[T](col: String, arg: T): Unit = {
+    where += ((s"($col IS NOT NULL AND ($col OR $arg))", ""))
+  }
+  protected def not[T](col: String): Unit = {
+    where += ((s"($col IS NOT NULL AND NOT $col)", ""))
   }
 
 

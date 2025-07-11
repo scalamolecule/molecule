@@ -8,8 +8,8 @@ import scala.Tuple.{:*, Init}
 
 
 trait ExprMapOpt_1[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends CardMap { self: Molecule  =>
-  def apply(map: Option[Map[String, T]]): Entity[Map[String, T]] = entity[Map[String, T]](addMapOpt(dataModel, Eq , map     ))
-  def apply(key: String                ): Entity[Option[T]     ] = entity[Option[T]     ](addMapKs (dataModel, Has, Seq(key)))
+  def apply(map: Option[Map[String, T]]): Entity[Option[Map[String, T]]] = entity[Option[Map[String, T]]](addMapOpt(dataModel, Eq , map     ))
+  def apply(key: String                ): Entity[Option[T             ]] = entity[Option[T             ]](addMapKs (dataModel, Has, Seq(key)))
 }
 
 trait ExprMapOpt_n[T, Tpl <: Tuple, Entity[_ <: Tuple]](entity: [tpl <: Tuple] => DataModel => Entity[tpl]) extends CardMap { self: Molecule  =>
