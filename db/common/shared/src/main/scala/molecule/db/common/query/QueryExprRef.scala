@@ -147,9 +147,6 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     if (isManNested) {
       noMixedNestedModes
     }
-    if (expectedFilterAttrs.nonEmpty) {
-      throw ModelError("Filter attributes not allowed in optional nested queries.")
-    }
     resolveNested(ref, nestedElements, "LEFT")
   }
 
