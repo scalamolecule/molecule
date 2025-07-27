@@ -6,7 +6,7 @@ import java.nio.ByteBuffer
 trait SerializationUtils {
 
   // Drop non-used bytes of internal array initialized with size 512
-  implicit class byteBuffer2byteArray(byteBuffer: ByteBuffer) {
+  extension (byteBuffer: ByteBuffer) {
     def toArray: Array[Byte] = {
       val length    = byteBuffer.remaining()
       val byteArray = Array.ofDim[Byte](length)

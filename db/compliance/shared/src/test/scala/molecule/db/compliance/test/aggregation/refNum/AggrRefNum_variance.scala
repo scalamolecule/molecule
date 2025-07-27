@@ -6,6 +6,7 @@ import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
+import org.scalactic.Equality
 
 case class AggrRefNum_variance(
   suite: MUnit,
@@ -18,7 +19,7 @@ case class AggrRefNum_variance(
   import suite.*
 
   "ref" - refs {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.insert(List(
         (1, 1),
@@ -40,7 +41,7 @@ case class AggrRefNum_variance(
 
 
   "2nd ref" - refs {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.C.i.insert(List(
         (1, 1, 1),
@@ -61,7 +62,7 @@ case class AggrRefNum_variance(
 
 
   "multiple refs" - refs {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.C.i.insert(List(
         (1, 1, 1),
@@ -84,7 +85,7 @@ case class AggrRefNum_variance(
 
 
   "backref" - refs {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i._A.C.i.insert(List(
         (1, 1, 1),

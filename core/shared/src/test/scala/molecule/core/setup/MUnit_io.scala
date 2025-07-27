@@ -4,11 +4,11 @@ import munit.CatsEffectSuite
 
 trait MUnit_io extends CatsEffectSuite {
 
-  implicit class TestableString(s: String) {
+  extension (s: String) {
     def -(x: => Any): Unit = test(s)(x)
   }
 
-  implicit class ArrowAssert(lhs: Any) {
+  extension (lhs: Any) {
     def ==>[V](rhs: V): Unit = assertEquals(lhs, rhs)
   }
 }

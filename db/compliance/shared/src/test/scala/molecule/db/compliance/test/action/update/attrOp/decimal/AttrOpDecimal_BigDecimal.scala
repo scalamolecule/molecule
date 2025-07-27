@@ -17,7 +17,7 @@ case class AttrOpDecimal_BigDecimal(
   import api.*
   import suite.*
 
-  implicit val tolerance: Equality[BigDecimal] = tolerantBigDecimalEquality(toleranceBigDecimal)
+  given Equality[BigDecimal] = tolerantBigDecimalEquality(toleranceBigDecimal)
 
   "plus" - types {
     for {

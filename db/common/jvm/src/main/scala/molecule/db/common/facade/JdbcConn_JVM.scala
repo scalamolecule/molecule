@@ -140,7 +140,7 @@ case class JdbcConn_JVM(
   }
 
   override def savepoint_async[T](runSavepoint: Savepoint => Future[T])
-                                 (implicit ec: ExecutionContext): Future[T] = {
+                                 (using ec: ExecutionContext): Future[T] = {
     setAutoCommit(false)
     val savepoint = sqlConn.setSavepoint()
     savepointStack.append(savepoint)

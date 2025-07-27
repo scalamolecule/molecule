@@ -14,7 +14,7 @@ abstract class Conn(val proxy: ConnProxy)
 
 
   def transact_async(data: Data)
-                    (implicit ec: ExecutionContext): Future[TxReport] =
+                    (using ec: ExecutionContext): Future[TxReport] =
     throw jvmOnly("transact_async")
 
   def transact_sync(data: Data): TxReport =
@@ -37,7 +37,7 @@ abstract class Conn(val proxy: ConnProxy)
   private var callbacks = List.empty[(DataModel, Int, java.util.BitSet, () => Unit)]
 
   def callback(mutation: DataModel, isDelete: Boolean = false)
-              (implicit ec: ExecutionContext): Future[Unit] = Future(
+              (using ec: ExecutionContext): Future[Unit] = Future(
     callbacks.foreach {
       case (_, deletionEntityIndex, _, callback) if isDelete =>
         if (deletionEntityIndex == mutation.firstEntityIndex) {
@@ -77,7 +77,7 @@ abstract class Conn(val proxy: ConnProxy)
   def rollback(): Unit = ???
 
   def savepoint_sync[T](body: Savepoint => T): T = ???
-  def savepoint_async[T](body: Savepoint => Future[T])(implicit ec: ExecutionContext): Future[T] = ???
+  def savepoint_async[T](body: Savepoint => Future[T])(using ec: ExecutionContext): Future[T] = ???
   def savepoint_zio[T](body: Savepoint => ZIO[Conn, MoleculeError, T]): ZIO[Conn, MoleculeError, T] = ???
   def savepoint_io[T](body: Savepoint => IO[T]): IO[T] = ???
 

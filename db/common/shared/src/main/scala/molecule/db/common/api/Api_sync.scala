@@ -9,7 +9,7 @@ import scala.util.control.NonFatal
 
 trait Api_sync extends Keywords { spi: Spi_sync =>
 
-  implicit class QueryApiSync[Tpl](q: Query[Tpl]) {
+  extension [Tpl](q: Query[Tpl]) {
     def get(using conn: Conn): List[Tpl] = query_get(q)
     def inspect(using conn: Conn): String = query_inspect(q)
 
@@ -20,35 +20,35 @@ trait Api_sync extends Keywords { spi: Spi_sync =>
     def unsubscribe()(using conn: Conn): Unit = query_unsubscribe(q)
   }
 
-  implicit class QueryOffsetApiSync[Tpl](q: QueryOffset[Tpl]) {
+  extension [Tpl](q: QueryOffset[Tpl]) {
     def get(using conn: Conn): (List[Tpl], Int, Boolean) = queryOffset_get(q)
     def inspect(using conn: Conn): String = queryOffset_inspect(q)
   }
 
-  implicit class QueryCursorApiSync[Tpl](q: QueryCursor[Tpl]) {
+  extension [Tpl](q: QueryCursor[Tpl]) {
     def get(using conn: Conn): (List[Tpl], String, Boolean) = queryCursor_get(q)
     def inspect(using conn: Conn): String = queryCursor_inspect(q)
   }
 
-  implicit class SaveApiSync[Tpl](save: Save) {
+  extension [Tpl](save: Save) {
     def transact(using conn: Conn): TxReport = save_transact(save)
     def inspect(using conn: Conn): String = save_inspect(save)
     def validate(using conn: Conn): Map[String, Seq[String]] = save_validate(save)
   }
 
-  implicit class InsertApiSync[Tpl](insert: Insert) {
+  extension [Tpl](insert: Insert) {
     def transact(using conn: Conn): TxReport = insert_transact(insert)
     def inspect(using conn: Conn): String = insert_inspect(insert)
     def validate(using conn: Conn): Seq[(Int, Seq[InsertError])] = insert_validate(insert)
   }
 
-  implicit class UpdateApiSync[Tpl](update: Update) {
+  extension [Tpl](update: Update) {
     def transact(using conn0: Conn): TxReport = update_transact(update)
     def inspect(using conn0: Conn): String = update_inspect(update)
     def validate(using conn: Conn): Map[String, Seq[String]] = update_validate(update)
   }
 
-  implicit class DeleteApiSync[Tpl](delete: Delete) {
+  extension [Tpl](delete: Delete) {
     def transact(using conn0: Conn): TxReport = delete_transact(delete)
     def inspect(using conn0: Conn): String = delete_inspect(delete)
   }

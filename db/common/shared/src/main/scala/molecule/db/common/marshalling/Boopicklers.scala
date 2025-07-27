@@ -17,10 +17,10 @@ object Boopicklers extends MoleculeLogging {
 
 
   implicit val iArrayBytePickler: Pickler[IArray[Byte]] = new Pickler[IArray[Byte]] {
-    override def pickle(iArray: IArray[Byte])(implicit state: PickleState): Unit = {
+    override def pickle(iArray: IArray[Byte])(using state: PickleState): Unit = {
       state.enc.writeByteArray(IArray.genericWrapArray(iArray).toArray)
     }
-    override def unpickle(implicit state: UnpickleState): IArray[Byte] = {
+    override def unpickle(using state: UnpickleState): IArray[Byte] = {
       IArray.unsafeFromArray(state.unpickle[Array[Byte]])
     }
   }

@@ -11,7 +11,7 @@ object Spi_postgresql_async extends Spi_postgresql_async
 trait Spi_postgresql_async extends SpiBaseJS_async {
 
   override protected def renderInspectQuery(label: String, dataModel: DataModel)
-                                           (implicit ec: EC): Future[String] = Future {
+                                           (using ec: EC): Future[String] = Future {
     val query = new Model2SqlQuery_postgresql(dataModel.elements).getSqlQuery(Nil, None, None, None)
     renderInspection(label, dataModel, query)
   }

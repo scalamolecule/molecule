@@ -2,8 +2,9 @@ package molecule.db.mysql
 
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
-import async.*
+import molecule.db.mysql.async.*
 import molecule.db.mysql.setup.DbProviders_mysql
+import org.scalactic.Equality
 
 
 class Adhoc_mysql_jvm_async extends MUnit with DbProviders_mysql with TestUtils {
@@ -11,7 +12,7 @@ class Adhoc_mysql_jvm_async extends MUnit with DbProviders_mysql with TestUtils 
 
   "types" - types {
     import molecule.db.compliance.domains.dsl.Types.*
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       id <- Entity.i(42).save.transact.map(_.id)
 

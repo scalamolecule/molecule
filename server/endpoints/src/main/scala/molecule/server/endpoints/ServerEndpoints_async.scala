@@ -1,12 +1,12 @@
 package molecule.server.endpoints
 
 import java.nio.ByteBuffer
+import scala.concurrent.Future
 import molecule.base.error.*
 import molecule.db.common.marshalling.MoleculeRpc
 import molecule.db.common.util.Executor.*
 import sttp.tapir.*
 import sttp.tapir.server.ServerEndpoint
-import scala.concurrent.Future
 
 abstract class ServerEndpoints_async(rpc: MoleculeRpc) extends Execution(rpc) {
 

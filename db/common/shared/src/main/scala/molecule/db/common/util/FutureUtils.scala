@@ -7,7 +7,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait FutureUtils extends ModelUtils with MoleculeLogging {
 
-  implicit class futEither2fut[T](fut: Future[Either[MoleculeError, T]])(implicit ec: ExecutionContext) {
+  extension [T](fut: Future[Either[MoleculeError, T]])(using ec: ExecutionContext) {
     def future: Future[T] = {
       fut
         .map {
@@ -26,7 +26,7 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
     }
   }
 
-  def either[T](fut: Future[T])(implicit ec: ExecutionContext): Future[Either[MoleculeError, T]] = {
+  def either[T](fut: Future[T])(using ec: ExecutionContext): Future[Either[MoleculeError, T]] = {
     fut
       .map(txR => Right(txR))
       .recover {
@@ -40,7 +40,7 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
       }
   }
 
-  def future[T](body: => T)(implicit ec: ExecutionContext): Future[T] = {
+  def future[T](body: => T)(using ec: ExecutionContext): Future[T] = {
     Future(body).recover {
       case e: MoleculeError =>
         logger.debug(e)

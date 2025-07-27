@@ -12,7 +12,7 @@ object Spi_h2_async extends Spi_h2_async
 trait Spi_h2_async extends SpiBaseJS_async {
 
   override protected def renderInspectQuery(label: String, dataModel: DataModel)
-                                           (implicit ec: EC): Future[String] = Future {
+                                           (using ec: EC): Future[String] = Future {
     val query = new Model2SqlQuery_h2(dataModel.elements).getSqlQuery(Nil, None, None, None)
     renderInspection(label, dataModel, query)
   }

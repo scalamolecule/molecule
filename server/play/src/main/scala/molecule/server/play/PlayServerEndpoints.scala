@@ -19,7 +19,7 @@ import scala.concurrent.Future
 
 abstract class PlayServerEndpoints(rpc: MoleculeRpc) extends PekkoServerEndpoints(rpc) {
 
-  def moleculeWebsocketHandler_ByteFlow(implicit mat: Materializer): Flow[Array[Byte], Array[Byte], NotUsed] = {
+  def moleculeWebsocketHandler_ByteFlow(using mat: Materializer): Flow[Array[Byte], Array[Byte], NotUsed] = {
     val (queue, source): (SourceQueueWithComplete[Array[Byte]], Source[Array[Byte], NotUsed]) =
       Source.queue[Array[Byte]](bufferSize = 2, OverflowStrategy.backpressure).preMaterialize()
 
@@ -48,7 +48,7 @@ abstract class PlayServerEndpoints(rpc: MoleculeRpc) extends PekkoServerEndpoint
     Flow.fromSinkAndSource(sink, source)
   }
 
-  def moleculeServerEndpoint_subscribe(implicit mat: Materializer): ServerEndpoint[PekkoStreams & WebSockets, Future] =
+  def moleculeServerEndpoint_subscribe(using mat: Materializer): ServerEndpoint[PekkoStreams & WebSockets, Future] =
     endpoint
       .in("molecule" / "subscribe")
       .out(
@@ -56,7 +56,7 @@ abstract class PlayServerEndpoints(rpc: MoleculeRpc) extends PekkoServerEndpoint
       )
       .serverLogicSuccess(_ => Future.successful(moleculeWebsocketHandler_ByteFlow))
 
-  def moleculeServerEndpoints(implicit mat: Materializer): List[ServerEndpoint[PekkoStreams & WebSockets, Future]] =
+  def moleculeServerEndpoints(using mat: Materializer): List[ServerEndpoint[PekkoStreams & WebSockets, Future]] =
     moleculeServerEndpoints_Future :+ moleculeServerEndpoint_subscribe
 
 }

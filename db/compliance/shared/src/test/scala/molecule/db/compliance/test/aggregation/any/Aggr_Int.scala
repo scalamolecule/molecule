@@ -6,6 +6,8 @@ import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
+import org.scalactic.Equality
+import org.scalactic.Equality
 
 case class Aggr_Int(
   suite: MUnit,

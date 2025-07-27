@@ -7,13 +7,13 @@ trait MUnit_arrays extends FunSuite {
 
   override def munitTimeout: FiniteDuration = 3.minutes
 
-  implicit class TestableString(s: String) {
+  extension (s: String) {
     def -(x: => Any): Unit = test(s)(x)
   }
 
   // Allow comparing Arrays
 
-  implicit class ArrowAssert(lhs: Any) {
+  extension (lhs: Any) {
     def ==>[V](rhs: V): Unit = {
       val (left, right) = (r(lhs), r(rhs))
       Predef.assert(

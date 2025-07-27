@@ -5,14 +5,15 @@ import boopickle.Default.*
 import molecule.base.error.MoleculeError
 import molecule.core.dataModel.{DataModel, Value}
 import molecule.db.common.action.*
+import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.deserialize.UnpickleTpls
 import molecule.db.common.marshalling.{ConnProxy, MoleculeRpc}
-import molecule.db.common.spi.{Spi_sync, TxReport}
+import molecule.db.common.spi.{Conn, Spi_sync, TxReport}
+import scala.concurrent.Future
 import molecule.db.common.util.Executor.*
 import molecule.db.common.util.FutureUtils
 import molecule.db.common.transaction.CachedConnection
-import scala.concurrent.Future
 
 
 trait MoleculeBackend_SQL
@@ -34,7 +35,8 @@ trait MoleculeBackend_SQL
     bindValues: List[Value]
   ): Future[Either[MoleculeError, List[AnyTpl]]] = either {
     getConn(proxy).map(conn =>
-      query_get[AnyTpl](Query(dataModel, limit, bindValues = bindValues))(using conn)
+      given Conn = conn // only this worked
+      query_get[AnyTpl](Query(dataModel, limit, bindValues = bindValues))
     )
   }
 

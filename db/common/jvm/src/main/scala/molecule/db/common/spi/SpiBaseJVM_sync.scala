@@ -1,6 +1,9 @@
 package molecule.db.common.spi
 
 import java.sql.{ResultSet, ResultSetMetaData, Statement}
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.Future
+import scala.util.control.NonFatal
 import geny.Generator
 import molecule.base.error.{InsertError, InsertErrors, ModelError, ValidationErrors}
 import molecule.base.util.BaseHelpers
@@ -9,22 +12,19 @@ import molecule.db.common.action.*
 import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.javaSql.{PrepStmtImpl, ResultSetInterface as RS}
 import molecule.db.common.marshalling.ConnProxy
-import molecule.db.common.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.db.common.query.casting.strategy.{CastOptEntity, CastOptRefs, CastTuple}
+import molecule.db.common.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.db.common.spi.{Conn, Renderer, Spi_sync, TxReport}
-import molecule.db.common.util.Executor.*
-import molecule.db.common.util.FutureUtils
-import molecule.db.common.validation.TxModelValidation
-import molecule.db.common.validation.insert.InsertValidation
-import molecule.db.common.query.{Model2SqlQuery, SqlQueryBase}
 import molecule.db.common.transaction.strategy.SqlAction
 import molecule.db.common.transaction.strategy.delete.DeleteAction
 import molecule.db.common.transaction.strategy.insert.InsertAction
 import molecule.db.common.transaction.strategy.save.SaveAction
 import molecule.db.common.transaction.strategy.update.UpdateAction
 import molecule.db.common.transaction.{CachedConnection, SqlUpdateSetValidator}
-import scala.collection.mutable.ListBuffer
-import scala.util.control.NonFatal
+import molecule.db.common.util.Executor.*
+import molecule.db.common.util.FutureUtils
+import molecule.db.common.validation.TxModelValidation
+import molecule.db.common.validation.insert.InsertValidation
 
 
 trait SpiBaseJVM_sync
@@ -129,8 +129,8 @@ trait SpiBaseJVM_sync
 
   override def query_subscribe[Tpl](query: Query[Tpl], callback: List[Tpl] => Unit)
                                    (using conn0: Conn): Unit = {
-    val conn      = conn0.asInstanceOf[JdbcConn_JVM]
-    val elements  = keywordsSuffixed(query.dataModel.elements, conn.proxy)
+    val conn           = conn0.asInstanceOf[JdbcConn_JVM]
+    val elements       = keywordsSuffixed(query.dataModel.elements, conn.proxy)
     val cleanDataModel = query.dataModel.copy(elements = elements)
     conn.addCallback(query.dataModel, () =>
       callback {

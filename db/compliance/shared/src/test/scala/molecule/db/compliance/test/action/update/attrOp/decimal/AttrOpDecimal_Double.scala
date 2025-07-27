@@ -16,7 +16,7 @@ case class AttrOpDecimal_Double(
   import api.*
   import suite.*
 
-  implicit val tolerance: Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+  given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
 
   "plus" - types {
     for {

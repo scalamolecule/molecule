@@ -4,6 +4,7 @@ import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
+import org.scalactic.Equality
 import molecule.db.compliance.domains.dsl.Refs.*
 import molecule.db.compliance.setup.DbProviders
 
@@ -20,7 +21,7 @@ case class AggrRefNum_median(
   val average = (int1 + int2).toDouble / 2.0
 
   "ref" - refs {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.insert(List(
         (1, 1),
@@ -42,7 +43,7 @@ case class AggrRefNum_median(
 
 
   "2nd ref" - refs {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.C.i.insert(List(
         (1, 1, 1),
@@ -63,7 +64,7 @@ case class AggrRefNum_median(
 
 
   "multiple refs" - refs {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.C.i.insert(List(
         (1, 1, 1),
@@ -86,7 +87,7 @@ case class AggrRefNum_median(
 
 
   "backref" - refs {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i._A.C.i.insert(List(
         (1, 1, 1),

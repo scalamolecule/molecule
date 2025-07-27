@@ -1,5 +1,6 @@
 package molecule.db.common.util
 
+import scala.annotation.targetName
 import cats.effect.IO
 import molecule.base.error.{ExecutionError, MoleculeError}
 import molecule.core.util.MoleculeLogging
@@ -9,7 +10,8 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait IOUtils extends ModelUtils with MoleculeLogging {
 
-  implicit class futEither2io[T](fut: Future[Either[MoleculeError, T]])(implicit ec: ExecutionContext) {
+  extension [T](fut: Future[Either[MoleculeError, T]])(using ec: ExecutionContext) {
+    @targetName("eitherToIO")
     def io: IO[T] = {
       IO.fromFuture {
         IO.blocking {
@@ -32,7 +34,8 @@ trait IOUtils extends ModelUtils with MoleculeLogging {
     }
   }
 
-  implicit class futTxReport2io(fut: Future[TxReport])(implicit ec: ExecutionContext) {
+  extension (fut: Future[TxReport])(using ec: ExecutionContext) {
+    @targetName("txReportToIO")
     def io: IO[TxReport] = {
       IO.fromFuture {
         IO.blocking {
@@ -51,7 +54,8 @@ trait IOUtils extends ModelUtils with MoleculeLogging {
     }
   }
 
-  implicit class futListUnit2io(fut: Future[Unit])(implicit ec: ExecutionContext) {
+  extension (fut: Future[Unit])(using ec: ExecutionContext) {
+    @targetName("unitToIO")
     def io: IO[Unit] = {
       IO.fromFuture {
         IO.blocking {
@@ -70,7 +74,7 @@ trait IOUtils extends ModelUtils with MoleculeLogging {
     }
   }
 
-  def either[T](fut: Future[T])(implicit ec: ExecutionContext): IO[Either[MoleculeError, T]] = {
+  def either[T](fut: Future[T])(using ec: ExecutionContext): IO[Either[MoleculeError, T]] = {
     IO.fromFuture {
       IO.blocking {
         fut

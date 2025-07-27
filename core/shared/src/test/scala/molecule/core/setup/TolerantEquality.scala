@@ -5,8 +5,8 @@ import org.scalactic.{Equality, TripleEquals}
 
 trait TolerantEquality extends TripleEquals {
 
-  implicit class tolerantEquality[T](lhs: T) {
-    def ==~(rhs: Any)(implicit equality: Equality[T]): Unit = {
+  extension [T](lhs: T) {
+    def ==~(rhs: Any)(using equality: Equality[T]): Unit = {
       (lhs, rhs) match {
 
         // Simple hack to allow tolerant-comparing Lists of small tuples
@@ -56,17 +56,17 @@ trait TolerantEquality extends TripleEquals {
   private def check(lhs: Any, rhs: Any): Unit = {
     lhs match {
       case v: Float      =>
-        implicit val tolerance = tolerantFloatEquality(0.001F)
+        given Equality[Float] = tolerantFloatEquality(0.001F)
         if (v !== rhs) {
           throw new Exception("tolerant check failed")
         }
       case v: Double     =>
-        implicit val tolerance = tolerantDoubleEquality(0.001)
+        given Equality[Double] = tolerantDoubleEquality(0.001)
         if (v !== rhs) {
           throw new Exception("tolerant check failed")
         }
       case v: BigDecimal =>
-        implicit val tolerance = tolerantBigDecimalEquality(BigDecimal(0.001))
+        given Equality[BigDecimal] = tolerantBigDecimalEquality(BigDecimal(0.001))
         if (v !== rhs) {
           throw new Exception("tolerant check failed")
         }
@@ -184,7 +184,7 @@ trait TolerantEquality extends TripleEquals {
   }
 
 
-  //  private def check[T](lhs: T, rhs: Any)(implicit equality: Equality[T]): Unit = {
+  //  private def check[T](lhs: T, rhs: Any)(using equality: Equality[T]): Unit = {
   //    //  private def check[T](lhs: T, rhs: Any): Unit = {
   //    if (lhs !== rhs) {
   //      // fallback from unsuccessful tolerant check to strict test in order to show left/right values

@@ -7,6 +7,7 @@ import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
+import org.scalactic.Equality
 
 case class Widening(
   suite: MUnit,
@@ -125,7 +126,7 @@ case class Widening(
 
 
   "Float" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.float(1.1f).save.transact
       eq = Entity.float(?).a1.query
@@ -143,7 +144,7 @@ case class Widening(
   }
 
   "Float, no decimals" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.float(1.0f).save.transact
       eq = Entity.float(?).a1.query
@@ -169,7 +170,7 @@ case class Widening(
 
 
   "Double" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.double(1.1).save.transact
       eq = Entity.double(?).a1.query
@@ -187,7 +188,7 @@ case class Widening(
   }
 
   "Double, no decimals" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.double(1.0).save.transact
       eq = Entity.double(?).a1.query
@@ -213,7 +214,7 @@ case class Widening(
 
 
   "BigDecimal" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
 
     for {
       _ <- Entity.bigDecimal(BigDecimal("1.1")).save.transact

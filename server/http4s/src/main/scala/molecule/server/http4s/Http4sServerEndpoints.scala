@@ -18,7 +18,7 @@ import sttp.tapir.server.ServerEndpoint
 
 abstract class Http4sServerEndpoints(rpc: MoleculeRpc) extends ServerEndpoints_io(rpc) {
 
-  def moleculeWebsocketHandler_fs2Pipe(implicit runtime: IORuntime): Pipe[IO, Array[Byte], Array[Byte]] = { in =>
+  def moleculeWebsocketHandler_fs2Pipe(using runtime: IORuntime): Pipe[IO, Array[Byte], Array[Byte]] = { in =>
     fs2.Stream.eval {
       for {
         outgoingQueue <- Queue.unbounded[IO, Array[Byte]]

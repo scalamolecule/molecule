@@ -7,6 +7,8 @@ import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
+import org.scalactic.Equality
+import org.scalactic.Equality
 
 case class AggrNum_BigInt_(
   suite: MUnit,
@@ -19,7 +21,7 @@ case class AggrNum_BigInt_(
   import suite.*
 
   "sum" - types {
-    implicit val tolerant = tolerantBigIntEquality(toleranceBigInt)
+    given Equality[BigInt] = tolerantBigIntEquality(toleranceBigInt)
     for {
       _ <- Entity.i.bigInt.insert(List(
         (1, bigInt1),
@@ -43,7 +45,7 @@ case class AggrNum_BigInt_(
 
 
   "median" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.bigInt.insert(List(
         (1, bigInt1),
@@ -64,7 +66,7 @@ case class AggrNum_BigInt_(
 
 
   "avg" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.bigInt.insert(List(
         (1, bigInt1),
@@ -88,7 +90,7 @@ case class AggrNum_BigInt_(
 
 
   "variance" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.bigInt.insert(List(
         (1, bigInt1),
@@ -112,7 +114,7 @@ case class AggrNum_BigInt_(
 
 
   "stddev" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.bigInt.insert(List(
         (1, bigInt1),

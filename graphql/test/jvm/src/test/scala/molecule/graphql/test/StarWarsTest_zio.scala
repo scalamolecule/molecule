@@ -8,7 +8,7 @@ import zio.test.*
 
 trait StarWarsTest_zio extends ZIOSpecDefault with StarWarsServer {
 
-  implicit class ArrowAssert(lhs: Any) {
+  extension (lhs: Any) {
     def ==>[V](rhs: V): TestResult = assertTrue(lhs == rhs)
   }
 

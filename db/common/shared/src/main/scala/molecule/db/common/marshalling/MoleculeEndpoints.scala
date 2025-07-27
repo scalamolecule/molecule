@@ -13,11 +13,8 @@ trait MoleculeEndpoints {
 
   type publicEndpoint = PublicEndpoint[ByteBuffer, MoleculeError, ByteBuffer, Any]
 
-  implicit private val pickleInsertError: CompositePickler[InsertError] =
-    compositePickler[InsertError]
-
-  implicit private val pickleMoleculeError: Pickler[MoleculeError] =
-    generatePickler[MoleculeError]
+  given CompositePickler[InsertError] = compositePickler[InsertError]
+  given Pickler[MoleculeError] = generatePickler[MoleculeError]
 
   private val boopickleCodec: Codec[ByteBuffer, MoleculeError, CodecFormat.OctetStream] =
     Codec.byteBuffer.map(

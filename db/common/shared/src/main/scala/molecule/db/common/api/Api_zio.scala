@@ -9,7 +9,7 @@ import zio.stream.ZStream
 
 trait Api_zio extends Keywords { spi: Spi_zio =>
 
-  implicit class QueryApiZIO[Tpl](q: Query[Tpl]) {
+  extension [Tpl](q: Query[Tpl]) {
     def get: ZIO[Conn, MoleculeError, List[Tpl]] = query_get(q)
     def inspect: ZIO[Conn, MoleculeError, String] = query_inspect(q)
 
@@ -20,35 +20,35 @@ trait Api_zio extends Keywords { spi: Spi_zio =>
     def unsubscribe(): ZIO[Conn, MoleculeError, Unit] = query_unsubscribe(q)
   }
 
-  implicit class QueryOffsetApiZIO[Tpl](q: QueryOffset[Tpl]) {
+  extension [Tpl](q: QueryOffset[Tpl]) {
     def get: ZIO[Conn, MoleculeError, (List[Tpl], Int, Boolean)] = queryOffset_get(q)
     def inspect: ZIO[Conn, MoleculeError, String] = queryOffset_inspect(q)
   }
 
-  implicit class QueryCursorApiZIO[Tpl](q: QueryCursor[Tpl]) {
+  extension [Tpl](q: QueryCursor[Tpl]) {
     def get: ZIO[Conn, MoleculeError, (List[Tpl], String, Boolean)] = queryCursor_get(q)
     def inspect: ZIO[Conn, MoleculeError, String] = queryCursor_inspect(q)
   }
 
-  implicit class SaveApiZIO[Tpl](save: Save) {
+  extension [Tpl](save: Save) {
     def transact: ZIO[Conn, MoleculeError, TxReport] = save_transact(save)
     def validate: ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = save_validate(save)
     def inspect: ZIO[Conn, MoleculeError, String] = save_inspect(save)
   }
 
-  implicit class InsertApiZIO[Tpl](insert: Insert) {
+  extension [Tpl](insert: Insert) {
     def transact: ZIO[Conn, MoleculeError, TxReport] = insert_transact(insert)
     def validate: ZIO[Conn, MoleculeError, Seq[(Int, Seq[InsertError])]] = insert_validate(insert)
     def inspect: ZIO[Conn, MoleculeError, String] = insert_inspect(insert)
   }
 
-  implicit class UpdateApiZIO[Tpl](update: Update) {
+  extension [Tpl](update: Update) {
     def transact: ZIO[Conn, MoleculeError, TxReport] = update_transact(update)
     def validate: ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = update_validate(update)
     def inspect: ZIO[Conn, MoleculeError, String] = update_inspect(update)
   }
 
-  implicit class DeleteApiZIO[Tpl](delete: Delete) {
+  extension [Tpl](delete: Delete) {
     def transact: ZIO[Conn, MoleculeError, TxReport] = delete_transact(delete)
     def inspect: ZIO[Conn, MoleculeError, String] = delete_inspect(delete)
   }

@@ -1,6 +1,7 @@
 package molecule.server.endpoints
 
 import java.nio.ByteBuffer
+import scala.concurrent.Future
 import boopickle.Default.*
 import molecule.base.error.MoleculeError
 import molecule.core.dataModel.{DataModel, Value}
@@ -10,8 +11,6 @@ import molecule.db.common.marshalling.serialize.PickleTpls
 import molecule.db.common.marshalling.{ConnProxy, MoleculeEndpoints, MoleculeRpc}
 import molecule.db.common.spi.TxReport
 import molecule.db.common.util.Executor.*
-import scala.concurrent.Future
-
 
 abstract class Execution(rpc: MoleculeRpc)
   extends MoleculeEndpoints with MoleculeLogging {

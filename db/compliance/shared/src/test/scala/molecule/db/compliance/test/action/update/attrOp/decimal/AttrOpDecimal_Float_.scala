@@ -17,7 +17,7 @@ case class AttrOpDecimal_Float_(
   import api.*
   import suite.*
 
-  implicit val tolerance: Equality[Float] = tolerantFloatEquality(toleranceFloat)
+  given Equality[Float] = tolerantFloatEquality(toleranceFloat)
 
   "plus" - types {
     for {

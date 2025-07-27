@@ -10,4 +10,12 @@ object Executor {
   implicit val global: ExecutionContextExecutor = ExecutionContext.fromExecutor(
     (runnable: Runnable) => runnable.run()
   )
+
+  // This requires tedious imports:
+  //  import scala.concurrent.{ExecutionContextExecutor, Future}
+  //  import molecule.db.common.util.Executor.given ExecutionContextExecutor
+  //
+  //  given ExecutionContextExecutor = ExecutionContext.fromExecutor(
+  //    (runnable: Runnable) => runnable.run()
+  //  )
 }

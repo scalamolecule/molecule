@@ -26,12 +26,12 @@ trait ExprOneMan_n[T, Tpl <: Tuple, Entity[_ <: Tuple]](entity: [tpl <: Tuple] =
   def >    (lower: qm): Entity[Tpl] = entity[Tpl](addOne(dataModel, Gt , Nil, true))
   def >=   (lower: qm): Entity[Tpl] = entity[Tpl](addOne(dataModel, Ge , Nil, true))
 
-  def apply(a: Molecule_0 & CardOne)(implicit ev: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Eq , a))
-  def not  (a: Molecule_0 & CardOne)(implicit ev: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Neq, a))
-  def <    (a: Molecule_0 & CardOne)(implicit ev: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Lt , a))
-  def <=   (a: Molecule_0 & CardOne)(implicit ev: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Le , a))
-  def >    (a: Molecule_0 & CardOne)(implicit ev: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Gt , a))
-  def >=   (a: Molecule_0 & CardOne)(implicit ev: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Ge , a))
+  def apply(a: Molecule_0 & CardOne)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Eq , a))
+  def not  (a: Molecule_0 & CardOne)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Neq, a))
+  def <    (a: Molecule_0 & CardOne)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Lt , a))
+  def <=   (a: Molecule_0 & CardOne)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Le , a))
+  def >    (a: Molecule_0 & CardOne)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Gt , a))
+  def >=   (a: Molecule_0 & CardOne)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Ge , a))
 
   def apply(kw: count)        : Entity[Init[Tpl] :* Int   ] = entity[Init[Tpl] :* Int   ](toInt(dataModel, kw            ))
   def apply(kw: countDistinct): Entity[Init[Tpl] :* Int   ] = entity[Init[Tpl] :* Int   ](toInt(dataModel, kw            ))

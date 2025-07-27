@@ -7,6 +7,8 @@ import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
+import org.scalactic.Equality
+import org.scalactic.Equality
 
 case class AggrNum_Byte_(
   suite: MUnit,
@@ -19,7 +21,7 @@ case class AggrNum_Byte_(
   import suite.*
 
   "sum" - types {
-    implicit val tolerant = tolerantByteEquality(toleranceByte)
+    given Equality[Byte] = tolerantByteEquality(toleranceByte)
     for {
       _ <- Entity.i.byte.insert(List(
         (1, byte1),
@@ -43,7 +45,7 @@ case class AggrNum_Byte_(
 
 
   "median" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.byte.insert(List(
         (1, byte1),
@@ -64,7 +66,7 @@ case class AggrNum_Byte_(
 
 
   "avg" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.byte.insert(List(
         (1, byte1),
@@ -88,7 +90,7 @@ case class AggrNum_Byte_(
 
 
   "variance" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.byte.insert(List(
         (1, byte1),
@@ -112,7 +114,7 @@ case class AggrNum_Byte_(
 
 
   "stddev" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.byte.insert(List(
         (1, byte1),

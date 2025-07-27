@@ -4,6 +4,7 @@ import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
 import molecule.db.h2.async.*
 import molecule.db.h2.setup.DbProviders_h2
+import org.scalactic.Equality
 
 
 class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
@@ -11,7 +12,7 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
   import molecule.db.compliance.domains.dsl.Types.*
 
   "types" - types {
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(3).save.transact

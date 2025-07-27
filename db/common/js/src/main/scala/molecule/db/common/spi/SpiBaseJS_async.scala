@@ -171,10 +171,10 @@ trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {
   // Util --------------------------------------
 
   private def renderInspectTx(label: String, dataModel: DataModel)
-                             (implicit ec: EC): Future[String] = {
+                             (using ec: EC): Future[String] = {
     Future(renderInspection(label, dataModel))
   }
 
   protected def renderInspectQuery(label: String, dataModel: DataModel)
-                                  (implicit ec: EC): Future[String]
+                                  (using ec: EC): Future[String]
 }

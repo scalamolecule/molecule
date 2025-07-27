@@ -2,15 +2,16 @@ package molecule.db.postgresql
 
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
-import async.*
+import molecule.db.postgresql.async.*
 import molecule.db.postgresql.setup.DbProviders_postgresql
+import org.scalactic.Equality
 
 
 class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with TestUtils {
 
   "types" - types {
     import molecule.db.compliance.domains.dsl.Types.*
-    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
 
 //      id <- Entity.i(42).save.transact.map(_.id)
@@ -61,7 +62,7 @@ class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with 
 
 //  "refs" - refs {
 //    import molecule.db.compliance.domains.dsl.Refs.*
-//    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+//    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
 //
 //    for {
 //
