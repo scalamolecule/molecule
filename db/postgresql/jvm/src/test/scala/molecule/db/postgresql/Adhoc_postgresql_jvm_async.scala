@@ -8,7 +8,7 @@ import molecule.db.postgresql.setup.DbProviders_postgresql
 
 class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with TestUtils {
 
-  "types" - types { implicit conn =>
+  "types" - types {
     import molecule.db.compliance.domains.dsl.Types.*
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
@@ -59,7 +59,7 @@ class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with 
   }
 
 
-//  "refs" - refs { implicit conn =>
+//  "refs" - refs {
 //    import molecule.db.compliance.domains.dsl.Refs.*
 //    implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 //
@@ -83,7 +83,7 @@ class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with 
 //  }
 
 
-  //    "unique" - unique { implicit conn =>
+  //    "unique" - unique {
   //      import molecule.db.compliance.domains.dsl.Uniques._
   //      for {
   //        _ <- Uniques.i(1).save.transact
@@ -92,7 +92,7 @@ class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with 
   //    }
   //
   //
-  //    "validation" - validation { implicit conn =>
+  //    "validation" - validation {
   //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //        _ <- Type.string.insert("a").transact

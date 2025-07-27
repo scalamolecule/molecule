@@ -16,7 +16,7 @@ case class FilterAttrNested(
   import api.*
   import suite.*
 
-  "Expressions" - refs { implicit conn =>
+  "Expressions" - refs {
     for {
       _ <- A.s.i.Bb.*(B.i).insert(
         ("a", 1, List(2, 3)),
@@ -48,7 +48,7 @@ case class FilterAttrNested(
   }
 
 
-  "Ref" - refs { implicit conn =>
+  "Ref" - refs {
     for {
       _ <- A.s.i.Bb.*(B.i).insert(
         ("a", 1, List(2, 3)),
@@ -122,7 +122,7 @@ case class FilterAttrNested(
   }
 
   // Same results with optional nested
-  "Opt Ref" - refs { implicit conn =>
+  "Opt Ref" - refs {
     for {
       _ <- A.s.i.Bb.*(B.i).insert(
         ("a", 1, List(2, 3)),

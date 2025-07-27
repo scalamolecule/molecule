@@ -10,7 +10,7 @@ class Adhoc_h2_jvm_io extends MUnit_io
   with DbProviders_h2 with TestUtils {
 
 
-  "commit" - types { implicit conn =>
+  "commit" - types {
 
     for {
       _ <- Entity.i.insert(1, 2, 3).transact

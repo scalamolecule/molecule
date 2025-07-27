@@ -15,7 +15,7 @@ case class Adjacent(
   import api.*
   import suite.*
 
-  "equal (apply)" - types { implicit conn =>
+  "equal (apply)" - types {
     for {
       _ <- Entity.s.i.int.insert(
         ("a", 1, 2),
@@ -28,7 +28,7 @@ case class Adjacent(
     } yield ()
   }
 
-  "not equal" - types { implicit conn =>
+  "not equal" - types {
     for {
       _ <- Entity.s.i.int.insert(
         ("a", 1, 2),
@@ -42,7 +42,7 @@ case class Adjacent(
   }
 
 
-  "<" - types { implicit conn =>
+  "<" - types {
     for {
       _ <- Entity.s.i.int.insert(
         ("a", 1, 2),
@@ -56,7 +56,7 @@ case class Adjacent(
   }
 
 
-  "<=" - types { implicit conn =>
+  "<=" - types {
     for {
       _ <- Entity.s.i.int.insert(
         ("a", 1, 2),
@@ -70,7 +70,7 @@ case class Adjacent(
   }
 
 
-  ">" - types { implicit conn =>
+  ">" - types {
     for {
       _ <- Entity.s.i.int.insert(
         ("a", 1, 2),
@@ -84,7 +84,7 @@ case class Adjacent(
   }
 
 
-  ">=" - types { implicit conn =>
+  ">=" - types {
     for {
       _ <- Entity.s.i.int.insert(
         ("a", 1, 2),

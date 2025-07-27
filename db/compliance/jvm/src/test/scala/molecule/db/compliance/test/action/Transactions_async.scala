@@ -22,7 +22,7 @@ case class Transactions_async(
   import suite.*
 
 
-  "commit" - types { implicit conn =>
+  "commit" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
       _ <- Entity.int(count).query.get.map(_.head ==> 7)
@@ -33,7 +33,7 @@ case class Transactions_async(
   }
 
 
-  "Transact actions: simple" - types { implicit conn =>
+  "Transact actions: simple" - types {
     for {
       _ <- transact(
         Entity.int(1).save,
@@ -44,7 +44,7 @@ case class Transactions_async(
   }
 
 
-  "Transact actions: mixed" - types { implicit conn =>
+  "Transact actions: mixed" - types {
     for {
       _ <- transact(
         Entity.int(1).save, //         List(1)
@@ -57,7 +57,7 @@ case class Transactions_async(
   }
 
 
-  "Transact actions: validation 1" - validation { implicit conn =>
+  "Transact actions: validation 1" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     for {
       _ <- transact(
@@ -77,7 +77,7 @@ case class Transactions_async(
   }
 
 
-  "Transact actions: validation 2" - validation { implicit conn =>
+  "Transact actions: validation 2" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     for {
       _ <- transact(
@@ -97,7 +97,7 @@ case class Transactions_async(
   }
 
 
-  "Transact actions: validation 3" - validation { implicit conn =>
+  "Transact actions: validation 3" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     for {
       _ <- transact(
@@ -109,7 +109,7 @@ case class Transactions_async(
   }
 
 
-  "UnitOfWork: simple" - types { implicit conn =>
+  "UnitOfWork: simple" - types {
     for {
       _ <- unitOfWork {
         Entity.int(1).save.transact
@@ -120,7 +120,7 @@ case class Transactions_async(
   }
 
 
-  "UnitOfWork: mixed" - types { implicit conn =>
+  "UnitOfWork: mixed" - types {
     for {
       _ <- unitOfWork {
         Entity.int(1).save.transact //         List(1)
@@ -133,7 +133,7 @@ case class Transactions_async(
   }
 
 
-  "UnitOfWork: mixed with queries" - types { implicit conn =>
+  "UnitOfWork: mixed with queries" - types {
     for {
       _ <- unitOfWork {
         for {
@@ -155,7 +155,7 @@ case class Transactions_async(
   }
 
 
-  "UnitOfWork: abort save" - types { implicit conn =>
+  "UnitOfWork: abort save" - types {
     for {
       _ <- Entity.int(1).save.transact
       _ <- unitOfWork {
@@ -172,7 +172,7 @@ case class Transactions_async(
   }
 
 
-  "UnitOfWork: abort insert" - types { implicit conn =>
+  "UnitOfWork: abort insert" - types {
     for {
       _ <- Entity.int(1).save.transact
       _ <- unitOfWork {
@@ -189,7 +189,7 @@ case class Transactions_async(
   }
 
 
-  "UnitOfWork: abort update" - types { implicit conn =>
+  "UnitOfWork: abort update" - types {
     for {
       _ <- Entity.int(1).save.transact
       _ <- unitOfWork {
@@ -206,7 +206,7 @@ case class Transactions_async(
   }
 
 
-  "UnitOfWork: abort delete" - types { implicit conn =>
+  "UnitOfWork: abort delete" - types {
     for {
       _ <- Entity.int.insert(1, 2).transact
       _ <- unitOfWork {
@@ -223,7 +223,7 @@ case class Transactions_async(
   }
 
 
-  "UnitOfWork: abort mixed" - types { implicit conn =>
+  "UnitOfWork: abort mixed" - types {
     for {
       // Initial data
       _ <- Entity.int(1).save.transact
@@ -254,7 +254,7 @@ case class Transactions_async(
   }
 
 
-  "UnitOfWork: money transfer" - types { implicit conn =>
+  "UnitOfWork: money transfer" - types {
     for {
       // Initial balance in two bank accounts
       _ <- Entity.s("fromAccount").int(100).save.transact
@@ -294,7 +294,7 @@ case class Transactions_async(
 
   // Transfer logic separated with unitOfWork
   def transfer(from: String, to: String, amount: Int)
-              (implicit conn: Conn): Future[Unit] = {
+              (using conn: Conn): Future[Unit] = {
     unitOfWork {
       for {
         _ <- Entity.s_(from).int.-(amount).update.transact
@@ -315,7 +315,7 @@ case class Transactions_async(
     }
   }
 
-  "UnitOfWork: money transfer2" - types { implicit conn =>
+  "UnitOfWork: money transfer2" - types {
     for {
       // Initial balance in two bank accounts
       _ <- Entity.s("fromAccount").int(100).save.transact
@@ -336,7 +336,7 @@ case class Transactions_async(
   }
 
 
-  "Savepoint: commit" - types { implicit conn =>
+  "Savepoint: commit" - types {
     unitOfWork {
       for {
         _ <- Entity.int.insert(1 to 4).transact
@@ -356,7 +356,7 @@ case class Transactions_async(
   }
 
   // Without rollbacks, the above is the same as the following:
-  "Savepoint: commit2" - types { implicit conn =>
+  "Savepoint: commit2" - types {
     for {
       _ <- Entity.int.insert(1 to 4).transact
       _ <- Entity.int(count).query.get.map(_.head ==> 4)
@@ -371,7 +371,7 @@ case class Transactions_async(
   }
 
 
-  "Savepoint: rollback" - types { implicit conn =>
+  "Savepoint: rollback" - types {
     unitOfWork {
       for {
         _ <- Entity.int.insert(1 to 4).transact
@@ -396,7 +396,7 @@ case class Transactions_async(
   }
 
 
-  "Savepoint: rollback2" - types { implicit conn =>
+  "Savepoint: rollback2" - types {
     for {
       _ <- Entity.int.insert(1 to 4).transact
       _ <- Entity.int(count).query.get.map(_.head ==> 4)
@@ -421,7 +421,7 @@ case class Transactions_async(
   }
 
 
-  "Savepoint: throw" - types { implicit conn =>
+  "Savepoint: throw" - types {
     unitOfWork {
       for {
         _ <- Entity.int.insert(1 to 4).transact
@@ -447,7 +447,7 @@ case class Transactions_async(
     }
   }
 
-  "Savepoint: throw2" - types { implicit conn =>
+  "Savepoint: throw2" - types {
     for {
       _ <- Entity.int.insert(1 to 4).transact
       _ <- Entity.int(count).query.get.map(_.head ==> 4)
@@ -473,7 +473,7 @@ case class Transactions_async(
   }
 
 
-  "Savepoint: throwDouble" - types { implicit conn =>
+  "Savepoint: throwDouble" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 
@@ -510,7 +510,7 @@ case class Transactions_async(
   }
 
 
-  "Savepoint: rollbackDouble" - types { implicit conn =>
+  "Savepoint: rollbackDouble" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 
@@ -545,7 +545,7 @@ case class Transactions_async(
   }
 
 
-  "Double savepoint: commit" - types { implicit conn =>
+  "Double savepoint: commit" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 
@@ -582,7 +582,7 @@ case class Transactions_async(
   }
 
 
-  "throw: inner" - types { implicit conn =>
+  "throw: inner" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 
@@ -623,7 +623,7 @@ case class Transactions_async(
   }
 
 
-  "throw: middle" - types { implicit conn =>
+  "throw: middle" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 
@@ -664,7 +664,7 @@ case class Transactions_async(
   }
 
 
-  "throw: innerMiddle" - types { implicit conn =>
+  "throw: innerMiddle" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 
@@ -704,7 +704,7 @@ case class Transactions_async(
   }
 
 
-  "throw: innerMiddleOuter" - types { implicit conn =>
+  "throw: innerMiddleOuter" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 
@@ -744,7 +744,7 @@ case class Transactions_async(
   }
 
 
-  "Rollback: inner" - types { implicit conn =>
+  "Rollback: inner" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 
@@ -782,7 +782,7 @@ case class Transactions_async(
   }
 
 
-  "Rollback: middle" - types { implicit conn =>
+  "Rollback: middle" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 
@@ -821,7 +821,7 @@ case class Transactions_async(
   }
 
 
-  "Rollback: innerMiddle" - types { implicit conn =>
+  "Rollback: innerMiddle" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 
@@ -860,7 +860,7 @@ case class Transactions_async(
   }
 
 
-  "Rollback: middleOuter" - types { implicit conn =>
+  "Rollback: middleOuter" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 
@@ -899,7 +899,7 @@ case class Transactions_async(
   }
 
 
-  "Rollback: innerMiddleOuter" - types { implicit conn =>
+  "Rollback: innerMiddleOuter" - types {
     for {
       _ <- Entity.int.insert(1 to 7).transact
 

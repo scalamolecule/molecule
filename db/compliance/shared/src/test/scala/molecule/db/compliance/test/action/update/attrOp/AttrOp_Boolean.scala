@@ -15,7 +15,7 @@ case class AttrOp_Boolean(
   import api.*
   import suite.*
 
-  "And" - types { implicit conn =>
+  "And" - types {
     for {
       case List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
       _ <- Entity(a, b).boolean.&&(true).update.transact
@@ -34,7 +34,7 @@ case class AttrOp_Boolean(
   }
 
 
-  "Or" - types { implicit conn =>
+  "Or" - types {
     for {
       case List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
       _ <- Entity(a, b).boolean.||(true).update.transact
@@ -53,7 +53,7 @@ case class AttrOp_Boolean(
   }
 
 
-  "Not" - types { implicit conn =>
+  "Not" - types {
     for {
       case List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
       _ <- Entity(a, b).boolean.!.update.transact

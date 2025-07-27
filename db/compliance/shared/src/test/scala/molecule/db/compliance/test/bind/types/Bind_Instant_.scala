@@ -17,7 +17,7 @@ case class Bind_Instant_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.instant.insert(instant1, instant2, instant3).transact
 
@@ -54,7 +54,7 @@ case class Bind_Instant_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.instant.insert((1, instant1), (2, instant2), (3, instant3)).transact
 

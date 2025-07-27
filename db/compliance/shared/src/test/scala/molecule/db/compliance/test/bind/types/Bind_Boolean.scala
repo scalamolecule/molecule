@@ -16,7 +16,7 @@ case class Bind_Boolean(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.boolean.insert(true, false).transact
 
@@ -31,7 +31,7 @@ case class Bind_Boolean(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.boolean.insert((1, true), (0, false)).transact
 

@@ -19,7 +19,7 @@ case class SaveCardSet(
   import api.*
   import suite.*
 
-  "mandatory" - types { implicit conn =>
+  "mandatory" - types {
     for {
       // Empty Set of values is ignored
       _ <- Entity.iSet.query.get.map(_ ==> List())
@@ -79,7 +79,7 @@ case class SaveCardSet(
   }
 
 
-  "optional" - types { implicit conn =>
+  "optional" - types {
     for {
       // Empty option of Set of values is ignored
       _ <- Entity.intSet_?(Option.empty[Set[Int]]).save.transact
@@ -186,7 +186,7 @@ case class SaveCardSet(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     // Applying value to tacit or mandatory attribute has same effect
     for {
       _ <- Entity.i(1).stringSet_(Set(string1, string2)).save.transact

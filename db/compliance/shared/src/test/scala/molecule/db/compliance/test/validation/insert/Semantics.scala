@@ -17,7 +17,7 @@ case class Semantics(
   import api.*
   import suite.*
 
-  "1 row, 1 error" - validation { implicit conn =>
+  "1 row, 1 error" - validation {
     for {
       _ <- Type.int.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -44,7 +44,7 @@ case class Semantics(
   }
 
 
-  "1 row, 2 errors" - validation { implicit conn =>
+  "1 row, 2 errors" - validation {
     for {
       _ <- Type.int.long.insert((1, 1L)).transact
         .map(_ ==> "Unexpected success").recover {
@@ -81,7 +81,7 @@ case class Semantics(
   }
 
 
-  "2 rows, 2 errors" - validation { implicit conn =>
+  "2 rows, 2 errors" - validation {
     for {
       _ <- Type.int.long.insert(
           (0, 0L),
@@ -146,7 +146,7 @@ case class Semantics(
   }
 
 
-  "3 rows, mixed errors" - validation { implicit conn =>
+  "3 rows, mixed errors" - validation {
     for {
       _ <- Type.int.long.insert(
           (1, 4L), // bad - ok

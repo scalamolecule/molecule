@@ -16,7 +16,7 @@ case class Aggr_ZonedDateTime_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.zonedDateTime.insert(List(
         (1, zonedDateTime1),
@@ -44,7 +44,7 @@ case class Aggr_ZonedDateTime_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.zonedDateTime.insert(
         (1, zonedDateTime1),
@@ -76,7 +76,7 @@ case class Aggr_ZonedDateTime_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.zonedDateTime.insert(
         (1, zonedDateTime1),
@@ -112,7 +112,7 @@ case class Aggr_ZonedDateTime_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4)
     for {
       _ <- Entity.zonedDateTime.insert(List(zonedDateTime1, zonedDateTime2, zonedDateTime3)).transact
@@ -123,7 +123,7 @@ case class Aggr_ZonedDateTime_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.zonedDateTime.insert(List(
         (1, zonedDateTime1),

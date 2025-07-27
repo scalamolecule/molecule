@@ -32,7 +32,7 @@ case class PrimaryUnique[Tpl](
 
 
   def getPage(tokens: List[String], limit: Int)
-             (implicit conn: JdbcConn_JVM): (List[Tpl], String, Boolean) = {
+             (using conn: JdbcConn_JVM): (List[Tpl], String, Boolean) = {
     val List(_, _, tpe, ent, attr, _, a, z) = tokens
 
     val forward      = limit > 0

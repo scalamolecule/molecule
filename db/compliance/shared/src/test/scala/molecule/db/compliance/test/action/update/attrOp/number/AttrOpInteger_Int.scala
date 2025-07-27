@@ -16,7 +16,7 @@ case class AttrOpInteger_Int(
   import api.*
   import suite.*
 
-  "plus" - types { implicit conn =>
+  "plus" - types {
     for {
       id <- Entity.int(int1).save.transact.map(_.id)
       _ <- Entity(id).int.+(int2).update.transact
@@ -24,7 +24,7 @@ case class AttrOpInteger_Int(
     } yield ()
   }
 
-  "minus" - types { implicit conn =>
+  "minus" - types {
     for {
       id <- Entity.int(int3).save.transact.map(_.id)
       _ <- Entity(id).int.-(int2).update.transact
@@ -32,7 +32,7 @@ case class AttrOpInteger_Int(
     } yield ()
   }
 
-  "times" - types { implicit conn =>
+  "times" - types {
     for {
       id <- Entity.int(int2).save.transact.map(_.id)
       _ <- Entity(id).int.*(int2).update.transact
@@ -40,7 +40,7 @@ case class AttrOpInteger_Int(
     } yield ()
   }
 
-  "divide" - types { implicit conn =>
+  "divide" - types {
     for {
       id <- Entity.int(int4).save.transact.map(_.id)
       _ <- Entity(id).int./(int2).update.transact
@@ -48,7 +48,7 @@ case class AttrOpInteger_Int(
     } yield ()
   }
 
-  "negate" - types { implicit conn =>
+  "negate" - types {
     for {
       ids <- Entity.int.insert(-int1, int2).transact.map(_.ids)
       _ <- Entity(ids).int.negate.update.transact
@@ -56,7 +56,7 @@ case class AttrOpInteger_Int(
     } yield ()
   }
 
-  "absolute" - types { implicit conn =>
+  "absolute" - types {
     for {
       ids <- Entity.int.insert(-int1, int2).transact.map(_.ids)
       _ <- Entity(ids).int.abs.update.transact
@@ -64,7 +64,7 @@ case class AttrOpInteger_Int(
     } yield ()
   }
 
-  "absolute negative" - types { implicit conn =>
+  "absolute negative" - types {
     for {
       ids <- Entity.int.insert(-int1, int2).transact.map(_.ids)
       _ <- Entity(ids).int.absNeg.update.transact
@@ -75,7 +75,7 @@ case class AttrOpInteger_Int(
 
   // even/odd/modulo not allowed for updates
 
-  "No even" - types { implicit conn =>
+  "No even" - types {
     for {
       id <- Entity.int(int4).save.transact.map(_.id)
       _ <- Entity(id).int.even.update.transact
@@ -85,7 +85,7 @@ case class AttrOpInteger_Int(
     } yield ()
   }
 
-  "No odd" - types { implicit conn =>
+  "No odd" - types {
     for {
       id <- Entity.int(int4).save.transact.map(_.id)
       _ <- Entity(id).int.odd.update.transact
@@ -95,7 +95,7 @@ case class AttrOpInteger_Int(
     } yield ()
   }
 
-  "No modulo" - types { implicit conn =>
+  "No modulo" - types {
     for {
       id <- Entity.int(int4).save.transact.map(_.id)
       _ <- Entity(id).int.%(int3, int2).update.transact

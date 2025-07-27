@@ -20,7 +20,7 @@ case class FilterMap(
   // Use tacit attributes as filters to match entities to be updated.
   // Apply new values to mandatory attributes.
 
-  "Map asserted" - types { implicit conn =>
+  "Map asserted" - types {
     for {
       case List(a, b, c) <- Entity.iMap_?.int.insert(
         (None, 0),
@@ -52,7 +52,7 @@ case class FilterMap(
   }
 
 
-  "Map not asserted" - types { implicit conn =>
+  "Map not asserted" - types {
     for {
       List(a, b, c) <- Entity.iMap_?.int.insert(
         (None, 0),
@@ -73,7 +73,7 @@ case class FilterMap(
   }
 
 
-  "Key" - types { implicit conn =>
+  "Key" - types {
     // Filtering updates by equality of collections is not supported by molecule.
     // Instead, use has/hasNo.
     for {
@@ -115,7 +115,7 @@ case class FilterMap(
   }
 
 
-  "No key" - types { implicit conn =>
+  "No key" - types {
     // Filtering updates by equality of collections is not supported by molecule.
     // Instead, use has/hasNo.
     for {
@@ -150,7 +150,7 @@ case class FilterMap(
   }
 
 
-  "Has value" - types { implicit conn =>
+  "Has value" - types {
     for {
       case List(a, b) <- Entity.iMap.int.insert(
         (Map("a" -> 1, "b" -> 2, "c" -> 3), 1),
@@ -183,7 +183,7 @@ case class FilterMap(
   }
 
 
-  "Doesn't have value" - types { implicit conn =>
+  "Doesn't have value" - types {
     for {
       case List(a, b) <- Entity.iMap.int.insert(
         (Map("a" -> 1, "b" -> 2, "c" -> 3), 1),
@@ -216,7 +216,7 @@ case class FilterMap(
   }
 
 
-  "Types, filter asserted" - types { implicit conn =>
+  "Types, filter asserted" - types {
     for {
       // Initial values
       _ <- Entity.i(1).stringMap(Map(pstring1)).save.transact
@@ -293,7 +293,7 @@ case class FilterMap(
   }
 
 
-  "Types, filter key" - types { implicit conn =>
+  "Types, filter key" - types {
     for {
       // Initial values
       _ <- Entity.i(1).stringMap(Map(pstring1)).save.transact
@@ -370,7 +370,7 @@ case class FilterMap(
   }
 
 
-  "Types, filter not key" - types { implicit conn =>
+  "Types, filter not key" - types {
     for {
       // Initial values
       _ <- Entity.i(1).stringMap(Map(pstring1)).save.transact
@@ -447,7 +447,7 @@ case class FilterMap(
   }
 
 
-  "Types, filter has value" - types { implicit conn =>
+  "Types, filter has value" - types {
     for {
       // Initial values
       _ <- Entity.i(1).stringMap(Map(pstring1)).save.transact
@@ -524,7 +524,7 @@ case class FilterMap(
   }
 
 
-  "Types, filter hasNo value" - types { implicit conn =>
+  "Types, filter hasNo value" - types {
     for {
       // Initial values
       _ <- Entity.i(1).stringMap(Map(pstring1)).save.transact

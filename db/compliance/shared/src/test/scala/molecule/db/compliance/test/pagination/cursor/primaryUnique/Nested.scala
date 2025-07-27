@@ -26,7 +26,7 @@ case class Nested(
   import api.*
   import suite.*
 
-  "Nested: From start" - unique { implicit conn =>
+  "Nested: From start" - unique {
     val query = Uniques.int.a1.Refs.*(Ref.i).query
     for {
       // Using attribute Uniques.int with only unique values
@@ -41,7 +41,7 @@ case class Nested(
     } yield ()
   }
 
-  "Nested: From end" - unique { implicit conn =>
+  "Nested: From end" - unique {
     val query = Uniques.int.a1.Refs.*(Ref.i).query
     for {
       _ <- Uniques.int.Refs.*(Ref.i).insert(data).transact
@@ -55,7 +55,7 @@ case class Nested(
   }
 
 
-  "Optional nested: From start" - unique { implicit conn =>
+  "Optional nested: From start" - unique {
     val query = Uniques.int.a1.Refs.*?(Ref.i).query
     for {
       _ <- Uniques.int.Refs.*(Ref.i).insert(data).transact
@@ -67,7 +67,7 @@ case class Nested(
     } yield ()
   }
 
-  "Optional nested: From end" - unique { implicit conn =>
+  "Optional nested: From end" - unique {
     val query = Uniques.int.a1.Refs.*?(Ref.i).query
     for {
       _ <- Uniques.int.Refs.*(Ref.i).insert(data).transact

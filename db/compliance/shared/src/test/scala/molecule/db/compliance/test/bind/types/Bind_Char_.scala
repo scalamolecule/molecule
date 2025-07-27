@@ -17,7 +17,7 @@ case class Bind_Char_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.char.insert(char1, char2, char3).transact
 
@@ -54,7 +54,7 @@ case class Bind_Char_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.char.insert((1, char1), (2, char2), (3, char3)).transact
 

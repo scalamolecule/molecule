@@ -12,7 +12,7 @@ import molecule.db.mysql.setup.DbProviders_mysql
 class Test_Inspect extends MUnit with DbProviders_mysql with TestUtils {
 
 
-  "Inspect without fetching" - types { implicit conn =>
+  "Inspect without fetching" - types {
     for {
       _ <- Entity.string("a").int(1).save.transact
 
@@ -59,7 +59,7 @@ class Test_Inspect extends MUnit with DbProviders_mysql with TestUtils {
   }
 
 
-  "Inspect without saving" - types { implicit conn =>
+  "Inspect without saving" - types {
     for {
       // Inspect save action without saving
       _ <- Entity.string("a").int(1).save.inspect.map(_ ==> {
@@ -104,7 +104,7 @@ class Test_Inspect extends MUnit with DbProviders_mysql with TestUtils {
     } yield ()
   }
 
-  "Inspect and save" - types { implicit conn =>
+  "Inspect and save" - types {
     for {
       // Save data and print inspection
       _ <- Entity.string("a").int(1).save.i.transact
@@ -115,7 +115,7 @@ class Test_Inspect extends MUnit with DbProviders_mysql with TestUtils {
   }
 
 
-  "Inspect without inserting" - types { implicit conn =>
+  "Inspect without inserting" - types {
     for {
       // Inspect insert action without inserting
       _ <- Entity.string.int.insert(("a", 1), ("b", 2)).inspect.map(_ ==> {
@@ -163,7 +163,7 @@ class Test_Inspect extends MUnit with DbProviders_mysql with TestUtils {
     } yield ()
   }
 
-  "Inspect and insert" - types { implicit conn =>
+  "Inspect and insert" - types {
     for {
       // Insert data and print inspection
       _ <- Entity.string.int.insert(("a", 1), ("b", 2)).i.transact
@@ -174,7 +174,7 @@ class Test_Inspect extends MUnit with DbProviders_mysql with TestUtils {
   }
 
 
-  "Inspect without updating" - types { implicit conn =>
+  "Inspect without updating" - types {
     for {
       id <- Entity.string("a").int(1).save.transact.map(_.id)
 
@@ -223,7 +223,7 @@ class Test_Inspect extends MUnit with DbProviders_mysql with TestUtils {
     } yield ()
   }
 
-  "Inspect and update" - types { implicit conn =>
+  "Inspect and update" - types {
     for {
       id <- Entity.string("a").int(1).save.transact.map(_.id)
 
@@ -236,7 +236,7 @@ class Test_Inspect extends MUnit with DbProviders_mysql with TestUtils {
   }
 
 
-  "Inspect without deleting" - types { implicit conn =>
+  "Inspect without deleting" - types {
     for {
       case List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
 
@@ -278,7 +278,7 @@ class Test_Inspect extends MUnit with DbProviders_mysql with TestUtils {
     } yield ()
   }
 
-  "Inspect and delete" - types { implicit conn =>
+  "Inspect and delete" - types {
     for {
       case List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
 

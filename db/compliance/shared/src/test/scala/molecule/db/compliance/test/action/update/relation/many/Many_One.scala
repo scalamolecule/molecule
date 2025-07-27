@@ -15,7 +15,7 @@ case class Many_One(
   import api.*
   import suite.*
 
-  "id-filter - ref - value" - refs { implicit conn =>
+  "id-filter - ref - value" - refs {
     for {
       case List(a, b, c, d, e, f) <- A.i.Bb.*?(B.s_?.i_?).insert(
         (1, List()),
@@ -53,7 +53,7 @@ case class Many_One(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i.Bb.*?(B.s_?.i_?).insert(
         (1, List()),
@@ -91,7 +91,7 @@ case class Many_One(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.i(0).save.transact.map(_.id)
       _ <- A.s.Bb.*(B.s).insert(("x", List("a", "b"))).transact.map(_.id)
@@ -117,7 +117,7 @@ case class Many_One(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // will not be updated since entities have no A -> B relationship
       _ <- B.s("x").i(0).save.transact
@@ -168,7 +168,7 @@ case class Many_One(
   }
 
 
-  "ref ref" - refs { implicit conn =>
+  "ref ref" - refs {
     for {
       id <- A.i(1).Bb.i(2).Cc.i(3).save.transact.map(_.id)
       _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -204,7 +204,7 @@ case class Many_One(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     for {
       id <- A.i(1).Bb.i(2)._A.Cc.i(3).save.transact.map(_.id)
       _ <- A.i.Bb.i._A.Cc.i.query.get.map(_ ==> List((1, 2, 3)))

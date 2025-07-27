@@ -19,7 +19,7 @@ case class InsertCardSeq(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       // No Entity.intSeq inserted yet
       _ <- Entity.intSeq.query.get.map(_ ==> Nil)
@@ -81,7 +81,7 @@ case class InsertCardSeq(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     for {
       _ <- Entity.int.i.stringSeq_?.insert((1, 1, Option.empty[List[String]])).transact
       _ <- Entity.int.i.intSeq_?.insert((2, 1, Option.empty[List[Int]])).transact
@@ -178,7 +178,7 @@ case class InsertCardSeq(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       // Can't insert tacit attributes
       _ <- Future(compileErrors("Entity.i.stringSeq_.insert(1, List(string1))"))

@@ -36,8 +36,9 @@ object DbConnection_postgresql {
     JdbcConn_JS(proxy, "localhost", 8080)
   }
 
-  def run(test: Conn => Any, metaDb: MetaDb_postgresql): Any = {
-    test(getConnection(metaDb))
+  def run(test: Conn ?=> Any, metaDb: MetaDb_postgresql): Any = {
+    given Conn = getConnection(metaDb)
+    test
   }
 
   def connZLayer(metaDb: MetaDb_postgresql): ZLayer[Any, Throwable, Conn] = {

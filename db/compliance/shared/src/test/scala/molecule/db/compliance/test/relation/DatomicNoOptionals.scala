@@ -18,7 +18,7 @@ case class DatomicNoOptionals(
   import suite.*
 
 
-  "Optional entity" - refs { implicit conn =>
+  "Optional entity" - refs {
     for {
       _ <- A.?(A.i).B.i.insert(List((None, 1))).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -32,7 +32,7 @@ case class DatomicNoOptionals(
     } yield ()
   }
 
-  "Optional ref" - refs { implicit conn =>
+  "Optional ref" - refs {
     for {
       _ <- A.i.B.?(B.i).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -41,7 +41,7 @@ case class DatomicNoOptionals(
     } yield ()
   }
 
-  "Optional nested" - refs { implicit conn =>
+  "Optional nested" - refs {
     for {
       _ <- A.s.a1.Bb.*?(B.i).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

@@ -31,7 +31,7 @@ case class MutationAdd(
   import api.*
   import suite.*
 
-  "Forward: Add row before" - types { implicit conn =>
+  "Forward: Add row before" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -46,7 +46,7 @@ case class MutationAdd(
     } yield ()
   }
 
-  "Forward: Add row after" - types { implicit conn =>
+  "Forward: Add row after" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -62,7 +62,7 @@ case class MutationAdd(
   }
 
 
-  "Backwards: Add row before" - types { implicit conn =>
+  "Backwards: Add row before" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -77,7 +77,7 @@ case class MutationAdd(
     } yield ()
   }
 
-  "Backwards: Add row after" - types { implicit conn =>
+  "Backwards: Add row after" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     for {

@@ -17,7 +17,7 @@ case class Bind_Duration_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.duration.insert(duration1, duration2, duration3).transact
 
@@ -54,7 +54,7 @@ case class Bind_Duration_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.duration.insert((1, duration1), (2, duration2), (3, duration3)).transact
 

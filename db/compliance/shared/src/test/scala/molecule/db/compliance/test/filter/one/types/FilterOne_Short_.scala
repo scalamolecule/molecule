@@ -16,7 +16,7 @@ case class FilterOne_Short_(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     val a = (1, short1)
     val b = (2, short2)
     val c = (3, short3)
@@ -67,7 +67,7 @@ case class FilterOne_Short_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, c, x) = (1, 2, 3, 4)
     for {
       _ <- Entity.i.short_?.insert(List(
@@ -124,7 +124,7 @@ case class FilterOne_Short_(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     val a = (1, Some(short1))
     val b = (2, Some(short2))
     val c = (3, Some(short3))
@@ -147,7 +147,7 @@ case class FilterOne_Short_(
   }
 
 
-  "Combinations" - types { implicit conn =>
+  "Combinations" - types {
     for {
       _ <- Entity.i.short.insert(
         (1, short1),

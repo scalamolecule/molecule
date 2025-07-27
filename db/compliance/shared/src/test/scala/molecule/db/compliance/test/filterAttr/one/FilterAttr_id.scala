@@ -18,7 +18,7 @@ case class FilterAttr_id(
   import api.*
   import suite.*
 
-  "equal (apply)" - types { implicit conn =>
+  "equal (apply)" - types {
     for {
       _ <- Entity.s.id(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -43,7 +43,7 @@ case class FilterAttr_id(
   }
 
 
-  "not equal" - types { implicit conn =>
+  "not equal" - types {
     for {
       _ <- Entity.s.id.not(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -58,7 +58,7 @@ case class FilterAttr_id(
   }
 
 
-  "<" - types { implicit conn =>
+  "<" - types {
     for {
       _ <- Entity.s.id.<(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -73,7 +73,7 @@ case class FilterAttr_id(
   }
 
 
-  "<=" - types { implicit conn =>
+  "<=" - types {
     for {
       _ <- Entity.s.id.<=(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -88,7 +88,7 @@ case class FilterAttr_id(
   }
 
 
-  ">" - types { implicit conn =>
+  ">" - types {
     for {
       _ <- Entity.s.id.>(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -103,7 +103,7 @@ case class FilterAttr_id(
   }
 
 
-  ">=" - types { implicit conn =>
+  ">=" - types {
     for {
       _ <- Entity.s.id.>=(Entity.long_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

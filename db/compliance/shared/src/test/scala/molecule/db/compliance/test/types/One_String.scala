@@ -15,7 +15,7 @@ case class One_String(
   import suite.*
 
 
-  "string 0-1" - types { implicit conn =>
+  "string 0-1" - types {
     // Mandatory
     lazy val a1: String = Entity.string.query.get.head
     lazy val a2: String = Entity.string.apply(string1).query.get.head
@@ -48,7 +48,7 @@ case class One_String(
   }
 
 
-  "string 1-n" - types { implicit conn =>
+  "string 1-n" - types {
     // Tacit - stays a Boolean
     lazy val a1: Boolean = Entity.boolean.string_.query.get.head
     lazy val a2: Boolean = Entity.boolean.string_.apply(string1).query.get.head
@@ -87,7 +87,7 @@ case class One_String(
   }
 
 
-  "string n-n" - types { implicit conn =>
+  "string n-n" - types {
     // Tacit - stays an (Int, Boolean)
     lazy val a1: (Int, Boolean) = Entity.i.boolean.string_.query.get.head
     lazy val a2: (Int, Boolean) = Entity.i.boolean.string_.apply(string1).query.get.head

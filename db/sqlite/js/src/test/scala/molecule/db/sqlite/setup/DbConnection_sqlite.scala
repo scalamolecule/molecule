@@ -27,9 +27,13 @@ trait DbConnection_sqlite extends DbConnection {
     JdbcConn_JS(proxy, "localhost", 8080)
   }
 
-  def run(test: Conn => Any, metaDb: MetaDb_sqlite): Any = {
-    test(getConnection(metaDb))
+  def run(test: Conn ?=> Any, metaDb: MetaDb_sqlite): Any = {
+    given Conn = getConnection(metaDb)
+    test
   }
+
+  def run4(test: Conn ?=> Any, metaDb: MetaDb_sqlite): Any = ???
+
 
   def connZLayer(metaDb: MetaDb_sqlite): ZLayer[Any, Throwable, Conn] = {
     ZLayer.scoped(

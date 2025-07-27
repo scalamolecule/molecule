@@ -13,7 +13,7 @@ import upickle.default.read
 
 class RawQuery extends MUnit with DbProviders_postgresql with TestUtils {
 
-  "Lists of Lists of Any" - types { implicit conn =>
+  "Lists of Lists of Any" - types {
     for {
       _ <- Entity.string("a").int(1).save.transact
 
@@ -39,7 +39,7 @@ class RawQuery extends MUnit with DbProviders_postgresql with TestUtils {
   }
 
 
-  "Base types" - types { implicit conn =>
+  "Base types" - types {
     def q(attr: String): String = s"SELECT DISTINCT $attr FROM Entity WHERE $attr IS NOT NULL"
     for {
       _ <- Entity.string(string1).save.transact
@@ -93,7 +93,7 @@ class RawQuery extends MUnit with DbProviders_postgresql with TestUtils {
   }
 
 
-  "Set" - types { implicit conn =>
+  "Set" - types {
     def q(attr: String): String = s"SELECT DISTINCT $attr FROM Entity WHERE $attr IS NOT NULL"
     for {
       _ <- Entity.stringSet(Set(string1, string2)).save.transact
@@ -111,7 +111,7 @@ class RawQuery extends MUnit with DbProviders_postgresql with TestUtils {
   }
 
 
-  "Seq" - types { implicit conn =>
+  "Seq" - types {
     def q(attr: String): String = s"SELECT DISTINCT $attr FROM Entity WHERE $attr IS NOT NULL"
     for {
       _ <- Entity.stringSet(Set(string1, string2)).save.transact
@@ -130,7 +130,7 @@ class RawQuery extends MUnit with DbProviders_postgresql with TestUtils {
   }
 
 
-  "Map" - types { implicit conn =>
+  "Map" - types {
     def q(attr: String): String = s"SELECT DISTINCT $attr FROM Entity WHERE $attr IS NOT NULL"
     for {
       _ <- Entity.stringMap(Map("a" -> "foo", "b" -> "bar")).save.transact
@@ -156,7 +156,7 @@ class RawQuery extends MUnit with DbProviders_postgresql with TestUtils {
   }
 
 
-  "Optional values" - types { implicit conn =>
+  "Optional values" - types {
     for {
       _ <- Entity.i.string_?.insert(
         (1, Option.empty[String]),

@@ -35,8 +35,9 @@ object DbConnection_mysql {
     JdbcConn_JS(proxy, "localhost", 8080)
   }
 
-  def run(test: Conn => Any, metaDb: MetaDb_mysql): Any = {
-    test(getConnection(metaDb))
+  def run(test: Conn ?=> Any, metaDb: MetaDb_mysql): Any = {
+    given Conn = getConnection(metaDb)
+    test
   }
 
   def connZLayer(metaDb: MetaDb_mysql): ZLayer[Any, Throwable, Conn] = {

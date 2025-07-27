@@ -21,7 +21,7 @@ case class Directions(
   import api.*
   import suite.*
 
-  "Unique primary sort: From start" - unique { implicit conn =>
+  "Unique primary sort: From start" - unique {
     val query = Uniques.int.a1.query
     for {
       // Using attribute Uniques.int with only unique values
@@ -36,7 +36,7 @@ case class Directions(
     } yield ()
   }
 
-  "Unique primary sort: From end" - unique { implicit conn =>
+  "Unique primary sort: From end" - unique {
     val query = Uniques.int.a1.query
     for {
       _ <- Uniques.int.insert(1, 2, 3, 4, 5).transact
@@ -50,7 +50,7 @@ case class Directions(
   }
 
 
-  "Near-unique primary sort: From start" - types { implicit conn =>
+  "Near-unique primary sort: From start" - types {
     val query = Entity.date.a1.query
     for {
       // Using attribute Uniques.int with only unique values
@@ -65,7 +65,7 @@ case class Directions(
     } yield ()
   }
 
-  "Near-unique primary sort: From end" - types { implicit conn =>
+  "Near-unique primary sort: From end" - types {
     val query = Entity.date.a1.query
     for {
       _ <- Entity.date.insert(date1, date2, date3, date4, date5).transact

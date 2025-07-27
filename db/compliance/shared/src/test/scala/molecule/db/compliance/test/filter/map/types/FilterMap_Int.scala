@@ -19,7 +19,7 @@ case class FilterMap_Int(
   import suite.*
 
 
-  "Mandatory: Mandatory map (no filter)" - types { implicit conn =>
+  "Mandatory: Mandatory map (no filter)" - types {
     for {
       _ <- Entity.i.intMap.insert(a, b).transact
       _ <- Entity.i.a1.intMap.query.get.map(_ ==> List(a, b))
@@ -27,7 +27,7 @@ case class FilterMap_Int(
   }
 
 
-  "Mandatory: Map with certain keys" - types { implicit conn =>
+  "Mandatory: Map with certain keys" - types {
     for {
       _ <- Entity.i.intMap.insert(a, b).transact
 
@@ -42,7 +42,7 @@ case class FilterMap_Int(
   }
 
 
-  "Mandatory: Map without certain keys" - types { implicit conn =>
+  "Mandatory: Map without certain keys" - types {
     for {
       _ <- Entity.i.intMap.insert(a, b).transact
 
@@ -67,7 +67,7 @@ case class FilterMap_Int(
   }
 
 
-  "Mandatory: Map with certain values" - types { implicit conn =>
+  "Mandatory: Map with certain values" - types {
     for {
       _ <- Entity.i.intMap.insert(a, b).transact
 
@@ -108,7 +108,7 @@ case class FilterMap_Int(
   }
 
 
-  "Mandatory: Map without certain values" - types { implicit conn =>
+  "Mandatory: Map without certain values" - types {
     for {
       _ <- Entity.i.intMap.insert(a, b).transact
 
@@ -146,7 +146,7 @@ case class FilterMap_Int(
   }
 
 
-  "Tacit: Tacit Map (no filter)" - types { implicit conn =>
+  "Tacit: Tacit Map (no filter)" - types {
     for {
       _ <- Entity.i.intMap.insert(a, b).transact
       _ <- Entity.i.a1.intMap_.query.get.map(_ ==> List(1, 2))
@@ -154,7 +154,7 @@ case class FilterMap_Int(
   }
 
 
-  "Tacit: Match map with certain keys" - types { implicit conn =>
+  "Tacit: Match map with certain keys" - types {
     for {
       _ <- Entity.i.insert(0).transact // Entity without map attribute
       _ <- Entity.i.intMap.insert(a, b).transact
@@ -183,7 +183,7 @@ case class FilterMap_Int(
   }
 
 
-  "Tacit: Match map without certain keys" - types { implicit conn =>
+  "Tacit: Match map without certain keys" - types {
     for {
       _ <- Entity.i.intMap.insert(a, b).transact
 
@@ -208,7 +208,7 @@ case class FilterMap_Int(
   }
 
 
-  "Tacit: Match map with certain values" - types { implicit conn =>
+  "Tacit: Match map with certain values" - types {
     for {
       _ <- Entity.i.intMap.insert(a, b).transact
 
@@ -243,7 +243,7 @@ case class FilterMap_Int(
   }
 
 
-  "Tacit: Match map without certain values" - types { implicit conn =>
+  "Tacit: Match map without certain values" - types {
     for {
       _ <- Entity.i.intMap.insert(a, b).transact
 
@@ -278,7 +278,7 @@ case class FilterMap_Int(
   }
 
 
-  "Optional map (no filter)" - types { implicit conn =>
+  "Optional map (no filter)" - types {
     val a = (1, Some(Map("a" -> int1, "b" -> int2)))
     val b = (2, Some(Map("a" -> int2, "b" -> int3, "c" -> int4)))
     val c = (3, None)
@@ -289,7 +289,7 @@ case class FilterMap_Int(
   }
 
 
-  "Optional map values by key" - types { implicit conn =>
+  "Optional map values by key" - types {
 
     for {
       _ <- Entity.i.intMap.insert(a, b).transact

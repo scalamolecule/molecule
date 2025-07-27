@@ -16,7 +16,7 @@ case class Aggr_URI_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.uri.insert(List(
         (1, uri1),
@@ -44,7 +44,7 @@ case class Aggr_URI_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.uri.insert(
         (1, uri1),
@@ -76,7 +76,7 @@ case class Aggr_URI_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.uri.insert(
         (1, uri1),
@@ -112,7 +112,7 @@ case class Aggr_URI_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(uri1, uri2, uri3, uri4)
     for {
       _ <- Entity.uri.insert(List(uri1, uri2, uri3)).transact
@@ -123,7 +123,7 @@ case class Aggr_URI_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.uri.insert(List(
         (1, uri1),

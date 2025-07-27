@@ -21,7 +21,7 @@ case class FilterSeq(
   // Use tacit attributes as filters to match entities to be updated.
   // Apply new values to mandatory attributes.
 
-  "Seq asserted" - types { implicit conn =>
+  "Seq asserted" - types {
     for {
       case List(a, b, c) <- Entity.iSeq_?.int.insert(
         (None, 0),
@@ -53,7 +53,7 @@ case class FilterSeq(
   }
 
 
-  "Seq not asserted" - types { implicit conn =>
+  "Seq not asserted" - types {
     for {
       case List(a, b, c) <- Entity.iSeq_?.int.insert(
         (None, 0),
@@ -74,7 +74,7 @@ case class FilterSeq(
   }
 
 
-  "Seq equality" - types { implicit conn =>
+  "Seq equality" - types {
     // Filtering updates by equality of collections is not supported by molecule.
     // Instead, use has/hasNo.
     for {
@@ -86,7 +86,7 @@ case class FilterSeq(
   }
 
 
-  "Has value" - types { implicit conn =>
+  "Has value" - types {
     for {
       case List(a, b) <- Entity.iSeq.int.insert(
         (List(0, 1, 2), 1),
@@ -119,7 +119,7 @@ case class FilterSeq(
   }
 
 
-  "Doesn't have value" - types { implicit conn =>
+  "Doesn't have value" - types {
     for {
       case List(a, b) <- Entity.iSeq.int.insert(
         (List(1, 2), 1),
@@ -152,7 +152,7 @@ case class FilterSeq(
   }
 
 
-  "Types" - types { implicit conn =>
+  "Types" - types {
     for {
       // Initial values
       _ <- Entity.i(1).stringSeq(List(string1)).save.transact

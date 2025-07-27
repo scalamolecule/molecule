@@ -21,7 +21,7 @@ case class FilterSeq_LocalTime_(
   import suite.*
 
 
-  "Mandatory: has" - types { implicit conn =>
+  "Mandatory: has" - types {
     for {
       _ <- Entity.i.localTimeSeq.insert(a, b).transact
 
@@ -59,7 +59,7 @@ case class FilterSeq_LocalTime_(
   }
 
 
-  "Mandatory: hasNo" - types { implicit conn =>
+  "Mandatory: hasNo" - types {
     for {
       _ <- Entity.i.localTimeSeq.insert(a, b).transact
 
@@ -99,7 +99,7 @@ case class FilterSeq_LocalTime_(
   }
 
 
-  "Tacit: has" - types { implicit conn =>
+  "Tacit: has" - types {
     for {
       _ <- Entity.i.localTimeSeq.insert(a, b).transact
 
@@ -137,7 +137,7 @@ case class FilterSeq_LocalTime_(
   }
 
 
-  "Tacit: hasNo" - types { implicit conn =>
+  "Tacit: hasNo" - types {
     for {
       _ <- Entity.i.localTimeSeq.insert(a, b).transact
 

@@ -17,7 +17,7 @@ trait StreamingJdbc {
     chunkSize: Int,
     inspect: (Query[Tpl], Conn) => Unit,
     getResultSetAndResolver: (Query[Tpl], Conn) => (RS, RS => Any)
-  )(implicit conn: Conn): fs2.Stream[IO, Tpl] = {
+  )(using conn: Conn): fs2.Stream[IO, Tpl] = {
 
     // Ensure the inspection runs in IO
     val inspectIO: IO[Unit] =

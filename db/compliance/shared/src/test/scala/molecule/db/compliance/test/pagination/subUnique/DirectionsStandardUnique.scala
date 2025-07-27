@@ -18,7 +18,7 @@ case class DirectionsStandardUnique(
   import api.*
   import suite.*
 
-  "Forward, asc asc" - unique { implicit conn =>
+  "Forward, asc asc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     val query               = (cursor: String, limit: Int) => Uniques.i.a1.int.a2.query.from(cursor).limit(limit)
@@ -32,7 +32,7 @@ case class DirectionsStandardUnique(
     } yield ()
   }
 
-  "Forward, desc asc" - unique { implicit conn =>
+  "Forward, desc asc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
     val query               = (cursor: String, limit: Int) => Uniques.i.d1.int.a2.query.from(cursor).limit(limit)
@@ -46,7 +46,7 @@ case class DirectionsStandardUnique(
     } yield ()
   }
 
-  "Forward, asc desc" - unique { implicit conn =>
+  "Forward, asc desc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
     val query               = (cursor: String, limit: Int) => Uniques.i.a1.int.d2.query.from(cursor).limit(limit)
@@ -60,7 +60,7 @@ case class DirectionsStandardUnique(
     } yield ()
   }
 
-  "Forward, desc desc" - unique { implicit conn =>
+  "Forward, desc desc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
     val query               = (cursor: String, limit: Int) => Uniques.i.d1.int.d2.query.from(cursor).limit(limit)
@@ -75,7 +75,7 @@ case class DirectionsStandardUnique(
   }
 
 
-  "Backwards, asc asc" - unique { implicit conn =>
+  "Backwards, asc asc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     val query               = (cursor: String, limit: Int) => Uniques.i.a1.int.a2.query.from(cursor).limit(limit)
@@ -89,7 +89,7 @@ case class DirectionsStandardUnique(
     } yield ()
   }
 
-  "Backwards, desc asc" - unique { implicit conn =>
+  "Backwards, desc asc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
     val query               = (cursor: String, limit: Int) => Uniques.i.d1.int.a2.query.from(cursor).limit(limit)
@@ -103,7 +103,7 @@ case class DirectionsStandardUnique(
     } yield ()
   }
 
-  "Backwards, asc desc" - unique { implicit conn =>
+  "Backwards, asc desc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
     val query               = (cursor: String, limit: Int) => Uniques.i.a1.int.d2.query.from(cursor).limit(limit)
@@ -117,7 +117,7 @@ case class DirectionsStandardUnique(
     } yield ()
   }
 
-  "Backwards, desc desc" - unique { implicit conn =>
+  "Backwards, desc desc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
     val query               = (cursor: String, limit: Int) => Uniques.i.d1.int.d2.query.from(cursor).limit(limit)

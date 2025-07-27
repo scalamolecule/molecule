@@ -32,7 +32,7 @@ case class MutationDelete(
   import api.*
   import suite.*
 
-  "Forward: Delete row before" - types { implicit conn =>
+  "Forward: Delete row before" - types {
     val pairs            = getPairs(4, Nil)
     val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -47,7 +47,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Forward: Delete last edge row" - types { implicit conn =>
+  "Forward: Delete last edge row" - types {
     val pairs                  = getPairs(6, Nil)
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -62,7 +62,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Forward: Delete 2 last edge rows" - types { implicit conn =>
+  "Forward: Delete 2 last edge rows" - types {
     val pairs                  = getPairs(6, Nil)
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -77,7 +77,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Forward: Delete 3 last edge rows" - types { implicit conn =>
+  "Forward: Delete 3 last edge rows" - types {
     val pairs                  = getPairs(6, Nil)
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -95,7 +95,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Forward: Delete row after" - types { implicit conn =>
+  "Forward: Delete row after" - types {
     val pairs            = getPairs(4, Nil)
     val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -111,7 +111,7 @@ case class MutationDelete(
   }
 
 
-  "Backwards: Delete row before" - types { implicit conn =>
+  "Backwards: Delete row before" - types {
     val pairs            = getPairs(4, Nil)
     val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -126,7 +126,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Backwards: Delete first edge row" - types { implicit conn =>
+  "Backwards: Delete first edge row" - types {
     val pairs                  = getPairs(6, Nil)
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -141,7 +141,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Backwards: Delete 2 first edge rows" - types { implicit conn =>
+  "Backwards: Delete 2 first edge rows" - types {
     val pairs                  = getPairs(6, Nil)
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -156,7 +156,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Backwards: Delete 3 first edge rows" - types { implicit conn =>
+  "Backwards: Delete 3 first edge rows" - types {
     val pairs                  = getPairs(6, Nil)
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -174,7 +174,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Backwards: Delete row after" - types { implicit conn =>
+  "Backwards: Delete row after" - types {
     val pairs            = getPairs(4, Nil)
     val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
     for {

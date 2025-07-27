@@ -15,7 +15,7 @@ case class Aggr_Boolean(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.boolean.insert(List(
         (1, true),
@@ -42,21 +42,21 @@ case class Aggr_Boolean(
   }
 
 
-  "min" - types { implicit conn =>
+  "min" - types {
     for {
       _ <- Entity.boolean.insert(List(true, false, true)).transact
     } yield ()
   }
 
 
-  "max" - types { implicit futConn =>
+  "max" - types {
     for {
       _ <- Entity.boolean.insert(List(true, false, true)).transact
     } yield ()
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     for {
       _ <- Entity.boolean.insert(List(true, false, true)).transact
       all = Set(true, false)
@@ -64,7 +64,7 @@ case class Aggr_Boolean(
   }
 
 
-  "count, countDistinct" - types { implicit conn =>
+  "count, countDistinct" - types {
     for {
       _ <- Entity.i.boolean.insert(List(
         (1, true),

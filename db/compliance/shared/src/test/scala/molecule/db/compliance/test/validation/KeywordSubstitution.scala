@@ -16,7 +16,7 @@ case class KeywordSubstitution(
   import api.*
   import suite.*
 
-  "Colliding keyword in sql correctly resolved" - types { implicit conn =>
+  "Colliding keyword in sql correctly resolved" - types {
 
     for {
       _ <- Other.select(1).save.transact

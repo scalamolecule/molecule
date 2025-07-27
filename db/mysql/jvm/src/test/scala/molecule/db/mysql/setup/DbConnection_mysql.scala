@@ -42,8 +42,9 @@ object DbConnection_mysql extends DbConnection {
     JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)
   }
 
-  def run(test: Conn => Any, metaDb: MetaDb_mysql): Any = {
-    test(getConnection(metaDb))
+  def run(test: Conn ?=> Any, metaDb: MetaDb_mysql): Any = {
+    given Conn = getConnection(metaDb)
+    test
   }
 
 

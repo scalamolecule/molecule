@@ -22,7 +22,7 @@ object DbConnection_mariadb {
   pickleMetaDb.addConcreteType[Validation_MetaDb_mariadb]
   pickleMetaDb.addConcreteType[Segments_MetaDb_mariadb]
 
-  def run(test: Conn => Any, metaDb: MetaDb_mariadb): Any = {
+  def run(test: Conn ?=> Any, metaDb: MetaDb_mariadb): Any = {
     // Since RPC calls run in parallel we need a new connection for
     // each test when using Docker containers.
     // This makes the test suite run slower compared to sequential runs
@@ -35,8 +35,8 @@ object DbConnection_mariadb {
       s"&password="
 
     val proxy = JdbcProxy(url, metaDb)
-    val conn  = JdbcConn_JS(proxy, "localhost", 8080)
-    test(conn)
+    given Conn = JdbcConn_JS(proxy, "localhost", 8080)
+    test
   }
 
   def connZLayer(metaDb: MetaDb): ZLayer[Any, Throwable, Conn] = {

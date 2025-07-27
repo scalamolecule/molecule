@@ -64,7 +64,7 @@ class Adhoc_graphql_jvm_sync extends MUnit with TestUtils {
 
   }
 
-  //  "Subscription" - types { implicit conn =>
+  //  "Subscription" - types {
   //    var intermediaryCallbackResults = List.empty[List[Int]]
   //
   //    // Initial data
@@ -101,7 +101,7 @@ class Adhoc_graphql_jvm_sync extends MUnit with TestUtils {
   //  }
 
 
-  //  "commit" - refs { implicit conn =>
+  //  "commit" - refs {
   //    import molecule.db.compliance.domains.dsl.Refs.*
   //
   //    A.i.insert(1, 2, 3).transact

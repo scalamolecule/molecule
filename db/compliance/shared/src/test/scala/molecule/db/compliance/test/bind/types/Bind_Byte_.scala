@@ -17,7 +17,7 @@ case class Bind_Byte_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.byte.insert(byte1, byte2, byte3).transact
 
@@ -54,7 +54,7 @@ case class Bind_Byte_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.byte.insert((1, byte1), (2, byte2), (3, byte3)).transact
 

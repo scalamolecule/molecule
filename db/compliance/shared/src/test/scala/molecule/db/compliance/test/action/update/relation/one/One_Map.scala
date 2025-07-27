@@ -15,7 +15,7 @@ case class One_Map(
   import api.*
   import suite.*
 
-  "id-filter - ref - value" - refs { implicit conn =>
+  "id-filter - ref - value" - refs {
     for {
       a <- A.i(1).save.transact.map(_.id)
       b <- A.i(2).B.s("b").save.transact.map(_.id)
@@ -46,7 +46,7 @@ case class One_Map(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.i(2).B.s("b").save.transact
@@ -77,7 +77,7 @@ case class One_Map(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.iMap(Map(pint0, pint1)).save.transact // won't be updated since there's no B value
       _ <- A.s("x").B.i(1).save.transact
@@ -113,7 +113,7 @@ case class One_Map(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // will not be updated (no update filter match)
       _ <- B.s("x").iMap(Map(pint0, pint1)).save.transact
@@ -152,7 +152,7 @@ case class One_Map(
   }
 
 
-  "ref ref" - refs { implicit conn =>
+  "ref ref" - refs {
     for {
       id <- A.iMap(Map(pint1)).B.iMap(Map(pint2)).C.iMap(Map(pint3)).save.transact.map(_.id)
       _ <- A.iMap.B.iMap.C.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
@@ -188,7 +188,7 @@ case class One_Map(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     for {
       id <- A.iMap(Map(pint1)).B.iMap(Map(pint2))._A.C.iMap(Map(pint3)).save.transact.map(_.id)
       _ <- A.iMap.B.iMap._A.C.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))

@@ -20,7 +20,7 @@ case class FilterSeq_Enum(
   val b = (2, List(Green.toString, Blue.toString, Blue.toString))
 
 
-  "Mandatory: has" - types { implicit conn =>
+  "Mandatory: has" - types {
     for {
       _ <- Entity.i.colorSeq.insert(a, b).transact
 
@@ -58,7 +58,7 @@ case class FilterSeq_Enum(
   }
 
 
-  "Mandatory: hasNo" - types { implicit conn =>
+  "Mandatory: hasNo" - types {
     for {
       _ <- Entity.i.colorSeq.insert(a, b).transact
 
@@ -94,7 +94,7 @@ case class FilterSeq_Enum(
   }
 
 
-  "Tacit: has" - types { implicit conn =>
+  "Tacit: has" - types {
     for {
       _ <- Entity.i.colorSeq.insert(a, b).transact
 
@@ -132,7 +132,7 @@ case class FilterSeq_Enum(
   }
 
 
-  "Tacit: hasNo" - types { implicit conn =>
+  "Tacit: hasNo" - types {
     for {
       _ <- Entity.i.colorSeq.insert(a, b).transact
 

@@ -11,69 +11,69 @@ import scala.concurrent.{Future, ExecutionContext as EC}
 trait Api_async extends Keywords with ModelUtils { spi: Spi_async =>
 
   implicit class QueryApiAsync[Tpl](q: Query[Tpl]) {
-    def get(implicit conn: Conn, ec: EC): Future[List[Tpl]] = query_get(q)
-    def inspect(implicit conn: Conn, ec: EC): Future[String] = query_inspect(q)
+    def get(using conn: Conn, ec: EC): Future[List[Tpl]] = query_get(q)
+    def inspect(using conn: Conn, ec: EC): Future[String] = query_inspect(q)
 
-    def stream(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = query_stream(q, 100)
-    def stream(chunkSize: Int)(implicit conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = query_stream(q, chunkSize)
+    def stream(using conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = query_stream(q, 100)
+    def stream(chunkSize: Int)(using conn: Conn, ec: EC): fs2.Stream[IO, Tpl] = query_stream(q, chunkSize)
 
     def subscribe(callback: List[Tpl] => Unit)
-                 (implicit conn: Conn, ec: EC): Future[Unit] = query_subscribe(q, callback)
-    def unsubscribe()(implicit conn: Conn, ec: EC): Future[Unit] = query_unsubscribe(q)
+                 (using conn: Conn, ec: EC): Future[Unit] = query_subscribe(q, callback)
+    def unsubscribe()(using conn: Conn, ec: EC): Future[Unit] = query_unsubscribe(q)
   }
 
   implicit class QueryOffsetApiAsync[Tpl](q: QueryOffset[Tpl]) {
-    def get(implicit conn: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = queryOffset_get(q)
-    def inspect(implicit conn: Conn, ec: EC): Future[String] = queryOffset_inspect(q)
+    def get(using conn: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = queryOffset_get(q)
+    def inspect(using conn: Conn, ec: EC): Future[String] = queryOffset_inspect(q)
   }
 
   implicit class QueryCursorApiAsync[Tpl](q: QueryCursor[Tpl]) {
-    def get(implicit conn: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = queryCursor_get(q)
-    def inspect(implicit conn: Conn, ec: EC): Future[String] = queryCursor_inspect(q)
+    def get(using conn: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = queryCursor_get(q)
+    def inspect(using conn: Conn, ec: EC): Future[String] = queryCursor_inspect(q)
   }
 
   implicit class SaveApiAsync(save: Save) {
-    def transact(implicit conn: Conn, ec: EC): Future[TxReport] = save_transact(save)
-    def inspect(implicit conn: Conn, ec: EC): Future[String] = save_inspect(save)
-    def validate(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = save_validate(save)
+    def transact(using conn: Conn, ec: EC): Future[TxReport] = save_transact(save)
+    def inspect(using conn: Conn, ec: EC): Future[String] = save_inspect(save)
+    def validate(using conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = save_validate(save)
   }
 
   implicit class InsertApiAsync(insert: Insert) {
-    def transact(implicit conn: Conn, ec: EC): Future[TxReport] = insert_transact(insert)
-    def inspect(implicit conn: Conn, ec: EC): Future[String] = insert_inspect(insert)
-    def validate(implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = insert_validate(insert)
+    def transact(using conn: Conn, ec: EC): Future[TxReport] = insert_transact(insert)
+    def inspect(using conn: Conn, ec: EC): Future[String] = insert_inspect(insert)
+    def validate(using conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = insert_validate(insert)
   }
 
   implicit class UpdateApiAsync(update: Update) {
-    def transact(implicit conn0: Conn, ec: EC): Future[TxReport] = update_transact(update)
-    def inspect(implicit conn0: Conn, ec: EC): Future[String] = update_inspect(update)
-    def validate(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = update_validate(update)
+    def transact(using conn0: Conn, ec: EC): Future[TxReport] = update_transact(update)
+    def inspect(using conn0: Conn, ec: EC): Future[String] = update_inspect(update)
+    def validate(using conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = update_validate(update)
   }
 
   implicit class DeleteApiAsync(delete: Delete) {
-    def transact(implicit conn0: Conn, ec: EC): Future[TxReport] = delete_transact(delete)
-    def inspect(implicit conn0: Conn, ec: EC): Future[String] = delete_inspect(delete)
+    def transact(using conn0: Conn, ec: EC): Future[TxReport] = delete_transact(delete)
+    def inspect(using conn0: Conn, ec: EC): Future[String] = delete_inspect(delete)
   }
 
   def rawQuery(
     query: String,
     doPrint: Boolean = false,
-  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = fallback_rawQuery(query, doPrint)
+  )(using conn: Conn, ec: EC): Future[List[List[Any]]] = fallback_rawQuery(query, doPrint)
 
   def rawTransact(
     txData: String,
     doPrint: Boolean = false
-  )(implicit conn: Conn, ec: EC): Future[TxReport] = fallback_rawTransact(txData, doPrint)
+  )(using conn: Conn, ec: EC): Future[TxReport] = fallback_rawTransact(txData, doPrint)
 }
 
 
 trait Api_async_transact { api: Api_async & Spi_async =>
 
   def transact(a1: Action, a2: Action, aa: Action*)
-              (implicit conn: Conn, ec: EC): Future[Seq[TxReport]] = transact(a1 +: a2 +: aa)
+              (using conn: Conn, ec: EC): Future[Seq[TxReport]] = transact(a1 +: a2 +: aa)
 
   def transact(actions: Seq[Action])
-              (implicit conn: Conn, ec: EC): Future[Seq[TxReport]] = {
+              (using conn: Conn, ec: EC): Future[Seq[TxReport]] = {
     var ok = true
     conn.waitCommitting()
     val txReports = Future.sequence(
@@ -105,7 +105,7 @@ trait Api_async_transact { api: Api_async & Spi_async =>
 
 
   def unitOfWork[T](runUOW: => Future[T])
-                   (implicit conn: Conn, ec: EC): Future[T] = {
+                   (using conn: Conn, ec: EC): Future[T] = {
     conn.waitCommitting()
     runUOW
       .map { t =>
@@ -122,7 +122,7 @@ trait Api_async_transact { api: Api_async & Spi_async =>
 
 
   def savepoint[T](runSavepoint: Savepoint => Future[T])
-                  (implicit conn: Conn, ec: EC): Future[T] = {
+                  (using conn: Conn, ec: EC): Future[T] = {
     conn.savepoint_async(runSavepoint)
   }
 }

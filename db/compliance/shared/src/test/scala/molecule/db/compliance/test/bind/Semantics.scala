@@ -19,7 +19,7 @@ case class Semantics(
   import suite.*
 
 
-  "Basic" - types { implicit conn =>
+  "Basic" - types {
     for {
       _ <- Entity.int.insert(1, 2, 3).transact
 
@@ -34,7 +34,7 @@ case class Semantics(
     } yield ()
   }
 
-  "Runtime input type checking" - types { implicit conn =>
+  "Runtime input type checking" - types {
     for {
       _ <- Entity.int.insert(1, 2, 3).transact
 
@@ -49,7 +49,7 @@ case class Semantics(
   }
 
 
-  "Mutations don't support bind params" - types { implicit conn =>
+  "Mutations don't support bind params" - types {
     interceptMessage[ModelError](
       "Save action does not support bind parameters."
     )(Entity.i(?).save)
@@ -68,7 +68,7 @@ case class Semantics(
   }
 
 
-  "Query offset" - types { implicit conn =>
+  "Query offset" - types {
     for {
       _ <- Entity.int.insert(1, 2, 3).transact
 
@@ -91,7 +91,7 @@ case class Semantics(
     } yield ()
   }
 
-  "Query cursor" - types { implicit conn =>
+  "Query cursor" - types {
     val query   = Entity.int.a1.query
     val queryGt = Entity.int.>(?).a1.query
     for {
@@ -110,7 +110,7 @@ case class Semantics(
 
 
   // (Up to 22 inputs)
-  "Multiple bindings in correct order" - types { implicit conn =>
+  "Multiple bindings in correct order" - types {
     for {
       _ <- Entity.i.int.string.insert(
         (1, 1, "a"),

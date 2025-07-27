@@ -23,11 +23,11 @@ trait DbConnection_h2 extends DbConnection {
   pickleMetaDb.addConcreteType[Validation_MetaDb_h2]
   pickleMetaDb.addConcreteType[Segments_MetaDb_h2]
 
-  def run(test: Conn => Any, metaDb: MetaDb_h2): Any = {
+  def run(test: Conn ?=> Any, metaDb: MetaDb_h2): Any = {
     val url   = s"jdbc:h2:mem:test" + Random.nextInt().abs
     val proxy = JdbcProxy(url, metaDb)
-    val conn  = JdbcConn_JS(proxy, "localhost", 8080)
-    test(conn)
+    given Conn = JdbcConn_JS(proxy, "localhost", 8080)
+    test
   }
 
   def connZLayer(metaDb: MetaDb): ZLayer[Any, Throwable, Conn] = {

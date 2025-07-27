@@ -19,7 +19,7 @@ case class TypesOne(
   import api.*
   import suite.*
 
-  "Types" - validation { implicit conn =>
+  "Types" - validation {
     for {
       _ <- Type.string("a").save.transact
         .map(_ ==> "Unexpected success").recover {

@@ -17,7 +17,7 @@ case class FilterOne_LocalTime_(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     val a = (1, localTime1)
     val b = (2, localTime2)
     val c = (3, localTime3)
@@ -68,7 +68,7 @@ case class FilterOne_LocalTime_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, c, x) = (1, 2, 3, 4)
     for {
       _ <- Entity.i.localTime_?.insert(List(
@@ -125,7 +125,7 @@ case class FilterOne_LocalTime_(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     val a = (1, Some(localTime1))
     val b = (2, Some(localTime2))
     val c = (3, Some(localTime3))
@@ -148,7 +148,7 @@ case class FilterOne_LocalTime_(
   }
 
 
-  "Combinations" - types { implicit conn =>
+  "Combinations" - types {
     for {
       _ <- Entity.i.localTime.insert(
         (1, localTime1),

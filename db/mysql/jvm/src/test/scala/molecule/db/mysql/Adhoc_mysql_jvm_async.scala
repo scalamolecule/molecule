@@ -9,7 +9,7 @@ import molecule.db.mysql.setup.DbProviders_mysql
 class Adhoc_mysql_jvm_async extends MUnit with DbProviders_mysql with TestUtils {
 
 
-  "types" - types { implicit conn =>
+  "types" - types {
     import molecule.db.compliance.domains.dsl.Types.*
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
@@ -26,7 +26,7 @@ class Adhoc_mysql_jvm_async extends MUnit with DbProviders_mysql with TestUtils 
   }
 
 //
-//  "refs" - refs { implicit conn =>
+//  "refs" - refs {
 //    import molecule.db.compliance.domains.dsl.Refs.*
 //    for {
 //
@@ -43,7 +43,7 @@ class Adhoc_mysql_jvm_async extends MUnit with DbProviders_mysql with TestUtils 
 //  }
 
 
-  //    "unique" - unique { implicit conn =>
+  //    "unique" - unique {
   //      import molecule.db.compliance.domains.dsl.Uniques._
   //      for {
   //        _ <- Uniques.i(1).save.transact
@@ -52,7 +52,7 @@ class Adhoc_mysql_jvm_async extends MUnit with DbProviders_mysql with TestUtils 
   //    }
   //
   //
-  //    "validation" - validation { implicit conn =>
+  //    "validation" - validation {
   //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)

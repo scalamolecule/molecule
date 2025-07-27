@@ -21,7 +21,7 @@ case class FilterSet_OffsetTime_(
   import suite.*
 
 
-  "Mandatory: has" - types { implicit conn =>
+  "Mandatory: has" - types {
     for {
       _ <- Entity.i.offsetTimeSet.insert(a, b).transact
 
@@ -58,7 +58,7 @@ case class FilterSet_OffsetTime_(
   }
 
 
-  "Mandatory: hasNo" - types { implicit conn =>
+  "Mandatory: hasNo" - types {
     for {
       _ <- Entity.i.offsetTimeSet.insert(a, b).transact
 
@@ -98,7 +98,7 @@ case class FilterSet_OffsetTime_(
   }
 
 
-  "Tacit: has" - types { implicit conn =>
+  "Tacit: has" - types {
     for {
       _ <- Entity.i.offsetTimeSet.insert(a, b).transact
 
@@ -136,7 +136,7 @@ case class FilterSet_OffsetTime_(
   }
 
 
-  "Tacit: hasNo" - types { implicit conn =>
+  "Tacit: hasNo" - types {
     for {
       _ <- Entity.i.offsetTimeSet.insert(a, b).transact
 

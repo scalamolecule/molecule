@@ -19,7 +19,7 @@ case class TypesSetOpt(
   import api.*
   import suite.*
 
-  "Types" - validation { implicit conn =>
+  "Types" - validation {
     for {
       _ <- Type.stringSet_?.insert(Some(Set("a", "b", "d"))).transact
         .map(_ ==> "Unexpected success").recover {

@@ -15,7 +15,7 @@ case class OpsSet(
   import api.*
   import suite.*
 
-  "apply" - types { implicit conn =>
+  "apply" - types {
     for {
       id <- Entity.i(42).save.transact.map(_.id)
 
@@ -62,7 +62,7 @@ case class OpsSet(
   }
 
 
-  "add" - types { implicit conn =>
+  "add" - types {
     for {
       id <- Entity.i(42).save.transact.map(_.id)
 
@@ -100,7 +100,7 @@ case class OpsSet(
   }
 
 
-  "remove" - types { implicit conn =>
+  "remove" - types {
     // No semantic difference between update/upsert when removing
     for {
       id <- Entity.i(42).save.transact.map(_.id)
@@ -146,7 +146,7 @@ case class OpsSet(
   }
 
 
-  "Update multiple values" - types { implicit conn =>
+  "Update multiple values" - types {
     for {
       case List(a, b, c) <- Entity.i.intSet_?.insert(
         (1, None),
@@ -177,7 +177,7 @@ case class OpsSet(
   }
 
 
-  "Types apply" - types { implicit conn =>
+  "Types apply" - types {
     for {
       case List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
 
@@ -308,7 +308,7 @@ case class OpsSet(
   }
 
 
-  "Types add" - types { implicit conn =>
+  "Types add" - types {
     for {
       case List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
 
@@ -437,7 +437,7 @@ case class OpsSet(
   }
 
 
-  "Types remove" - types { implicit conn =>
+  "Types remove" - types {
     for {
       List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
 

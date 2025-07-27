@@ -15,7 +15,7 @@ case class OffsetForward(
   import api.*
   import suite.*
 
-  "Flat" - types { implicit conn =>
+  "Flat" - types {
     for {
       // Empty results
       _ <- Entity.int.a1.query.limit(2).get.map(_ ==> Nil)
@@ -48,7 +48,7 @@ case class OffsetForward(
   }
 
 
-  "Nested" - types { implicit conn =>
+  "Nested" - types {
     for {
       // Empty results
       _ <- Entity.int.a1.Refs.*(Ref.i).query.limit(2).get.map(_ ==> Nil)
@@ -97,7 +97,7 @@ case class OffsetForward(
   }
 
 
-  "Optional nested" - types { implicit conn =>
+  "Optional nested" - types {
     for {
       _ <- Entity.int.Refs.*(Ref.i).insert(
         (1, List(11, 12)),

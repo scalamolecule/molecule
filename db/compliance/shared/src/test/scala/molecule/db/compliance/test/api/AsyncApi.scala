@@ -20,7 +20,7 @@ case class AsyncApi(
   import api.*
   import suite.*
 
-  "Crud actions" - types { implicit conn =>
+  "Crud actions" - types {
     for {
       case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(3).save.transact
@@ -32,7 +32,7 @@ case class AsyncApi(
   }
 
 
-  "Streaming" - types { implicit conn =>
+  "Streaming" - types {
     for {
       _ <- Entity.i.insert(1, 2, 3).transact
 
@@ -63,7 +63,7 @@ case class AsyncApi(
   }
 
 
-  "Opt ref" - refs { implicit conn =>
+  "Opt ref" - refs {
 
     for {
       _ <- A.i(1).save.transact
@@ -84,7 +84,7 @@ case class AsyncApi(
   }
 
 
-  "Validation" - validation { implicit conn =>
+  "Validation" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     for {
       _ <- Type.string("a").save.transact
@@ -118,7 +118,7 @@ case class AsyncApi(
   }
 
 
-  "Offset query" - types { implicit conn =>
+  "Offset query" - types {
     for {
       _ <- Entity.int.insert(1, 2, 3).transact
       _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
@@ -129,7 +129,7 @@ case class AsyncApi(
   }
 
 
-  "Cursor query" - unique { implicit conn =>
+  "Cursor query" - unique {
     import molecule.db.compliance.domains.dsl.Uniques.*
     val query = Uniques.int.a1.query
     for {
@@ -143,7 +143,7 @@ case class AsyncApi(
   }
 
 
-  "Subscription" - types { implicit conn =>
+  "Subscription" - types {
     var intermediaryCallbackResults = List.empty[List[Int]]
     for {
       // Initial data

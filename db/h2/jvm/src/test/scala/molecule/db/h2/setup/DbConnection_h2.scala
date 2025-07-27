@@ -15,7 +15,7 @@ import scala.util.Using.Manager
 
 trait DbConnection_h2 extends DbConnection {
 
-  def run(test: Conn => Any, metaDb: MetaDb_h2): Any = {
+  def run(test: Conn ?=> Any, metaDb: MetaDb_h2): Any = {
 
     // Using unclosed, gc'ed connection to avoid fs2 Stream
     // to materialize in test assertion after db has been closed.
@@ -28,36 +28,36 @@ trait DbConnection_h2 extends DbConnection {
   }
 
   // Use in-memory H2 (fastest)
-  private def runMemDbUnclosed(test: Conn => Any, metaDb: MetaDb_h2): Any = {
+  private def runMemDbUnclosed(test: Conn ?=> Any, metaDb: MetaDb_h2): Any = {
     val url   = "jdbc:h2:mem:test" + Random.nextInt().abs
     val proxy = JdbcProxy(url, metaDb)
     Class.forName("org.h2.Driver")
     val sqlConn = DriverManager.getConnection(proxy.url)
-    val conn    = JdbcHandler_JVM.recreateDb(proxy, sqlConn)
-    test(conn)
+    given Conn = JdbcHandler_JVM.recreateDb(proxy, sqlConn)
+    test
   }
 
-  private def runMemDb(test: Conn => Any, metaDb: MetaDb_h2): Any = {
+  private def runMemDb(test: Conn ?=> Any, metaDb: MetaDb_h2): Any = {
     val url = "jdbc:h2:mem:test" + Random.nextInt().abs
     Manager { use =>
       val proxy   = JdbcProxy(url, metaDb)
       val sqlConn = use(DriverManager.getConnection(proxy.url))
-      val conn    = use(JdbcHandler_JVM.recreateDb(proxy, sqlConn))
-      test(conn)
+      given Conn = use(JdbcHandler_JVM.recreateDb(proxy, sqlConn))
+      test
     }.get
   }
 
 
   // Use H2 saving to disk (slower but can persist)
-  private def runFileDb(test: Conn => Any, metaDb: MetaDb_h2): Any = {
+  private def runFileDb(test: Conn ?=> Any, metaDb: MetaDb_h2): Any = {
     val ds             = new JdbcDataSource()
     val tempDbFilePath = tempDbPath
     ds.setUrl("jdbc:h2:" + tempDbFilePath)
     Manager { use =>
       val proxy   = JdbcProxy(ds.getUrl, metaDb)
       val sqlConn = use(ds.getConnection)
-      val conn    = use(JdbcHandler_JVM.recreateDb(proxy, sqlConn))
-      test(conn)
+      given Conn = use(JdbcHandler_JVM.recreateDb(proxy, sqlConn))
+      test
       tempDbFilePath.toFile.delete()
     }.get
   }
@@ -68,15 +68,15 @@ trait DbConnection_h2 extends DbConnection {
   config.setConnectionTimeout(3000)
 
   // Use Hikari connection pool
-  private def runFileDbWithHikariCP(test: Conn => Any, metaDb: MetaDb_h2): Any = {
+  private def runFileDbWithHikariCP(test: Conn ?=> Any, metaDb: MetaDb_h2): Any = {
     val tempDbFilePath = tempDbPath
     config.setJdbcUrl("jdbc:h2:" + tempDbFilePath)
     Manager { use =>
       val ds      = use(new HikariDataSource(config))
       val proxy   = JdbcProxy(ds.getJdbcUrl, metaDb)
       val sqlConn = use(ds.getConnection)
-      val conn    = use(JdbcHandler_JVM.recreateDb(proxy, sqlConn))
-      test(conn)
+      given Conn = use(JdbcHandler_JVM.recreateDb(proxy, sqlConn))
+      test
       tempDbFilePath.toFile.delete()
     }.get
   }

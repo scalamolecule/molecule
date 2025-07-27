@@ -16,7 +16,7 @@ case class Sorting(
   import api.*
   import suite.*
 
-  "Same entity" - types { implicit conn =>
+  "Same entity" - types {
     for {
       _ <- Entity.i.int.insert(
         (2, 3),
@@ -50,7 +50,7 @@ case class Sorting(
   }
 
 
-  "CrossEntity" - refs { implicit conn =>
+  "CrossEntity" - refs {
     for {
       _ <- A.i.B.i.insert(
         (2, 3),

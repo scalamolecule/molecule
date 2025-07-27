@@ -16,7 +16,7 @@ case class FilterSeq_Boolean(
   import api.*
   import suite.*
 
-  "Mandatory: has" - types { implicit conn =>
+  "Mandatory: has" - types {
     val t  = (1, List(true))
     val f  = (2, List(false))
     val tf = (3, List(true, false, false))
@@ -47,7 +47,7 @@ case class FilterSeq_Boolean(
   }
 
 
-  "Mandatory: hasNo" - types { implicit conn =>
+  "Mandatory: hasNo" - types {
     val t  = (1, List(true))
     val f  = (2, List(false))
     val tf = (3, List(true, false, false))
@@ -77,7 +77,7 @@ case class FilterSeq_Boolean(
   }
 
 
-  "Tacit: has" - types { implicit conn =>
+  "Tacit: has" - types {
     val (t, f, tf) = (1, 2, 3)
     for {
       _ <- Entity.i.booleanSeq.insert(List(
@@ -110,7 +110,7 @@ case class FilterSeq_Boolean(
   }
 
 
-  "Tacit: hasNo" - types { implicit conn =>
+  "Tacit: hasNo" - types {
     val (t, f, tf) = (1, 2, 3)
     for {
       _ <- Entity.i.booleanSeq.insert(List(

@@ -17,7 +17,7 @@ case class Bind_Float_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.float.insert(float1, float2, float3).transact
 
@@ -54,7 +54,7 @@ case class Bind_Float_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.float.insert((1, float1), (2, float2), (3, float3)).transact
 

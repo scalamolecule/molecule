@@ -16,7 +16,7 @@ case class Aggr_Duration_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.duration.insert(List(
         (1, duration1),
@@ -44,7 +44,7 @@ case class Aggr_Duration_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.duration.insert(
         (1, duration1),
@@ -76,7 +76,7 @@ case class Aggr_Duration_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.duration.insert(
         (1, duration1),
@@ -112,7 +112,7 @@ case class Aggr_Duration_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(duration1, duration2, duration3, duration4)
     for {
       _ <- Entity.duration.insert(List(duration1, duration2, duration3)).transact
@@ -123,7 +123,7 @@ case class Aggr_Duration_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.duration.insert(List(
         (1, duration1),

@@ -16,7 +16,7 @@ case class Prefixed(
   import api.*
   import suite.*
 
-  "Nested 2 levels" - segments { implicit conn =>
+  "Nested 2 levels" - segments {
     for {
       _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)
         .insert(("book", "Jan", List("Musician"))).transact
@@ -31,7 +31,7 @@ case class Prefixed(
   }
 
 
-  "Back only" - segments { implicit conn =>
+  "Back only" - segments {
     for {
       _ <- lit_Book.title("A good book").cat("good").Author.name("Marc").save.transact
       _ <- lit_Book.title.Author.name._lit_Book.cat
@@ -40,7 +40,7 @@ case class Prefixed(
   }
 
 
-  "Adjacent" - segments { implicit conn =>
+  "Adjacent" - segments {
     for {
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name
         .insert(("book", "John", "Marc")).transact
@@ -54,7 +54,7 @@ case class Prefixed(
   }
 
 
-  "Nested" - segments { implicit conn =>
+  "Nested" - segments {
     for {
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(gen_Person.name)
         .insert(("book", "John", List("Marc"))).transact
@@ -68,7 +68,7 @@ case class Prefixed(
   }
 
 
-  "Nested + adjacent" - segments { implicit conn =>
+  "Nested + adjacent" - segments {
     for {
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(
         gen_Person.name.Professions.name
@@ -83,7 +83,7 @@ case class Prefixed(
   }
 
 
-  "Nested + nested" - segments { implicit conn =>
+  "Nested + nested" - segments {
     for {
       _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(
           gen_Person.name.Professions.*(

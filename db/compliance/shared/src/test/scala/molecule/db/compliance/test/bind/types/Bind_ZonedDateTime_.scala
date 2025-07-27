@@ -17,7 +17,7 @@ case class Bind_ZonedDateTime_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.zonedDateTime.insert(zonedDateTime1, zonedDateTime2, zonedDateTime3).transact
 
@@ -54,7 +54,7 @@ case class Bind_ZonedDateTime_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.zonedDateTime.insert((1, zonedDateTime1), (2, zonedDateTime2), (3, zonedDateTime3)).transact
 

@@ -17,7 +17,7 @@ case class NestedSemantics(
   import api.*
   import suite.*
 
-  "Nested entity must match" - refs { implicit conn =>
+  "Nested entity must match" - refs {
     for {
       _ <- A.i.Bb.*(E.i).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -32,7 +32,7 @@ case class NestedSemantics(
   }
 
 
-  "Mixing *?/* not allowed" - refs { implicit conn =>
+  "Mixing *?/* not allowed" - refs {
     for {
       _ <- A.i.Bb.*(B.i.Cc.*?(C.i)).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

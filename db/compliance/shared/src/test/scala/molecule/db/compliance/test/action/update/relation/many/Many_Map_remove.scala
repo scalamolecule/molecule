@@ -15,7 +15,7 @@ case class Many_Map_remove(
   import api.*
   import suite.*
 
-  "id-filter - ref - value" - refs { implicit conn =>
+  "id-filter - ref - value" - refs {
     for {
       List(a, b, c, d, e, f) <- A.i.Bb.*?(B.s_?.iMap_?).insert(
         (1, List()),
@@ -42,7 +42,7 @@ case class Many_Map_remove(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i.Bb.*?(B.s_?.iMap_?).insert(
         (1, List()),
@@ -69,7 +69,7 @@ case class Many_Map_remove(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.iMap.Bb.*?(B.s).insert(
         (Map(pint1, pint3), List()),
@@ -94,7 +94,7 @@ case class Many_Map_remove(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // Will not be updated since entity has no A -> B relationship
       _ <- B.s("x").iMap(Map(pint1, pint3)).save.transact

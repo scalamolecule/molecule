@@ -29,7 +29,7 @@ case class DirectionsMandatory(
   import api.*
   import suite.*
 
-  "Forward, asc asc" - types { implicit conn =>
+  "Forward, asc asc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.a1.int.a2.query.from(cursor).limit(limit)
@@ -43,7 +43,7 @@ case class DirectionsMandatory(
     } yield ()
   }
 
-  "Forward, desc asc" - types { implicit conn =>
+  "Forward, desc asc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.d1.int.a2.query.from(cursor).limit(limit)
@@ -57,7 +57,7 @@ case class DirectionsMandatory(
     } yield ()
   }
 
-  "Forward, asc desc" - types { implicit conn =>
+  "Forward, asc desc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.a1.int.d2.query.from(cursor).limit(limit)
@@ -71,7 +71,7 @@ case class DirectionsMandatory(
     } yield ()
   }
 
-  "Forward, desc desc" - types { implicit conn =>
+  "Forward, desc desc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.d1.int.d2.query.from(cursor).limit(limit)
@@ -86,7 +86,7 @@ case class DirectionsMandatory(
   }
 
 
-  "Backwards, asc asc" - types { implicit conn =>
+  "Backwards, asc asc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.a1.int.a2.query.from(cursor).limit(limit)
@@ -100,7 +100,7 @@ case class DirectionsMandatory(
     } yield ()
   }
 
-  "Backwards, desc asc" - types { implicit conn =>
+  "Backwards, desc asc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.d1.int.a2.query.from(cursor).limit(limit)
@@ -114,7 +114,7 @@ case class DirectionsMandatory(
     } yield ()
   }
 
-  "Backwards, asc desc" - types { implicit conn =>
+  "Backwards, asc desc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.a1.int.d2.query.from(cursor).limit(limit)
@@ -128,7 +128,7 @@ case class DirectionsMandatory(
     } yield ()
   }
 
-  "Backwards, desc desc" - types { implicit conn =>
+  "Backwards, desc desc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.d1.int.d2.query.from(cursor).limit(limit)

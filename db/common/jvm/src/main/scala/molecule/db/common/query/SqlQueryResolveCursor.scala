@@ -23,7 +23,7 @@ case class SqlQueryResolveCursor[Tpl](
   with MoleculeLogging {
 
 
-  def getListFromCursor_sync(implicit conn: JdbcConn_JVM)
+  def getListFromCursor_sync(using conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = {
     optLimit match {
       case Some(limit) => cursor match {
@@ -48,7 +48,7 @@ case class SqlQueryResolveCursor[Tpl](
     }
   }
 
-  private def getInitialPage(limit: Int)(implicit conn: JdbcConn_JVM)
+  private def getInitialPage(limit: Int)(using conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = {
     val forward      = limit > 0
     val altElements  = if (forward) dataModel.elements else reverseTopLevelSorting(dataModel.elements)

@@ -17,7 +17,7 @@ case class InsertRefs(
   import api.*
   import suite.*
 
-  "card one" - refs { implicit conn =>
+  "card one" - refs {
     for {
       _ <- A.i.B.s.insert(
         (1, "a"),
@@ -38,7 +38,7 @@ case class InsertRefs(
   }
 
 
-  "card many" - refs { implicit conn =>
+  "card many" - refs {
     for {
       _ <- A.i.Bb.i.insert((1, 2)).transact
       _ <- A.i.Bb.i.query.get.map(_ ==> List((1, 2)))
@@ -49,7 +49,7 @@ case class InsertRefs(
   }
 
 
-  "card one/many" - refs { implicit conn =>
+  "card one/many" - refs {
     for {
       _ <- A.i.B.i.Cc.i.insert((1, 2, 3)).transact
       _ <- A.i.B.i.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -57,7 +57,7 @@ case class InsertRefs(
   }
 
 
-  "card many/one" - refs { implicit conn =>
+  "card many/one" - refs {
     for {
       _ <- A.i.Bb.i.C.i.insert((1, 2, 3)).transact
       _ <- A.i.Bb.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -65,7 +65,7 @@ case class InsertRefs(
   }
 
 
-  "backref, card one" - refs { implicit conn =>
+  "backref, card one" - refs {
     for {
       // Can't go back from empty entities
       _ <- A.i.B._A.s.insert((1, "a")).transact
@@ -107,7 +107,7 @@ case class InsertRefs(
   }
 
 
-  "backref, card many" - refs { implicit conn =>
+  "backref, card many" - refs {
     for {
       _ <- A.i.Bb.i._A.s.insert((1, 2, "a")).transact
       _ <- A.i.Bb.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
@@ -154,7 +154,7 @@ case class InsertRefs(
   }
 
 
-  "self-join, one" - refs { implicit conn =>
+  "self-join, one" - refs {
     for {
       _ <- A.i.A.i.insert((1, 2)).transact
       _ <- A.i.A.i.query.get.map(_ ==> List((1, 2)))
@@ -171,7 +171,7 @@ case class InsertRefs(
   }
 
 
-  "self-join, many" - refs { implicit conn =>
+  "self-join, many" - refs {
     for {
       _ <- A.i.Aa.i.insert((1, 2)).transact
       _ <- A.i.Aa.i.query.get.map(_ ==> List((1, 2)))
@@ -188,7 +188,7 @@ case class InsertRefs(
   }
 
 
-  "ids, ref, card-one" - refs { implicit conn =>
+  "ids, ref, card-one" - refs {
     for {
       // Ids of A entities returned
       case List(a1, a2) <- A.i.B.i.insert(
@@ -212,7 +212,7 @@ case class InsertRefs(
     } yield ()
   }
 
-  "ids, ref, card-set" - refs { implicit conn =>
+  "ids, ref, card-set" - refs {
     for {
       // Ids of A entities returned
       case List(a1, a2) <- A.i.Bb.i.insert(
@@ -238,7 +238,7 @@ case class InsertRefs(
   }
 
 
-  "ids, backref" - refs { implicit conn =>
+  "ids, backref" - refs {
 
     for {
       // ref - ref
@@ -287,7 +287,7 @@ case class InsertRefs(
     } yield ()
   }
 
-  "ids, nested" - refs { implicit conn =>
+  "ids, nested" - refs {
 
     for {
       // 2 A entity ids returned (no Bb ref ids)
@@ -303,7 +303,7 @@ case class InsertRefs(
     } yield ()
   }
 
-  "ids, nested + ref" - refs { implicit conn =>
+  "ids, nested + ref" - refs {
 
     for {
       // Ids of A entities returned
@@ -319,7 +319,7 @@ case class InsertRefs(
     } yield ()
   }
 
-  "ids, ref + nested + ref " - refs { implicit conn =>
+  "ids, ref + nested + ref " - refs {
 
     for {
       // Ids of A entities returned
@@ -335,7 +335,7 @@ case class InsertRefs(
     } yield ()
   }
 
-  "ids, self-join + nested + ref " - refs { implicit conn =>
+  "ids, self-join + nested + ref " - refs {
 
     for {
       // Ids of A entities returned
@@ -351,7 +351,7 @@ case class InsertRefs(
     } yield ()
   }
 
-  "Optional ref (left join)" - refs { implicit conn =>
+  "Optional ref (left join)" - refs {
     for {
       _ <- A.i.B.?(B.s).insert(
         (1, Some("a")),
@@ -365,7 +365,7 @@ case class InsertRefs(
     } yield ()
   }
 
-  "Optional ref 2 (left join)" - refs { implicit conn =>
+  "Optional ref 2 (left join)" - refs {
     for {
       _ <- A.i.B.?(B.i.s).insert(
         (1, Some((10, "a"))),
@@ -380,7 +380,7 @@ case class InsertRefs(
   }
 
 
-  "Optional entity (right join)" - refs { implicit conn =>
+  "Optional entity (right join)" - refs {
     for {
       _ <- A.?(A.i).B.s.insert(
         (Some(1), "a"),
@@ -394,7 +394,7 @@ case class InsertRefs(
     } yield ()
   }
 
-  "Optional entity 2 (right join)" - refs { implicit conn =>
+  "Optional entity 2 (right join)" - refs {
     for {
       _ <- A.?(A.i.s).B.s.insert.apply(
         (Some((1, "x")), "a"),

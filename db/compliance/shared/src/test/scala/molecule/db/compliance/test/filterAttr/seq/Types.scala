@@ -15,7 +15,7 @@ case class Types(
   import api.*
   import suite.*
 
-  "has" - types { implicit conn =>
+  "has" - types {
     for {
       _ <- Entity.stringSeq.Ref.string.insert((List(string1), string1)).transact
       _ <- Entity.stringSeq.Ref.string.insert((List(string1), string1)).transact
@@ -87,7 +87,7 @@ case class Types(
   }
 
 
-  "hasNo" - types { implicit conn =>
+  "hasNo" - types {
     for {
       _ <- Entity.stringSeq.Ref.string.insert((List(string1), string2)).transact
       _ <- Entity.intSeq.Ref.int.insert((List(int1), int2)).transact

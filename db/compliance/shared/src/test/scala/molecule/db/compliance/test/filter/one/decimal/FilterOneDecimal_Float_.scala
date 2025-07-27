@@ -16,7 +16,7 @@ case class FilterOneDecimal_Float_(
   import api.*
   import suite.*
 
-  "ceil/floor" - types { implicit conn =>
+  "ceil/floor" - types {
     for {
       _ <- Entity.float.insert(
         -float2, // -2.2

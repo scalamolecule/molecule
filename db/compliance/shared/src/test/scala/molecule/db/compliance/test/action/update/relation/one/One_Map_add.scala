@@ -19,7 +19,7 @@ case class One_Map_add(
   import api.*
   import suite.*
 
-  "id-filter - ref - value" - refs { implicit conn =>
+  "id-filter - ref - value" - refs {
     for {
       a <- A.i(1).save.transact.map(_.id)
       b <- A.i(2).B.s("b").save.transact.map(_.id)
@@ -60,7 +60,7 @@ case class One_Map_add(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.i(2).B.s("b").save.transact
@@ -101,7 +101,7 @@ case class One_Map_add(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.iMap(Map(pint0, pint1)).save.transact // won't be updated since there's no B value
       _ <- A.s("x").B.i(1).save.transact
@@ -137,7 +137,7 @@ case class One_Map_add(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // will not be updated (no update filter match)
       _ <- B.s("x").iMap(Map(pint0, pint1)).save.transact

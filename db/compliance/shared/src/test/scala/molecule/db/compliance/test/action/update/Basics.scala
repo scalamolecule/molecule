@@ -17,7 +17,7 @@ case class Basics(
   import api.*
   import suite.*
 
-  "Update entity with id" - types { implicit conn =>
+  "Update entity with id" - types {
     for {
       id <- Entity.i(1).save.transact.map(_.id)
       _ <- Entity.i.query.get.map(_ ==> List(1))
@@ -28,7 +28,7 @@ case class Basics(
   }
 
 
-  "Can't update optional values" - types { implicit conn =>
+  "Can't update optional values" - types {
     for {
       _ <- Entity(42).int_?(Some(1)).update.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -53,7 +53,7 @@ case class Basics(
   }
 
 
-  "Subtypes - Seq" - types { implicit conn =>
+  "Subtypes - Seq" - types {
     for {
       _ <- Entity.s("Seq").intSeq(Seq(1, 2, 3)).save.transact // default LinearSeq -> List
       _ <- Entity.s("IndexedSeq").intSeq(IndexedSeq(1, 2, 3)).save.transact // default Vector
@@ -92,7 +92,7 @@ case class Basics(
     } yield ()
   }
 
-  "Subtypes - Set" - types { implicit conn =>
+  "Subtypes - Set" - types {
     for {
       _ <- Entity.s("Set").intSet(Set(1, 2, 3)).save.transact // default HashSet
       _ <- Entity.s("HashSet").intSet(HashSet(1, 2, 3)).save.transact
@@ -119,7 +119,7 @@ case class Basics(
     } yield ()
   }
 
-  "Subtypes - Map" - types { implicit conn =>
+  "Subtypes - Map" - types {
     for {
       _ <- Entity.s("Map").intMap(Map("a" -> 1, "b" -> 2, "c" -> 3)).save.transact // default SeqMap -> HashMap
       _ <- Entity.s("HashMap").intMap(HashMap("a" -> 1, "b" -> 2, "c" -> 3)).save.transact

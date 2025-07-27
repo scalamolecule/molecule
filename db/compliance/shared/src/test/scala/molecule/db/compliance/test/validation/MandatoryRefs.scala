@@ -18,7 +18,7 @@ case class MandatoryRefs(
   import api.*
   import suite.*
 
-  "Missing ref" - validation { implicit conn =>
+  "Missing ref" - validation {
     for {
       _ <- MandatoryRefB.i(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -48,7 +48,7 @@ case class MandatoryRefs(
   }
 
 
-  "Missing ref, second level" - validation { implicit conn =>
+  "Missing ref, second level" - validation {
     for {
       // Ref A still has unset mandatory ref to RefB
       _ <- MandatoryRefAB.i(1).RefA.i(2).save.transact
@@ -70,7 +70,7 @@ case class MandatoryRefs(
   }
 
 
-  "Missing card-many ref" - validation { implicit conn =>
+  "Missing card-many ref" - validation {
     for {
       _ <- MandatoryRefsB.i(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -91,7 +91,7 @@ case class MandatoryRefs(
   }
 
 
-  "Missing card-many ref, second level" - validation { implicit conn =>
+  "Missing card-many ref, second level" - validation {
     for {
       // Ref A still has unset mandatory ref to RefB
       _ <- MandatoryRefsAB.i(1).RefsA.i(2).save.transact
@@ -113,7 +113,7 @@ case class MandatoryRefs(
   }
 
 
-  "Update, delete ref attr" - validation { implicit conn =>
+  "Update, delete ref attr" - validation {
     for {
       id <- MandatoryRefB.i(1).RefB.i(2).save.transact.map(_.id)
 
@@ -129,7 +129,7 @@ case class MandatoryRefs(
   }
 
 
-  "Update, remove last card-many value" - validation { implicit conn =>
+  "Update, remove last card-many value" - validation {
     for {
       case List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
 

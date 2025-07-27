@@ -17,7 +17,7 @@ case class Bind_Long_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.long.insert(long1, long2, long3).transact
 
@@ -54,7 +54,7 @@ case class Bind_Long_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.long.insert((1, long1), (2, long2), (3, long3)).transact
 

@@ -17,7 +17,7 @@ case class Bind_BigInt_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.bigInt.insert(bigInt1, bigInt2, bigInt3).transact
 
@@ -54,7 +54,7 @@ case class Bind_BigInt_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.bigInt.insert((1, bigInt1), (2, bigInt2), (3, bigInt3)).transact
 

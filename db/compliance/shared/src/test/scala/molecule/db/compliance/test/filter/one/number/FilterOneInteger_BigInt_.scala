@@ -16,7 +16,7 @@ case class FilterOneInteger_BigInt_(
   import api.*
   import suite.*
 
-  "odd/even" - types { implicit conn =>
+  "odd/even" - types {
     for {
       _ <- Entity.i.bigInt.insert(
         (-2, -bigInt2),
@@ -35,7 +35,7 @@ case class FilterOneInteger_BigInt_(
   }
 
 
-  "modulo" - types { implicit conn =>
+  "modulo" - types {
     for {
       _ <- Entity.i.bigInt.insert(
         (1, bigInt1),

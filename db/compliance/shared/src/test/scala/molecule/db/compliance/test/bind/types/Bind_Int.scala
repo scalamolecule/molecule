@@ -16,7 +16,7 @@ case class Bind_Int(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
 
@@ -53,7 +53,7 @@ case class Bind_Int(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.int.insert((1, int1), (2, int2), (3, int3)).transact
 

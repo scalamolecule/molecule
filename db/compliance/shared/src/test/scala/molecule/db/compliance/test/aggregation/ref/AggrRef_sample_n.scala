@@ -15,7 +15,7 @@ case class AggrRef_sample_n(
   import api.*
   import suite.*
 
-  "ref" - refs { implicit conn =>
+  "ref" - refs {
     val all = Set(1, 2, 3, 4)
     for {
       _ <- A.i.B.i.insert(List(
@@ -29,7 +29,7 @@ case class AggrRef_sample_n(
   }
 
 
-  "2nd ref" - refs { implicit conn =>
+  "2nd ref" - refs {
     val all = Set(1, 2, 3, 4)
     for {
       _ <- A.i.B.i.C.i.insert(List(
@@ -43,7 +43,7 @@ case class AggrRef_sample_n(
   }
 
 
-  "multiple refs" - refs { implicit conn =>
+  "multiple refs" - refs {
     val all = Set(1, 2, 3, 4)
     for {
       _ <- A.i.B.i.C.i.insert(List(
@@ -60,7 +60,7 @@ case class AggrRef_sample_n(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     val all = Set(1, 2, 3, 4)
     for {
       _ <- A.i.B.i._A.C.i.insert(List(

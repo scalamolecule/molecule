@@ -15,7 +15,7 @@ case class FilterOne_id(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     val id0 = 42L
     for {
       List(id1, id2, id3) <- Entity.i.insert(1, 2, 3).transact.map(_.ids)
@@ -67,7 +67,7 @@ case class FilterOne_id(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, c) = (1, 2, 3)
     val id0       = 42L
     for {

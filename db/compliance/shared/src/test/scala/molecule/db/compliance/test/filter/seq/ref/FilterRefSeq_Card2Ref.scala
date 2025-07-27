@@ -15,7 +15,7 @@ case class FilterRefSeq_Card2Ref(
   import api.*
   import suite.*
 
-  "mandatory" - refs { implicit conn =>
+  "mandatory" - refs {
     for {
       _ <- A.i.Bb.iSeq.insert(
         (1, List(1, 2, 2)),
@@ -71,7 +71,7 @@ case class FilterRefSeq_Card2Ref(
   }
 
 
-  "tacit" - refs { implicit conn =>
+  "tacit" - refs {
     for {
       _ <- A.i.Bb.iSeq.insert(
         (1, List(1, 2, 2)),

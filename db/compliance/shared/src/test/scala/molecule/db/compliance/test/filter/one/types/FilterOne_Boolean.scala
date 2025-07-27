@@ -15,7 +15,7 @@ case class FilterOne_Boolean(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     val a = (1, true)
     val b = (2, false)
     for {
@@ -56,7 +56,7 @@ case class FilterOne_Boolean(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, x) = (1, 2, 3)
     for {
       _ <- Entity.i.boolean_?.insert(List(
@@ -103,7 +103,7 @@ case class FilterOne_Boolean(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     val a = (1, Some(true))
     val b = (2, Some(false))
     val x = (3, Option.empty[Boolean])

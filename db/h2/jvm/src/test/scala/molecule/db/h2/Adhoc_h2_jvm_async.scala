@@ -10,7 +10,7 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
 
   import molecule.db.compliance.domains.dsl.Types.*
 
-  "types" - types { implicit conn =>
+  "types" - types {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
@@ -24,7 +24,7 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
   }
 
 
-  //  "refs" - refs { implicit conn =>
+  //  "refs" - refs {
   //    import molecule.db.compliance.domains.dsl.Refs.*
   //
   //    for {
@@ -45,7 +45,7 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
   //  }
 
 
-  //    "unique" - unique { implicit conn =>
+  //    "unique" - unique {
   //      import molecule.db.compliance.domains.dsl.Uniques._
   //      val triples             = getTriples.map(t => (t._3, t._1, t._2))
   //      val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
@@ -58,7 +58,7 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
   //
 
 
-  //    "validation" - validation { implicit conn =>
+  //    "validation" - validation {
   //      import molecule.db.compliance.domains.dsl.Validation._
   //
   //      for {
@@ -102,7 +102,7 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
   //      } yield ()
   //    }
   //
-  //    "partitions" - partition { implicit conn =>
+  //    "partitions" - partition {
   //      import molecule.db.compliance.domains.dsl.Groups._
   //      for {
   //

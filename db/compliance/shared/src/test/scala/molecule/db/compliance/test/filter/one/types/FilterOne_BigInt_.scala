@@ -16,7 +16,7 @@ case class FilterOne_BigInt_(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     val a = (1, bigInt1)
     val b = (2, bigInt2)
     val c = (3, bigInt3)
@@ -67,7 +67,7 @@ case class FilterOne_BigInt_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, c, x) = (1, 2, 3, 4)
     for {
       _ <- Entity.i.bigInt_?.insert(List(
@@ -124,7 +124,7 @@ case class FilterOne_BigInt_(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     val a = (1, Some(bigInt1))
     val b = (2, Some(bigInt2))
     val c = (3, Some(bigInt3))
@@ -147,7 +147,7 @@ case class FilterOne_BigInt_(
   }
 
 
-  "Combinations" - types { implicit conn =>
+  "Combinations" - types {
     for {
       _ <- Entity.i.bigInt.insert(
         (1, bigInt1),

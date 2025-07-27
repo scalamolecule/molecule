@@ -15,7 +15,7 @@ case class FilterOne_ref(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
       a = (1, ref1)
@@ -69,7 +69,7 @@ case class FilterOne_ref(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, c, x) = (1, 2, 3, 4)
     for {
       List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
@@ -128,7 +128,7 @@ case class FilterOne_ref(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     for {
       List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
       a = (1, Some(ref1))

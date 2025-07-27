@@ -15,7 +15,7 @@ case class FilterOneSpecial_String(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.i.string.insert(
         (1, "hello"),
@@ -36,7 +36,7 @@ case class FilterOneSpecial_String(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.string.insert(
         (1, "hello"),
@@ -55,7 +55,7 @@ case class FilterOneSpecial_String(
   }
 
 
-  "Empty string" - types { implicit conn =>
+  "Empty string" - types {
     for {
       _ <- Entity.i.string.insert(
         (0, ""),

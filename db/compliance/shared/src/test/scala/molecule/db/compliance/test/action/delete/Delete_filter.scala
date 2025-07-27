@@ -17,7 +17,7 @@ case class Delete_filter(
   import api.*
   import suite.*
 
-  "Filter by 1 non-ns value" - refs { implicit conn =>
+  "Filter by 1 non-ns value" - refs {
     import molecule.db.compliance.domains.dsl.Refs.*
     for {
       _ <- A.i.insert(1, 2).transact
@@ -27,7 +27,7 @@ case class Delete_filter(
   }
 
 
-  "Filter by multiple non-ns value" - refs { implicit conn =>
+  "Filter by multiple non-ns value" - refs {
     import molecule.db.compliance.domains.dsl.Refs.*
     for {
       case List(e1, e2, e3) <- A.i.insert(1, 2, 2).transact.map(_.ids)
@@ -47,7 +47,7 @@ case class Delete_filter(
     } yield ()
   }
 
-  "Filters: not null" - types { implicit conn =>
+  "Filters: not null" - types {
     for {
       _ <- Entity.string.insert(string1, string2).transact
       _ <- Entity.int.insert(int1, int2).transact
@@ -61,7 +61,7 @@ case class Delete_filter(
     } yield ()
   }
 
-  "Filters: null" - types { implicit conn =>
+  "Filters: null" - types {
     for {
       _ <- Entity.string.insert(string1, string2).transact
       _ <- Entity.int.insert(int1, int2).transact
@@ -75,21 +75,21 @@ case class Delete_filter(
     } yield ()
   }
 
-  "Filters: equal 0" - types { implicit conn =>
+  "Filters: equal 0" - types {
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
       _ <- Entity.int_(int0).delete.transact
       _ <- Entity.int.a1.query.get.map(_ ==> List(int1, int2, int3))
     } yield ()
   }
-  "Filters: equal 2" - types { implicit conn =>
+  "Filters: equal 2" - types {
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
       _ <- Entity.int_(int2).delete.transact
       _ <- Entity.int.a1.query.get.map(_ ==> List(int1, int3))
     } yield ()
   }
-  "Filters: equal 1 2" - types { implicit conn =>
+  "Filters: equal 1 2" - types {
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
       _ <- Entity.int_(int1, int2).delete.transact
@@ -98,21 +98,21 @@ case class Delete_filter(
   }
 
 
-  "Filters: not equal 0" - types { implicit conn =>
+  "Filters: not equal 0" - types {
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
       _ <- Entity.int_.not(int0).delete.transact
       _ <- Entity.int.query.get.map(_ ==> List())
     } yield ()
   }
-  "Filters: not equal 2" - types { implicit conn =>
+  "Filters: not equal 2" - types {
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
       _ <- Entity.int_.not(int2).delete.transact
       _ <- Entity.int.query.get.map(_ ==> List(int2))
     } yield ()
   }
-  "Filters: not equal 1 2" - types { implicit conn =>
+  "Filters: not equal 1 2" - types {
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
       _ <- Entity.int_.not(int1, int2).delete.transact
@@ -121,7 +121,7 @@ case class Delete_filter(
   }
 
 
-  "Filters: <" - types { implicit conn =>
+  "Filters: <" - types {
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
       _ <- Entity.int_.<(int2).delete.transact
@@ -130,7 +130,7 @@ case class Delete_filter(
   }
 
 
-  "Filters: <=" - types { implicit conn =>
+  "Filters: <=" - types {
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
       _ <- Entity.int_.<=(int2).delete.transact
@@ -139,7 +139,7 @@ case class Delete_filter(
   }
 
 
-  "Filters: >" - types { implicit conn =>
+  "Filters: >" - types {
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
       _ <- Entity.int_.>(int2).delete.transact
@@ -148,7 +148,7 @@ case class Delete_filter(
   }
 
 
-  "Filters: >=" - types { implicit conn =>
+  "Filters: >=" - types {
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
       _ <- Entity.int_.>=(int2).delete.transact
@@ -157,7 +157,7 @@ case class Delete_filter(
   }
 
 
-  "Multiple filters" - refs { implicit conn =>
+  "Multiple filters" - refs {
     for {
       _ <- A.i.s.insert(
         (1, "a"),
@@ -182,7 +182,7 @@ case class Delete_filter(
   }
 
 
-  "Range" - refs { implicit conn =>
+  "Range" - refs {
     for {
       _ <- A.i.insert(1, 2, 3, 4).transact
 
@@ -195,7 +195,7 @@ case class Delete_filter(
   }
 
 
-  "Ref" - refs { implicit conn =>
+  "Ref" - refs {
     for {
       _ <- A.i.insert(1).transact
       _ <- A.i.B.i.insert((2, 20), (3, 30)).transact
@@ -228,7 +228,7 @@ case class Delete_filter(
     } yield ()
   }
 
-  "Ref owned" - refs { implicit conn =>
+  "Ref owned" - refs {
 
     for {
       _ <- A.i.insert(1).transact
@@ -262,7 +262,7 @@ case class Delete_filter(
   }
 
 
-  "Ref + expr" - refs { implicit conn =>
+  "Ref + expr" - refs {
     for {
       _ <- A.i.B.i.insert((1, 10), (2, 20)).transact
       _ <- A.i.a1.query.get.map(_ ==> List(1, 2))
@@ -278,7 +278,7 @@ case class Delete_filter(
     } yield ()
   }
 
-  "Ref owned + expr" - refs { implicit conn =>
+  "Ref owned + expr" - refs {
     // In other dbs, owned B is a separate entity. So we can query it independently
     for {
       _ <- A.i.OwnB.i.insert((1, 10), (2, 20)).transact
@@ -296,7 +296,7 @@ case class Delete_filter(
   }
 
 
-  "Filter types" - types { implicit conn =>
+  "Filter types" - types {
 
     for {
       // Initial values
@@ -373,7 +373,7 @@ case class Delete_filter(
     } yield ()
   }
 
-  "Only tacit card-one attributes" - refs { implicit conn =>
+  "Only tacit card-one attributes" - refs {
     for {
       _ <- A.iSet_(Set(int1)).delete.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

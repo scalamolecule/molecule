@@ -18,7 +18,7 @@ case class AggrNum_Double_(
   import api.*
   import suite.*
 
-  "sum" - types { implicit conn =>
+  "sum" - types {
     implicit val tolerant = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.double.insert(List(
@@ -42,7 +42,7 @@ case class AggrNum_Double_(
   }
 
 
-  "median" - types { implicit futConn =>
+  "median" - types {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.double.insert(List(
@@ -63,7 +63,7 @@ case class AggrNum_Double_(
   }
 
 
-  "avg" - types { implicit conn =>
+  "avg" - types {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.double.insert(List(
@@ -87,7 +87,7 @@ case class AggrNum_Double_(
   }
 
 
-  "variance" - types { implicit conn =>
+  "variance" - types {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.double.insert(List(
@@ -111,7 +111,7 @@ case class AggrNum_Double_(
   }
 
 
-  "stddev" - types { implicit conn =>
+  "stddev" - types {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.i.double.insert(List(

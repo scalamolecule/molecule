@@ -21,7 +21,7 @@ case class SqlQueryResolveOffset[Tpl](
 
   lazy val forward = optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0)
 
-  def getListFromOffset_sync(implicit conn: JdbcConn_JVM)
+  def getListFromOffset_sync(using conn: JdbcConn_JVM)
   : (List[Tpl], Int, Boolean) = {
     offsetLimitCheck(optLimit, optOffset)
     val sortedRows = getData(conn, optLimit, optOffset)

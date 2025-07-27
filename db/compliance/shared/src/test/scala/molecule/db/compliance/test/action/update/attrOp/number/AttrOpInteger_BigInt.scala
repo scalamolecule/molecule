@@ -16,7 +16,7 @@ case class AttrOpInteger_BigInt(
   import api.*
   import suite.*
 
-  "plus" - types { implicit conn =>
+  "plus" - types {
     for {
       id <- Entity.bigInt(bigInt1).save.transact.map(_.id)
       _ <- Entity(id).bigInt.+(bigInt2).update.transact
@@ -24,7 +24,7 @@ case class AttrOpInteger_BigInt(
     } yield ()
   }
 
-  "minus" - types { implicit conn =>
+  "minus" - types {
     for {
       id <- Entity.bigInt(bigInt3).save.transact.map(_.id)
       _ <- Entity(id).bigInt.-(bigInt2).update.transact
@@ -32,7 +32,7 @@ case class AttrOpInteger_BigInt(
     } yield ()
   }
 
-  "times" - types { implicit conn =>
+  "times" - types {
     for {
       id <- Entity.bigInt(bigInt2).save.transact.map(_.id)
       _ <- Entity(id).bigInt.*(bigInt2).update.transact
@@ -40,7 +40,7 @@ case class AttrOpInteger_BigInt(
     } yield ()
   }
 
-  "divide" - types { implicit conn =>
+  "divide" - types {
     for {
       id <- Entity.bigInt(bigInt4).save.transact.map(_.id)
       _ <- Entity(id).bigInt./(bigInt2).update.transact
@@ -48,7 +48,7 @@ case class AttrOpInteger_BigInt(
     } yield ()
   }
 
-  "negate" - types { implicit conn =>
+  "negate" - types {
     for {
       ids <- Entity.bigInt.insert(-bigInt1, bigInt2).transact.map(_.ids)
       _ <- Entity(ids).bigInt.negate.update.transact
@@ -56,7 +56,7 @@ case class AttrOpInteger_BigInt(
     } yield ()
   }
 
-  "absolute" - types { implicit conn =>
+  "absolute" - types {
     for {
       ids <- Entity.bigInt.insert(-bigInt1, bigInt2).transact.map(_.ids)
       _ <- Entity(ids).bigInt.abs.update.transact
@@ -64,7 +64,7 @@ case class AttrOpInteger_BigInt(
     } yield ()
   }
 
-  "absolute negative" - types { implicit conn =>
+  "absolute negative" - types {
     for {
       ids <- Entity.bigInt.insert(-bigInt1, bigInt2).transact.map(_.ids)
       _ <- Entity(ids).bigInt.absNeg.update.transact
@@ -81,7 +81,7 @@ case class AttrOpInteger_BigInt(
 
   // even/odd/modulo not allowed for updates
 
-  "No even" - types { implicit conn =>
+  "No even" - types {
     for {
       id <- Entity.bigInt(bigInt4).save.transact.map(_.id)
       _ <- Entity(id).bigInt.even.update.transact
@@ -91,7 +91,7 @@ case class AttrOpInteger_BigInt(
     } yield ()
   }
 
-  "No odd" - types { implicit conn =>
+  "No odd" - types {
     for {
       id <- Entity.bigInt(bigInt4).save.transact.map(_.id)
       _ <- Entity(id).bigInt.odd.update.transact
@@ -101,7 +101,7 @@ case class AttrOpInteger_BigInt(
     } yield ()
   }
 
-  "No modulo" - types { implicit conn =>
+  "No modulo" - types {
     for {
       id <- Entity.bigInt(bigInt4).save.transact.map(_.id)
       _ <- Entity(id).bigInt.%(bigInt3, bigInt2).update.transact

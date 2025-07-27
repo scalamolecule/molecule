@@ -16,7 +16,7 @@ case class FilterAttrRef(
   import api.*
   import suite.*
 
-  "Forward/backward" - refs { implicit conn =>
+  "Forward/backward" - refs {
     for {
       _ <- A.s.i.B.i.insert(
         ("a", 1, 0),
@@ -31,7 +31,7 @@ case class FilterAttrRef(
     } yield ()
   }
 
-  "Ref-Ref" - refs { implicit conn =>
+  "Ref-Ref" - refs {
     for {
       _ <- A.s.i.B.i.C.i.insert(
         ("a", 1, 1, 0),
@@ -52,7 +52,7 @@ case class FilterAttrRef(
   }
 
 
-  "Optional qualifying" - refs { implicit conn =>
+  "Optional qualifying" - refs {
     for {
       _ <- A.s.i.B.i.insert(
         ("a", 1, 0),
@@ -80,7 +80,7 @@ case class FilterAttrRef(
   }
 
 
-  "Qualifying, multiple branches" - refs { implicit conn =>
+  "Qualifying, multiple branches" - refs {
     for {
       _ <- A.s.i
         .B.i._A
@@ -116,7 +116,7 @@ case class FilterAttrRef(
   }
 
 
-  "Branches, forward" - refs { implicit conn =>
+  "Branches, forward" - refs {
     for {
       _ <- A.s.i.B.i._A.OwnB.i.insert(
         ("a", 1, 1, 0),
@@ -139,7 +139,7 @@ case class FilterAttrRef(
   }
 
 
-  "Branches, backward" - refs { implicit conn =>
+  "Branches, backward" - refs {
     for {
       _ <- A.s.i.B.i._A.OwnB.i.insert(
         ("a", 1, 1, 0),
@@ -162,7 +162,7 @@ case class FilterAttrRef(
   }
 
 
-  "Branch to branch" - refs { implicit conn =>
+  "Branch to branch" - refs {
     for {
       _ <- A.s.B.i._A.OwnB.i.insert(
         ("a", 1, 0),
@@ -183,7 +183,7 @@ case class FilterAttrRef(
   }
 
 
-  "2 branches" - refs { implicit conn =>
+  "2 branches" - refs {
     for {
       _ <- A.s.i
         .B.i.OwnC.i._B._A

@@ -16,7 +16,7 @@ case class StringOps(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.string.insert("hello", "friends").transact
 
@@ -36,7 +36,7 @@ case class StringOps(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.string.insert(
         (1, "hello"),
@@ -59,7 +59,7 @@ case class StringOps(
   }
 
 
-  "Regex" - types { implicit conn =>
+  "Regex" - types {
     for {
       _ <- Entity.i.string.insert(
         (1, "hello"),

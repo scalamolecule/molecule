@@ -16,7 +16,7 @@ case class Aggr_BigDecimal_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.bigDecimal.insert(List(
         (1, bigDecimal1),
@@ -44,7 +44,7 @@ case class Aggr_BigDecimal_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.bigDecimal.insert(
         (1, bigDecimal1),
@@ -76,7 +76,7 @@ case class Aggr_BigDecimal_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.bigDecimal.insert(
         (1, bigDecimal1),
@@ -112,7 +112,7 @@ case class Aggr_BigDecimal_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)
     for {
       _ <- Entity.bigDecimal.insert(List(bigDecimal1, bigDecimal2, bigDecimal3)).transact
@@ -123,7 +123,7 @@ case class Aggr_BigDecimal_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.bigDecimal.insert(List(
         (1, bigDecimal1),

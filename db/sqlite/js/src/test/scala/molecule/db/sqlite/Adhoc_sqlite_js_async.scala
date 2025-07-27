@@ -10,7 +10,7 @@ import molecule.db.sqlite.setup.DbProviders_sqlite
 class Adhoc_sqlite_js_async extends MUnit with DbProviders_sqlite with TestUtils {
 
 
-  "types" - types { implicit conn =>
+  "types" - types {
     for {
       case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(3).save.transact
@@ -22,7 +22,7 @@ class Adhoc_sqlite_js_async extends MUnit with DbProviders_sqlite with TestUtils
   }
 
 
-  //    "refs" - refs { implicit conn =>
+  //    "refs" - refs {
   //      import molecule.db.compliance.domains.dsl.Refs._
   //      for {
   //
@@ -56,7 +56,7 @@ class Adhoc_sqlite_js_async extends MUnit with DbProviders_sqlite with TestUtils
   //    }
 
   //
-  //    "validation" - validation { implicit conn =>
+  //    "validation" - validation {
   //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //

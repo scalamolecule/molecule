@@ -17,7 +17,7 @@ case class AllowedValues(
   import api.*
   import suite.*
 
-  "Allowed values, default error" - validation { implicit conn =>
+  "Allowed values, default error" - validation {
     for {
       _ <- AllowedAttrs.luckyNumber(8).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -44,7 +44,7 @@ case class AllowedValues(
     } yield ()
   }
 
-  "Allowed values, custom error" - validation { implicit conn =>
+  "Allowed values, custom error" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     for {
       _ <- AllowedAttrs.luckyNumber2(5).save.transact

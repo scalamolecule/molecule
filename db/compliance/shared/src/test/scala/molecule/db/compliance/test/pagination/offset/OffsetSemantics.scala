@@ -19,7 +19,7 @@ case class OffsetSemantics(
   import api.*
   import suite.*
 
-  "Different limit/offset sign" - types { implicit conn =>
+  "Different limit/offset sign" - types {
     for {
       _ <- Entity.int.a1.query.limit(20).offset(-10).get
         .map(_ ==> "Unexpected success").recover { case ModelError(msg) =>
@@ -31,7 +31,7 @@ case class OffsetSemantics(
 
   // General problems with offset pagination (for any db system):
 
-  "Re-seen data" - types { implicit conn =>
+  "Re-seen data" - types {
     for {
       _ <- Entity.int.insert(1, 3, 5).transact
 
@@ -45,7 +45,7 @@ case class OffsetSemantics(
     } yield ()
   }
 
-  "Skipped data" - types { implicit conn =>
+  "Skipped data" - types {
     for {
       ids <- Entity.int.insert(1, 2, 3, 4).transact.map(_.ids)
 

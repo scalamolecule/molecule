@@ -362,40 +362,40 @@ lazy val serverZioHttp = project
   .dependsOn(serverEndpoints)
 
 
-// Graphql =========================================================================================
-
-lazy val graphqlClient = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("graphql/client"))
-  .settings(name := "molecule-graphql-client")
-  //  .settings(compilerArgs, checkPublishing)
-  .settings(publish / skip := true)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.lihaoyi" %% "requests" % "0.9.0",
-      "com.lihaoyi" %% "upickle" % "4.2.1",
-
-      "dev.zio" %% "zio" % zioVersion,
-      "com.github.ghostdogpr" %% "caliban" % calibanVersion,
-      "com.github.ghostdogpr" %% "caliban-tools" % calibanVersion,
-      "com.github.ghostdogpr" %% "caliban-client" % calibanVersion,
-    ),
-  )
-  .jsSettings(jsEnvironment)
-  .dependsOn(core % "compile->compile;test->test")
-
-
-lazy val graphqlTest = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("graphql/test"))
-  .settings(name := "molecule-graphql-test")
-  .settings(withoutDocs)
-  //  .enablePlugins(MoleculePlugin)
-  .settings(
-    publish / skip := true,
-    //    testFrameworks += new TestFramework("munit.runner.Framework"),
-  )
-  .dependsOn(graphqlClient % "compile->compile;test->test", dbCommon)
+//// Graphql =========================================================================================
+//
+//lazy val graphqlClient = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("graphql/client"))
+//  .settings(name := "molecule-graphql-client")
+//  //  .settings(compilerArgs, checkPublishing)
+//  .settings(publish / skip := true)
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "com.lihaoyi" %% "requests" % "0.9.0",
+//      "com.lihaoyi" %% "upickle" % "4.2.1",
+//
+//      "dev.zio" %% "zio" % zioVersion,
+//      "com.github.ghostdogpr" %% "caliban" % calibanVersion,
+//      "com.github.ghostdogpr" %% "caliban-tools" % calibanVersion,
+//      "com.github.ghostdogpr" %% "caliban-client" % calibanVersion,
+//    ),
+//  )
+//  .jsSettings(jsEnvironment)
+//  .dependsOn(core % "compile->compile;test->test")
+//
+//
+//lazy val graphqlTest = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("graphql/test"))
+//  .settings(name := "molecule-graphql-test")
+//  .settings(withoutDocs)
+//  //  .enablePlugins(MoleculePlugin)
+//  .settings(
+//    publish / skip := true,
+//    //    testFrameworks += new TestFramework("munit.runner.Framework"),
+//  )
+//  .dependsOn(graphqlClient % "compile->compile;test->test", dbCommon)
 
 
 // Settings =========================================================================================

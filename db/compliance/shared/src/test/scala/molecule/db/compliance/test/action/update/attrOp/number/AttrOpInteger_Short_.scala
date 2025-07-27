@@ -17,7 +17,7 @@ case class AttrOpInteger_Short_(
   import api.*
   import suite.*
 
-  "plus" - types { implicit conn =>
+  "plus" - types {
     for {
       id <- Entity.short(short1).save.transact.map(_.id)
       _ <- Entity(id).short.+(short2).update.transact
@@ -25,7 +25,7 @@ case class AttrOpInteger_Short_(
     } yield ()
   }
 
-  "minus" - types { implicit conn =>
+  "minus" - types {
     for {
       id <- Entity.short(short3).save.transact.map(_.id)
       _ <- Entity(id).short.-(short2).update.transact
@@ -33,7 +33,7 @@ case class AttrOpInteger_Short_(
     } yield ()
   }
 
-  "times" - types { implicit conn =>
+  "times" - types {
     for {
       id <- Entity.short(short2).save.transact.map(_.id)
       _ <- Entity(id).short.*(short2).update.transact
@@ -41,7 +41,7 @@ case class AttrOpInteger_Short_(
     } yield ()
   }
 
-  "divide" - types { implicit conn =>
+  "divide" - types {
     for {
       id <- Entity.short(short4).save.transact.map(_.id)
       _ <- Entity(id).short./(short2).update.transact
@@ -49,7 +49,7 @@ case class AttrOpInteger_Short_(
     } yield ()
   }
 
-  "negate" - types { implicit conn =>
+  "negate" - types {
     for {
       ids <- Entity.short.insert(-1.toShort, short2).transact.map(_.ids)
       _ <- Entity(ids).short.negate.update.transact
@@ -57,7 +57,7 @@ case class AttrOpInteger_Short_(
     } yield ()
   }
 
-  "absolute" - types { implicit conn =>
+  "absolute" - types {
     for {
       ids <- Entity.short.insert(-1.toShort, short2).transact.map(_.ids)
       _ <- Entity(ids).short.abs.update.transact
@@ -65,7 +65,7 @@ case class AttrOpInteger_Short_(
     } yield ()
   }
 
-  "absolute negative" - types { implicit conn =>
+  "absolute negative" - types {
     for {
       ids <- Entity.short.insert(-1.toShort, short2).transact.map(_.ids)
       _ <- Entity(ids).short.absNeg.update.transact
@@ -76,7 +76,7 @@ case class AttrOpInteger_Short_(
 
   // even/odd/modulo not allowed for updates
 
-  "No even" - types { implicit conn =>
+  "No even" - types {
     for {
       id <- Entity.short(short4).save.transact.map(_.id)
       _ <- Entity(id).short.even.update.transact
@@ -86,7 +86,7 @@ case class AttrOpInteger_Short_(
     } yield ()
   }
 
-  "No odd" - types { implicit conn =>
+  "No odd" - types {
     for {
       id <- Entity.short(short4).save.transact.map(_.id)
       _ <- Entity(id).short.odd.update.transact
@@ -96,7 +96,7 @@ case class AttrOpInteger_Short_(
     } yield ()
   }
 
-  "No modulo" - types { implicit conn =>
+  "No modulo" - types {
     for {
       id <- Entity.short(short4).save.transact.map(_.id)
       _ <- Entity(id).short.%(short3, short2).update.transact

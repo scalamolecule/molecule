@@ -18,7 +18,7 @@ case class SharedSemantics(
   import api.*
   import suite.*
 
-  "Same query" - unique { implicit conn =>
+  "Same query" - unique {
     for {
       _ <- Uniques.int.insert(1, 2, 3).transact
 
@@ -31,7 +31,7 @@ case class SharedSemantics(
   }
 
 
-  "Premature turnaround" - unique { implicit conn =>
+  "Premature turnaround" - unique {
     for {
       _ <- Uniques.int.insert(1, 2, 3).transact
 
@@ -43,7 +43,7 @@ case class SharedSemantics(
   }
 
 
-  "Retry" - unique { implicit conn =>
+  "Retry" - unique {
     for {
       _ <- Uniques.int.insert(1, 2).transact
 

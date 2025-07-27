@@ -17,7 +17,7 @@ case class FilterOne_ZonedDateTime_(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     val a = (1, zonedDateTime1)
     val b = (2, zonedDateTime2)
     val c = (3, zonedDateTime3)
@@ -68,7 +68,7 @@ case class FilterOne_ZonedDateTime_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, c, x) = (1, 2, 3, 4)
     for {
       _ <- Entity.i.zonedDateTime_?.insert(List(
@@ -125,7 +125,7 @@ case class FilterOne_ZonedDateTime_(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     val a = (1, Some(zonedDateTime1))
     val b = (2, Some(zonedDateTime2))
     val c = (3, Some(zonedDateTime3))
@@ -148,7 +148,7 @@ case class FilterOne_ZonedDateTime_(
   }
 
 
-  "Combinations" - types { implicit conn =>
+  "Combinations" - types {
     for {
       _ <- Entity.i.zonedDateTime.insert(
         (1, zonedDateTime1),

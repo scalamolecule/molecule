@@ -21,7 +21,7 @@ case class FilterSet(
   // Use tacit attributes as filters to match entities to be updated.
   // Apply new values to mandatory attributes.
 
-  "Set asserted" - types { implicit conn =>
+  "Set asserted" - types {
     for {
       case List(a, b, c) <- Entity.iSet_?.int.insert(
         (None, 0),
@@ -53,7 +53,7 @@ case class FilterSet(
   }
 
 
-  "Set not asserted" - types { implicit conn =>
+  "Set not asserted" - types {
     for {
       case List(a, b, c) <- Entity.iSet_?.int.insert(
         (None, 0),
@@ -74,7 +74,7 @@ case class FilterSet(
   }
 
 
-  "Set equality" - types { implicit conn =>
+  "Set equality" - types {
     // Filtering updates by equality of collections is not supported by molecule.
     // Instead, use has/hasNo.
     for {
@@ -86,7 +86,7 @@ case class FilterSet(
   }
 
 
-  "Has value" - types { implicit conn =>
+  "Has value" - types {
     for {
       case List(a, b) <- Entity.iSet.int.insert(
         (Set(0, 1, 2), 1),
@@ -119,7 +119,7 @@ case class FilterSet(
   }
 
 
-  "Doesn't have value" - types { implicit conn =>
+  "Doesn't have value" - types {
     for {
       case List(a, b) <- Entity.iSet.int.insert(
         (Set(1, 2), 1),
@@ -152,7 +152,7 @@ case class FilterSet(
   }
 
 
-  "Types, filter asserted" - types { implicit conn =>
+  "Types, filter asserted" - types {
     for {
       ref1 <- Ref.i(1).save.transact.map(_.id)
 
@@ -234,7 +234,7 @@ case class FilterSet(
   }
 
 
-  "Types, filter has" - types { implicit conn =>
+  "Types, filter has" - types {
     for {
       ref1 <- Ref.i(1).save.transact.map(_.id)
 
@@ -316,7 +316,7 @@ case class FilterSet(
   }
 
 
-  "Types, filter hasNo" - types { implicit conn =>
+  "Types, filter hasNo" - types {
     for {
       List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
 

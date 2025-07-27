@@ -19,7 +19,7 @@ case class InsertCardSet(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       // No Entity.iSet inserted yet
       _ <- Entity.iSet.query.get.map(_ ==> Nil)
@@ -83,7 +83,7 @@ case class InsertCardSet(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     for {
       _ <- Entity.int.i.stringSet_?.insert((1, 1, Option.empty[Set[String]])).transact
       _ <- Entity.int.i.intSet_?.insert((2, 1, Option.empty[Set[Int]])).transact
@@ -186,7 +186,7 @@ case class InsertCardSet(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       // Can't insert tacit attributes
       _ <- Future(compileErrors("Entity.i.stringSet_.insert(1, Set(string1))"))

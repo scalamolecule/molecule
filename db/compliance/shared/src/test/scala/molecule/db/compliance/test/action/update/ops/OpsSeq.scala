@@ -15,7 +15,7 @@ case class OpsSeq(
   import api.*
   import suite.*
 
-  "apply" - types { implicit conn =>
+  "apply" - types {
     for {
       id <- Entity.i(42).save.transact.map(_.id)
 
@@ -62,7 +62,7 @@ case class OpsSeq(
   }
 
 
-  "add" - types { implicit conn =>
+  "add" - types {
     for {
       id <- Entity.i(42).save.transact.map(_.id)
 
@@ -100,7 +100,7 @@ case class OpsSeq(
   }
 
 
-  "remove" - types { implicit conn =>
+  "remove" - types {
     // No semantic difference between update/upsert when removing
     for {
       id <- Entity.i(42).save.transact.map(_.id)
@@ -163,7 +163,7 @@ case class OpsSeq(
   }
 
 
-  "Update multiple values" - types { implicit conn =>
+  "Update multiple values" - types {
     for {
       case List(a, b, c) <- Entity.i.intSeq_?.insert(
         (1, None),
@@ -194,7 +194,7 @@ case class OpsSeq(
   }
 
 
-  "Types apply" - types { implicit conn =>
+  "Types apply" - types {
     for {
       id1 <- Entity.stringSeq(List(string1)).save.transact.map(_.id)
       id2 <- Entity.intSeq(List(int1)).save.transact.map(_.id)
@@ -316,7 +316,7 @@ case class OpsSeq(
   }
 
 
-  "Types add" - types { implicit conn =>
+  "Types add" - types {
     for {
       id1 <- Entity.stringSeq(List(string1)).save.transact.map(_.id)
       id2 <- Entity.intSeq(List(int1)).save.transact.map(_.id)
@@ -434,7 +434,7 @@ case class OpsSeq(
   }
 
 
-  "Types remove" - types { implicit conn =>
+  "Types remove" - types {
     for {
       id1 <- Entity.stringSeq(List(string1, string2, string3)).save.transact.map(_.id)
       id2 <- Entity.intSeq(List(int1, int2, int3)).save.transact.map(_.id)

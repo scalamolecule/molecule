@@ -18,7 +18,7 @@ case class FlatOptEntity(
   import api.*
   import suite.*
 
-  "Optional entity only, 1 attr" - refs { implicit conn =>
+  "Optional entity only, 1 attr" - refs {
     for {
       _ <- A.?(A.i).insert(
         Some(1),
@@ -32,7 +32,7 @@ case class FlatOptEntity(
   }
 
 
-  "Optional entity only, multiple attrs" - refs { implicit conn =>
+  "Optional entity only, multiple attrs" - refs {
     for {
       _ <- A.?(A.i.s).insert(
         Some((1, "a")),
@@ -53,7 +53,7 @@ case class FlatOptEntity(
   }
 
 
-  "Basic with following ref" - refs { implicit conn =>
+  "Basic with following ref" - refs {
     for {
       _ <- A.?(A.i).B.i.insert(List(
         (None, 1),
@@ -72,7 +72,7 @@ case class FlatOptEntity(
   }
 
 
-  "Tacit optional entity attrs" - refs { implicit conn =>
+  "Tacit optional entity attrs" - refs {
     for {
       _ <- A.?(A.i).B.s.insert(List(
         (None, "-"),
@@ -108,7 +108,7 @@ case class FlatOptEntity(
   }
 
 
-  "Basic with following refs" - refs { implicit conn =>
+  "Basic with following refs" - refs {
     for {
       _ <- A.?(A.i.s).B.s.C.i.insert(
         (None, "-", 0),
@@ -125,7 +125,7 @@ case class FlatOptEntity(
   }
 
 
-  "Only optional attributes in optional entity - SQL" - refs { implicit conn =>
+  "Only optional attributes in optional entity - SQL" - refs {
     for {
       _ <- A.?(A.i_?).B.i.insert(List(
         (None, 1), // no relationship created
@@ -154,7 +154,7 @@ case class FlatOptEntity(
   }
 
 
-  "Mix man/opt attributes in opt ref" - refs { implicit conn =>
+  "Mix man/opt attributes in opt ref" - refs {
     for {
       _ <- A.?(A.s.i_?).B.i.insert(List(
         (None, 1),
@@ -188,7 +188,7 @@ case class FlatOptEntity(
   }
 
 
-  "Ref inside opt ref" - refs { implicit conn =>
+  "Ref inside opt ref" - refs {
     for {
       _ <- C.i.insert(
         1
@@ -221,7 +221,7 @@ case class FlatOptEntity(
   }
 
 
-  "Expression inside optional nested" - refs { implicit conn =>
+  "Expression inside optional nested" - refs {
     // Seems not possible to add expressions inside Datomic nested pulls
     for {
       _ <- A.?(A.i).B.i.insert(
@@ -298,7 +298,7 @@ case class FlatOptEntity(
   }
 
 
-  "Opt ref with Set attr" - refs { implicit conn =>
+  "Opt ref with Set attr" - refs {
     for {
       _ <- A.?(A.iSet).B.i.insert(
         (None, 0),
@@ -312,7 +312,7 @@ case class FlatOptEntity(
     } yield ()
   }
 
-  "Opt ref with Seq attr" - refs { implicit conn =>
+  "Opt ref with Seq attr" - refs {
     for {
       _ <- A.?(A.iSeq).B.i.insert(
         (None, 0),
@@ -326,7 +326,7 @@ case class FlatOptEntity(
     } yield ()
   }
 
-  "Opt ref with Map attr" - refs { implicit conn =>
+  "Opt ref with Map attr" - refs {
     for {
       _ <- A.?(A.iMap).B.i.insert(
         (None, 0),
@@ -341,7 +341,7 @@ case class FlatOptEntity(
   }
 
 
-  "Opt ref with sorting" - refs { implicit conn =>
+  "Opt ref with sorting" - refs {
     for {
       _ <- A.?(A.i).B.i.insert(List(
         (None, 1),
@@ -405,7 +405,7 @@ case class FlatOptEntity(
   }
 
 
-  "Limitations" - refs { implicit conn =>
+  "Limitations" - refs {
     for {
       _ <- A.?(B.i(1)).save.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -445,7 +445,7 @@ case class FlatOptEntity(
 
   import molecule.db.compliance.domains.dsl.Types.*
 
-  "Arity 23 opt entity attrs" - types { implicit conn =>
+  "Arity 23 opt entity attrs" - types {
     for {
       _ <- Entity.?(ent23).insert(
         Some(tpl23_1),
@@ -457,7 +457,7 @@ case class FlatOptEntity(
   }
 
 
-  "Arity 23 opt entity attrs + ref" - types { implicit conn =>
+  "Arity 23 opt entity attrs + ref" - types {
     for {
       _ <- Entity.?(ent23).Ref.i.insert(
         (Some(tpl23_1), 1),

@@ -16,7 +16,7 @@ case class SeqSemantics(
   import api.*
   import suite.*
 
-  "equal" - types { implicit conn =>
+  "equal" - types {
     for {
       _ <- Entity.i.intSeq(Seq(int1)).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -36,7 +36,7 @@ case class SeqSemantics(
   }
 
 
-  "equal nothing" - types { implicit conn =>
+  "equal nothing" - types {
     for {
       _ <- Entity.i.intSeq_?.insert(List(
         (0, None),

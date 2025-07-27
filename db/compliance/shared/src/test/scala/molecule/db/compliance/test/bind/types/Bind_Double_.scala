@@ -17,7 +17,7 @@ case class Bind_Double_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.double.insert(double1, double2, double3).transact
 
@@ -54,7 +54,7 @@ case class Bind_Double_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.double.insert((1, double1), (2, double2), (3, double3)).transact
 

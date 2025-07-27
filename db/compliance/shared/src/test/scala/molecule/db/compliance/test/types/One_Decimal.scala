@@ -15,7 +15,7 @@ case class One_Decimal(
   import suite.*
 
 
-  "decimal 0-1" - types { implicit conn =>
+  "decimal 0-1" - types {
     // Mandatory
     lazy val a1: Float = Entity.float.query.get.head
     lazy val a2: Float = Entity.float.apply(float1).query.get.head
@@ -50,7 +50,7 @@ case class One_Decimal(
   }
 
 
-  "decimal 1-n" - types { implicit conn =>
+  "decimal 1-n" - types {
     // Tacit - stays a String
     lazy val a1: String = Entity.s.float_.query.get.head
     lazy val a2: String = Entity.s.float_.apply(float1).query.get.head
@@ -91,7 +91,7 @@ case class One_Decimal(
   }
 
 
-  "decimal n-n" - types { implicit conn =>
+  "decimal n-n" - types {
     // Tacit - stays an (Int, String)
     lazy val a1: (Int, String) = Entity.i.s.float_.query.get.head
     lazy val a2: (Int, String) = Entity.i.s.float_.apply(float1).query.get.head

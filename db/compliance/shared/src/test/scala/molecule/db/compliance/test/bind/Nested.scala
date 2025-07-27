@@ -16,7 +16,7 @@ case class Nested(
   import suite.*
 
 
-  "Mandatory nested" - refs { implicit conn =>
+  "Mandatory nested" - refs {
     for {
       _ <- A.s.Bb.*(B.i).insert(
         ("a", List(1, 2, 3)),
@@ -52,7 +52,7 @@ case class Nested(
   }
 
 
-  "Optional nested" - refs { implicit conn =>
+  "Optional nested" - refs {
     for {
       _ <- A.s.Bb.*(B.i).insert(
         ("a", List(1, 2, 3)),

@@ -17,7 +17,7 @@ case class OpsOne(
   import api.*
   import suite.*
 
-  "apply" - types { implicit conn =>
+  "apply" - types {
     for {
       id <- Entity.i(42).save.transact.map(_.id)
 
@@ -64,7 +64,7 @@ case class OpsOne(
   }
 
 
-  "Delete individual ref value(s) with update" - refs { implicit conn =>
+  "Delete individual ref value(s) with update" - refs {
     for {
       refId <- B.i(7).save.transact.map(_.id)
       id <- A.i.b.insert((1, refId)).transact.map(_.id)
@@ -76,7 +76,7 @@ case class OpsOne(
     } yield ()
   }
 
-  "Update multiple values" - types { implicit conn =>
+  "Update multiple values" - types {
     for {
       case List(a, b, c) <- Entity.i.int_?.insert(
         (1, None),
@@ -106,7 +106,7 @@ case class OpsOne(
     } yield ()
   }
 
-  "Can't update multiple values for one card-one attribute" - types { implicit conn =>
+  "Can't update multiple values for one card-one attribute" - types {
     for {
       _ <- Entity(42).int(2, 3).update.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -116,7 +116,7 @@ case class OpsOne(
   }
 
 
-  "Types apply" - types { implicit conn =>
+  "Types apply" - types {
     for {
       case List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
 

@@ -17,7 +17,7 @@ case class NestedRef(
   import api.*
   import suite.*
 
-  "Ref" - refs { implicit conn =>
+  "Ref" - refs {
     for {
       _ <- A.i.Bb.*(B.i.C.i).insert(
         (0, Nil),
@@ -58,7 +58,7 @@ case class NestedRef(
   }
 
 
-  "Ref, 2 levels" - refs { implicit conn =>
+  "Ref, 2 levels" - refs {
     for {
       _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i)).insert(
         (0, Nil),
@@ -94,7 +94,7 @@ case class NestedRef(
   }
 
 
-  "Ref before nested" - refs { implicit conn =>
+  "Ref before nested" - refs {
     for {
       // Ref before nested
       _ <- A.i.B.i.Cc.*(C.i).insert(
@@ -117,7 +117,7 @@ case class NestedRef(
   }
 
 
-  "Nested ref with card-set attr" - refs { implicit conn =>
+  "Nested ref with card-set attr" - refs {
     for {
       _ <- A.i.Bb.*(B.i.C.iSet).insert(
         (0, Nil),
@@ -174,7 +174,7 @@ case class NestedRef(
   }
 
 
-  "Backref, 1 step back" - refs { implicit conn =>
+  "Backref, 1 step back" - refs {
     for {
       _ <- A.i.Bb.*(B.i.C.i._B.C1.s.D.i).insert((0, List((1, 2, "a", 3)))).transact
       _ <- A.i_.Bb.*(B.i.C.i._B.C1.s.D.i).query.get.map(_ ==> List(List((1, 2, "a", 3))))
@@ -194,7 +194,7 @@ case class NestedRef(
   }
 
 
-  "Backref, 2 steps back" - refs { implicit conn =>
+  "Backref, 2 steps back" - refs {
     for {
       _ <- A.i.Bb.*(B.i.C.i.D.i._C._B.C1.s.D.i).insert((0, List((1, 2, 3, "a", 33)))).transact
       _ <- A.i_.Bb.*(B.i.C.i.D.i._C._B.C1.s.D.i).query.get.map(_ ==> List(List((1, 2, 3, "a", 33))))
@@ -210,7 +210,7 @@ case class NestedRef(
     } yield ()
   }
 
-  "Backref before nested" - refs { implicit conn =>
+  "Backref before nested" - refs {
     for {
       _ <- A.i.B.i._A.Bb.*(B.i).insert((0, 1, List(2))).transact
       _ <- A.i.B.i._A.Bb.*(B.i).query.get.map(_ ==> List((0, 1, List(2))))
@@ -218,7 +218,7 @@ case class NestedRef(
     } yield ()
   }
 
-  "Backref insert: no ref re-use after" - refs { implicit conn =>
+  "Backref insert: no ref re-use after" - refs {
     for {
       _ <- A.i.Bb.*(B.i.C.i._B.C.s).insert((0, List((1, 2, "a")))).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -233,7 +233,7 @@ case class NestedRef(
   }
 
 
-  "Optional attributes in nested" - refs { implicit conn =>
+  "Optional attributes in nested" - refs {
     for {
       _ <- A.i.Bb.*(B.i.s_?.C.i).insert(
         (1, List((10, Some("a"), 11))),
@@ -270,7 +270,7 @@ case class NestedRef(
   }
 
 
-  "Optional attributes before nested" - refs { implicit conn =>
+  "Optional attributes before nested" - refs {
     for {
       _ <- A.s_?.Bb.i.Cc.*(C.i).insert(List(
         (Some("a"), 10, List(1, 2)),
@@ -289,7 +289,7 @@ case class NestedRef(
   }
 
 
-  "Optional Nested semantics" - refs { implicit conn =>
+  "Optional Nested semantics" - refs {
     for {
       _ <- A.i.Bb.*?(B.s.i_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

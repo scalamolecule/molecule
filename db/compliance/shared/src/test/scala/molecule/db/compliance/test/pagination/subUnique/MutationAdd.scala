@@ -20,7 +20,7 @@ case class MutationAdd(
   import api.*
   import suite.*
 
-  "Forward: Add row before" - unique { implicit conn =>
+  "Forward: Add row before" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -35,7 +35,7 @@ case class MutationAdd(
     } yield ()
   }
 
-  "Forward: Add row after" - unique { implicit conn =>
+  "Forward: Add row after" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -51,7 +51,7 @@ case class MutationAdd(
   }
 
 
-  "Backwards: Add row before" - unique { implicit conn =>
+  "Backwards: Add row before" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -66,7 +66,7 @@ case class MutationAdd(
     } yield ()
   }
 
-  "Backwards: Add row after" - unique { implicit conn =>
+  "Backwards: Add row after" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     for {

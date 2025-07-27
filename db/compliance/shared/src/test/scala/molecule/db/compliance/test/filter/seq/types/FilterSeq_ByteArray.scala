@@ -17,7 +17,7 @@ case class FilterSeq_ByteArray(
   import suite.*
 
 
-  "Mandatory: attr" - types { implicit conn =>
+  "Mandatory: attr" - types {
     val a = (1, Array(byte1, byte2))
     val b = (2, Array(byte2, byte3, byte3))
     for {
@@ -26,7 +26,7 @@ case class FilterSeq_ByteArray(
     } yield ()
   }
 
-  "Mandatory: equal" - types { implicit conn =>
+  "Mandatory: equal" - types {
     val a = (1, Array(byte1, byte2))
     val b = (2, Array(byte2, byte3, byte3))
     for {
@@ -45,7 +45,7 @@ case class FilterSeq_ByteArray(
     } yield ()
   }
 
-  "Mandatory: not equal" - types { implicit conn =>
+  "Mandatory: not equal" - types {
     val a = (1, Array(byte1, byte2))
     val b = (2, Array(byte2, byte3, byte3))
     for {
@@ -62,7 +62,7 @@ case class FilterSeq_ByteArray(
   }
 
 
-  "Tacit: attr" - types { implicit conn =>
+  "Tacit: attr" - types {
     val a = (1, Array(byte1, byte2))
     val b = (2, Array(byte2, byte3, byte3))
     for {
@@ -71,7 +71,7 @@ case class FilterSeq_ByteArray(
     } yield ()
   }
 
-  "Tacit: equal" - types { implicit conn =>
+  "Tacit: equal" - types {
     val a = (1, Array(byte1, byte2))
     val b = (2, Array(byte2, byte3, byte3))
     for {
@@ -90,7 +90,7 @@ case class FilterSeq_ByteArray(
     } yield ()
   }
 
-  "Tacit: not equal" - types { implicit conn =>
+  "Tacit: not equal" - types {
     val a = (1, Array(byte1, byte2))
     val b = (2, Array(byte2, byte3, byte3))
     for {
@@ -107,7 +107,7 @@ case class FilterSeq_ByteArray(
   }
 
 
-  "Optional: attr" - types { implicit conn =>
+  "Optional: attr" - types {
     val a = (1, Some(Array(byte1, byte2)))
     val b = (2, Some(Array(byte2, byte3, byte3)))
     val c = (3, None)
@@ -117,7 +117,7 @@ case class FilterSeq_ByteArray(
     } yield ()
   }
 
-  "Optional: no filters on optional byte arrays" - types { implicit conn =>
+  "Optional: no filters on optional byte arrays" - types {
     val a = (1, Some(Array(byte1, byte2)))
     val b = (2, Some(Array(byte2, byte3, byte3)))
     val c = (3, None)

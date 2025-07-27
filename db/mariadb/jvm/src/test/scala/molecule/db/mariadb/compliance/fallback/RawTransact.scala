@@ -9,7 +9,7 @@ import molecule.db.mariadb.setup.DbProviders_mariadb
 
 class RawTransact extends MUnit with DbProviders_mariadb with TestUtils {
 
-  "Semantics" - types { implicit conn =>
+  "Semantics" - types {
     for {
       // Insert 1 row with 2 values
       txReport <- rawTransact(
@@ -33,7 +33,7 @@ class RawTransact extends MUnit with DbProviders_mariadb with TestUtils {
   }
 
 
-  "Insert" - types { implicit conn =>
+  "Insert" - types {
     for {
       _ <- rawTransact(s"insert into Entity (string        ) values ('$string1')")
       _ <- rawTransact(s"insert into Entity (int_          ) values ($int1)")
@@ -85,7 +85,7 @@ class RawTransact extends MUnit with DbProviders_mariadb with TestUtils {
   }
 
 
-  "Insert Set" - types { implicit conn =>
+  "Insert Set" - types {
     for {
       _ <- rawTransact(s"""insert into Entity (stringSet        ) values ('["$string1", "$string2"]')""")
       _ <- rawTransact(s"""insert into Entity (intSet           ) values ('[$int1, $int2]')""")
@@ -137,7 +137,7 @@ class RawTransact extends MUnit with DbProviders_mariadb with TestUtils {
   }
 
 
-  "Update" - types { implicit conn =>
+  "Update" - types {
     for {
       // Initial values
       id1 <- Entity.string(string1).save.transact.map(_.id)
@@ -214,7 +214,7 @@ class RawTransact extends MUnit with DbProviders_mariadb with TestUtils {
   }
 
 
-  "Delete" - types { implicit conn =>
+  "Delete" - types {
     for {
       // Initial values
       List(id1, _) <- Entity.string.insert(string1, string2).transact.map(_.ids)

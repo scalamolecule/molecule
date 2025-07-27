@@ -18,7 +18,7 @@ case class Nested(
   import api.*
   import suite.*
 
-  "Forward, asc asc" - unique { implicit conn =>
+  "Forward, asc asc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -33,7 +33,7 @@ case class Nested(
     } yield ()
   }
 
-  "Forward, desc asc" - unique { implicit conn =>
+  "Forward, desc asc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -48,7 +48,7 @@ case class Nested(
     } yield ()
   }
 
-  "Forward, asc desc" - unique { implicit conn =>
+  "Forward, asc desc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -63,7 +63,7 @@ case class Nested(
     } yield ()
   }
 
-  "Forward, desc desc" - unique { implicit conn =>
+  "Forward, desc desc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -79,7 +79,7 @@ case class Nested(
   }
 
 
-  "Backwards, asc asc" - unique { implicit conn =>
+  "Backwards, asc asc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -94,7 +94,7 @@ case class Nested(
     } yield ()
   }
 
-  "Backwards, desc asc" - unique { implicit conn =>
+  "Backwards, desc asc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -109,7 +109,7 @@ case class Nested(
     } yield ()
   }
 
-  "Backwards, asc desc" - unique { implicit conn =>
+  "Backwards, asc desc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -124,7 +124,7 @@ case class Nested(
     } yield ()
   }
 
-  "Backwards, desc desc" - unique { implicit conn =>
+  "Backwards, desc desc" - unique {
     val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
     val query               = (cursor: String, limit: Int) =>

@@ -20,7 +20,7 @@ case class SaveCardMap(
   import api.*
   import suite.*
 
-  "mandatory" - types { implicit conn =>
+  "mandatory" - types {
     for {
       // Empty values are ignored
       _ <- Entity.intMap.query.get.map(_ ==> List())
@@ -76,7 +76,7 @@ case class SaveCardMap(
   }
 
 
-  "optional" - types { implicit conn =>
+  "optional" - types {
     for {
       // Empty option of Array of values saves nothing
       _ <- Entity.intMap_?(Option.empty[Map[String, Int]]).save.transact
@@ -177,7 +177,7 @@ case class SaveCardMap(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       // Can't save map with tacit map attribute
       _ <- Future(compileErrors("Entity.i(1).stringMap_(Map(pstring1, pstring2)).save"))
@@ -185,7 +185,7 @@ case class SaveCardMap(
   }
 
 
-  "Valid keys" - types { implicit conn =>
+  "Valid keys" - types {
     for {
       // Allowed characters in a key name
       _ <- Entity.intMap(Map("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789" -> 1)).save.transact

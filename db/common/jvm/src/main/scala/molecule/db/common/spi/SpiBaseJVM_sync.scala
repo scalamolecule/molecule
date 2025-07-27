@@ -39,7 +39,7 @@ trait SpiBaseJVM_sync
 
   // Query --------------------------------------------------------
 
-  override def query_get[Tpl](query: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
+  override def query_get[Tpl](query: Query[Tpl])(using conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (query.printInspect)
       query_inspect(query)
@@ -51,13 +51,13 @@ trait SpiBaseJVM_sync
       .getListFromOffset_sync(using conn)._1
   }
 
-  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): String = {
+  override def query_inspect[Tpl](q: Query[Tpl])(using conn: Conn): String = {
     inspectQuery("QUERY", q.dataModel, q.optLimit, None, conn.proxy)
   }
 
 
   override def queryOffset_get[Tpl](query: QueryOffset[Tpl])
-                                   (implicit conn0: Conn): (List[Tpl], Int, Boolean) = {
+                                   (using conn0: Conn): (List[Tpl], Int, Boolean) = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (query.printInspect)
       queryOffset_inspect(query)
@@ -69,12 +69,12 @@ trait SpiBaseJVM_sync
       .getListFromOffset_sync(using conn)
   }
 
-  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): String = {
+  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(using conn: Conn): String = {
     inspectQuery("QUERY (offset)", q.dataModel, q.optLimit, Some(q.offset), conn.proxy)
   }
 
   override def queryCursor_get[Tpl](query: QueryCursor[Tpl])
-                                   (implicit conn0: Conn): (List[Tpl], String, Boolean) = {
+                                   (using conn0: Conn): (List[Tpl], String, Boolean) = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (query.printInspect)
       queryCursor_inspect(query)
@@ -86,7 +86,7 @@ trait SpiBaseJVM_sync
       .getListFromCursor_sync(using conn)
   }
 
-  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): String = {
+  override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])(using conn: Conn): String = {
     inspectQuery("QUERY (cursor)", q.dataModel, q.optLimit, None, conn.proxy)
   }
 
@@ -112,7 +112,7 @@ trait SpiBaseJVM_sync
   // See https://github.com/com-lihaoyi/geny
   override def query_stream[Tpl](
     q: Query[Tpl], chunkSize: Int
-  )(implicit conn0: Conn): Generator[Tpl] = new Generator[Tpl] {
+  )(using conn0: Conn): Generator[Tpl] = new Generator[Tpl] {
     // callback function
     def generate(handleTuple: Tpl => Generator.Action): Generator.Action = {
       if (q.printInspect)
@@ -128,7 +128,7 @@ trait SpiBaseJVM_sync
 
 
   override def query_subscribe[Tpl](query: Query[Tpl], callback: List[Tpl] => Unit)
-                                   (implicit conn0: Conn): Unit = {
+                                   (using conn0: Conn): Unit = {
     val conn      = conn0.asInstanceOf[JdbcConn_JVM]
     val elements  = keywordsSuffixed(query.dataModel.elements, conn.proxy)
     val cleanDataModel = query.dataModel.copy(elements = elements)
@@ -140,14 +140,14 @@ trait SpiBaseJVM_sync
     )
   }
 
-  override def query_unsubscribe[Tpl](query: Query[Tpl])(implicit conn: Conn): Unit = {
+  override def query_unsubscribe[Tpl](query: Query[Tpl])(using conn: Conn): Unit = {
     conn.removeCallback(query.dataModel)
   }
 
 
   // Save --------------------------------------------------------
 
-  override def save_transact(save: Save)(implicit conn0: Conn): TxReport = {
+  override def save_transact(save: Save)(using conn0: Conn): TxReport = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (save.printInspect)
       save_inspect(save)
@@ -164,7 +164,7 @@ trait SpiBaseJVM_sync
     }
   }
 
-  override def save_inspect(save: Save)(implicit conn0: Conn): String = {
+  override def save_inspect(save: Save)(using conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("save", save.dataModel) {
       val cleanElements  = keywordsSuffixed(save.dataModel.elements, conn.proxy)
@@ -178,7 +178,7 @@ trait SpiBaseJVM_sync
   def save_getAction(save: Save, conn: JdbcConn_JVM): SaveAction
 
 
-  override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
+  override def save_validate(save: Save)(using conn: Conn): Map[String, Seq[String]] = {
     if (save.doValidate) {
       TxModelValidation(conn.proxy.metaDb, "save").validate(save.dataModel.elements)
     } else {
@@ -189,7 +189,7 @@ trait SpiBaseJVM_sync
 
   // Insert --------------------------------------------------------
 
-  override def insert_transact(insert: Insert)(implicit conn0: Conn): TxReport = {
+  override def insert_transact(insert: Insert)(using conn0: Conn): TxReport = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (insert.printInspect)
       insert_inspect(insert)
@@ -209,7 +209,7 @@ trait SpiBaseJVM_sync
       throw InsertErrors(errors)
     }
   }
-  override def insert_inspect(insert: Insert)(implicit conn: Conn): String = {
+  override def insert_inspect(insert: Insert)(using conn: Conn): String = {
     tryInspect("insert", insert.dataModel) {
       val jdbcConn       = conn.asInstanceOf[JdbcConn_JVM]
       val cleanElements  = keywordsSuffixed(insert.dataModel.elements, conn.proxy)
@@ -222,7 +222,7 @@ trait SpiBaseJVM_sync
   // Implement for each sql database
   def insert_getAction(insert: Insert, conn: JdbcConn_JVM): InsertAction
 
-  override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
+  override def insert_validate(insert: Insert)(using conn: Conn): Seq[(Int, Seq[InsertError])] = {
     if (insert.doValidate) {
       InsertValidation.validate(conn, insert.dataModel.elements, insert.tpls)
     } else {
@@ -233,7 +233,7 @@ trait SpiBaseJVM_sync
 
   // Update --------------------------------------------------------
 
-  override def update_transact(update: Update)(implicit conn0: Conn): TxReport = {
+  override def update_transact(update: Update)(using conn0: Conn): TxReport = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (update.printInspect)
       update_inspect(update)
@@ -251,7 +251,7 @@ trait SpiBaseJVM_sync
     }
   }
 
-  override def update_inspect(update: Update)(implicit conn0: Conn): String = {
+  override def update_inspect(update: Update)(using conn0: Conn): String = {
     val conn   = conn0.asInstanceOf[JdbcConn_JVM]
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
     tryInspect(action, update.dataModel) {
@@ -268,7 +268,7 @@ trait SpiBaseJVM_sync
 
   override def update_validate(
     update: Update
-  )(implicit conn0: Conn): Map[String, Seq[String]] = {
+  )(using conn0: Conn): Map[String, Seq[String]] = {
     if (update.doValidate) {
       val conn            = conn0.asInstanceOf[JdbcConn_JVM]
       val query2resultSet = (query: String) => {
@@ -292,7 +292,7 @@ trait SpiBaseJVM_sync
 
   // Delete --------------------------------------------------------
 
-  override def delete_transact(delete: Delete)(implicit conn0: Conn): TxReport = {
+  override def delete_transact(delete: Delete)(using conn0: Conn): TxReport = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     if (delete.printInspect)
       delete_inspect(delete)
@@ -305,7 +305,7 @@ trait SpiBaseJVM_sync
     txReport
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn0: Conn): String = {
+  override def delete_inspect(delete: Delete)(using conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("delete", delete.dataModel) {
       val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
@@ -347,7 +347,7 @@ trait SpiBaseJVM_sync
   override def fallback_rawTransact(
     stmt: String,
     doPrint: Boolean = false
-  )(implicit conn0: Conn): TxReport = {
+  )(using conn0: Conn): TxReport = {
     val conn  = conn0.asInstanceOf[JdbcConn_JVM]
     val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
     debug("\n=============================================================================")
@@ -373,7 +373,7 @@ trait SpiBaseJVM_sync
   override def fallback_rawQuery(
     query: String,
     debug: Boolean = false,
-  )(implicit conn: Conn): List[List[Any]] = {
+  )(using conn: Conn): List[List[Any]] = {
     val c            = conn.asInstanceOf[JdbcConn_JVM].sqlConn
     val statement    = c.createStatement()
     val resultSet    = statement.executeQuery(query)

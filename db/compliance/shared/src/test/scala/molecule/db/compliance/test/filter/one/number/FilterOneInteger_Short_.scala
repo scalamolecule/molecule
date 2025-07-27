@@ -16,7 +16,7 @@ case class FilterOneInteger_Short_(
   import api.*
   import suite.*
 
-  "odd/even" - types { implicit conn =>
+  "odd/even" - types {
     for {
       _ <- Entity.i.short.insert(
         (-2, -2.toShort),
@@ -35,7 +35,7 @@ case class FilterOneInteger_Short_(
   }
 
 
-  "modulo" - types { implicit conn =>
+  "modulo" - types {
     for {
       _ <- Entity.i.short.insert(
         (1, short1),

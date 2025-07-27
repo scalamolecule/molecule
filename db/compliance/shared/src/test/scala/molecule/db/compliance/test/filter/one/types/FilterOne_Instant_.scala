@@ -17,7 +17,7 @@ case class FilterOne_Instant_(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     val a = (1, instant1)
     val b = (2, instant2)
     val c = (3, instant3)
@@ -68,7 +68,7 @@ case class FilterOne_Instant_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, c, x) = (1, 2, 3, 4)
     for {
       _ <- Entity.i.instant_?.insert(List(
@@ -125,7 +125,7 @@ case class FilterOne_Instant_(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     val a = (1, Some(instant1))
     val b = (2, Some(instant2))
     val c = (3, Some(instant3))
@@ -148,7 +148,7 @@ case class FilterOne_Instant_(
   }
 
 
-  "Combinations" - types { implicit conn =>
+  "Combinations" - types {
     for {
       _ <- Entity.i.instant.insert(
         (1, instant1),

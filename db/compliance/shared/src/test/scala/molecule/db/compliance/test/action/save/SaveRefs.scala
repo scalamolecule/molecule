@@ -17,7 +17,7 @@ case class SaveRefs(
   import api.*
   import suite.*
 
-  "card one" - refs { implicit conn =>
+  "card one" - refs {
     for {
       _ <- A.i(1).B.i(2).save.transact
       _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
@@ -28,7 +28,7 @@ case class SaveRefs(
   }
 
 
-  "card many" - refs { implicit conn =>
+  "card many" - refs {
     for {
       _ <- A.i(1).Bb.i(2).save.transact
       _ <- A.i.Bb.i.query.get.map(_ ==> List((1, 2)))
@@ -39,7 +39,7 @@ case class SaveRefs(
   }
 
 
-  "card one/many" - refs { implicit conn =>
+  "card one/many" - refs {
     for {
       _ <- A.i(1).B.i(2).Cc.i(3).save.transact
       _ <- A.i.B.i.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -47,7 +47,7 @@ case class SaveRefs(
   }
 
 
-  "card many/one" - refs { implicit conn =>
+  "card many/one" - refs {
     for {
       _ <- A.i(1).Bb.i(2).C.i(3).save.transact
       _ <- A.i.Bb.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -55,7 +55,7 @@ case class SaveRefs(
   }
 
 
-  "backref, card one" - refs { implicit conn =>
+  "backref, card one" - refs {
     for {
       // Can't go back from empty entities
       _ <- A.i(1).B._A.s("a").save.transact
@@ -97,7 +97,7 @@ case class SaveRefs(
   }
 
 
-  "backref, card many" - refs { implicit conn =>
+  "backref, card many" - refs {
     for {
       _ <- A.i(1).Bb.i(2)._A.s("a").save.transact
       _ <- A.i.Bb.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
@@ -142,7 +142,7 @@ case class SaveRefs(
   }
 
 
-  "self-join, one" - refs { implicit conn =>
+  "self-join, one" - refs {
     for {
       _ <- A.i(1).A.i(2).save.transact
       _ <- A.i.A.i.query.get.map(_ ==> List((1, 2)))
@@ -159,7 +159,7 @@ case class SaveRefs(
   }
 
 
-  "self-join, many" - refs { implicit conn =>
+  "self-join, many" - refs {
     for {
       _ <- A.i(1).Aa.i(2).save.transact
       _ <- A.i.Aa.i.query.get.map(_ ==> List((1, 2)))
@@ -176,7 +176,7 @@ case class SaveRefs(
   }
 
 
-  "ids, ref" - refs { implicit conn =>
+  "ids, ref" - refs {
     for {
       // Card one
       case List(a1) <- A.i(1).B.i(2).save.transact.map(_.ids)
@@ -210,7 +210,7 @@ case class SaveRefs(
   }
 
 
-  "Optional ref" - refs { implicit conn =>
+  "Optional ref" - refs {
     for {
       _ <- A.i(1).B.?(B.i(2)).save.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

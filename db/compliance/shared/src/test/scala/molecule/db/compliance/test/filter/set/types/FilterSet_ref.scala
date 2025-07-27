@@ -15,7 +15,7 @@ case class FilterSet_ref(
   import api.*
   import suite.*
 
-  "Mandatory: has" - types { implicit conn =>
+  "Mandatory: has" - types {
     for {
       List(ref1, ref2, ref3, ref4) <- Ref.i.insert(1, 2, 3, 4).transact.map(_.ids)
       a = (1, Set(ref1, ref2))
@@ -57,7 +57,7 @@ case class FilterSet_ref(
   }
 
 
-  "Mandatory: hasNo" - types { implicit conn =>
+  "Mandatory: hasNo" - types {
     for {
       List(ref0, ref1, ref2, ref3, ref4, ref5) <- Ref.i.insert(0, 1, 2, 3, 4, 5).transact.map(_.ids)
       a = (1, Set(ref1, ref2))
@@ -103,7 +103,7 @@ case class FilterSet_ref(
   }
 
 
-  "Tacit: has" - types { implicit conn =>
+  "Tacit: has" - types {
     for {
       List(ref0, ref1, ref2, ref3, ref4) <- Ref.i.insert(0, 1, 2, 3, 4).transact.map(_.ids)
 
@@ -147,7 +147,7 @@ case class FilterSet_ref(
   }
 
 
-  "Tacit: hasNo" - types { implicit conn =>
+  "Tacit: hasNo" - types {
     for {
       List(ref0, ref1, ref2, ref3, ref4, ref5) <- Ref.i.insert(0, 1, 2, 3, 4, 5).transact.map(_.ids)
 

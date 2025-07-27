@@ -17,7 +17,7 @@ case class Transactions_io(
 
 
   test("Transaction bundle") {
-    types { implicit conn =>
+    types {
       // Mutation actions only
       for {
         _ <- transact(
@@ -32,7 +32,7 @@ case class Transactions_io(
   }
 
   test("Unit of work") {
-    types { implicit conn =>
+    types {
       // Use a unitOfWork when both mutations and queries are needed
       for {
         // Initial balance in two bank accounts
@@ -72,7 +72,7 @@ case class Transactions_io(
   }
 
   test("Savepoint") {
-    types { implicit conn =>
+    types {
       // Use savepoint within unitOfWork to
       // rollback transactions within the savepoint body
       unitOfWork {

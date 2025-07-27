@@ -16,7 +16,7 @@ case class Aggr_UUID_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.uuid.insert(List(
         (1, uuid1),
@@ -44,7 +44,7 @@ case class Aggr_UUID_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.uuid.insert(
         (1, uuid1),
@@ -76,7 +76,7 @@ case class Aggr_UUID_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.uuid.insert(
         (1, uuid1),
@@ -112,7 +112,7 @@ case class Aggr_UUID_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(uuid1, uuid2, uuid3, uuid4)
     for {
       _ <- Entity.uuid.insert(List(uuid1, uuid2, uuid3)).transact
@@ -123,7 +123,7 @@ case class Aggr_UUID_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.uuid.insert(List(
         (1, uuid1),

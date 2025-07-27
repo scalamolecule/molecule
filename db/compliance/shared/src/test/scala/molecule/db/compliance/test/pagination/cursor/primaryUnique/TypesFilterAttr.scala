@@ -17,7 +17,7 @@ case class TypesFilterAttr(
   import api.*
   import suite.*
 
-  "String" - types { implicit conn =>
+  "String" - types {
     val pairs               = List(
       (1, string1),
       (2, string1),
@@ -37,7 +37,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Int" - types { implicit conn =>
+  "Int" - types {
     val pairs               = List(
       (1, int1),
       (2, int1),
@@ -57,7 +57,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Long" - types { implicit conn =>
+  "Long" - types {
     val pairs               = List(
       (1, long1),
       (2, long1),
@@ -77,7 +77,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Float" - types { implicit conn =>
+  "Float" - types {
     val pairs               = List(
       (1, float1),
       (2, float1),
@@ -97,7 +97,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Double" - types { implicit conn =>
+  "Double" - types {
     val pairs               = List(
       (1, double1),
       (2, double1),
@@ -117,7 +117,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Boolean" - types { implicit conn =>
+  "Boolean" - types {
     // Can save only 2 entity boolean values
     val pairs      = List(
       (1, boolean1),
@@ -133,7 +133,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "BigInt" - types { implicit conn =>
+  "BigInt" - types {
     val pairs               = List(
       (1, bigInt1),
       (2, bigInt1),
@@ -153,7 +153,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "BigDecimal" - types { implicit conn =>
+  "BigDecimal" - types {
     val pairs               = List(
       (1, bigDecimal1),
       (2, bigDecimal1),
@@ -173,7 +173,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Date" - types { implicit conn =>
+  "Date" - types {
     val pairs               = List(
       (1, date1),
       (2, date1),
@@ -193,7 +193,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Duration" - types { implicit conn =>
+  "Duration" - types {
     val pairs               = List(
       (1, duration1),
       (2, duration1),
@@ -213,7 +213,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Instant" - types { implicit conn =>
+  "Instant" - types {
     val pairs               = List(
       (1, instant1),
       (2, instant1),
@@ -233,7 +233,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "LocalDate" - types { implicit conn =>
+  "LocalDate" - types {
     val pairs               = List(
       (1, localDate1),
       (2, localDate1),
@@ -253,7 +253,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "LocalTime" - types { implicit conn =>
+  "LocalTime" - types {
     val pairs               = List(
       (1, localTime1),
       (2, localTime1),
@@ -273,7 +273,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "LocalDateTime" - types { implicit conn =>
+  "LocalDateTime" - types {
     val pairs               = List(
       (1, localDateTime1),
       (2, localDateTime1),
@@ -293,7 +293,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "OffsetTime" - types { implicit conn =>
+  "OffsetTime" - types {
     val pairs               = List(
       (1, offsetTime1),
       (2, offsetTime1),
@@ -313,7 +313,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "OffsetDateTime" - types { implicit conn =>
+  "OffsetDateTime" - types {
     val pairs               = List(
       (1, offsetDateTime1),
       (2, offsetDateTime1),
@@ -333,7 +333,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "ZonedDateTime" - types { implicit conn =>
+  "ZonedDateTime" - types {
     val pairs               = List(
       (1, zonedDateTime1),
       (2, zonedDateTime1),
@@ -353,7 +353,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Uuid" - types { implicit conn =>
+  "Uuid" - types {
     val pairs               = List(
       (1, uuid1),
       (2, uuid1),
@@ -373,7 +373,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Uri" - types { implicit conn =>
+  "Uri" - types {
     val pairs               = List(
       (1, uri1),
       (2, uri1),
@@ -393,7 +393,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Byte" - types { implicit conn =>
+  "Byte" - types {
     val pairs               = List(
       (1, byte1),
       (2, byte1),
@@ -413,7 +413,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Short" - types { implicit conn =>
+  "Short" - types {
     val pairs               = List(
       (1, short1),
       (2, short1),
@@ -433,7 +433,7 @@ case class TypesFilterAttr(
     } yield ()
   }
 
-  "Char" - types { implicit conn =>
+  "Char" - types {
     val pairs               = List(
       (1, char1),
       (2, char1),

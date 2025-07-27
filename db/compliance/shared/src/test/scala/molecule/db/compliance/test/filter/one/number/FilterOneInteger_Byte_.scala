@@ -16,7 +16,7 @@ case class FilterOneInteger_Byte_(
   import api.*
   import suite.*
 
-  "odd/even" - types { implicit conn =>
+  "odd/even" - types {
     for {
       _ <- Entity.i.byte.insert(
         (-2, -2.toByte),
@@ -35,7 +35,7 @@ case class FilterOneInteger_Byte_(
   }
 
 
-  "modulo" - types { implicit conn =>
+  "modulo" - types {
     for {
       _ <- Entity.i.byte.insert(
         (1, byte1),

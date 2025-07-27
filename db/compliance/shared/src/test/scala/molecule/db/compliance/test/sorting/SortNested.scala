@@ -18,7 +18,7 @@ case class SortNested(
   import api.*
   import suite.*
 
-  "Basic types, ascending" - types { implicit conn =>
+  "Basic types, ascending" - types {
 
     for {
       _ <- Ref.i.Entities.*(Entity.string).insert((1, List(string1, string2))).transact
@@ -98,7 +98,7 @@ case class SortNested(
   }
 
 
-  "Basic types, descending" - types { implicit conn =>
+  "Basic types, descending" - types {
 
     for {
       _ <- Ref.i.Entities.*(Entity.string).insert((1, List(string1, string2))).transact
@@ -176,7 +176,7 @@ case class SortNested(
   }
 
 
-  "OptNested type, optional" - types { implicit conn =>
+  "OptNested type, optional" - types {
 
     for {
       _ <- Ref.i.Entities.*(Entity.i.string_?).insert((1, List(
@@ -478,7 +478,7 @@ case class SortNested(
   }
 
 
-  "Sort top level" - refs { implicit conn =>
+  "Sort top level" - refs {
     for {
       _ <- A.s.Bb.*(B.i).insert(
         ("A", List(1, 2)),
@@ -505,7 +505,7 @@ case class SortNested(
   }
 
 
-  "Options" - refs { implicit conn =>
+  "Options" - refs {
     for {
       _ <- A.i.s_?.Bb.*(B.i.s_?).insert(
         (1, Some("A"), List(
@@ -669,7 +669,7 @@ case class SortNested(
   }
 
 
-  "2 sub levels" - refs { implicit conn =>
+  "2 sub levels" - refs {
     for {
       _ <- A.i.s_?.Bb.*(B.i.s_?.Cc.*(C.s)).insert(
         (1, Some("A"), List(

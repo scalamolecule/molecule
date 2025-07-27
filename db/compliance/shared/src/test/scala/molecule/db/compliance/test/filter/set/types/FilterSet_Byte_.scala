@@ -20,7 +20,7 @@ case class FilterSet_Byte_(
   import suite.*
 
 
-  "Mandatory: has" - types { implicit conn =>
+  "Mandatory: has" - types {
     for {
       _ <- Entity.i.byteSet.insert(a, b).transact
 
@@ -57,7 +57,7 @@ case class FilterSet_Byte_(
   }
 
 
-  "Mandatory: hasNo" - types { implicit conn =>
+  "Mandatory: hasNo" - types {
     for {
       _ <- Entity.i.byteSet.insert(a, b).transact
 
@@ -97,7 +97,7 @@ case class FilterSet_Byte_(
   }
 
 
-  "Tacit: has" - types { implicit conn =>
+  "Tacit: has" - types {
     for {
       _ <- Entity.i.byteSet.insert(a, b).transact
 
@@ -135,7 +135,7 @@ case class FilterSet_Byte_(
   }
 
 
-  "Tacit: hasNo" - types { implicit conn =>
+  "Tacit: hasNo" - types {
     for {
       _ <- Entity.i.byteSet.insert(a, b).transact
 

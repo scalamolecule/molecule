@@ -19,7 +19,7 @@ case class TypesOne(
   import api.*
   import suite.*
 
-  "Types" - validation { implicit conn =>
+  "Types" - validation {
     for {
       id <- Type.string("c").save.transact.map(_.id)
 

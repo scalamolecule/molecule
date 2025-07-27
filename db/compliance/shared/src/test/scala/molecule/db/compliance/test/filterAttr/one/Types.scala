@@ -15,7 +15,7 @@ case class Types(
   import api.*
   import suite.*
 
-  "equal (apply)" - types { implicit conn =>
+  "equal (apply)" - types {
     for {
       _ <- Entity.string.Ref.string.insert((string1, string1)).transact
       _ <- Entity.int.Ref.int.insert((int1, int1)).transact
@@ -66,7 +66,7 @@ case class Types(
   }
 
 
-  "not equal" - types { implicit conn =>
+  "not equal" - types {
     for {
       _ <- Entity.string.Ref.string.insert((string1, string2)).transact
       _ <- Entity.int.Ref.int.insert((int1, int2)).transact
@@ -117,7 +117,7 @@ case class Types(
   }
 
 
-  "<" - types { implicit conn =>
+  "<" - types {
     for {
       _ <- Entity.string.Ref.string.insert((string1, string2)).transact
       _ <- Entity.int.Ref.int.insert((int1, int2)).transact
@@ -168,7 +168,7 @@ case class Types(
   }
 
 
-  "<=" - types { implicit conn =>
+  "<=" - types {
     for {
       _ <- Entity.string.Ref.string.insert((string1, string2)).transact
       _ <- Entity.int.Ref.int.insert((int1, int2)).transact
@@ -219,7 +219,7 @@ case class Types(
   }
 
 
-  ">" - types { implicit conn =>
+  ">" - types {
     for {
       _ <- Entity.string.Ref.string.insert((string2, string1)).transact
       _ <- Entity.int.Ref.int.insert((int2, int1)).transact
@@ -270,7 +270,7 @@ case class Types(
   }
 
 
-  ">=" - types { implicit conn =>
+  ">=" - types {
     for {
       _ <- Entity.string.Ref.string.insert((string2, string1)).transact
       _ <- Entity.int.Ref.int.insert((int2, int1)).transact

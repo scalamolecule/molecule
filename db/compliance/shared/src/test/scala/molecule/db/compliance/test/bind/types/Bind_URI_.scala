@@ -17,7 +17,7 @@ case class Bind_URI_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.uri.insert(uri1, uri2, uri3).transact
 
@@ -54,7 +54,7 @@ case class Bind_URI_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.uri.insert((1, uri1), (2, uri2), (3, uri3)).transact
 

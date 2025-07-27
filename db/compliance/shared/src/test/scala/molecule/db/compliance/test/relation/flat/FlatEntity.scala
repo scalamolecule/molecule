@@ -16,7 +16,7 @@ case class FlatEntity(
   import api.*
   import suite.*
 
-  "Arity 23 save" - types { implicit conn =>
+  "Arity 23 save" - types {
     for {
       _ <- Entity
         .string(string1)
@@ -49,7 +49,7 @@ case class FlatEntity(
   }
 
 
-  "Arity 23 insert" - types { implicit conn =>
+  "Arity 23 insert" - types {
     for {
       _ <- ent23.insert(tpl23_1).transact
       _ <- ent23.query.get.map(_ ==> List(tpl23_1))
@@ -57,7 +57,7 @@ case class FlatEntity(
   }
 
 
-  "Arity 23 update" - types { implicit conn =>
+  "Arity 23 update" - types {
     for {
       id <- ent23.insert(tpl23_1).transact.map(_.id)
       _ <- Entity(id)

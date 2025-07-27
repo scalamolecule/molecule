@@ -16,7 +16,7 @@ case class OpsMap(
   import api.*
   import suite.*
 
-  "Valid keys" - types { implicit conn =>
+  "Valid keys" - types {
     for {
       id <- Entity.intMap(Map("a" -> int0)).save.transact.map(_.id)
 
@@ -41,7 +41,7 @@ case class OpsMap(
     } yield ()
   }
 
-  "apply" - types { implicit conn =>
+  "apply" - types {
     for {
       id <- Entity.i(42).save.transact.map(_.id)
 
@@ -84,7 +84,7 @@ case class OpsMap(
   }
 
 
-  "add" - types { implicit conn =>
+  "add" - types {
     for {
       id <- Entity.i(42).save.transact.map(_.id)
       // Map attribute not yet asserted
@@ -125,7 +125,7 @@ case class OpsMap(
   }
 
 
-  "remove" - types { implicit conn =>
+  "remove" - types {
     // No semantic difference between update/upsert when removing
     for {
       id <- Entity.i(42).save.transact.map(_.id)
@@ -171,7 +171,7 @@ case class OpsMap(
   }
 
 
-  "Update multiple values" - types { implicit conn =>
+  "Update multiple values" - types {
     for {
       case List(a, b, c) <- Entity.i.intMap_?.insert(
         (1, None),
@@ -202,7 +202,7 @@ case class OpsMap(
   }
 
 
-  "Types apply" - types { implicit conn =>
+  "Types apply" - types {
     for {
       id1 <- Entity.stringMap(Map(pstring1)).save.transact.map(_.id)
       id2 <- Entity.intMap(Map(pint1)).save.transact.map(_.id)
@@ -324,7 +324,7 @@ case class OpsMap(
   }
 
 
-  "Types add" - types { implicit conn =>
+  "Types add" - types {
     for {
       id1 <- Entity.stringMap(Map(pstring1)).save.transact.map(_.id)
       id2 <- Entity.intMap(Map(pint1)).save.transact.map(_.id)
@@ -446,7 +446,7 @@ case class OpsMap(
   }
 
 
-  "Types remove" - types { implicit conn =>
+  "Types remove" - types {
     for {
       id1 <- Entity.stringMap(Map(pstring1, pstring2, pstring3)).save.transact.map(_.id)
       id2 <- Entity.intMap(Map(pint1, pint2, pint3)).save.transact.map(_.id)
@@ -570,7 +570,7 @@ case class OpsMap(
   }
 
 
-  "Valid keys" - types { implicit conn =>
+  "Valid keys" - types {
     for {
       id <- Entity.intMap(Map("a" -> int0)).save.transact.map(_.id)
 

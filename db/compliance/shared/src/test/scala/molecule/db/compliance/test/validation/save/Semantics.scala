@@ -17,7 +17,7 @@ case class Semantics(
   import api.*
   import suite.*
 
-  "1 attribute" - validation { implicit conn =>
+  "1 attribute" - validation {
     for {
       _ <- Type.int(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -35,7 +35,7 @@ case class Semantics(
   }
 
 
-  "2 attributes" - validation { implicit conn =>
+  "2 attributes" - validation {
     for {
       _ <- Type.int(1).long(3L).save.transact
         .map(_ ==> "Unexpected success").recover {

@@ -18,7 +18,7 @@ case class FlatOptRef(
   import api.*
   import suite.*
 
-  "Basic optional ref" - refs { implicit conn =>
+  "Basic optional ref" - refs {
     for {
       _ <- A.i(1).save.transact
 
@@ -43,7 +43,7 @@ case class FlatOptRef(
   }
 
   // same as:
-  "Basic optional ref with opt ref insert" - refs { implicit conn =>
+  "Basic optional ref with opt ref insert" - refs {
     for {
       _ <- A.i.B.?(B.i).insert(List(
         (1, None),
@@ -62,7 +62,7 @@ case class FlatOptRef(
   }
 
 
-  "Only optional attributes in optional ref - SQL" - refs { implicit conn =>
+  "Only optional attributes in optional ref - SQL" - refs {
     for {
       _ <- A.i.B.?(B.i_?).insert(List(
         (1, None), // no relationship created
@@ -91,7 +91,7 @@ case class FlatOptRef(
   }
 
 
-  "Mix man/opt attributes in opt ref" - refs { implicit conn =>
+  "Mix man/opt attributes in opt ref" - refs {
     for {
       _ <- A.i.B.?(B.s.i_?).insert(List(
         (1, None),
@@ -125,7 +125,7 @@ case class FlatOptRef(
   }
 
 
-  "Ref after opt ref" - refs { implicit conn =>
+  "Ref after opt ref" - refs {
     for {
       _ <- A.i.B.?(B.i.s).C.i.query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -146,7 +146,7 @@ case class FlatOptRef(
   }
 
 
-  "Ref inside opt ref" - refs { implicit conn =>
+  "Ref inside opt ref" - refs {
     for {
       _ <- A.i.insert(
         1
@@ -180,7 +180,7 @@ case class FlatOptRef(
   }
 
 
-  "No card-many ref inside opt ref" - refs { implicit conn =>
+  "No card-many ref inside opt ref" - refs {
     for {
       _ <- A.i.B.s.i.Cc.*(C.s).insert(List(
         (1, "a", 1, Nil),
@@ -214,7 +214,7 @@ case class FlatOptRef(
   }
 
 
-  "Expression inside optional nested" - refs { implicit conn =>
+  "Expression inside optional nested" - refs {
     // Seems not possible to add expressions inside Datomic nested pulls
     for {
       _ <- A.i.B.?(B.i).insert(
@@ -291,7 +291,7 @@ case class FlatOptRef(
   }
 
 
-  "Opt ref with Set attr" - refs { implicit conn =>
+  "Opt ref with Set attr" - refs {
     for {
       _ <- A.i.B.?(B.iSet).insert(
         (0, None),
@@ -305,7 +305,7 @@ case class FlatOptRef(
     } yield ()
   }
 
-  "Opt ref with Seq attr" - refs { implicit conn =>
+  "Opt ref with Seq attr" - refs {
     for {
       _ <- A.i.B.?(B.iSeq).insert(
         (0, None),
@@ -319,7 +319,7 @@ case class FlatOptRef(
     } yield ()
   }
 
-  "Opt ref with Map attr" - refs { implicit conn =>
+  "Opt ref with Map attr" - refs {
     for {
       _ <- A.i.B.?(B.iMap).insert(
         (0, None),
@@ -334,7 +334,7 @@ case class FlatOptRef(
   }
 
 
-  "Opt ref with sorting" - refs { implicit conn =>
+  "Opt ref with sorting" - refs {
     for {
       _ <- A.i.B.?(B.i).insert(List(
         (1, None),
@@ -397,7 +397,7 @@ case class FlatOptRef(
     } yield ()
   }
 
-  "Opt ref with sorting, 2 levels" - refs { implicit conn =>
+  "Opt ref with sorting, 2 levels" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.i(1).B.i(1).save.transact
@@ -433,7 +433,7 @@ case class FlatOptRef(
     } yield ()
   }
 
-  "Opt ref with sorting, adjacent" - refs { implicit conn =>
+  "Opt ref with sorting, adjacent" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.i(1).B.i(1).save.transact
@@ -470,7 +470,7 @@ case class FlatOptRef(
   }
 
 
-  "Arity 23 opt ref" - types { implicit conn =>
+  "Arity 23 opt ref" - types {
     for {
       _ <- entOptRef23.insert(
         (1, Some(tpl23_1)),

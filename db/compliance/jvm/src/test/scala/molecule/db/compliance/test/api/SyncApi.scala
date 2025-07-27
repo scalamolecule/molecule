@@ -20,7 +20,7 @@ case class SyncApi(
   import suite.*
 
 
-  "Crud actions" - types { implicit conn =>
+  "Crud actions" - types {
     val List(a, b) = Entity.int.insert(1, 2).transact.ids
     Entity.int(3).save.transact
     Entity.int.a1.query.get ==> List(1, 2, 3)
@@ -30,7 +30,7 @@ case class SyncApi(
   }
 
 
-  "Streaming" - types { implicit conn =>
+  "Streaming" - types {
     Entity.i.insert(1, 2, 3).transact
 
     // Returning a geny Generator[Int] from the lihaoyi ecosystem
@@ -39,7 +39,7 @@ case class SyncApi(
   }
 
 
-  "Opt ref" - refs { implicit conn =>
+  "Opt ref" - refs {
     import molecule.db.compliance.domains.dsl.Refs.*
 
     A.i(1).save.transact
@@ -59,7 +59,7 @@ case class SyncApi(
   }
 
 
-  "Validation" - validation { implicit conn =>
+  "Validation" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
 
     intercept[ValidationErrors](
@@ -94,7 +94,7 @@ case class SyncApi(
   }
 
 
-  "Offset query" - types { implicit conn =>
+  "Offset query" - types {
     Entity.int.insert(1, 2, 3).transact
     Entity.int.a1.query.get ==> List(1, 2, 3)
     Entity.int.a1.query.limit(2).get ==> List(1, 2)
@@ -103,7 +103,7 @@ case class SyncApi(
   }
 
 
-  "Cursor query" - unique { implicit conn =>
+  "Cursor query" - unique {
     import molecule.db.compliance.domains.dsl.Uniques.*
 
     val query = Uniques.int.a1.query
@@ -126,7 +126,7 @@ case class SyncApi(
   }
 
 
-  "Subscription" - types { implicit conn =>
+  "Subscription" - types {
     var intermediaryCallbackResults = List.empty[List[Int]]
 
     // Initial data

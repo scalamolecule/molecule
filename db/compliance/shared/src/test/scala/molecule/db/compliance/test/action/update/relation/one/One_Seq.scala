@@ -15,7 +15,7 @@ case class One_Seq(
   import api.*
   import suite.*
 
-  "id-filter - ref - value" - refs { implicit conn =>
+  "id-filter - ref - value" - refs {
     for {
       a <- A.i(1).save.transact.map(_.id)
       b <- A.i(2).B.s("b").save.transact.map(_.id)
@@ -46,7 +46,7 @@ case class One_Seq(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.i(2).B.s("b").save.transact
@@ -77,7 +77,7 @@ case class One_Seq(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.iSeq(Seq(0, 1)).save.transact // won't be updated since there's no B value
       _ <- A.s("x").B.i(1).save.transact
@@ -113,7 +113,7 @@ case class One_Seq(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // will not be updated (no update filter match)
       _ <- B.s("x").iSeq(Seq(0, 1)).save.transact
@@ -152,7 +152,7 @@ case class One_Seq(
   }
 
 
-  "ref ref" - refs { implicit conn =>
+  "ref ref" - refs {
     for {
       id <- A.iSeq(List(1)).B.iSeq(List(2)).C.iSeq(List(3)).save.transact.map(_.id)
       _ <- A.iSeq.B.iSeq.C.iSeq.query.get.map(_ ==> List((List(1), List(2), List(3))))
@@ -188,7 +188,7 @@ case class One_Seq(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     for {
       id <- A.iSeq(List(1)).B.iSeq(List(2))._A.C.iSeq(List(3)).save.transact.map(_.id)
       _ <- A.iSeq.B.iSeq._A.C.iSeq.query.get.map(_ ==> List((List(1), List(2), List(3))))

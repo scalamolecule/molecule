@@ -17,7 +17,7 @@ case class Bind_Date_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.date.insert(date1, date2, date3).transact
 
@@ -54,7 +54,7 @@ case class Bind_Date_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.date.insert((1, date1), (2, date2), (3, date3)).transact
 

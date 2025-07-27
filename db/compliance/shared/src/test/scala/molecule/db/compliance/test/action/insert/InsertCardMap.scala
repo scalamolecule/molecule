@@ -20,7 +20,7 @@ case class InsertCardMap(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       // No Entity.intMap inserted yet
       _ <- Entity.intMap.query.get.map(_ ==> Nil)
@@ -79,7 +79,7 @@ case class InsertCardMap(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     for {
       _ <- Entity.int.i.stringMap_?.insert((1, 1, Option.empty[Map[String, String]])).transact
       _ <- Entity.int.i.intMap_?.insert((2, 1, Option.empty[Map[String, Int]])).transact
@@ -176,7 +176,7 @@ case class InsertCardMap(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       // Can't insert tacit attributes
       _ <- Future(compileErrors("Entity.i.stringMap_.insert(1, Map(pstring1))"))
@@ -184,7 +184,7 @@ case class InsertCardMap(
   }
 
 
-  "Valid keys" - types { implicit conn =>
+  "Valid keys" - types {
     for {
       // Allowed characters in a key name
       _ <- Entity.intMap.insert(Map("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789" -> 1)).transact

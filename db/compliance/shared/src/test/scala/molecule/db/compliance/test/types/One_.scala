@@ -16,7 +16,7 @@ case class One_(
   import suite.*
 
 
-  "other type 0-1" - types { implicit conn =>
+  "other type 0-1" - types {
     // Mandatory
     lazy val a1: Date = Entity.date.query.get.head
     lazy val a2: Date = Entity.date.apply(date1).query.get.head
@@ -49,7 +49,7 @@ case class One_(
   }
 
 
-  "other type 1-n" - types { implicit conn =>
+  "other type 1-n" - types {
     // Tacit - stays a String
     lazy val a1: String = Entity.s.date_.query.get.head
     lazy val a2: String = Entity.s.date_.apply(date1).query.get.head
@@ -88,7 +88,7 @@ case class One_(
   }
 
 
-  "other type n-n" - types { implicit conn =>
+  "other type n-n" - types {
     // Tacit - stays an (Int, String)
     lazy val a1: (Int, String) = Entity.i.s.date_.query.get.head
     lazy val a2: (Int, String) = Entity.i.s.date_.apply(date1).query.get.head

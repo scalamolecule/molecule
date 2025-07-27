@@ -15,7 +15,7 @@ case class Many_Set_remove(
   import api.*
   import suite.*
 
-  "id-filter - ref - value" - refs { implicit conn =>
+  "id-filter - ref - value" - refs {
     for {
       List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iSet_?).insert(
         (1, List()),
@@ -42,7 +42,7 @@ case class Many_Set_remove(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i.Bb.*?(B.s_?.iSet_?).insert(
         (1, List()),
@@ -69,7 +69,7 @@ case class Many_Set_remove(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.iSet.Bb.*?(B.s).insert(
         (Set(1, 3), List()),
@@ -94,7 +94,7 @@ case class Many_Set_remove(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // Will not be updated since entity has no A -> B relationship
       _ <- B.s("x").iSet(Set(1, 3)).save.transact

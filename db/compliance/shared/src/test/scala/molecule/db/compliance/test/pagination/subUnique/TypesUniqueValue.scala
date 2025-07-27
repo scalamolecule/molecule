@@ -18,7 +18,7 @@ case class TypesUniqueValue(
   import api.*
   import suite.*
 
-  "String" - unique { implicit conn =>
+  "String" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, string1),
       (Random.nextInt(3) + 1, string2),
@@ -38,7 +38,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Int" - unique { implicit conn =>
+  "Int" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, int1),
       (Random.nextInt(3) + 1, int2),
@@ -58,7 +58,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Long" - unique { implicit conn =>
+  "Long" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, long1),
       (Random.nextInt(3) + 1, long2),
@@ -78,7 +78,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Float" - unique { implicit conn =>
+  "Float" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, float1),
       (Random.nextInt(3) + 1, float2),
@@ -98,7 +98,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Double" - unique { implicit conn =>
+  "Double" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, double1),
       (Random.nextInt(3) + 1, double2),
@@ -118,7 +118,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Boolean" - unique { implicit conn =>
+  "Boolean" - unique {
     // Can save only 2 unique boolean values
     val pairs      = List(
       (Random.nextInt(3) + 1, boolean1),
@@ -134,7 +134,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "BigInt" - unique { implicit conn =>
+  "BigInt" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, bigInt1),
       (Random.nextInt(3) + 1, bigInt2),
@@ -161,7 +161,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "BigDecimal" - unique { implicit conn =>
+  "BigDecimal" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, bigDecimal1),
       (Random.nextInt(3) + 1, bigDecimal2),
@@ -181,7 +181,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Date" - unique { implicit conn =>
+  "Date" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, date1),
       (Random.nextInt(3) + 1, date2),
@@ -201,7 +201,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Duration" - unique { implicit conn =>
+  "Duration" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, duration1),
       (Random.nextInt(3) + 1, duration2),
@@ -221,7 +221,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Instant" - unique { implicit conn =>
+  "Instant" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, instant1),
       (Random.nextInt(3) + 1, instant2),
@@ -241,7 +241,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "LocalDate" - unique { implicit conn =>
+  "LocalDate" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, localDate1),
       (Random.nextInt(3) + 1, localDate2),
@@ -261,7 +261,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "LocalTime" - unique { implicit conn =>
+  "LocalTime" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, localTime1),
       (Random.nextInt(3) + 1, localTime2),
@@ -281,7 +281,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "LocalDateTime" - unique { implicit conn =>
+  "LocalDateTime" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, localDateTime1),
       (Random.nextInt(3) + 1, localDateTime2),
@@ -301,7 +301,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "OffsetTime" - unique { implicit conn =>
+  "OffsetTime" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, offsetTime1),
       (Random.nextInt(3) + 1, offsetTime2),
@@ -321,7 +321,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "OffsetDateTime" - unique { implicit conn =>
+  "OffsetDateTime" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, offsetDateTime1),
       (Random.nextInt(3) + 1, offsetDateTime2),
@@ -341,7 +341,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "ZonedDateTime" - unique { implicit conn =>
+  "ZonedDateTime" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, zonedDateTime1),
       (Random.nextInt(3) + 1, zonedDateTime2),
@@ -361,7 +361,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Uuid" - unique { implicit conn =>
+  "Uuid" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, uuid1),
       (Random.nextInt(3) + 1, uuid2),
@@ -381,7 +381,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Uri" - unique { implicit conn =>
+  "Uri" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, uri1),
       (Random.nextInt(3) + 1, uri2),
@@ -401,7 +401,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Byte" - unique { implicit conn =>
+  "Byte" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, byte1),
       (Random.nextInt(3) + 1, byte2),
@@ -421,7 +421,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Short" - unique { implicit conn =>
+  "Short" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, short1),
       (Random.nextInt(3) + 1, short2),
@@ -441,7 +441,7 @@ case class TypesUniqueValue(
     } yield ()
   }
 
-  "Char" - unique { implicit conn =>
+  "Char" - unique {
     val pairs               = List(
       (Random.nextInt(3) + 1, char1),
       (Random.nextInt(3) + 1, char2),

@@ -19,7 +19,7 @@ case class AggrRefNum_median(
 
   val average = (int1 + int2).toDouble / 2.0
 
-  "ref" - refs { implicit conn =>
+  "ref" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.insert(List(
@@ -41,7 +41,7 @@ case class AggrRefNum_median(
   }
 
 
-  "2nd ref" - refs { implicit conn =>
+  "2nd ref" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.C.i.insert(List(
@@ -62,7 +62,7 @@ case class AggrRefNum_median(
   }
 
 
-  "multiple refs" - refs { implicit conn =>
+  "multiple refs" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.C.i.insert(List(
@@ -85,7 +85,7 @@ case class AggrRefNum_median(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i._A.C.i.insert(List(

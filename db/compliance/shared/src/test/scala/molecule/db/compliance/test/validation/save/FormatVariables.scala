@@ -20,7 +20,7 @@ case class FormatVariables(
   import api.*
   import suite.*
 
-  "Default msg" - validation { implicit conn =>
+  "Default msg" - validation {
     for {
       _ <- Variables.noErrorMsg(1).int(2).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -59,7 +59,7 @@ case class FormatVariables(
   }
 
 
-  "Msg" - validation { implicit conn =>
+  "Msg" - validation {
     for {
       _ <- Variables.errorMsg(1).int1(2).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -72,7 +72,7 @@ case class FormatVariables(
   }
 
 
-  "Msg with value" - validation { implicit conn =>
+  "Msg with value" - validation {
     for {
       _ <- Variables.errorMsgWithValue(1).int2(2).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -85,7 +85,7 @@ case class FormatVariables(
   }
 
 
-  "Multi-line msg with value 2" - validation { implicit conn =>
+  "Multi-line msg with value 2" - validation {
     for {
       _ <- Variables.multilineMsg(1).int3(2).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -99,7 +99,7 @@ case class FormatVariables(
   }
 
 
-  "Multi-line test, default msg" - validation { implicit conn =>
+  "Multi-line test, default msg" - validation {
     for {
       _ <- Variables.multiLine(1).int4(10).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -117,7 +117,7 @@ case class FormatVariables(
   }
 
 
-  "Multi-line test, msg" - validation { implicit conn =>
+  "Multi-line test, msg" - validation {
     for {
       _ <- Variables.multiLine2(1).int5(10).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -130,7 +130,7 @@ case class FormatVariables(
   }
 
 
-  "Multi-line test, multi-line msg" - validation { implicit conn =>
+  "Multi-line test, multi-line msg" - validation {
     for {
       _ <- Variables.multiLine3(1).int6(10).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -144,7 +144,7 @@ case class FormatVariables(
   }
 
 
-  "Single test line with logic" - validation { implicit conn =>
+  "Single test line with logic" - validation {
     for {
       _ <- Variables.logic(1).int7(7).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -157,7 +157,7 @@ case class FormatVariables(
   }
 
 
-  "Validation attributes only mandatory" - validation { implicit conn =>
+  "Validation attributes only mandatory" - validation {
     for {
       _ <- Variables.errorMsg_(1).int1(2).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -196,7 +196,7 @@ case class FormatVariables(
   }
 
 
-  "Multiple validations, missing value attrs" - validation { implicit conn =>
+  "Multiple validations, missing value attrs" - validation {
     for {
       // Valid values passing all 5 tests
       _ <- Variables
@@ -254,7 +254,7 @@ case class FormatVariables(
   }
 
 
-  "Value attributes are tied to validation attributes using them" - validation { implicit conn =>
+  "Value attributes are tied to validation attributes using them" - validation {
     for {
       // multipleErrors requires int8, intSet, strs and str for its validation
       // Like a quintuple of coherent data
@@ -272,7 +272,7 @@ case class FormatVariables(
   }
 
 
-  "Multiple validations" - validation { implicit conn =>
+  "Multiple validations" - validation {
     for {
       _ <- Variables.multipleErrors(3).int8(3).str("hello").intSet(Set(10)).strs(Set("hi", "there")).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -313,7 +313,7 @@ case class FormatVariables(
   }
 
 
-  "Multiple values for save-validation" - validation { implicit conn =>
+  "Multiple values for save-validation" - validation {
     for {
       _ <- Variables.multipleErrors(0, 3, 11).int8(3).str("hello").intSet(Set(10)).strs(Set("hi", "there")).save.transact
         .map(_ ==> "Unexpected success").recover {

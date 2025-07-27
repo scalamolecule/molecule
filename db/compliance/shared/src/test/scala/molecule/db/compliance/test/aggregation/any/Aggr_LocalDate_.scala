@@ -16,7 +16,7 @@ case class Aggr_LocalDate_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.localDate.insert(List(
         (1, localDate1),
@@ -44,7 +44,7 @@ case class Aggr_LocalDate_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.localDate.insert(
         (1, localDate1),
@@ -76,7 +76,7 @@ case class Aggr_LocalDate_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.localDate.insert(
         (1, localDate1),
@@ -112,7 +112,7 @@ case class Aggr_LocalDate_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(localDate1, localDate2, localDate3, localDate4)
     for {
       _ <- Entity.localDate.insert(List(localDate1, localDate2, localDate3)).transact
@@ -123,7 +123,7 @@ case class Aggr_LocalDate_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.localDate.insert(List(
         (1, localDate1),

@@ -17,7 +17,7 @@ case class MapSemantics(
   import api.*
   import suite.*
 
-  "Special Map attribute semantics" - types { implicit conn =>
+  "Special Map attribute semantics" - types {
     for {
       // For simple lookup maps, it's easier to use a map attribute:
       _ <- Entity.i.intMap.insert(
@@ -56,7 +56,7 @@ case class MapSemantics(
     } yield ()
   }
 
-  "Custom alternative to Map attribute" - types { implicit conn =>
+  "Custom alternative to Map attribute" - types {
     for {
       // one-to-many relationship could be created to save Map data.
       _ <- Entity.i.Refs.*(Ref.s.i).insert(
@@ -72,7 +72,7 @@ case class MapSemantics(
   }
 
 
-  "Matching entire map not supported" - types { implicit conn =>
+  "Matching entire map not supported" - types {
     for {
       _ <- Entity.intMap(Map(pint1)).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -89,7 +89,7 @@ case class MapSemantics(
   }
 
 
-  "equal nothing" - types { implicit conn =>
+  "equal nothing" - types {
     for {
       _ <- Entity.i.intMap_?.insert(List(
         (0, None),

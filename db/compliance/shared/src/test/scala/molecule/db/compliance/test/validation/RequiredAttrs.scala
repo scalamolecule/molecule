@@ -17,7 +17,7 @@ case class RequiredAttrs(
   import api.*
   import suite.*
 
-  "Pair" - validation { implicit conn =>
+  "Pair" - validation {
     for {
       _ <- Require.username("bob").save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -48,7 +48,7 @@ case class RequiredAttrs(
   }
 
 
-  "Triple" - validation { implicit conn =>
+  "Triple" - validation {
     for {
       _ <- Require.i(0).x(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -77,7 +77,7 @@ case class RequiredAttrs(
   }
 
 
-  "Attr/ref" - validation { implicit conn =>
+  "Attr/ref" - validation {
     for {
       case List(ref1) <- RefB.i.insert(1).transact.map(_.ids)
 
@@ -101,7 +101,7 @@ case class RequiredAttrs(
   }
 
 
-  "Ref/ref" - validation { implicit conn =>
+  "Ref/ref" - validation {
     for {
       ref1 <- RefB.i.insert(1).transact.map(_.id)
       ref2 <- AllowedAttrs.luckyNumber.insert(7).transact.map(_.id)

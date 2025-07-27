@@ -17,7 +17,7 @@ case class Bind_Short_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.short.insert(short1, short2, short3).transact
 
@@ -54,7 +54,7 @@ case class Bind_Short_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.short.insert((1, short1), (2, short2), (3, short3)).transact
 

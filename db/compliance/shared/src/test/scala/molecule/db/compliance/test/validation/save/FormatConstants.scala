@@ -21,7 +21,7 @@ case class FormatConstants(
   import api.*
   import suite.*
 
-  "Default msg" - validation { implicit conn =>
+  "Default msg" - validation {
     for {
       _ <- Constants.noErrorMsg(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -60,7 +60,7 @@ case class FormatConstants(
   }
 
 
-  "Msg" - validation { implicit conn =>
+  "Msg" - validation {
     for {
       _ <- Constants.errorMsg(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -73,7 +73,7 @@ case class FormatConstants(
   }
 
 
-  "Msg with value" - validation { implicit conn =>
+  "Msg with value" - validation {
     for {
       _ <- Constants.errorMsgWithValue(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -86,7 +86,7 @@ case class FormatConstants(
   }
 
 
-  "Msg with quoted value" - validation { implicit conn =>
+  "Msg with quoted value" - validation {
     for {
       _ <- Constants.errorMsgWithValueQuoted("hi").save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -98,7 +98,7 @@ case class FormatConstants(
     } yield ()
   }
 
-  "Msg with quoted value 2" - validation { implicit conn =>
+  "Msg with quoted value 2" - validation {
     for {
       _ <- Constants.errorMsgWithValueQuoted2("hi").save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -111,7 +111,7 @@ case class FormatConstants(
   }
 
 
-  "Multi-line msg" - validation { implicit conn =>
+  "Multi-line msg" - validation {
     for {
       _ <- Constants.multilineErrorMsg(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -125,7 +125,7 @@ case class FormatConstants(
   }
 
 
-  "Multi-line msg with value" - validation { implicit conn =>
+  "Multi-line msg with value" - validation {
     for {
       _ <- Constants.multilineMsgWithValue(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -138,7 +138,7 @@ case class FormatConstants(
     } yield ()
   }
 
-  "Multi-line msg with value 2" - validation { implicit conn =>
+  "Multi-line msg with value 2" - validation {
     for {
       _ <- Constants.multilineMsgWithValue2(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -152,7 +152,7 @@ case class FormatConstants(
   }
 
 
-  "Multi-line test, default msg" - validation { implicit conn =>
+  "Multi-line test, default msg" - validation {
     for {
       _ <- Constants.multiLine(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -170,7 +170,7 @@ case class FormatConstants(
   }
 
 
-  "Multi-line test, msg" - validation { implicit conn =>
+  "Multi-line test, msg" - validation {
     for {
       _ <- Constants.multiLine2(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -184,7 +184,7 @@ case class FormatConstants(
   }
 
 
-  "Multi-line test, multi-line msg" - validation { implicit conn =>
+  "Multi-line test, multi-line msg" - validation {
     for {
       _ <- Constants.multiLine3(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -198,7 +198,7 @@ case class FormatConstants(
   }
 
 
-  "Single test line with logic" - validation { implicit conn =>
+  "Single test line with logic" - validation {
     for {
       _ <- Constants.logic(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -211,7 +211,7 @@ case class FormatConstants(
   }
 
 
-  "Multiple validations" - validation { implicit conn =>
+  "Multiple validations" - validation {
     for {
       _ <- Constants.multipleErrors(1).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -260,7 +260,7 @@ case class FormatConstants(
   }
 
 
-  "Multiple validations, multiple values" - validation { implicit conn =>
+  "Multiple validations, multiple values" - validation {
     for {
       // Multiple values for an attribute cannot be stored with `save`.
       // But since validation of constants happen already on applying the values
@@ -291,7 +291,7 @@ case class FormatConstants(
   }
 
 
-  "Multiple attribute validations" - validation { implicit conn =>
+  "Multiple attribute validations" - validation {
     for {
       _ <- Constants.errorMsg(1).multipleErrors(0).save.transact
         .map(_ ==> "Unexpected success").recover {

@@ -3,7 +3,6 @@ package molecule.db.common.util
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 
 object Executor {
-  //  implicit def global: ExecutionContext = ExecutionContext.global
 
   // Enable stack traces back to calling code causing asynchronous exceptions.
   // Without it we get meaningless stack traces pointing only to the exception.

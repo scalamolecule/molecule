@@ -29,7 +29,7 @@ case class Nested(
   import api.*
   import suite.*
 
-  "Forward, asc asc" - types { implicit conn =>
+  "Forward, asc asc" - types {
     val pairs               = getData(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -44,7 +44,7 @@ case class Nested(
     } yield ()
   }
 
-  "Forward, desc asc" - types { implicit conn =>
+  "Forward, desc asc" - types {
     val pairs               = getData(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -59,7 +59,7 @@ case class Nested(
     } yield ()
   }
 
-  "Forward, asc desc" - types { implicit conn =>
+  "Forward, asc desc" - types {
     val pairs               = getData(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -74,7 +74,7 @@ case class Nested(
     } yield ()
   }
 
-  "Forward, desc desc" - types { implicit conn =>
+  "Forward, desc desc" - types {
     val pairs               = getData(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -90,7 +90,7 @@ case class Nested(
   }
 
 
-  "Backwards, asc asc" - types { implicit conn =>
+  "Backwards, asc asc" - types {
     val pairs               = getData(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -105,7 +105,7 @@ case class Nested(
     } yield ()
   }
 
-  "Backwards, desc asc" - types { implicit conn =>
+  "Backwards, desc asc" - types {
     val pairs               = getData(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -120,7 +120,7 @@ case class Nested(
     } yield ()
   }
 
-  "Backwards, asc desc" - types { implicit conn =>
+  "Backwards, asc desc" - types {
     val pairs               = getData(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
     val query               = (cursor: String, limit: Int) =>
@@ -135,7 +135,7 @@ case class Nested(
     } yield ()
   }
 
-  "Backwards, desc desc" - types { implicit conn =>
+  "Backwards, desc desc" - types {
     val pairs               = getData(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
     val query               = (cursor: String, limit: Int) =>

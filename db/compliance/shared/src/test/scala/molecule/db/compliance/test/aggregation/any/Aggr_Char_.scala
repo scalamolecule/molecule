@@ -16,7 +16,7 @@ case class Aggr_Char_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.char.insert(List(
         (1, char1),
@@ -44,7 +44,7 @@ case class Aggr_Char_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.char.insert(
         (1, char1),
@@ -76,7 +76,7 @@ case class Aggr_Char_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.char.insert(
         (1, char1),
@@ -112,7 +112,7 @@ case class Aggr_Char_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(char1, char2, char3, char4)
     for {
       _ <- Entity.char.insert(List(char1, char2, char3)).transact
@@ -123,7 +123,7 @@ case class Aggr_Char_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.char.insert(List(
         (1, char1),

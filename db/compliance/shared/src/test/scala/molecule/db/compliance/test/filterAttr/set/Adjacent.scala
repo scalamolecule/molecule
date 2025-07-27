@@ -15,7 +15,7 @@ case class Adjacent(
   import api.*
   import suite.*
 
-  "has" - types { implicit conn =>
+  "has" - types {
     for {
       _ <- Entity.s.iSet.i.insert(
         ("a", Set(1, 2), 1),
@@ -28,7 +28,7 @@ case class Adjacent(
   }
 
 
-  "hasNo" - types { implicit conn =>
+  "hasNo" - types {
     for {
       _ <- Entity.s.iSet.i.insert(
         ("a", Set(1, 2), 1),

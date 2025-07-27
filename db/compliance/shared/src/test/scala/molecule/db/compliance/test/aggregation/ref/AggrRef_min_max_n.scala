@@ -15,7 +15,7 @@ case class AggrRef_min_max_n(
   import api.*
   import suite.*
 
-  "ref" - refs { implicit conn =>
+  "ref" - refs {
     for {
       _ <- A.i.B.i.insert(
         (1, 1),
@@ -49,7 +49,7 @@ case class AggrRef_min_max_n(
   }
 
 
-  "2nd ref" - refs { implicit conn =>
+  "2nd ref" - refs {
     for {
       _ <- A.i.B.i.C.i.insert(
         (1, 1, 1),
@@ -83,7 +83,7 @@ case class AggrRef_min_max_n(
   }
 
 
-  "multiple refs" - refs { implicit conn =>
+  "multiple refs" - refs {
     for {
       _ <- A.i.B.i.C.i.insert(
         (1, 1, 1),
@@ -117,7 +117,7 @@ case class AggrRef_min_max_n(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     for {
       _ <- A.i.B.i._A.C.i.insert(
         (1, 1, 1),

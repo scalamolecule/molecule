@@ -41,8 +41,9 @@ object DbConnection_mariadb extends SchemaLoader with DbConnection {
     JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)
   }
 
-  def run(test: Conn => Any, metaDb: MetaDb_mariadb): Any = {
-    test(getConnection(metaDb))
+  def run(test: Conn ?=> Any, metaDb: MetaDb_mariadb): Any = {
+    given Conn = getConnection(metaDb)
+    test
   }
 
 

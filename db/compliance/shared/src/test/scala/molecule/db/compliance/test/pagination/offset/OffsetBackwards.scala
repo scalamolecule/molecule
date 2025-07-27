@@ -15,7 +15,7 @@ case class OffsetBackwards(
   import api.*
   import suite.*
 
-  "Avoid backwards pagination in sql" - types { implicit conn =>
+  "Avoid backwards pagination in sql" - types {
     for {
       _ <- Entity.int.insert(1, 2, 3).transact
 
@@ -33,7 +33,7 @@ case class OffsetBackwards(
   }
 
 
-  "Flat" - types { implicit conn =>
+  "Flat" - types {
     for {
       // Empty results
       _ <- Entity.int.a1.query.limit(-2).get.map(_ ==> Nil)
@@ -62,7 +62,7 @@ case class OffsetBackwards(
   }
 
 
-  "Nested" - types { implicit conn =>
+  "Nested" - types {
     for {
       _ <- Entity.int.Refs.*(Ref.i).insert(
         (1, List(11, 12)),
@@ -109,7 +109,7 @@ case class OffsetBackwards(
   }
 
 
-  "Optional nested" - types { implicit conn =>
+  "Optional nested" - types {
     for {
       _ <- Entity.int.Refs.*(Ref.i).insert(
         (1, List(11, 12)),

@@ -17,7 +17,7 @@ case class AggrRefNum_variance(
   import api.*
   import suite.*
 
-  "ref" - refs { implicit conn =>
+  "ref" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.insert(List(
@@ -39,7 +39,7 @@ case class AggrRefNum_variance(
   }
 
 
-  "2nd ref" - refs { implicit conn =>
+  "2nd ref" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.C.i.insert(List(
@@ -60,7 +60,7 @@ case class AggrRefNum_variance(
   }
 
 
-  "multiple refs" - refs { implicit conn =>
+  "multiple refs" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.C.i.insert(List(
@@ -83,7 +83,7 @@ case class AggrRefNum_variance(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i._A.C.i.insert(List(

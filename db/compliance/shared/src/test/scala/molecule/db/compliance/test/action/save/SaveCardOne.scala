@@ -19,7 +19,7 @@ case class SaveCardOne(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       // Can't save multiple values (use insert for that)
       _ <- Entity.i(1, 2).save.transact
@@ -90,7 +90,7 @@ case class SaveCardOne(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     for {
       // Empty option of value is ignored
       _ <- Entity.i_?(Option.empty[Int]).save.transact
@@ -173,7 +173,7 @@ case class SaveCardOne(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     // Applying value to tacit or mandatory attribute has same effect
     for {
       _ <- Entity.i(1).string_(string1).save.transact

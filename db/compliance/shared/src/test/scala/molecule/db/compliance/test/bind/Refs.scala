@@ -16,7 +16,7 @@ case class Refs(
   import suite.*
 
 
-  "Card-one ref" - refs { implicit conn =>
+  "Card-one ref" - refs {
     for {
       _ <- A.i.B.i.insert(
         (1, 1),
@@ -45,7 +45,7 @@ case class Refs(
   }
 
 
-  "Card-set ref" - refs { implicit conn =>
+  "Card-set ref" - refs {
     for {
       _ <- A.i.Bb.i.insert(
         (1, 1),

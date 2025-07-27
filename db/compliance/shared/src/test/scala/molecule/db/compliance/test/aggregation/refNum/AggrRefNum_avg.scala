@@ -17,7 +17,7 @@ case class AggrRefNum_avg(
   import api.*
   import suite.*
 
-  "ref" - refs { implicit conn =>
+  "ref" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.insert(List(
@@ -39,7 +39,7 @@ case class AggrRefNum_avg(
   }
 
 
-  "2nd ref" - refs { implicit conn =>
+  "2nd ref" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.C.i.insert(List(
@@ -59,7 +59,7 @@ case class AggrRefNum_avg(
   }
 
 
-  "multiple refs" - refs { implicit conn =>
+  "multiple refs" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i.C.i.insert(List(
@@ -82,7 +82,7 @@ case class AggrRefNum_avg(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- A.i.B.i._A.C.i.insert(List(

@@ -16,7 +16,7 @@ case class Enums(
   import api.*
   import suite.*
 
-  "Enum type - value" - validation { implicit conn =>
+  "Enum type - value" - validation {
     for {
       // Typed enum value saved
       _ <- Person.name("Bob").favoriteColor(Color.BLUE).save.transact
@@ -27,7 +27,7 @@ case class Enums(
   }
 
 
-  "Comparing with typed enum" - validation { implicit conn =>
+  "Comparing with typed enum" - validation {
     for {
       _ <- Person.name("Bob").favoriteColor(Color.BLUE).save.transact
 

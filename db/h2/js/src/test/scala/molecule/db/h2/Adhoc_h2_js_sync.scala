@@ -9,7 +9,7 @@ import sync.*
 
 class Adhoc_h2_js_sync extends MUnit with DbProviders_h2 with TestUtils {
 
-  "types" - types { implicit conn =>
+  "types" - types {
     try {
       Entity.int.query.get ==> List(1)
     } catch {

@@ -7,14 +7,14 @@ import sync.*
 
 class Adhoc_sqlite_jvm_sync extends MUnit with DbProviders_sqlite with TestUtils {
 
-  //  "types" - types { implicit conn =>
+  //  "types" - types {
   //    import molecule.db.compliance.domains.dsl.Types._
   //
   //    Entity.int(1).save.transact
   //    Entity.int.query.get.head ==> 1
   //  }
 
-  "refs" - refs { implicit conn =>
+  "refs" - refs {
     import molecule.db.compliance.domains.dsl.Refs.*
 
     A.i(1).save.transact
@@ -45,7 +45,7 @@ class Adhoc_sqlite_jvm_sync extends MUnit with DbProviders_sqlite with TestUtils
   }
 
 
-  //  "validation" - validation { implicit conn =>
+  //  "validation" - validation {
   //    import molecule.db.compliance.domains.dsl.Validation._
   //
   //    try {

@@ -15,7 +15,7 @@ case class One_One(
   import api.*
   import suite.*
 
-  "id - ref - value" - refs { implicit conn =>
+  "id - ref - value" - refs {
     for {
       a <- A.i(1).save.transact.map(_.id)
       b <- A.i(2).B.s("b").save.transact.map(_.id)
@@ -46,7 +46,7 @@ case class One_One(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.i(2).B.s("b").save.transact
@@ -77,7 +77,7 @@ case class One_One(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.i(0).save.transact // won't be updated since there's no B value
       _ <- A.s("x").B.i(1).save.transact
@@ -113,7 +113,7 @@ case class One_One(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // will not be updated (no update filter match)
       _ <- B.s("x").i(0).save.transact
@@ -152,7 +152,7 @@ case class One_One(
   }
 
 
-  "value - ref - value/filter" - refs { implicit conn =>
+  "value - ref - value/filter" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.s("x").B.i(2).save.transact
@@ -183,7 +183,7 @@ case class One_One(
   }
 
 
-  "value/filter - ref - value" - refs { implicit conn =>
+  "value/filter - ref - value" - refs {
     for {
       _ <- A.i(1).s("a").save.transact
       _ <- A.i(2).B.s("b").save.transact
@@ -212,7 +212,7 @@ case class One_One(
   }
 
 
-  "All ids known" - refs { implicit conn =>
+  "All ids known" - refs {
     for {
       _ <- A.i(1).B.i(1).C.s("c").save.transact // no matching C.i
       _ <- A.i(2).B.i(2).C.i(2).save.transact
@@ -254,7 +254,7 @@ case class One_One(
   }
 
 
-  "1 ref unknown (C), 1 filter (B.i)" - refs { implicit conn =>
+  "1 ref unknown (C), 1 filter (B.i)" - refs {
     for {
       _ <- A.s("a").B.s("b").save.transact // no B.i filter match
       _ <- A.i(1).B.s("b").save.transact // no B.i filter match
@@ -289,7 +289,7 @@ case class One_One(
   }
 
 
-  "1 ref unknown (C), 2 filters (A.i and B.i)" - refs { implicit conn =>
+  "1 ref unknown (C), 2 filters (A.i and B.i)" - refs {
     for {
       _ <- A.s("a").B.s("b").save.transact // no A.i or B.i filter match
       _ <- A.s("a").B.i(1).save.transact // no A.i filter match
@@ -320,7 +320,7 @@ case class One_One(
   }
 
 
-  "2 refs unknown (B and C), 1 filter (A.i)" - refs { implicit conn =>
+  "2 refs unknown (B and C), 1 filter (A.i)" - refs {
     for {
       _ <- A.s("a").save.transact // no A.i filter match
       _ <- A.i(1).save.transact
@@ -360,7 +360,7 @@ case class One_One(
   }
 
 
-  "ref ref" - refs { implicit conn =>
+  "ref ref" - refs {
     for {
       id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
       _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -396,7 +396,7 @@ case class One_One(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     for {
       id <- A.i(1).B.i(2)._A.C.i(3).save.transact.map(_.id)
       _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -412,7 +412,7 @@ case class One_One(
   }
 
 
-  "Delete individual ref value(s) with update" - refs { implicit conn =>
+  "Delete individual ref value(s) with update" - refs {
     for {
       refId <- B.i(7).save.transact.map(_.id)
       id <- A.i.b.insert((1, refId)).transact.map(_.id)

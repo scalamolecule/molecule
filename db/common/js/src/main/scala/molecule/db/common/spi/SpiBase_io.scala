@@ -20,54 +20,54 @@ trait SpiBase_io
 
   // Query --------------------------------------------------------
 
-  override def query_get[Tpl](q: Query[Tpl])(implicit conn0: Conn): IO[List[Tpl]] = {
+  override def query_get[Tpl](q: Query[Tpl])(using conn0: Conn): IO[List[Tpl]] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     conn.rpc.query[Tpl](conn.proxy, q.dataModel, q.optLimit, q.bindValues).io
   }
 
-  override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): IO[String] = {
+  override def query_inspect[Tpl](q: Query[Tpl])(using conn: Conn): IO[String] = {
     renderInspectQuery("QUERY", q.dataModel)
   }
 
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
-                                   (implicit conn0: Conn): IO[(List[Tpl], Int, Boolean)] = {
+                                   (using conn0: Conn): IO[(List[Tpl], Int, Boolean)] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     conn.rpc.queryOffset[Tpl](conn.proxy, q.dataModel, q.optLimit, q.offset, q.bindValues).io
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
-                                       (implicit conn: Conn): IO[String] = {
+                                       (using conn: Conn): IO[String] = {
     renderInspectQuery("QUERY (offset)", q.dataModel)
   }
 
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
-                                   (implicit conn0: Conn): IO[(List[Tpl], String, Boolean)] = {
+                                   (using conn0: Conn): IO[(List[Tpl], String, Boolean)] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     conn.rpc.queryCursor[Tpl](conn.proxy, q.dataModel, q.optLimit, q.cursor, q.bindValues).io
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
-                                       (implicit conn: Conn): IO[String] = {
+                                       (using conn: Conn): IO[String] = {
     renderInspectQuery("QUERY (cursor)", q.dataModel)
   }
 
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
-                                   (implicit conn0: Conn): IO[Unit] = {
+                                   (using conn0: Conn): IO[Unit] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     IO(conn.rpc.subscribe[Tpl](conn.proxy, q.dataModel, q.optLimit, callback))
   }
 
-  override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn0: Conn): IO[Unit] = {
+  override def query_unsubscribe[Tpl](q: Query[Tpl])(using conn0: Conn): IO[Unit] = {
     IO(conn0.removeCallback(q.dataModel))
   }
 
 
   // Save --------------------------------------------------------
 
-  override def save_transact(save: Save)(implicit conn0: Conn): IO[TxReport] = {
+  override def save_transact(save: Save)(using conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
       _ <- if (save.printInspect) save_inspect(save) else IO.unit
@@ -84,11 +84,11 @@ trait SpiBase_io
     }
   }
 
-  override def save_inspect(save: Save)(implicit conn: Conn): IO[String] = {
+  override def save_inspect(save: Save)(using conn: Conn): IO[String] = {
     renderInspectTx("SAVE", save.dataModel)
   }
 
-  override def save_validate(save: Save)(implicit conn: Conn): IO[Map[String, Seq[String]]] = IO.blocking {
+  override def save_validate(save: Save)(using conn: Conn): IO[Map[String, Seq[String]]] = IO.blocking {
     if (save.doValidate) {
       TxModelValidation(conn.proxy.metaDb, "save").validate(save.dataModel.elements)
     } else {
@@ -99,7 +99,7 @@ trait SpiBase_io
 
   // Insert --------------------------------------------------------
 
-  override def insert_transact(insert: Insert)(implicit conn0: Conn): IO[TxReport] = {
+  override def insert_transact(insert: Insert)(using conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
       _ <- if (insert.printInspect) insert_inspect(insert) else IO.unit
@@ -121,12 +121,12 @@ trait SpiBase_io
     }
   }
 
-  override def insert_inspect(insert: Insert)(implicit conn: Conn): IO[String] = {
+  override def insert_inspect(insert: Insert)(using conn: Conn): IO[String] = {
     renderInspectTx("INSERT", insert.dataModel)
   }
 
   override def insert_validate(insert: Insert)
-                              (implicit conn: Conn): IO[Seq[(Int, Seq[InsertError])]] = IO.blocking {
+                              (using conn: Conn): IO[Seq[(Int, Seq[InsertError])]] = IO.blocking {
     if (insert.doValidate) {
       InsertValidation.validate(conn, insert.dataModel.elements, insert.tpls)
     } else {
@@ -137,7 +137,7 @@ trait SpiBase_io
 
   // Update --------------------------------------------------------
 
-  override def update_transact(update: Update)(implicit conn0: Conn): IO[TxReport] = {
+  override def update_transact(update: Update)(using conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
       _ <- if (update.printInspect) update_inspect(update) else IO.unit
@@ -149,19 +149,19 @@ trait SpiBase_io
     }
   }
 
-  override def update_inspect(update: Update)(implicit conn: Conn): IO[String] = {
+  override def update_inspect(update: Update)(using conn: Conn): IO[String] = {
     renderInspectTx("UPDATE", update.dataModel)
   }
 
   override def update_validate(update: Update)
-                              (implicit conn: Conn): IO[Map[String, Seq[String]]] = IO.blocking {
+                              (using conn: Conn): IO[Map[String, Seq[String]]] = IO.blocking {
     TxModelValidation(conn.proxy.metaDb, "update").validate(update.dataModel.elements)
   }
 
 
   // Delete --------------------------------------------------------
 
-  override def delete_transact(delete: Delete)(implicit conn0: Conn): IO[TxReport] = {
+  override def delete_transact(delete: Delete)(using conn0: Conn): IO[TxReport] = {
     val conn = conn0.asInstanceOf[JdbcConn_JS]
     for {
       txReport <- conn.rpc.delete(conn.proxy, delete.dataModel).io
@@ -169,7 +169,7 @@ trait SpiBase_io
     } yield txReport
   }
 
-  override def delete_inspect(delete: Delete)(implicit conn: Conn): IO[String] = {
+  override def delete_inspect(delete: Delete)(using conn: Conn): IO[String] = {
     renderInspectTx("DELETE", delete.dataModel)
   }
 

@@ -15,7 +15,7 @@ case class Many_Seq(
   import api.*
   import suite.*
 
-  "id-filter - ref - value" - refs { implicit conn =>
+  "id-filter - ref - value" - refs {
     for {
       List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iSeq_?).insert(
         (1, List()),
@@ -53,7 +53,7 @@ case class Many_Seq(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).insert(
         (1, List()),
@@ -91,7 +91,7 @@ case class Many_Seq(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.iSeq_?.Bb.*?(B.s).insert(
         (Some(Seq(0, 1)), List()),
@@ -124,7 +124,7 @@ case class Many_Seq(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // will not be updated since entities have no A -> B relationship
       _ <- B.s("x").iSeq(Seq(0, 1)).save.transact
@@ -176,7 +176,7 @@ case class Many_Seq(
   }
 
 
-  "ref ref" - refs { implicit conn =>
+  "ref ref" - refs {
     for {
       id <- A.iSeq(List(1)).Bb.iSeq(List(2)).Cc.iSeq(List(3)).save.transact.map(_.id)
       _ <- A.iSeq.Bb.iSeq.Cc.iSeq.query.get.map(_ ==> List((List(1), List(2), List(3))))
@@ -212,7 +212,7 @@ case class Many_Seq(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     for {
       id <- A.iSeq(List(1)).Bb.iSeq(List(2))._A.Cc.iSeq(List(3)).save.transact.map(_.id)
       _ <- A.iSeq.Bb.iSeq._A.Cc.iSeq.query.get.map(_ ==> List((List(1), List(2), List(3))))

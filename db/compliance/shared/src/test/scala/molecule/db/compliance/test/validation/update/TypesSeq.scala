@@ -19,7 +19,7 @@ case class TypesSeq(
   import api.*
   import suite.*
 
-  "Types" - validation { implicit conn =>
+  "Types" - validation {
     for {
       id <- Type.stringSeq(Seq("d")).save.transact.map(_.id)
 

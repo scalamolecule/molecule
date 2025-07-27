@@ -17,7 +17,7 @@ case class StringValidationFns(
   import api.*
   import suite.*
 
-  "Email, default msg" - validation { implicit conn =>
+  "Email, default msg" - validation {
     for {
       _ <- Strings.email("foo@bar").save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -53,7 +53,7 @@ case class StringValidationFns(
     } yield ()
   }
 
-  "Email, msg" - validation { implicit conn =>
+  "Email, msg" - validation {
     for {
       _ <- Strings.emailWithMsg("foo@bar").save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -82,7 +82,7 @@ case class StringValidationFns(
   }
 
 
-  "Regex, default msg" - validation { implicit conn =>
+  "Regex, default msg" - validation {
     for {
       _ <- Strings.regex("Ben-hur").save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -95,7 +95,7 @@ case class StringValidationFns(
     } yield ()
   }
 
-  "Regex, msg" - validation { implicit conn =>
+  "Regex, msg" - validation {
     for {
       _ <- Strings.regexWithMsg("Ben-hur").save.transact
         .map(_ ==> "Unexpected success").recover {

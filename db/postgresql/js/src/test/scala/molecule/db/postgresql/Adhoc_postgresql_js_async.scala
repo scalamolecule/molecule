@@ -10,7 +10,7 @@ import molecule.db.postgresql.setup.DbProviders_postgresql
 class Adhoc_postgresql_js_async extends MUnit with DbProviders_postgresql with TestUtils {
 
 
-  "types" - types { implicit conn =>
+  "types" - types {
     for {
       _ <- Entity.int.insert(1).transact
       _ <- Entity.int.query.get.map(_ ==> List(1))
@@ -19,7 +19,7 @@ class Adhoc_postgresql_js_async extends MUnit with DbProviders_postgresql with T
   }
 
 
-  "refs" - refs { implicit conn =>
+  "refs" - refs {
     import molecule.db.compliance.domains.dsl.Refs.*
     for {
 
@@ -30,7 +30,7 @@ class Adhoc_postgresql_js_async extends MUnit with DbProviders_postgresql with T
   }
 
   //
-  //    "validation" - validation { implicit conn =>
+  //    "validation" - validation {
   //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //

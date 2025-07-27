@@ -16,7 +16,7 @@ case class InsertSemantics(
   import api.*
   import suite.*
 
-  "Attribute required for each entity" - refs { implicit conn =>
+  "Attribute required for each entity" - refs {
     for {
       _ <- A.B.i.insert(1).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -36,7 +36,7 @@ case class InsertSemantics(
   }
 
 
-  "Empty Sets: Alone" - refs { implicit conn =>
+  "Empty Sets: Alone" - refs {
     for {
       _ <- A.iSet.insert(Set.empty[Int]).transact
 
@@ -45,7 +45,7 @@ case class InsertSemantics(
     } yield ()
   }
 
-  "Empty Sets: With other attribute" - refs { implicit conn =>
+  "Empty Sets: With other attribute" - refs {
     for {
       _ <- A.i.iSet.insert((1, Set.empty[Int])).transact
 
@@ -58,7 +58,7 @@ case class InsertSemantics(
     } yield ()
   }
 
-  "Empty Sets: Optional with other attribute" - refs { implicit conn =>
+  "Empty Sets: Optional with other attribute" - refs {
     for {
       case List(a, b, c, d) <- A.i.iSet_?.insert(
         (1, None),
@@ -87,7 +87,7 @@ case class InsertSemantics(
     } yield ()
   }
 
-  "Empty Sets: Alone after ref" - refs { implicit conn =>
+  "Empty Sets: Alone after ref" - refs {
     for {
       _ <- A.i.B.iSet.insert((1, Set.empty[Int])).transact
 
@@ -100,7 +100,7 @@ case class InsertSemantics(
     } yield ()
   }
 
-  "Empty Sets: With other attribute after ref" - refs { implicit conn =>
+  "Empty Sets: With other attribute after ref" - refs {
     for {
       _ <- A.i.B.i.iSet.insert((1, 2, Set.empty[Int])).transact
 
@@ -113,7 +113,7 @@ case class InsertSemantics(
     } yield ()
   }
 
-  "Empty Sets: Nested alone" - refs { implicit conn =>
+  "Empty Sets: Nested alone" - refs {
     for {
       _ <- A.i.Bb.*(B.iSet).insert((1, List(Set.empty[Int]))).transact
 
@@ -131,7 +131,7 @@ case class InsertSemantics(
     } yield ()
   }
 
-  "Empty Sets: Nested with other attribute" - refs { implicit conn =>
+  "Empty Sets: Nested with other attribute" - refs {
     for {
       _ <- A.i.Bb.*(B.i.iSet).insert((1, List((2, Set.empty[Int])))).transact
 
@@ -148,7 +148,7 @@ case class InsertSemantics(
   }
 
 
-  "Optional Nested" - refs { implicit conn =>
+  "Optional Nested" - refs {
     for {
       _ <- A.i.Bb.*(B.i).insert(
         (1, List(1, 2)),
@@ -171,7 +171,7 @@ case class InsertSemantics(
   }
 
 
-  "Duplicate attributes not allowed, flat: Same entity" - refs { implicit conn =>
+  "Duplicate attributes not allowed, flat: Same entity" - refs {
     for {
       _ <- A.i.i.insert((1, 2)).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -180,7 +180,7 @@ case class InsertSemantics(
     } yield ()
   }
 
-  "Duplicate attributes not allowed, flat: After backref" - refs { implicit conn =>
+  "Duplicate attributes not allowed, flat: After backref" - refs {
     for {
       _ <- A.i.B.i._A.i.insert((1, 2, 3)).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -200,7 +200,7 @@ case class InsertSemantics(
   }
 
 
-  "Duplicate attributes not allowed, nested: Same entity" - refs { implicit conn =>
+  "Duplicate attributes not allowed, nested: Same entity" - refs {
     for {
       _ <- A.i.Bb.*(B.i.i).insert((1, List((2, 3)))).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -214,7 +214,7 @@ case class InsertSemantics(
     } yield ()
   }
 
-  "Duplicate attributes not allowed, nested: Backref in nested" - refs { implicit conn =>
+  "Duplicate attributes not allowed, nested: Backref in nested" - refs {
     for {
       _ <- A.i.Bb.*(B.i.C.i._B.i).insert((1, List((2, 3, 4)))).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -229,7 +229,7 @@ case class InsertSemantics(
   }
 
 
-  "Backref in nested" - refs { implicit conn =>
+  "Backref in nested" - refs {
     for {
       _ <- A.i.Bb.*(B.i._A.i).insert((1, List((2, 3)))).transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

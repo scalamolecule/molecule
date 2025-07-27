@@ -21,7 +21,7 @@ case class MutationAdd(
   import api.*
   import suite.*
 
-  "Forward: Add row before" - unique { implicit conn =>
+  "Forward: Add row before" - unique {
     for {
       _ <- Uniques.int.insert(1, 3, 5).transact
       c <- query.from("").limit(2).get.map { case (List(1, 3), c, true) => c }
@@ -34,7 +34,7 @@ case class MutationAdd(
     } yield ()
   }
 
-  "Forward: Add row after" - unique { implicit conn =>
+  "Forward: Add row after" - unique {
     for {
       _ <- Uniques.int.insert(1, 3, 5).transact
       c <- query.from("").limit(2).get.map { case (List(1, 3), c, true) => c }
@@ -48,7 +48,7 @@ case class MutationAdd(
   }
 
 
-  "Backwards: Add row before" - unique { implicit conn =>
+  "Backwards: Add row before" - unique {
     for {
       _ <- Uniques.int.insert(1, 3, 5).transact
       c <- query.from("").limit(-2).get.map { case (List(3, 5), c, true) => c }
@@ -61,7 +61,7 @@ case class MutationAdd(
     } yield ()
   }
 
-  "Backwards: Add row after" - unique { implicit conn =>
+  "Backwards: Add row after" - unique {
     for {
       _ <- Uniques.int.insert(1, 3, 5).transact
       c <- query.from("").limit(-2).get.map { case (List(3, 5), c, true) => c }

@@ -15,7 +15,7 @@ case class CrossEntity(
   import api.*
   import suite.*
 
-  "has" - refs { implicit conn =>
+  "has" - refs {
     for {
       _ <- A.i.iSeq.B.iSeq.i.insert(
         (1, List(1, 2), List(1, 2, 3, 3), 3),
@@ -44,7 +44,7 @@ case class CrossEntity(
   }
 
 
-  "hasNo" - refs { implicit conn =>
+  "hasNo" - refs {
     for {
       _ <- A.i.iSeq.B.iSeq.i.insert(
         (1, List(1, 2), List(1, 2, 3, 3), 3),

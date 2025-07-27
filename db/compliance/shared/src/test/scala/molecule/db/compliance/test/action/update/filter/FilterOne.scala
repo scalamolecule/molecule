@@ -20,7 +20,7 @@ case class FilterOne(
   // Use tacit attributes as filters to match entities to be updated.
   // Apply new values to mandatory attributes.
 
-  "Value asserted" - types { implicit conn =>
+  "Value asserted" - types {
     for {
       _ <- Entity.i_?.int.insert(
         (None, 0), // entity with missing i
@@ -52,7 +52,7 @@ case class FilterOne(
   }
 
 
-  "Value not asserted" - types { implicit conn =>
+  "Value not asserted" - types {
     for {
       _ <- Entity.i_?.int.insert(
         (None, 0), // entity with missing i
@@ -73,7 +73,7 @@ case class FilterOne(
   }
 
 
-  "Equals id" - types { implicit conn =>
+  "Equals id" - types {
     for {
       case List(a, b, c) <- Entity.i.int.insert(
         (1, 1),
@@ -102,7 +102,7 @@ case class FilterOne(
   }
 
 
-  "Equals value" - types { implicit conn =>
+  "Equals value" - types {
     for {
       case List(a, b, c) <- Entity.i.int.insert(
         (1, 1),
@@ -131,7 +131,7 @@ case class FilterOne(
   }
 
 
-  "Not equals" - types { implicit conn =>
+  "Not equals" - types {
     for {
       List(a, b, c) <- Entity.i.int.insert(
         (1, 1),
@@ -160,7 +160,7 @@ case class FilterOne(
   }
 
 
-  "Comparison" - types { implicit conn =>
+  "Comparison" - types {
     for {
       List(a, b, c) <- Entity.i.int.insert(
         (1, 1),
@@ -210,7 +210,7 @@ case class FilterOne(
   }
 
 
-  "Multiple filters" - types { implicit conn =>
+  "Multiple filters" - types {
     for {
       _ <- Entity.i.int.insert(
         (1, 1),
@@ -233,7 +233,7 @@ case class FilterOne(
   }
 
 
-  "String ops" - types { implicit conn =>
+  "String ops" - types {
     for {
       _ <- Entity.s.int.insert(
         ("bar", 1),
@@ -290,7 +290,7 @@ case class FilterOne(
   }
 
 
-  "Number ops" - types { implicit conn =>
+  "Number ops" - types {
     for {
       _ <- Entity.i.int.insert(
         (1, 1),
@@ -333,7 +333,7 @@ case class FilterOne(
   }
 
 
-  "Update filter value itself" - types { implicit conn =>
+  "Update filter value itself" - types {
     for {
       _ <- Entity.i.insert(1).transact
       _ <- Entity.i.query.get.map(_ ==> List(1))
@@ -345,7 +345,7 @@ case class FilterOne(
   }
 
 
-  "Types, filter equal" - types { implicit conn =>
+  "Types, filter equal" - types {
     for {
       // Initial values
       _ <- Entity.i(1).string(string1).save.transact

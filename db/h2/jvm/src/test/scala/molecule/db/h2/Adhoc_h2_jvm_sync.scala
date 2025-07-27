@@ -8,7 +8,7 @@ import molecule.db.h2.sync.*
 class Adhoc_h2_jvm_sync extends MUnit with DbProviders_h2 with TestUtils {
 
 
-  "basic" - types { implicit conn =>
+  "basic" - types {
     import molecule.db.compliance.domains.dsl.Types.*
 
     val List(a, b) = Entity.int.insert.apply(1, 2).transact.ids
@@ -20,7 +20,7 @@ class Adhoc_h2_jvm_sync extends MUnit with DbProviders_h2 with TestUtils {
   }
 
 
-  "integer 0-1" - types { implicit conn =>
+  "integer 0-1" - types {
     // Mandatory
     lazy val a1: Long = Entity.long.query.get.head
     lazy val a2: Long = Entity.long.apply(long1).query.get.head
@@ -55,7 +55,7 @@ class Adhoc_h2_jvm_sync extends MUnit with DbProviders_h2 with TestUtils {
   }
 
 
-  "integer 1-n" - types { implicit conn =>
+  "integer 1-n" - types {
     // Tacit - stays a String
     val a1: String = Entity.s.long_.query.get.head
     val a2: String = Entity.s.long_.apply(long1).query.get.head
@@ -96,7 +96,7 @@ class Adhoc_h2_jvm_sync extends MUnit with DbProviders_h2 with TestUtils {
   }
 
 
-  "integer n-n" - types { implicit conn =>
+  "integer n-n" - types {
     // Tacit - stays an (Int, String)
     val a1: (Int, String) = Entity.i.s.long_.query.get.head
     val a2: (Int, String) = Entity.i.s.long_.apply(long1).query.get.head
@@ -137,7 +137,7 @@ class Adhoc_h2_jvm_sync extends MUnit with DbProviders_h2 with TestUtils {
   }
 
 
-//  "integer" - types { implicit conn =>
+//  "integer" - types {
 //    import molecule.db.compliance.domains.dsl.Types.*
 //
 //    // Optional
@@ -168,7 +168,7 @@ class Adhoc_h2_jvm_sync extends MUnit with DbProviders_h2 with TestUtils {
 //  }
 
 
-  //  "Subscription" - types { implicit conn =>
+  //  "Subscription" - types {
   //    var intermediaryCallbackResults = List.empty[List[Int]]
   //
   //    // Initial data
@@ -205,7 +205,7 @@ class Adhoc_h2_jvm_sync extends MUnit with DbProviders_h2 with TestUtils {
   //  }
 
 
-  //  "commit" - refs { implicit conn =>
+  //  "commit" - refs {
   //    import molecule.db.compliance.domains.dsl.Refs.*
   //
   //    A.i.insert(1, 2, 3).transact

@@ -19,7 +19,7 @@ case class SaveCardSeq(
   import api.*
   import suite.*
 
-  "mandatory" - types { implicit conn =>
+  "mandatory" - types {
     for {
       // Empty Seq of values is ignored
       _ <- Entity.intSeq(List.empty[Int]).save.transact
@@ -76,7 +76,7 @@ case class SaveCardSeq(
   }
 
 
-  "optional" - types { implicit conn =>
+  "optional" - types {
     for {
       // Empty option of Seq of values is ignored
       _ <- Entity.intSeq_?(Option.empty[List[Int]]).save.transact
@@ -177,7 +177,7 @@ case class SaveCardSeq(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     // Applying value to tacit or mandatory attribute has same effect
     for {
       _ <- Entity.i(1).stringSeq_(List(string1, string2)).save.transact

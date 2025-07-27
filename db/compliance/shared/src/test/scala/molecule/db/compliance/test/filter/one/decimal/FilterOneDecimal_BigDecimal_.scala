@@ -16,7 +16,7 @@ case class FilterOneDecimal_BigDecimal_(
   import api.*
   import suite.*
 
-  "ceil/floor" - types { implicit conn =>
+  "ceil/floor" - types {
     for {
       _ <- Entity.bigDecimal.insert(
         -bigDecimal2, // -2.2

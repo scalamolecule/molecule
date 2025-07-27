@@ -20,7 +20,7 @@ case class FilterMap_Char_(
   import suite.*
 
 
-  "Mandatory: Mandatory map (no filter)" - types { implicit conn =>
+  "Mandatory: Mandatory map (no filter)" - types {
     for {
       _ <- Entity.i.charMap.insert(a, b).transact
       _ <- Entity.i.a1.charMap.query.get.map(_ ==> List(a, b))
@@ -28,7 +28,7 @@ case class FilterMap_Char_(
   }
 
 
-  "Mandatory: Map with certain keys" - types { implicit conn =>
+  "Mandatory: Map with certain keys" - types {
     for {
       _ <- Entity.i.charMap.insert(a, b).transact
 
@@ -43,7 +43,7 @@ case class FilterMap_Char_(
   }
 
 
-  "Mandatory: Map without certain keys" - types { implicit conn =>
+  "Mandatory: Map without certain keys" - types {
     for {
       _ <- Entity.i.charMap.insert(a, b).transact
 
@@ -68,7 +68,7 @@ case class FilterMap_Char_(
   }
 
 
-  "Mandatory: Map with certain values" - types { implicit conn =>
+  "Mandatory: Map with certain values" - types {
     for {
       _ <- Entity.i.charMap.insert(a, b).transact
 
@@ -109,7 +109,7 @@ case class FilterMap_Char_(
   }
 
 
-  "Mandatory: Map without certain values" - types { implicit conn =>
+  "Mandatory: Map without certain values" - types {
     for {
       _ <- Entity.i.charMap.insert(a, b).transact
 
@@ -147,7 +147,7 @@ case class FilterMap_Char_(
   }
 
 
-  "Tacit: Tacit Map (no filter)" - types { implicit conn =>
+  "Tacit: Tacit Map (no filter)" - types {
     for {
       _ <- Entity.i.charMap.insert(a, b).transact
       _ <- Entity.i.a1.charMap_.query.get.map(_ ==> List(1, 2))
@@ -155,7 +155,7 @@ case class FilterMap_Char_(
   }
 
 
-  "Tacit: Match map with certain keys" - types { implicit conn =>
+  "Tacit: Match map with certain keys" - types {
     for {
       _ <- Entity.i.insert(0).transact // Entity without map attribute
       _ <- Entity.i.charMap.insert(a, b).transact
@@ -184,7 +184,7 @@ case class FilterMap_Char_(
   }
 
 
-  "Tacit: Match map without certain keys" - types { implicit conn =>
+  "Tacit: Match map without certain keys" - types {
     for {
       _ <- Entity.i.charMap.insert(a, b).transact
 
@@ -209,7 +209,7 @@ case class FilterMap_Char_(
   }
 
 
-  "Tacit: Match map with certain values" - types { implicit conn =>
+  "Tacit: Match map with certain values" - types {
     for {
       _ <- Entity.i.charMap.insert(a, b).transact
 
@@ -244,7 +244,7 @@ case class FilterMap_Char_(
   }
 
 
-  "Tacit: Match map without certain values" - types { implicit conn =>
+  "Tacit: Match map without certain values" - types {
     for {
       _ <- Entity.i.charMap.insert(a, b).transact
 
@@ -279,7 +279,7 @@ case class FilterMap_Char_(
   }
 
 
-  "Optional map (no filter)" - types { implicit conn =>
+  "Optional map (no filter)" - types {
     val a = (1, Some(Map("a" -> char1, "b" -> char2)))
     val b = (2, Some(Map("a" -> char2, "b" -> char3, "c" -> char4)))
     val c = (3, None)
@@ -290,7 +290,7 @@ case class FilterMap_Char_(
   }
 
 
-  "Optional map values by key" - types { implicit conn =>
+  "Optional map values by key" - types {
 
     for {
       _ <- Entity.i.charMap.insert(a, b).transact

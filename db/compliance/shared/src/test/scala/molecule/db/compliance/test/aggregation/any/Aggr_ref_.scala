@@ -16,7 +16,7 @@ case class Aggr_ref_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.ref.insert(List(
         (1, ref1),
@@ -44,7 +44,7 @@ case class Aggr_ref_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.ref.insert(
         (1, ref1),
@@ -76,7 +76,7 @@ case class Aggr_ref_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.ref.insert(
         (1, ref1),
@@ -112,7 +112,7 @@ case class Aggr_ref_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(ref1, ref2, ref3, ref4)
     for {
       _ <- Entity.ref.insert(List(ref1, ref2, ref3)).transact
@@ -123,7 +123,7 @@ case class Aggr_ref_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.ref.insert(List(
         (1, ref1),

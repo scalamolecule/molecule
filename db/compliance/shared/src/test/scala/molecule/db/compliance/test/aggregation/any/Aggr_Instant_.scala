@@ -16,7 +16,7 @@ case class Aggr_Instant_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.instant.insert(List(
         (1, instant1),
@@ -44,7 +44,7 @@ case class Aggr_Instant_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.instant.insert(
         (1, instant1),
@@ -76,7 +76,7 @@ case class Aggr_Instant_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.instant.insert(
         (1, instant1),
@@ -112,7 +112,7 @@ case class Aggr_Instant_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(instant1, instant2, instant3, instant4)
     for {
       _ <- Entity.instant.insert(List(instant1, instant2, instant3)).transact
@@ -123,7 +123,7 @@ case class Aggr_Instant_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.instant.insert(List(
         (1, instant1),

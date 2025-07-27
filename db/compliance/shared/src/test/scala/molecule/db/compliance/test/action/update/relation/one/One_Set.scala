@@ -15,7 +15,7 @@ case class One_Set(
   import api.*
   import suite.*
 
-  "id-filter - ref - value" - refs { implicit conn =>
+  "id-filter - ref - value" - refs {
     for {
       a <- A.i(1).save.transact.map(_.id)
       b <- A.i(2).B.s("b").save.transact.map(_.id)
@@ -46,7 +46,7 @@ case class One_Set(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.i(2).B.s("b").save.transact
@@ -77,7 +77,7 @@ case class One_Set(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.iSet(Set(0, 1)).save.transact // won't be updated since there's no B value
       _ <- A.s("x").B.i(1).save.transact
@@ -113,7 +113,7 @@ case class One_Set(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // will not be updated (no update filter match)
       _ <- B.s("x").iSet(Set(0, 1)).save.transact
@@ -152,7 +152,7 @@ case class One_Set(
   }
 
 
-  "ref ref" - refs { implicit conn =>
+  "ref ref" - refs {
     for {
       id <- A.iSet(Set(1)).B.iSet(Set(2)).C.iSet(Set(3)).save.transact.map(_.id)
       _ <- A.iSet.B.iSet.C.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
@@ -188,7 +188,7 @@ case class One_Set(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     for {
       id <- A.iSet(Set(1)).B.iSet(Set(2))._A.C.iSet(Set(3)).save.transact.map(_.id)
       _ <- A.iSet.B.iSet._A.C.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))

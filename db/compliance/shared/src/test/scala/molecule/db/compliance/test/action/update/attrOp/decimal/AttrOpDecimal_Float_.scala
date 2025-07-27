@@ -19,7 +19,7 @@ case class AttrOpDecimal_Float_(
 
   implicit val tolerance: Equality[Float] = tolerantFloatEquality(toleranceFloat)
 
-  "plus" - types { implicit conn =>
+  "plus" - types {
     for {
       id <- Entity.float(float1).save.transact.map(_.id)
       _ <- Entity(id).float.+(float2).update.transact
@@ -27,7 +27,7 @@ case class AttrOpDecimal_Float_(
     } yield ()
   }
 
-  "minus" - types { implicit conn =>
+  "minus" - types {
     for {
       id <- Entity.float(float3).save.transact.map(_.id)
       _ <- Entity(id).float.-(float2).update.transact
@@ -35,7 +35,7 @@ case class AttrOpDecimal_Float_(
     } yield ()
   }
 
-  "times" - types { implicit conn =>
+  "times" - types {
     for {
       id <- Entity.float(float2).save.transact.map(_.id)
       _ <- Entity(id).float.*(float2).update.transact
@@ -43,7 +43,7 @@ case class AttrOpDecimal_Float_(
     } yield ()
   }
 
-  "divide" - types { implicit conn =>
+  "divide" - types {
     for {
       id <- Entity.float(float4).save.transact.map(_.id)
       _ <- Entity(id).float./(float2).update.transact
@@ -51,7 +51,7 @@ case class AttrOpDecimal_Float_(
     } yield ()
   }
 
-  "negate" - types { implicit conn =>
+  "negate" - types {
     for {
       ids <- Entity.float.insert(-float1, float2).transact.map(_.ids)
       _ <- Entity(ids).float.negate.update.transact
@@ -59,7 +59,7 @@ case class AttrOpDecimal_Float_(
     } yield ()
   }
 
-  "absolute" - types { implicit conn =>
+  "absolute" - types {
     for {
       ids <- Entity.float.insert(-float1, float2).transact.map(_.ids)
       _ <- Entity(ids).float.abs.update.transact
@@ -67,7 +67,7 @@ case class AttrOpDecimal_Float_(
     } yield ()
   }
 
-  "absolute negative" - types { implicit conn =>
+  "absolute negative" - types {
     for {
       ids <- Entity.float.insert(-float1, float2).transact.map(_.ids)
       _ <- Entity(ids).float.absNeg.update.transact
@@ -78,7 +78,7 @@ case class AttrOpDecimal_Float_(
 
   // ceil/floor only available for decimal numbers
 
-  "ceil" - types { implicit conn =>
+  "ceil" - types {
     for {
       id <- Entity.float(float3).save.transact.map(_.id)
       _ <- Entity(id).float.ceil.update.transact
@@ -86,7 +86,7 @@ case class AttrOpDecimal_Float_(
     } yield ()
   }
 
-  "floor" - types { implicit conn =>
+  "floor" - types {
     for {
       id <- Entity.float(float3).save.transact.map(_.id)
       _ <- Entity(id).float.floor.update.transact

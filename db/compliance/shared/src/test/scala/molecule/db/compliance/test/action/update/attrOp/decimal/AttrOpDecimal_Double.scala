@@ -18,7 +18,7 @@ case class AttrOpDecimal_Double(
 
   implicit val tolerance: Equality[Double] = tolerantDoubleEquality(toleranceDouble)
 
-  "plus" - types { implicit conn =>
+  "plus" - types {
     for {
       id <- Entity.double(double1).save.transact.map(_.id)
       _ <- Entity(id).double.+(double2).update.transact
@@ -26,7 +26,7 @@ case class AttrOpDecimal_Double(
     } yield ()
   }
 
-  "minus" - types { implicit conn =>
+  "minus" - types {
     for {
       id <- Entity.double(double3).save.transact.map(_.id)
       _ <- Entity(id).double.-(double2).update.transact
@@ -34,7 +34,7 @@ case class AttrOpDecimal_Double(
     } yield ()
   }
 
-  "times" - types { implicit conn =>
+  "times" - types {
     for {
       id <- Entity.double(double2).save.transact.map(_.id)
       _ <- Entity(id).double.*(double2).update.transact
@@ -42,7 +42,7 @@ case class AttrOpDecimal_Double(
     } yield ()
   }
 
-  "divide" - types { implicit conn =>
+  "divide" - types {
     for {
       id <- Entity.double(double4).save.transact.map(_.id)
       _ <- Entity(id).double./(double2).update.transact
@@ -50,7 +50,7 @@ case class AttrOpDecimal_Double(
     } yield ()
   }
 
-  "negate" - types { implicit conn =>
+  "negate" - types {
     for {
       ids <- Entity.double.insert(-double1, double2).transact.map(_.ids)
       _ <- Entity(ids).double.negate.update.transact
@@ -58,7 +58,7 @@ case class AttrOpDecimal_Double(
     } yield ()
   }
 
-  "absolute" - types { implicit conn =>
+  "absolute" - types {
     for {
       ids <- Entity.double.insert(-double1, double2).transact.map(_.ids)
       _ <- Entity(ids).double.abs.update.transact
@@ -66,7 +66,7 @@ case class AttrOpDecimal_Double(
     } yield ()
   }
 
-  "absolute negative" - types { implicit conn =>
+  "absolute negative" - types {
     for {
       ids <- Entity.double.insert(-double1, double2).transact.map(_.ids)
       _ <- Entity(ids).double.absNeg.update.transact
@@ -77,7 +77,7 @@ case class AttrOpDecimal_Double(
 
   // ceil/floor only available for decimal numbers
 
-  "ceil" - types { implicit conn =>
+  "ceil" - types {
     for {
       id <- Entity.double(double3).save.transact.map(_.id)
       _ <- Entity(id).double.ceil.update.transact
@@ -85,7 +85,7 @@ case class AttrOpDecimal_Double(
     } yield ()
   }
 
-  "floor" - types { implicit conn =>
+  "floor" - types {
     for {
       id <- Entity.double(double3).save.transact.map(_.id)
       _ <- Entity(id).double.floor.update.transact

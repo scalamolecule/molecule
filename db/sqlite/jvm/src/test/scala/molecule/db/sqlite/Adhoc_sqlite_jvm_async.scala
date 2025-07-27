@@ -9,10 +9,9 @@ import molecule.db.sqlite.setup.DbProviders_sqlite
 class Adhoc_sqlite_jvm_async extends MUnit with DbProviders_sqlite with TestUtils {
 
 
-  "types" - types { implicit conn =>
+  "types" - types {
     import molecule.db.compliance.domains.dsl.Types.*
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-
     for {
       case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(3).save.transact
@@ -21,13 +20,12 @@ class Adhoc_sqlite_jvm_async extends MUnit with DbProviders_sqlite with TestUtil
       _ <- Entity(b).delete.transact
       _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
-
     } yield ()
   }
 
 
 
-  //  "refs" - refs { implicit conn =>
+  //  "refs" - refs {
   //    import molecule.db.compliance.domains.dsl.Refs.*
   //    for {
   //      _ <- A.i.insert(1, 2).transact
@@ -40,7 +38,7 @@ class Adhoc_sqlite_jvm_async extends MUnit with DbProviders_sqlite with TestUtil
   //  }
   //
   //
-  //  //    "unique" - unique { implicit conn =>
+  //  //    "unique" - unique {
   //  //      import molecule.db.compliance.domains.dsl.Uniques._
   //  //      //          val triples             = getTriples.map(t => (t._3, t._1, t._2))
   //      //          val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
@@ -62,7 +60,7 @@ class Adhoc_sqlite_jvm_async extends MUnit with DbProviders_sqlite with TestUtil
   //    }
 
 
-  //    "validation" - validation { implicit conn =>
+  //    "validation" - validation {
   //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
@@ -83,7 +81,7 @@ class Adhoc_sqlite_jvm_async extends MUnit with DbProviders_sqlite with TestUtil
   //      } yield ()
   //    }
   //
-  //    "partitions" - partition { implicit conn =>
+  //    "partitions" - partition {
   //      import molecule.db.compliance.domains.dsl.Groups._
   //      for {
   //

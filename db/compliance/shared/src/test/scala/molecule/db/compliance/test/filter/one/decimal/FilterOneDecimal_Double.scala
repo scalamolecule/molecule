@@ -15,7 +15,7 @@ case class FilterOneDecimal_Double(
   import api.*
   import suite.*
 
-  "ceil/floor" - types { implicit conn =>
+  "ceil/floor" - types {
     for {
       _ <- Entity.double.insert(
         -double2, // -2.2

@@ -16,7 +16,7 @@ case class AggrRelations(
   import api.*
   import suite.*
 
-  "ref ref" - refs { implicit conn =>
+  "ref ref" - refs {
     for {
       _ <- A.i.B.i.C.s.i.insert(List(
         (1, 1, "a", 1),
@@ -164,7 +164,7 @@ case class AggrRelations(
   }
 
 
-  "ref own" - refs { implicit conn =>
+  "ref own" - refs {
     for {
       _ <- A.i.B.i.OwnC.s.i.insert(List(
         (1, 1, "a", 1),
@@ -312,7 +312,7 @@ case class AggrRelations(
   }
 
 
-  "own ref" - refs { implicit conn =>
+  "own ref" - refs {
     for {
       _ <- A.i.OwnB.i.C.s.i.insert(List(
         (1, 1, "a", 1),
@@ -460,7 +460,7 @@ case class AggrRelations(
   }
 
 
-  "own own" - refs { implicit conn =>
+  "own own" - refs {
     for {
       _ <- A.i.OwnB.i.OwnC.s.i.insert(List(
         (1, 1, "a", 1),

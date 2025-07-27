@@ -15,7 +15,7 @@ case class One_Integer(
   import suite.*
 
 
-  "integer 0-1" - types { implicit conn =>
+  "integer 0-1" - types {
     // Mandatory
     lazy val a1: Long = Entity.long.query.get.head
     lazy val a2: Long = Entity.long.apply(long1).query.get.head
@@ -50,7 +50,7 @@ case class One_Integer(
   }
 
 
-  "integer 1-n" - types { implicit conn =>
+  "integer 1-n" - types {
     // Tacit - stays a String
     lazy val a1: String = Entity.s.long_.query.get.head
     lazy val a2: String = Entity.s.long_.apply(long1).query.get.head
@@ -91,7 +91,7 @@ case class One_Integer(
   }
 
 
-  "integer n-n" - types { implicit conn =>
+  "integer n-n" - types {
     // Tacit - stays an (Int, String)
     lazy val a1: (Int, String) = Entity.i.s.long_.query.get.head
     lazy val a2: (Int, String) = Entity.i.s.long_.apply(long1).query.get.head

@@ -21,7 +21,7 @@ case class MutationDelete(
   import api.*
   import suite.*
 
-  "Forward: Delete row before" - unique { implicit conn =>
+  "Forward: Delete row before" - unique {
     val pairs            = (1 to 4).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -36,7 +36,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Forward: Delete last edge row" - unique { implicit conn =>
+  "Forward: Delete last edge row" - unique {
     val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -51,7 +51,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Forward: Delete 2 last edge rows" - unique { implicit conn =>
+  "Forward: Delete 2 last edge rows" - unique {
     val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -66,7 +66,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Forward: Delete 3 last edge rows" - unique { implicit conn =>
+  "Forward: Delete 3 last edge rows" - unique {
     val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -85,7 +85,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Forward: Delete row after" - unique { implicit conn =>
+  "Forward: Delete row after" - unique {
     val pairs            = (1 to 4).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -101,7 +101,7 @@ case class MutationDelete(
   }
 
 
-  "Backwards: Delete row before" - unique { implicit conn =>
+  "Backwards: Delete row before" - unique {
     val pairs            = (1 to 4).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -116,7 +116,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Backwards: Delete first edge row" - unique { implicit conn =>
+  "Backwards: Delete first edge row" - unique {
     val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -131,7 +131,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Backwards: Delete 2 first edge rows" - unique { implicit conn =>
+  "Backwards: Delete 2 first edge rows" - unique {
     val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -146,7 +146,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Backwards: Delete 3 first edge rows" - unique { implicit conn =>
+  "Backwards: Delete 3 first edge rows" - unique {
     val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -164,7 +164,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Backwards: Delete row after" - unique { implicit conn =>
+  "Backwards: Delete row after" - unique {
     val pairs            = (1 to 4).toList.map((Random.nextInt(3) + 1, _))
     val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
     for {

@@ -20,7 +20,7 @@ case class Transactions_sync(
   import suite.*
 
 
-  "commit" - types { implicit conn =>
+  "commit" - types {
     Entity.int.insert(1 to 7).transact
     Entity.int(count).query.get.head ==> 7
 
@@ -29,7 +29,7 @@ case class Transactions_sync(
   }
 
 
-  "Transact actions: simple" - types { implicit conn =>
+  "Transact actions: simple" - types {
     transact(
       Entity.int(1).save,
       Entity.int(2).save,
@@ -38,7 +38,7 @@ case class Transactions_sync(
   }
 
 
-  "Transact actions: mixed" - types { implicit conn =>
+  "Transact actions: mixed" - types {
     transact(
       Entity.int(1).save, //         List(1)
       Entity.int.insert(2, 3), //    List(1, 2, 3)
@@ -49,7 +49,7 @@ case class Transactions_sync(
   }
 
 
-  "Transact actions: validation 1" - validation { implicit conn =>
+  "Transact actions: validation 1" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     try {
       transact(
@@ -69,7 +69,7 @@ case class Transactions_sync(
   }
 
 
-  "Transact actions: validation 2" - validation { implicit conn =>
+  "Transact actions: validation 2" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     try {
       transact(
@@ -89,7 +89,7 @@ case class Transactions_sync(
   }
 
 
-  "Transact actions: validation 3" - validation { implicit conn =>
+  "Transact actions: validation 3" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     transact(
       Type.int.insert(4, 5),
@@ -99,7 +99,7 @@ case class Transactions_sync(
   }
 
 
-  "UnitOfWork: simple" - types { implicit conn =>
+  "UnitOfWork: simple" - types {
     unitOfWork {
       Entity.int(1).save.transact
       Entity.int(2).save.transact
@@ -108,7 +108,7 @@ case class Transactions_sync(
   }
 
 
-  "UnitOfWork: mixed" - types { implicit conn =>
+  "UnitOfWork: mixed" - types {
     unitOfWork {
       Entity.int(1).save.transact //         List(1)
       Entity.int.insert(2, 3).transact //    List(1, 2, 3)
@@ -119,7 +119,7 @@ case class Transactions_sync(
   }
 
 
-  "UnitOfWork: mixed with queries" - types { implicit conn =>
+  "UnitOfWork: mixed with queries" - types {
     unitOfWork {
       Entity.int(1).save.transact
       Entity.int.query.get ==> List(1)
@@ -137,7 +137,7 @@ case class Transactions_sync(
   }
 
 
-  "UnitOfWork: abort save" - types { implicit conn =>
+  "UnitOfWork: abort save" - types {
     Entity.int(1).save.transact
     try {
       unitOfWork {
@@ -152,7 +152,7 @@ case class Transactions_sync(
   }
 
 
-  "UnitOfWork: abort insert" - types { implicit conn =>
+  "UnitOfWork: abort insert" - types {
     Entity.int(1).save.transact
     try {
       unitOfWork {
@@ -167,7 +167,7 @@ case class Transactions_sync(
   }
 
 
-  "UnitOfWork: abort update" - types { implicit conn =>
+  "UnitOfWork: abort update" - types {
     Entity.int(1).save.transact
     try {
       unitOfWork {
@@ -182,7 +182,7 @@ case class Transactions_sync(
   }
 
 
-  "UnitOfWork: abort delete" - types { implicit conn =>
+  "UnitOfWork: abort delete" - types {
     Entity.int.insert(1, 2).transact
     try {
       unitOfWork {
@@ -197,7 +197,7 @@ case class Transactions_sync(
   }
 
 
-  "UnitOfWork: abort mixed" - types { implicit conn =>
+  "UnitOfWork: abort mixed" - types {
     // Initial data
     Entity.int(1).save.transact
 
@@ -226,7 +226,7 @@ case class Transactions_sync(
   }
 
 
-  "UnitOfWork: money transfer" - types { implicit conn =>
+  "UnitOfWork: money transfer" - types {
     // Initial balance in two bank accounts
     Entity.s("fromAccount").int(100).save.transact
     Entity.s("toAccount").int(50).save.transact
@@ -260,7 +260,7 @@ case class Transactions_sync(
 
   // Transfer logic separated with unitOfWork
   def transfer(from: String, to: String, amount: Int)
-              (implicit conn: Conn): Unit = {
+              (using conn: Conn): Unit = {
     unitOfWork {
       Entity.s_(from).int.-(amount).update.transact
       Entity.s_(to).int.+(amount).update.transact
@@ -278,7 +278,7 @@ case class Transactions_sync(
   }
 
 
-  "UnitOfWork: money transfer2" - types { implicit conn =>
+  "UnitOfWork: money transfer2" - types {
     // Initial balance in two bank accounts
     Entity.s("fromAccount").int(100).save.transact
     Entity.s("toAccount").int(50).save.transact
@@ -299,7 +299,7 @@ case class Transactions_sync(
   }
 
 
-  "Savepoint: commit" - types { implicit conn =>
+  "Savepoint: commit" - types {
     unitOfWork {
       Entity.int.insert(1 to 4).transact
       Entity.int(count).query.get.head ==> 4
@@ -315,7 +315,7 @@ case class Transactions_sync(
   }
 
   // Without rollbacks, the above is the same as the following:
-  "Savepoint: commit2" - types { implicit conn =>
+  "Savepoint: commit2" - types {
     Entity.int.insert(1 to 4).transact
     Entity.int(count).query.get.head ==> 4
 
@@ -328,7 +328,7 @@ case class Transactions_sync(
   }
 
 
-  "Savepoint: rollback" - types { implicit conn =>
+  "Savepoint: rollback" - types {
     unitOfWork {
       Entity.int.insert(1 to 4).transact
       Entity.int(count).query.get.head ==> 4
@@ -349,7 +349,7 @@ case class Transactions_sync(
   }
 
 
-  "Savepoint: rollback2" - types { implicit conn =>
+  "Savepoint: rollback2" - types {
     Entity.int.insert(1 to 4).transact
     Entity.int(count).query.get.head ==> 4
 
@@ -370,7 +370,7 @@ case class Transactions_sync(
   }
 
 
-  "Savepoint: throw" - types { implicit conn =>
+  "Savepoint: throw" - types {
     Entity.int.insert(1 to 7).transact
     Entity.int(count).query.get.head ==> 7
 
@@ -399,7 +399,7 @@ case class Transactions_sync(
   }
 
 
-  "Savepoint: throw2" - types { implicit conn =>
+  "Savepoint: throw2" - types {
     Entity.int.insert(1 to 7).transact
     Entity.int(count).query.get.head ==> 7
 
@@ -425,7 +425,7 @@ case class Transactions_sync(
   }
 
 
-  "Savepoint: throwDouble" - types { implicit conn =>
+  "Savepoint: throwDouble" - types {
     Entity.int.insert(1 to 7).transact
 
     try {
@@ -465,7 +465,7 @@ case class Transactions_sync(
   }
 
 
-  "Savepoint: rollbackDouble" - types { implicit conn =>
+  "Savepoint: rollbackDouble" - types {
     Entity.int.insert(1 to 7).transact
 
     unitOfWork {
@@ -501,7 +501,7 @@ case class Transactions_sync(
     the inner savepoint/transaction blocks, while leaving changes applied during outer
     savepoint/transaction blocks in-place
     */
-  "Double savepoint: commit" - types { implicit conn =>
+  "Double savepoint: commit" - types {
     Entity.int.insert(1 to 7).transact
 
     unitOfWork {
@@ -531,7 +531,7 @@ case class Transactions_sync(
   }
 
 
-  "throw: inner" - types { implicit conn =>
+  "throw: inner" - types {
     Entity.int.insert(1 to 7).transact
 
     unitOfWork {
@@ -565,7 +565,7 @@ case class Transactions_sync(
   }
 
 
-  "throw: middle" - types { implicit conn =>
+  "throw: middle" - types {
     Entity.int.insert(1 to 7).transact
 
     unitOfWork {
@@ -600,7 +600,7 @@ case class Transactions_sync(
   }
 
 
-  "throw: innerMiddle" - types { implicit conn =>
+  "throw: innerMiddle" - types {
     Entity.int.insert(1 to 7).transact
 
     unitOfWork {
@@ -633,7 +633,7 @@ case class Transactions_sync(
   }
 
 
-  "throw: innerMiddleOuter" - types { implicit conn =>
+  "throw: innerMiddleOuter" - types {
     Entity.int.insert(1 to 7).transact
 
     try {
@@ -667,7 +667,7 @@ case class Transactions_sync(
   }
 
 
-  "rollback: inner" - types { implicit conn =>
+  "rollback: inner" - types {
     Entity.int.insert(1 to 7).transact
 
     unitOfWork {
@@ -697,7 +697,7 @@ case class Transactions_sync(
   }
 
 
-  "rollback: middle" - types { implicit conn =>
+  "rollback: middle" - types {
     Entity.int.insert(1 to 7).transact
 
     unitOfWork {
@@ -729,7 +729,7 @@ case class Transactions_sync(
   }
 
 
-  "rollback: innerMiddle" - types { implicit conn =>
+  "rollback: innerMiddle" - types {
     Entity.int.insert(1 to 7).transact
 
     unitOfWork {
@@ -761,7 +761,7 @@ case class Transactions_sync(
   }
 
 
-  "rollback: middleOuter" - types { implicit conn =>
+  "rollback: middleOuter" - types {
     Entity.int.insert(1 to 7).transact
 
     unitOfWork {
@@ -793,7 +793,7 @@ case class Transactions_sync(
   }
 
 
-  "rollback: innerMiddleOuter" - types { implicit conn =>
+  "rollback: innerMiddleOuter" - types {
     Entity.int.insert(1 to 7).transact
 
     unitOfWork {

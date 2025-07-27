@@ -17,7 +17,7 @@ case class NestedBasic(
   import api.*
   import suite.*
 
-  "Mandatory/optional rows" - refs { implicit conn =>
+  "Mandatory/optional rows" - refs {
     for {
       _ <- A.s.Bb.*(B.i).insert(
         ("a", List(1, 2)),
@@ -38,7 +38,7 @@ case class NestedBasic(
   }
 
 
-  "Nested: one" - refs { implicit conn =>
+  "Nested: one" - refs {
 
     for {
       _ <- A.i.Bb.*(B.i).insert((2, List(3, 4))).transact
@@ -46,7 +46,7 @@ case class NestedBasic(
     } yield ()
   }
 
-  "Nested: set" - refs { implicit conn =>
+  "Nested: set" - refs {
 
     for {
       _ <- A.i.Bb.*(B.iSet).insert(List((2, List(Set(3, 4))))).transact
@@ -55,7 +55,7 @@ case class NestedBasic(
   }
 
 
-  "Nested owned: one" - refs { implicit conn =>
+  "Nested owned: one" - refs {
 
     for {
       _ <- A.i.OwnBb.*(B.i).insert((2, List(3, 4))).transact
@@ -63,7 +63,7 @@ case class NestedBasic(
     } yield ()
   }
 
-  "Nested owned: set" - refs { implicit conn =>
+  "Nested owned: set" - refs {
 
     for {
       _ <- A.i.OwnBb.*(B.iSet).insert(List((2, List(Set(3, 4))))).transact
@@ -71,7 +71,7 @@ case class NestedBasic(
     } yield ()
   }
 
-  "Expressions in nested" - refs { implicit conn =>
+  "Expressions in nested" - refs {
     for {
       _ <- A.i.Bb.*(B.i).insert(List((1, List(1, 2, 3)))).transact
 
@@ -90,7 +90,7 @@ case class NestedBasic(
 
   import molecule.db.compliance.domains.dsl.Types.*
 
-  "Arity 23 nested" - types { implicit conn =>
+  "Arity 23 nested" - types {
     for {
       _ <- Entity.i.Refs.*(ref23).insert((1, List(tpl23_1, tpl23_2))).transact
       _ <- Entity.i.Refs.*(

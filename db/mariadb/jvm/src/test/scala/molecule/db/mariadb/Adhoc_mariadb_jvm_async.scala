@@ -9,7 +9,7 @@ import molecule.db.mariadb.setup.DbProviders_mariadb
 
 class Adhoc_mariadb_jvm_async extends MUnit with DbProviders_mariadb with TestUtils {
 
-  "types" - types { implicit conn =>
+  "types" - types {
     for {
       case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(3).save.transact
@@ -22,7 +22,7 @@ class Adhoc_mariadb_jvm_async extends MUnit with DbProviders_mariadb with TestUt
   }
 
 
-  //  "refs" - refs { implicit conn =>
+  //  "refs" - refs {
   //    import molecule.db.compliance.domains.dsl.Refs.*
   //    for {
   //
@@ -40,7 +40,7 @@ class Adhoc_mariadb_jvm_async extends MUnit with DbProviders_mariadb with TestUt
   //  }
 
 
-  //    "unique" - unique { implicit conn =>
+  //    "unique" - unique {
   //      import molecule.db.compliance.domains.dsl.Uniques._
   //
   //
@@ -57,7 +57,7 @@ class Adhoc_mariadb_jvm_async extends MUnit with DbProviders_mariadb with TestUt
   //    }
   //
   //
-  //    "validation" - validation { implicit conn =>
+  //    "validation" - validation {
   //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)

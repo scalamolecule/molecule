@@ -16,7 +16,7 @@ case class Delete_id(
   import api.*
   import suite.*
 
-  "1 entity" - refs { implicit conn =>
+  "1 entity" - refs {
     for {
       case List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
       _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
@@ -28,7 +28,7 @@ case class Delete_id(
   }
 
 
-  "n entities vararg" - refs { implicit conn =>
+  "n entities vararg" - refs {
     for {
       case List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
       _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
@@ -37,7 +37,7 @@ case class Delete_id(
     } yield ()
   }
 
-  "n entities iterable" - refs { implicit conn =>
+  "n entities iterable" - refs {
     for {
       case List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
       _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
@@ -46,7 +46,7 @@ case class Delete_id(
     } yield ()
   }
 
-  "0 entities" - refs { implicit conn =>
+  "0 entities" - refs {
     for {
       _ <- A.i.insert(1, 2, 3).transact
       _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
@@ -59,7 +59,7 @@ case class Delete_id(
   }
 
 
-  "Referenced entities: Card-one" - refs { implicit conn =>
+  "Referenced entities: Card-one" - refs {
     for {
       e1 <- A.i.B.i.insert(
         (1, 10),
@@ -85,7 +85,7 @@ case class Delete_id(
   }
 
 
-  "Referenced entities: Card-many" - refs { implicit conn =>
+  "Referenced entities: Card-many" - refs {
     for {
       e1 <- A.i.Bb.*(B.i).insert(
         (1, Seq(10, 11)),
@@ -135,7 +135,7 @@ case class Delete_id(
   }
 
 
-  "Orphan refs: delete ref" - refs { implicit conn =>
+  "Orphan refs: delete ref" - refs {
     for {
       b <- B.i(2).save.transact.map(_.id)
       _ <- A.i(1).b(b).save.transact
@@ -155,7 +155,7 @@ case class Delete_id(
     } yield ()
   }
 
-  "Orphan refs: delete ref and orphan ref id manually" - refs { implicit conn =>
+  "Orphan refs: delete ref and orphan ref id manually" - refs {
     for {
       b <- B.i(2).save.transact.map(_.id)
       a <- A.i(1).b(b).save.transact.map(_.id)
@@ -174,7 +174,7 @@ case class Delete_id(
   }
 
 
-  "Owned entities: Card-one" - refs { implicit conn =>
+  "Owned entities: Card-one" - refs {
     for {
       e1 <- A.i.OwnB.i.insert(
         (1, 10),
@@ -200,7 +200,7 @@ case class Delete_id(
     } yield ()
   }
 
-  "Owned entities: Card-many" - refs { implicit conn =>
+  "Owned entities: Card-many" - refs {
     for {
       e1 <- A.i.OwnBb.*(B.i).insert(
         (1, Seq(10, 11)),
@@ -229,7 +229,7 @@ case class Delete_id(
 
   // All owned entities are recursively deleted!
 
-  "Owned entities: one + one" - refs { implicit conn =>
+  "Owned entities: one + one" - refs {
     for {
       e1 <- A.i.OwnB.i.OwnC.i._B.D.i.insert(
         (11, 21, 31, 41),
@@ -258,7 +258,7 @@ case class Delete_id(
     } yield ()
   }
 
-  "Owned entities: one + many" - refs { implicit conn =>
+  "Owned entities: one + many" - refs {
     for {
       e1 <- A.i.OwnB.i.OwnCc.*(C.i).insert(
         (11, 21, Seq(31, 32)),
@@ -284,7 +284,7 @@ case class Delete_id(
     } yield ()
   }
 
-  "Owned entities: many + one" - refs { implicit conn =>
+  "Owned entities: many + one" - refs {
     for {
       e1 <- A.i.OwnBb.*(B.i.OwnC.i).insert(
         (11, Seq((21, 31))),
@@ -310,7 +310,7 @@ case class Delete_id(
     } yield ()
   }
 
-  "Owned entities: many + many" - refs { implicit conn =>
+  "Owned entities: many + many" - refs {
     for {
       e1 <- A.i.OwnBb.*(B.i.OwnCc.*(C.i)).insert(
         (11, Seq((21, Seq(31)))),

@@ -17,7 +17,7 @@ case class Bind_UUID_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.uuid.insert(uuid1, uuid2, uuid3).transact
 
@@ -54,7 +54,7 @@ case class Bind_UUID_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.uuid.insert((1, uuid1), (2, uuid2), (3, uuid3)).transact
 

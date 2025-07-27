@@ -17,7 +17,7 @@ case class FilterOne_Enum(
 
   import Color.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     val a = (1, Red.toString)
     val b = (2, Green.toString)
     val c = (3, Blue.toString)
@@ -65,7 +65,7 @@ case class FilterOne_Enum(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, c, x) = (1, 2, 3, 4)
     for {
       _ <- Entity.i.color_?.insert(List(
@@ -116,7 +116,7 @@ case class FilterOne_Enum(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     val a = (1, Some(Red.toString))
     val b = (2, Some(Green.toString))
     val c = (3, Some(Blue.toString))

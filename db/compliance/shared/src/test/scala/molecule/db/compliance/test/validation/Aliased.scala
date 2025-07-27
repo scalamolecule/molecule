@@ -16,7 +16,7 @@ case class Aliased(
   import api.*
   import suite.*
 
-  "Aliased attribute name" - validation { implicit conn =>
+  "Aliased attribute name" - validation {
     for {
       _ <- Person.name("Bob").tpe("easy-going").save.transact
       _ <- Person.name.tpe.query.get.map(_ ==> List(("Bob", "easy-going")))

@@ -16,7 +16,7 @@ case class Aggr_Double_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.double.insert(List(
         (1, double1),
@@ -44,7 +44,7 @@ case class Aggr_Double_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.double.insert(
         (1, double1),
@@ -76,7 +76,7 @@ case class Aggr_Double_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.double.insert(
         (1, double1),
@@ -112,7 +112,7 @@ case class Aggr_Double_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(double1, double2, double3, double4)
     for {
       _ <- Entity.double.insert(List(double1, double2, double3)).transact
@@ -123,7 +123,7 @@ case class Aggr_Double_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.double.insert(List(
         (1, double1),

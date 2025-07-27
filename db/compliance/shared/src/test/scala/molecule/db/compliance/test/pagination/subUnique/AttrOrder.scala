@@ -24,7 +24,7 @@ case class AttrOrder(
   import api.*
   import suite.*
 
-  "Unique first: u3-1-2" - unique { implicit conn =>
+  "Unique first: u3-1-2" - unique {
     val triples             = getTriples.map(t => (t._3, t._1, t._2))
     val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
     val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
@@ -38,7 +38,7 @@ case class AttrOrder(
     } yield ()
   }
 
-  "Unique first: u3-2-1" - unique { implicit conn =>
+  "Unique first: u3-2-1" - unique {
     val triples             = getTriples.map(t => (t._3, t._1, t._2))
     val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._2, p._1))
     val query               = (c: String, l: Int) => Uniques.int.a3.s.a2.i.a1.query.from(c).limit(l)
@@ -52,7 +52,7 @@ case class AttrOrder(
     } yield ()
   }
 
-  "Unique first: u2-1-3" - unique { implicit conn =>
+  "Unique first: u2-1-3" - unique {
     val triples             = getTriples.map(t => (t._3, t._1, t._2))
     val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._1, p._3))
     val query               = (c: String, l: Int) => Uniques.int.a2.s.a1.i.a3.query.from(c).limit(l)
@@ -66,7 +66,7 @@ case class AttrOrder(
     } yield ()
   }
 
-  "Unique first: u2-3-1" - unique { implicit conn =>
+  "Unique first: u2-3-1" - unique {
     val triples             = getTriples.map(t => (t._3, t._1, t._2))
     val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._1, p._2))
     val query               = (c: String, l: Int) => Uniques.int.a2.s.a3.i.a1.query.from(c).limit(l)
@@ -81,7 +81,7 @@ case class AttrOrder(
   }
 
 
-  "Unique middle: 1-u3-2" - unique { implicit conn =>
+  "Unique middle: 1-u3-2" - unique {
     val triples             = getTriples.map(t => (t._1, t._3, t._2))
     val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._3, p._2))
     val query               = (c: String, l: Int) => Uniques.s.a1.int.a3.i.a2.query.from(c).limit(l)
@@ -95,7 +95,7 @@ case class AttrOrder(
     } yield ()
   }
 
-  "Unique middle: 2-u3-1" - unique { implicit conn =>
+  "Unique middle: 2-u3-1" - unique {
     val triples             = getTriples.map(t => (t._1, t._3, t._2))
     val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._1, p._2))
     val query               = (c: String, l: Int) => Uniques.s.a2.int.a3.i.a1.query.from(c).limit(l)
@@ -109,7 +109,7 @@ case class AttrOrder(
     } yield ()
   }
 
-  "Unique middle: 1-u2-3" - unique { implicit conn =>
+  "Unique middle: 1-u2-3" - unique {
     val triples             = getTriples.map(t => (t._1, t._3, t._2))
     val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._2, p._3))
     val query               = (c: String, l: Int) => Uniques.s.a1.int.a2.i.a3.query.from(c).limit(l)
@@ -123,7 +123,7 @@ case class AttrOrder(
     } yield ()
   }
 
-  "Unique middle: 3-u2-1" - unique { implicit conn =>
+  "Unique middle: 3-u2-1" - unique {
     val triples             = getTriples.map(t => (t._1, t._3, t._2))
     val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._2, p._1))
     val query               = (c: String, l: Int) => Uniques.s.a3.int.a2.i.a1.query.from(c).limit(l)
@@ -138,7 +138,7 @@ case class AttrOrder(
   }
 
 
-  "Unique last: 1-2-u3" - unique { implicit conn =>
+  "Unique last: 1-2-u3" - unique {
     val triples             = getTriples
     val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._2, p._3))
     val query               = (c: String, l: Int) => Uniques.s.a1.i.a2.int.a3.query.from(c).limit(l)
@@ -152,7 +152,7 @@ case class AttrOrder(
     } yield ()
   }
 
-  "Unique last: 2-1-u3" - unique { implicit conn =>
+  "Unique last: 2-1-u3" - unique {
     val triples             = getTriples
     val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._1, p._3))
     val query               = (c: String, l: Int) => Uniques.s.a2.i.a1.int.a3.query.from(c).limit(l)
@@ -166,7 +166,7 @@ case class AttrOrder(
     } yield ()
   }
 
-  "Unique last: 1-3-u2" - unique { implicit conn =>
+  "Unique last: 1-3-u2" - unique {
     val triples             = getTriples
     val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._3, p._2))
     val query               = (c: String, l: Int) => Uniques.s.a1.i.a3.int.a2.query.from(c).limit(l)
@@ -180,7 +180,7 @@ case class AttrOrder(
     } yield ()
   }
 
-  "Unique last: 3-1-u2" - unique { implicit conn =>
+  "Unique last: 3-1-u2" - unique {
     val triples             = getTriples
     val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
     val query               = (c: String, l: Int) => Uniques.s.a3.i.a1.int.a2.query.from(c).limit(l)

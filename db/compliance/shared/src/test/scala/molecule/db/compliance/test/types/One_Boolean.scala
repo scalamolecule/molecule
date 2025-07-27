@@ -15,7 +15,7 @@ case class One_Boolean(
   import suite.*
 
 
-  "boolean 0-1" - types { implicit conn =>
+  "boolean 0-1" - types {
     // Mandatory
     lazy val a1: Boolean = Entity.boolean.query.get.head
     lazy val a2: Boolean = Entity.boolean.apply(boolean1).query.get.head
@@ -43,7 +43,7 @@ case class One_Boolean(
   }
 
 
-  "boolean 1-n" - types { implicit conn =>
+  "boolean 1-n" - types {
     // Tacit - stays a String
     lazy val a1: String = Entity.s.boolean_.query.get.head
     lazy val a2: String = Entity.s.boolean_.apply(boolean1).query.get.head
@@ -77,7 +77,7 @@ case class One_Boolean(
   }
 
 
-  "boolean n-n" - types { implicit conn =>
+  "boolean n-n" - types {
     // Tacit - stays an (Int, String)
     lazy val a1: (Int, String) = Entity.i.s.boolean_.query.get.head
     lazy val a2: (Int, String) = Entity.i.s.boolean_.apply(boolean1).query.get.head

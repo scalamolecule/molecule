@@ -16,7 +16,7 @@ case class AttrOp_String(
   import api.*
   import suite.*
 
-  "append" - types { implicit conn =>
+  "append" - types {
     for {
       id <- Entity.string("a").save.transact.map(_.id)
       _ <- Entity(id).string.+("b").update.transact
@@ -25,7 +25,7 @@ case class AttrOp_String(
   }
 
 
-  "prepend" - types { implicit conn =>
+  "prepend" - types {
     for {
       id <- Entity.string("a").save.transact.map(_.id)
       _ <- Entity(id).string.prepend("b").update.transact
@@ -34,7 +34,7 @@ case class AttrOp_String(
   }
 
 
-  "substring" - types { implicit conn =>
+  "substring" - types {
     for {
       ids <- Entity.string.insert("Hello", "World").transact.map(_.ids)
 
@@ -64,7 +64,7 @@ case class AttrOp_String(
   }
 
 
-  "replaceAll" - types { implicit conn =>
+  "replaceAll" - types {
     if (database == "sqlite") {
       for {
         ids <- Entity.string.insert("Hello", "World").transact.map(_.ids)
@@ -83,7 +83,7 @@ case class AttrOp_String(
   }
 
 
-  "toLower" - types { implicit conn =>
+  "toLower" - types {
     for {
       ids <- Entity.string.insert("Hello", "World").transact.map(_.ids)
       _ <- Entity(ids).string.toLower.update.transact
@@ -92,7 +92,7 @@ case class AttrOp_String(
   }
 
 
-  "toUpper" - types { implicit conn =>
+  "toUpper" - types {
     for {
       ids <- Entity.string.insert("Hello", "World").transact.map(_.ids)
       _ <- Entity(ids).string.toUpper.update.transact

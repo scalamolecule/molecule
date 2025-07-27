@@ -12,9 +12,9 @@ trait DbProviders_postgresql extends DbProviders with DbConnection with Platform
   override val database: String = "postgres"
   private val db = DbConnection_postgresql
 
-  override def types(test: Conn => Any): Any = db.run(test, Types_MetaDb_postgresql())
-  override def refs(test: Conn => Any): Any = db.run(test, Refs_MetaDb_postgresql())
-  override def unique(test: Conn => Any): Any = db.run(test, Uniques_MetaDb_postgresql())
-  override def validation(test: Conn => Any): Any = db.run(test, Validation_MetaDb_postgresql())
-  override def segments(test: Conn => Any): Any = db.run(test, Segments_MetaDb_postgresql())
+  override def types(test: Conn ?=> Any): Any = db.run(test, Types_MetaDb_postgresql())
+  override def refs(test: Conn ?=> Any): Any = db.run(test, Refs_MetaDb_postgresql())
+  override def unique(test: Conn ?=> Any): Any = db.run(test, Uniques_MetaDb_postgresql())
+  override def validation(test: Conn ?=> Any): Any = db.run(test, Validation_MetaDb_postgresql())
+  override def segments(test: Conn ?=> Any): Any = db.run(test, Segments_MetaDb_postgresql())
 }

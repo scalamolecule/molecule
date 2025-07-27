@@ -32,7 +32,7 @@ case class DirectionsOptional(
   import api.*
   import suite.*
 
-  "Forward, asc asc" - types { implicit conn =>
+  "Forward, asc asc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.a1.int_?.a2.query.from(cursor).limit(limit)
@@ -46,7 +46,7 @@ case class DirectionsOptional(
     } yield ()
   }
 
-  "Forward, desc asc" - types { implicit conn =>
+  "Forward, desc asc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.d1.int_?.a2.query.from(cursor).limit(limit)
@@ -60,7 +60,7 @@ case class DirectionsOptional(
     } yield ()
   }
 
-  "Forward, asc desc" - types { implicit conn =>
+  "Forward, asc desc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs
       .sortBy(p => (p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))
@@ -75,7 +75,7 @@ case class DirectionsOptional(
     } yield ()
   }
 
-  "Forward, desc desc" - types { implicit conn =>
+  "Forward, desc desc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs
       .sortBy(p => (-p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))
@@ -91,7 +91,7 @@ case class DirectionsOptional(
   }
 
 
-  "Backwards, asc asc" - types { implicit conn =>
+  "Backwards, asc asc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.a1.int_?.a2.query.from(cursor).limit(limit)
@@ -105,7 +105,7 @@ case class DirectionsOptional(
     } yield ()
   }
 
-  "Backwards, desc asc" - types { implicit conn =>
+  "Backwards, desc asc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs
       .sortBy(p => (-p._1, p._2))
@@ -120,7 +120,7 @@ case class DirectionsOptional(
     } yield ()
   }
 
-  "Backwards, asc desc" - types { implicit conn =>
+  "Backwards, asc desc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs
       .sortBy(p => (p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))
@@ -135,7 +135,7 @@ case class DirectionsOptional(
     } yield ()
   }
 
-  "Backwards, desc desc" - types { implicit conn =>
+  "Backwards, desc desc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs
       .sortBy(p => (-p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))

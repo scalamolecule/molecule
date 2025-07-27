@@ -16,7 +16,7 @@ case class NestedTypes(
   import api.*
   import suite.*
 
-  "Card one mandatory" - types { implicit conn =>
+  "Card one mandatory" - types {
     for {
       _ <- Ref.i.Entities.*(Entity.string).insert((1, List(string1, string2))).transact
       _ <- Ref.i.Entities.*(Entity.int).insert((2, List(int1, int2))).transact
@@ -90,7 +90,7 @@ case class NestedTypes(
   }
 
 
-  "Card one optional" - types { implicit conn =>
+  "Card one optional" - types {
     for {
       _ <- Ref.i.Entities.*(Entity.i.string_?).insert((1, List((1, Some(string1)), (2, None)))).transact
       _ <- Ref.i.Entities.*(Entity.i.int_?).insert((2, List((1, Some(int1)), (2, None)))).transact
@@ -164,7 +164,7 @@ case class NestedTypes(
   }
 
 
-  "Card set mandatory" - types { implicit conn =>
+  "Card set mandatory" - types {
     for {
       _ <- Ref.i.Entities.*(Entity.stringSet).insert((1, List(Set(string1, string2)))).transact
       _ <- Ref.i.Entities.*(Entity.intSet).insert((2, List(Set(int1, int2)))).transact
@@ -238,7 +238,7 @@ case class NestedTypes(
   }
 
 
-  "Card set optional" - types { implicit conn =>
+  "Card set optional" - types {
     for {
       _ <- Ref.i.Entities.*(Entity.i.stringSet_?).insert((1, List((1, Some(Set(string1, string2))), (2, None)))).transact
       _ <- Ref.i.Entities.*(Entity.i.intSet_?).insert((2, List((1, Some(Set(int1, int2))), (2, None)))).transact
@@ -312,7 +312,7 @@ case class NestedTypes(
   }
 
 
-  "Card seq mandatory" - types { implicit conn =>
+  "Card seq mandatory" - types {
     for {
       _ <- Ref.i.Entities.*(Entity.stringSeq).insert((1, List(List(string1, string2)))).transact
       _ <- Ref.i.Entities.*(Entity.intSeq).insert((2, List(List(int1, int2)))).transact
@@ -386,7 +386,7 @@ case class NestedTypes(
   }
 
 
-  "Card seq optional" - types { implicit conn =>
+  "Card seq optional" - types {
     for {
       _ <- Ref.i.Entities.*(Entity.i.stringSeq_?).insert((1, List((1, Some(List(string1, string2))), (2, None)))).transact
       _ <- Ref.i.Entities.*(Entity.i.intSeq_?).insert((2, List((1, Some(List(int1, int2))), (2, None)))).transact

@@ -16,7 +16,7 @@ case class FilterOne_BigDecimal_(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     val a = (1, bigDecimal1)
     val b = (2, bigDecimal2)
     val c = (3, bigDecimal3)
@@ -67,7 +67,7 @@ case class FilterOne_BigDecimal_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, c, x) = (1, 2, 3, 4)
     for {
       _ <- Entity.i.bigDecimal_?.insert(List(
@@ -124,7 +124,7 @@ case class FilterOne_BigDecimal_(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     val a = (1, Some(bigDecimal1))
     val b = (2, Some(bigDecimal2))
     val c = (3, Some(bigDecimal3))
@@ -147,7 +147,7 @@ case class FilterOne_BigDecimal_(
   }
 
 
-  "Combinations" - types { implicit conn =>
+  "Combinations" - types {
     for {
       _ <- Entity.i.bigDecimal.insert(
         (1, bigDecimal1),

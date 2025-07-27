@@ -19,7 +19,7 @@ case class FilterSet_Int(
   import suite.*
 
 
-  "Mandatory: has" - types { implicit conn =>
+  "Mandatory: has" - types {
     for {
       _ <- Entity.i.intSet.insert(a, b).transact
 
@@ -56,7 +56,7 @@ case class FilterSet_Int(
   }
 
 
-  "Mandatory: hasNo" - types { implicit conn =>
+  "Mandatory: hasNo" - types {
     for {
       _ <- Entity.i.intSet.insert(a, b).transact
 
@@ -96,7 +96,7 @@ case class FilterSet_Int(
   }
 
 
-  "Tacit: has" - types { implicit conn =>
+  "Tacit: has" - types {
     for {
       _ <- Entity.i.intSet.insert(a, b).transact
 
@@ -134,7 +134,7 @@ case class FilterSet_Int(
   }
 
 
-  "Tacit: hasNo" - types { implicit conn =>
+  "Tacit: hasNo" - types {
     for {
       _ <- Entity.i.intSet.insert(a, b).transact
 

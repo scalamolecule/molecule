@@ -16,7 +16,7 @@ case class NestedLevels(
   import api.*
   import suite.*
 
-  "All levels" - refs { implicit conn =>
+  "All levels" - refs {
     for {
       _ <- A.i.Bb.*(
         B.i.Cc.*(

@@ -19,7 +19,7 @@ case class AttrOpDecimal_BigDecimal(
 
   implicit val tolerance: Equality[BigDecimal] = tolerantBigDecimalEquality(toleranceBigDecimal)
 
-  "plus" - types { implicit conn =>
+  "plus" - types {
     for {
       id <- Entity.bigDecimal(bigDecimal1).save.transact.map(_.id)
       _ <- Entity(id).bigDecimal.+(bigDecimal2).update.transact
@@ -27,7 +27,7 @@ case class AttrOpDecimal_BigDecimal(
     } yield ()
   }
 
-  "minus" - types { implicit conn =>
+  "minus" - types {
     for {
       id <- Entity.bigDecimal(bigDecimal3).save.transact.map(_.id)
       _ <- Entity(id).bigDecimal.-(bigDecimal2).update.transact
@@ -35,7 +35,7 @@ case class AttrOpDecimal_BigDecimal(
     } yield ()
   }
 
-  "times" - types { implicit conn =>
+  "times" - types {
     for {
       id <- Entity.bigDecimal(bigDecimal2).save.transact.map(_.id)
       _ <- Entity(id).bigDecimal.*(bigDecimal2).update.transact
@@ -43,7 +43,7 @@ case class AttrOpDecimal_BigDecimal(
     } yield ()
   }
 
-  "divide" - types { implicit conn =>
+  "divide" - types {
     for {
       id <- Entity.bigDecimal(bigDecimal4).save.transact.map(_.id)
       _ <- Entity(id).bigDecimal./(bigDecimal2).update.transact
@@ -51,7 +51,7 @@ case class AttrOpDecimal_BigDecimal(
     } yield ()
   }
 
-  "negate" - types { implicit conn =>
+  "negate" - types {
     for {
       ids <- Entity.bigDecimal.insert(-bigDecimal1, bigDecimal2).transact.map(_.ids)
       _ <- Entity(ids).bigDecimal.negate.update.transact
@@ -59,7 +59,7 @@ case class AttrOpDecimal_BigDecimal(
     } yield ()
   }
 
-  "absolute" - types { implicit conn =>
+  "absolute" - types {
     for {
       ids <- Entity.bigDecimal.insert(-bigDecimal1, bigDecimal2).transact.map(_.ids)
       _ <- Entity(ids).bigDecimal.abs.update.transact
@@ -67,7 +67,7 @@ case class AttrOpDecimal_BigDecimal(
     } yield ()
   }
 
-  "absolute negative" - types { implicit conn =>
+  "absolute negative" - types {
     for {
       ids <- Entity.bigDecimal.insert(-bigDecimal1, bigDecimal2).transact.map(_.ids)
       _ <- Entity(ids).bigDecimal.absNeg.update.transact
@@ -84,7 +84,7 @@ case class AttrOpDecimal_BigDecimal(
 
   // ceil/floor only available for decimal numbers
 
-  "ceil" - types { implicit conn =>
+  "ceil" - types {
     for {
       id <- Entity.bigDecimal(bigDecimal3).save.transact.map(_.id)
       _ <- Entity(id).bigDecimal.ceil.update.transact
@@ -92,7 +92,7 @@ case class AttrOpDecimal_BigDecimal(
     } yield ()
   }
 
-  "floor" - types { implicit conn =>
+  "floor" - types {
     for {
       id <- Entity.bigDecimal(bigDecimal3).save.transact.map(_.id)
       _ <- Entity(id).bigDecimal.floor.update.transact

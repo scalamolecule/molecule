@@ -20,7 +20,7 @@ case class FilterSet_Enum(
   val b = (2, Set(Green.toString, Blue.toString, Yellow.toString))
 
 
-  "Mandatory: has" - types { implicit conn =>
+  "Mandatory: has" - types {
     for {
       _ <- Entity.i.colorSet.insert(a, b).transact
 
@@ -57,7 +57,7 @@ case class FilterSet_Enum(
   }
 
 
-  "Mandatory: hasNo" - types { implicit conn =>
+  "Mandatory: hasNo" - types {
     for {
       _ <- Entity.i.colorSet.insert(a, b).transact
 
@@ -97,7 +97,7 @@ case class FilterSet_Enum(
   }
 
 
-  "Tacit: has" - types { implicit conn =>
+  "Tacit: has" - types {
     for {
       _ <- Entity.i.colorSet.insert(a, b).transact
 
@@ -135,7 +135,7 @@ case class FilterSet_Enum(
   }
 
 
-  "Tacit: hasNo" - types { implicit conn =>
+  "Tacit: hasNo" - types {
     for {
       _ <- Entity.i.colorSet.insert(a, b).transact
 

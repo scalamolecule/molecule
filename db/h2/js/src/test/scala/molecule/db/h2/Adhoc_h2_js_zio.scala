@@ -9,7 +9,7 @@ import molecule.db.h2.setup.DbProviders_h2
 class Adhoc_h2_js_zio extends MUnit with DbProviders_h2 with TestUtils {
 
 
-  "types" - types { implicit conn =>
+  "types" - types {
     for {
       case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(3).save.transact
@@ -22,7 +22,7 @@ class Adhoc_h2_js_zio extends MUnit with DbProviders_h2 with TestUtils {
   }
 
 
-  //    "refs" - refs { implicit conn =>
+  //    "refs" - refs {
   //      import molecule.db.compliance.domains.dsl.Refs._
   //      for {
   //
@@ -56,7 +56,7 @@ class Adhoc_h2_js_zio extends MUnit with DbProviders_h2 with TestUtils {
   //    }
   //
   //
-  //    "validation" - validation { implicit conn =>
+  //    "validation" - validation {
   //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //

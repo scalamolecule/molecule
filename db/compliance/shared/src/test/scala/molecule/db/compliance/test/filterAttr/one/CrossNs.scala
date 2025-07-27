@@ -15,7 +15,7 @@ case class CrossEntity(
   import api.*
   import suite.*
 
-  "equal (apply)" - refs { implicit conn =>
+  "equal (apply)" - refs {
     for {
       _ <- A.s.i.B.i.insert(
         ("a", 1, 2),
@@ -95,7 +95,7 @@ case class CrossEntity(
   }
 
 
-  "not equal" - refs { implicit conn =>
+  "not equal" - refs {
     for {
       _ <- A.s.i.B.i.insert(
         ("a", 1, 2),
@@ -175,7 +175,7 @@ case class CrossEntity(
   }
 
 
-  "<" - refs { implicit conn =>
+  "<" - refs {
     for {
       _ <- A.s.i.B.i.insert(
         ("a", 1, 2),
@@ -255,7 +255,7 @@ case class CrossEntity(
   }
 
 
-  "<=" - refs { implicit conn =>
+  "<=" - refs {
     for {
       _ <- A.s.i.B.i.insert(
         ("a", 1, 2),
@@ -335,7 +335,7 @@ case class CrossEntity(
   }
 
 
-  ">" - refs { implicit conn =>
+  ">" - refs {
     for {
       _ <- A.s.i.B.i.insert(
         ("a", 1, 2),
@@ -415,7 +415,7 @@ case class CrossEntity(
   }
 
 
-  ">=" - refs { implicit conn =>
+  ">=" - refs {
     for {
       _ <- A.s.i.B.i.insert(
         ("a", 1, 2),

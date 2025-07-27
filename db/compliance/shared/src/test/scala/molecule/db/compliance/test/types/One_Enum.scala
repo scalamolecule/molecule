@@ -16,7 +16,7 @@ case class One_Enum(
   import suite.*
 
 
-  "enum 0-1" - types { implicit conn =>
+  "enum 0-1" - types {
     // Mandatory
     lazy val a1: String = Entity.color.query.get.head
     lazy val a2: String = Entity.color.apply(Blue).query.get.head
@@ -37,7 +37,7 @@ case class One_Enum(
   }
 
 
-  "enum 1-n" - types { implicit conn =>
+  "enum 1-n" - types {
     // Tacit - stays a String
     lazy val a1: String = Entity.s.color_.query.get.head
     lazy val a2: String = Entity.s.color_.apply(Blue).query.get.head
@@ -63,7 +63,7 @@ case class One_Enum(
   }
 
 
-  "enum n-n" - types { implicit conn =>
+  "enum n-n" - types {
     // Tacit - stays an (Int, String)
     lazy val a1: (Int, String) = Entity.i.s.color_.query.get.head
     lazy val a2: (Int, String) = Entity.i.s.color_.apply(Blue).query.get.head

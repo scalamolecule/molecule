@@ -15,7 +15,7 @@ case class Many_Map_add(
   import api.*
   import suite.*
 
-  "id-filter - ref - value" - refs { implicit conn =>
+  "id-filter - ref - value" - refs {
     for {
       case List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iMap_?).insert(
         (1, List()),
@@ -66,7 +66,7 @@ case class Many_Map_add(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i.a1.Bb.*?(B.s_?.iMap_?).insert(
         (1, List()),
@@ -117,7 +117,7 @@ case class Many_Map_add(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.iMap_?.Bb.*?(B.s).insert(
         (Some(Map(pint0, pint1)), List()),
@@ -149,7 +149,7 @@ case class Many_Map_add(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // will not be updated since entities have no A -> B relationship
       _ <- B.s("x").iMap(Map(pint0, pint1)).save.transact

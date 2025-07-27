@@ -36,7 +36,7 @@ case class SubUnique[Tpl](
 
 
   def getPage(allTokens: List[String], limit: Int)
-             (implicit conn: JdbcConn_JVM)
+             (using conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = try {
     val forward     = limit > 0
     val attrsTokens = allTokens.drop(2).grouped(13).toList.sortBy(_(2))

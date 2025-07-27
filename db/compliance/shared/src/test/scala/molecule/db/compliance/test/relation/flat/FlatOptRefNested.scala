@@ -17,7 +17,7 @@ case class FlatOptRefNested(
   import api.*
   import suite.*
 
-  "Basic optional ref nested" - refs { implicit conn =>
+  "Basic optional ref nested" - refs {
     for {
       _ <- A.i.B.?(B.s.i.C.?(C.s.i)).insert(List(
         (1, None),
@@ -44,7 +44,7 @@ case class FlatOptRefNested(
   }
 
 
-  "Optional ref nested with opt attrs" - refs { implicit conn =>
+  "Optional ref nested with opt attrs" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.i(2).B.i(20).save.transact
@@ -92,7 +92,7 @@ case class FlatOptRefNested(
   }
 
 
-  "Ref (for comparison)" - refs { implicit conn =>
+  "Ref (for comparison)" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.i(2).B.i(20).save.transact

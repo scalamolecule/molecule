@@ -15,7 +15,7 @@ case class Many_Seq_add(
   import api.*
   import suite.*
 
-  "id-filter - ref - value" - refs { implicit conn =>
+  "id-filter - ref - value" - refs {
     for {
       List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iSeq_?).insert(
         (1, List()),
@@ -53,7 +53,7 @@ case class Many_Seq_add(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i.a1.Bb.*?(B.s_?.iSeq_?).insert(
         (1, List()),
@@ -91,7 +91,7 @@ case class Many_Seq_add(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.iSeq_?.Bb.*?(B.s).insert(
         (Some(Seq(0, 1)), List()),
@@ -123,7 +123,7 @@ case class Many_Seq_add(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // will not be updated since entities have no A -> B relationship
       _ <- B.s("x").iSeq(Seq(0, 1)).save.transact

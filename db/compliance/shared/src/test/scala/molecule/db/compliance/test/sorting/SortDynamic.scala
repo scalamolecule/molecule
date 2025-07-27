@@ -16,7 +16,7 @@ case class SortDynamic(
   import api.*
   import suite.*
 
-  "Dynamic sort markers" - types { implicit conn =>
+  "Dynamic sort markers" - types {
     for {
       _ <- Entity.boolean.string.uri.i.int.insert(
         (false, "b", uri4, 8, 16),
@@ -172,7 +172,7 @@ case class SortDynamic(
   }
 
 
-  "Correct use of sort markers" - types { implicit conn =>
+  "Correct use of sort markers" - types {
     for {
       _ <- Entity.string.sort(1).int.sort(1).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

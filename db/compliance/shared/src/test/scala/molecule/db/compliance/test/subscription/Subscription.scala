@@ -16,7 +16,7 @@ case class Subscription(
   import api.*
   import suite.*
 
-  "Mutations call back" - types { implicit conn =>
+  "Mutations call back" - types {
     var intermediaryResults = List.empty[List[Int]]
     for {
       // Initial data
@@ -61,7 +61,7 @@ case class Subscription(
   }
 
 
-  "Multiple callbacks and unsubscribe" - types { implicit conn =>
+  "Multiple callbacks and unsubscribe" - types {
     var intResults    = List.empty[List[Int]]
     var stringResults = List.empty[List[String]]
     for {

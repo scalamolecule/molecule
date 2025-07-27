@@ -15,7 +15,7 @@ case class Many_Set(
   import api.*
   import suite.*
 
-  "id-filter - ref - value" - refs { implicit conn =>
+  "id-filter - ref - value" - refs {
     for {
       case List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iSet_?).insert(
         (1, List()),
@@ -53,7 +53,7 @@ case class Many_Set(
   }
 
 
-  "filter - ref - value" - refs { implicit conn =>
+  "filter - ref - value" - refs {
     for {
       _ <- A.i.a1.Bb.*?(B.s_?.iSet_?).insert(
         (1, List()),
@@ -91,7 +91,7 @@ case class Many_Set(
   }
 
 
-  "value - ref - filter" - refs { implicit conn =>
+  "value - ref - filter" - refs {
     for {
       _ <- A.iSet_?.Bb.*?(B.s).insert(
         (Some(Set(0, 1)), List()),
@@ -124,7 +124,7 @@ case class Many_Set(
   }
 
 
-  "ref - filter/value" - refs { implicit conn =>
+  "ref - filter/value" - refs {
     for {
       // will not be updated since entities have no A -> B relationship
       _ <- B.s("x").iSet(Set(0, 1)).save.transact
@@ -176,7 +176,7 @@ case class Many_Set(
   }
 
 
-  "ref ref" - refs { implicit conn =>
+  "ref ref" - refs {
     for {
       id <- A.iSet(Set(1)).Bb.iSet(Set(2)).Cc.iSet(Set(3)).save.transact.map(_.id)
       _ <- A.iSet.Bb.iSet.Cc.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
@@ -212,7 +212,7 @@ case class Many_Set(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     for {
       id <- A.iSet(Set(1)).Bb.iSet(Set(2))._A.Cc.iSet(Set(3)).save.transact.map(_.id)
       _ <- A.iSet.Bb.iSet._A.Cc.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))

@@ -115,7 +115,7 @@ trait Spi_sqlite_sync extends SpiBaseJVM_sync {
   override def fallback_rawTransact(
     stmt: String,
     doPrint: Boolean = false
-  )(implicit conn0: Conn): TxReport = {
+  )(using conn0: Conn): TxReport = {
     val conn  = conn0.asInstanceOf[JdbcConn_JVM]
     val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
     debug("\n=============================================================================")

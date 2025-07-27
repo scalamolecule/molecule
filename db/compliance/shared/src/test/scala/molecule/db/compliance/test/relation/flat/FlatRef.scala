@@ -16,7 +16,7 @@ case class FlatRef(
   import api.*
   import suite.*
 
-  "ref" - refs { implicit conn =>
+  "ref" - refs {
     for {
       _ <- A.i.B.i.insert((1, 2)).transact
       _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
@@ -24,7 +24,7 @@ case class FlatRef(
   }
 
 
-  "ref with Set attribute" - refs { implicit conn =>
+  "ref with Set attribute" - refs {
     for {
       _ <- A.i.B.i.iSet.insert(
         (1, 2, Set.empty[Int]),
@@ -51,7 +51,7 @@ case class FlatRef(
   }
 
 
-  "ref with only Set attribute" - refs { implicit conn =>
+  "ref with only Set attribute" - refs {
     for {
       _ <- A.i.B.iSet.insert(
         (1, Set.empty[Int]),
@@ -73,7 +73,7 @@ case class FlatRef(
   }
 
 
-  "backref" - refs { implicit conn =>
+  "backref" - refs {
     for {
       _ <- A.i.B.i._A.Bb.i.insert((1, 2, 3)).transact
       _ <- A.i.B.i._A.Bb.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -81,7 +81,7 @@ case class FlatRef(
   }
 
 
-  "Adjacent ref without attribute" - refs { implicit conn =>
+  "Adjacent ref without attribute" - refs {
     for {
       _ <- A.i.B.i.C.i.insert((1, 2, 3)).transact
       _ <- A.i.B.C.i.query.get.map(_ ==> List((1, 3)))
@@ -89,7 +89,7 @@ case class FlatRef(
   }
 
 
-  "complex" - refs { implicit conn =>
+  "complex" - refs {
     for {
       _ <- A.i(0).s("a").B.i(1).s("b").Cc.i(22)
         ._B.C.i(2).s("c")
@@ -115,7 +115,7 @@ case class FlatRef(
   }
 
 
-  "Flattened nested data" - refs { implicit conn =>
+  "Flattened nested data" - refs {
     for {
       _ <- A.i.Bb.*(B.i).insert(
         (1, List(1, 2)),
@@ -138,7 +138,7 @@ case class FlatRef(
     } yield ()
   }
 
-  "Flattened nested data, 2 levels" - refs { implicit conn =>
+  "Flattened nested data, 2 levels" - refs {
     for {
       _ <- A.i.Bb.*(B.i.Cc.*(C.i)).insert(
         (1, List(

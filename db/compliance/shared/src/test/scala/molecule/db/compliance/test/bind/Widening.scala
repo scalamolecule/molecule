@@ -17,7 +17,7 @@ case class Widening(
   import suite.*
 
 
-  "Byte" - types { implicit conn =>
+  "Byte" - types {
     for {
       _ <- Entity.byte(byte1).save.transact
       eq = Entity.byte(?).a1.query
@@ -38,7 +38,7 @@ case class Widening(
     } yield ()
   }
 
-  "Short" - types { implicit conn =>
+  "Short" - types {
     for {
       _ <- Entity.short(short1).save.transact
       eq = Entity.short(?).a1.query
@@ -59,7 +59,7 @@ case class Widening(
     } yield ()
   }
 
-  "Int" - types { implicit conn =>
+  "Int" - types {
     for {
       _ <- Entity.int(int1).save.transact
       eq = Entity.int(?).a1.query
@@ -80,7 +80,7 @@ case class Widening(
     } yield ()
   }
 
-  "Long" - types { implicit conn =>
+  "Long" - types {
     for {
       _ <- Entity.long(long1).save.transact
       eq = Entity.long(?).a1.query
@@ -102,7 +102,7 @@ case class Widening(
   }
 
 
-  "BigInt" - types { implicit conn =>
+  "BigInt" - types {
     for {
       _ <- Entity.bigInt(bigInt1).save.transact
       eq = Entity.bigInt(?).a1.query
@@ -124,7 +124,7 @@ case class Widening(
   }
 
 
-  "Float" - types { implicit conn =>
+  "Float" - types {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.float(1.1f).save.transact
@@ -142,7 +142,7 @@ case class Widening(
     } yield ()
   }
 
-  "Float, no decimals" - types { implicit conn =>
+  "Float, no decimals" - types {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.float(1.0f).save.transact
@@ -168,7 +168,7 @@ case class Widening(
   }
 
 
-  "Double" - types { implicit conn =>
+  "Double" - types {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.double(1.1).save.transact
@@ -186,7 +186,7 @@ case class Widening(
     } yield ()
   }
 
-  "Double, no decimals" - types { implicit conn =>
+  "Double, no decimals" - types {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.double(1.0).save.transact
@@ -212,7 +212,7 @@ case class Widening(
   }
 
 
-  "BigDecimal" - types { implicit conn =>
+  "BigDecimal" - types {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
 
     for {
@@ -231,7 +231,7 @@ case class Widening(
     } yield ()
   }
 
-  "BigDecimal, no decimals" - types { implicit conn =>
+  "BigDecimal, no decimals" - types {
     if (database == "sqlite")
       for {
         _ <- Entity.bigDecimal(BigDecimal("1.0")).save.transact

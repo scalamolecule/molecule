@@ -9,7 +9,7 @@ import molecule.db.mariadb.setup.DbProviders_mariadb
 
 class Adhoc_mariadb_js_async extends MUnit with DbProviders_mariadb with TestUtils {
 
-  "types" - types { implicit conn =>
+  "types" - types {
     for {
       case List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       _ <- Entity.int(3).save.transact
@@ -23,7 +23,7 @@ class Adhoc_mariadb_js_async extends MUnit with DbProviders_mariadb with TestUti
 
   // testOnly molecule.db.sql.mariadb.Adhoc_mariadb_js_async
 
-  //    "refs" - refs { implicit conn =>
+  //    "refs" - refs {
   //      import molecule.db.compliance.domains.dsl.Refs._
   //      for {
   //
@@ -33,7 +33,7 @@ class Adhoc_mariadb_js_async extends MUnit with DbProviders_mariadb with TestUti
   //    }
 
   //
-  //    "validation" - validation { implicit conn =>
+  //    "validation" - validation {
   //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
   //

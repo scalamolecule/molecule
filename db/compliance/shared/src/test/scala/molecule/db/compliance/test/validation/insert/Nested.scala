@@ -17,7 +17,7 @@ case class Nested(
   import api.*
   import suite.*
 
-  "2 levels" - validation { implicit conn =>
+  "2 levels" - validation {
     for {
       // bad, List(ok, ok)
       _ <- Type.int.Refs.*(Strings.email).insert(
@@ -340,7 +340,7 @@ case class Nested(
   }
 
 
-  "3 levels" - validation { implicit conn =>
+  "3 levels" - validation {
     for {
       _ <- Type.int.Refs.*(Strings.email.AllowedAttrs.*(AllowedAttrs.luckyNumber)).insert(
           (1, List(

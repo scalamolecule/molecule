@@ -17,7 +17,7 @@ case class Bind_OffsetDateTime_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.offsetDateTime.insert(offsetDateTime1, offsetDateTime2, offsetDateTime3).transact
 
@@ -54,7 +54,7 @@ case class Bind_OffsetDateTime_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.offsetDateTime.insert((1, offsetDateTime1), (2, offsetDateTime2), (3, offsetDateTime3)).transact
 

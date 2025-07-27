@@ -19,7 +19,7 @@ case class FilterMap_Boolean(
   import suite.*
 
 
-  "Mandatory: Mandatory Map (no filter)" - types { implicit conn =>
+  "Mandatory: Mandatory Map (no filter)" - types {
     for {
       _ <- Entity.i.booleanMap.insert(a, b).transact
       _ <- Entity.i.a1.booleanMap.query.get.map(_ ==> List(a, b))
@@ -27,7 +27,7 @@ case class FilterMap_Boolean(
   }
 
 
-  "Mandatory: Map with certain keys" - types { implicit conn =>
+  "Mandatory: Map with certain keys" - types {
     for {
       _ <- Entity.i.booleanMap.insert(a, b).transact
 
@@ -41,7 +41,7 @@ case class FilterMap_Boolean(
   }
 
 
-  "Mandatory: Match map without certain keys" - types { implicit conn =>
+  "Mandatory: Match map without certain keys" - types {
     for {
       _ <- Entity.i.booleanMap.insert(a, b).transact
 
@@ -66,7 +66,7 @@ case class FilterMap_Boolean(
   }
 
 
-  "Mandatory: Map with certain values" - types { implicit conn =>
+  "Mandatory: Map with certain values" - types {
     val a = (1, Map("a" -> boolean1))
     val b = (2, Map("a" -> boolean1, "b" -> boolean2))
     val c = (3, Map("c" -> boolean2))
@@ -94,7 +94,7 @@ case class FilterMap_Boolean(
   }
 
 
-  "Mandatory: Map without certain values" - types { implicit conn =>
+  "Mandatory: Map without certain values" - types {
     val a = (1, Map("a" -> boolean1))
     val b = (2, Map("a" -> boolean1, "b" -> boolean2))
     val c = (3, Map("c" -> boolean2))
@@ -121,7 +121,7 @@ case class FilterMap_Boolean(
   }
 
 
-  "Tacit: Tacit Map (no filter)" - types { implicit conn =>
+  "Tacit: Tacit Map (no filter)" - types {
     for {
       _ <- Entity.i.booleanMap.insert(a, b).transact
       _ <- Entity.i.a1.booleanMap_.query.get.map(_ ==> List(1, 2))
@@ -129,7 +129,7 @@ case class FilterMap_Boolean(
   }
 
 
-  "Tacit: Match map with certain keys" - types { implicit conn =>
+  "Tacit: Match map with certain keys" - types {
     for {
       _ <- Entity.i.insert(0).transact // Entity without map attribute
       _ <- Entity.i.booleanMap.insert(a, b).transact
@@ -158,7 +158,7 @@ case class FilterMap_Boolean(
   }
 
 
-  "Tacit: Match map without certain keys" - types { implicit conn =>
+  "Tacit: Match map without certain keys" - types {
     for {
       _ <- Entity.i.booleanMap.insert(a, b).transact
 
@@ -183,7 +183,7 @@ case class FilterMap_Boolean(
   }
 
 
-  "Tacit: has value(s)" - types { implicit conn =>
+  "Tacit: has value(s)" - types {
     val aFalse = "a" -> boolean1
     val bFalse = "b" -> boolean1
     val cTrue  = "c" -> boolean2
@@ -208,7 +208,7 @@ case class FilterMap_Boolean(
   }
 
 
-  "Tacit: Match map with certain values" - types { implicit conn =>
+  "Tacit: Match map with certain values" - types {
     val aFalse = "a" -> boolean1
     val bFalse = "b" -> boolean1
     val cTrue  = "c" -> boolean2
@@ -233,7 +233,7 @@ case class FilterMap_Boolean(
   }
 
 
-  "Optiopnal: Get optional map" - types { implicit conn =>
+  "Optiopnal: Get optional map" - types {
     val a = (1, Some(Map("a" -> boolean1, "b" -> boolean2)))
     val b = (2, Some(Map("a" -> boolean2, "b" -> boolean3, "c" -> boolean4)))
     val c = (3, None)
@@ -244,7 +244,7 @@ case class FilterMap_Boolean(
   }
 
 
-  "Optiopnal: Optional map values by key" - types { implicit conn =>
+  "Optiopnal: Optional map values by key" - types {
     for {
       _ <- Entity.i.booleanMap.insert(a, b).transact
       _ <- Entity.i(3).save.transact // entity without intMap

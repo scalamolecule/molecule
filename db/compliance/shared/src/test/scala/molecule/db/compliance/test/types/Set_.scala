@@ -15,7 +15,7 @@ case class Set_(
   import suite.*
 
 
-  "set 0-1" - types { implicit conn =>
+  "set 0-1" - types {
     // Mandatory
     lazy val a1: Set[Int] = Entity.intSet.query.get.head
     lazy val a2: Set[Int] = Entity.intSet.apply(Set(int1)).query.get.head
@@ -28,7 +28,7 @@ case class Set_(
   }
 
 
-  "set 1-n" - types { implicit conn =>
+  "set 1-n" - types {
     // Tacit - stays a String
     lazy val a1: String = Entity.s.intSet_.query.get.head
     lazy val a2: String = Entity.s.intSet_.apply(Set(int1)).query.get.head
@@ -46,7 +46,7 @@ case class Set_(
   }
 
 
-  "set n-n" - types { implicit conn =>
+  "set n-n" - types {
     // Tacit - stays an (Int, String)
     lazy val a1: (Int, String) = Entity.i.s.intSet_.query.get.head
     lazy val a2: (Int, String) = Entity.i.s.intSet_.apply(Set(int1)).query.get.head

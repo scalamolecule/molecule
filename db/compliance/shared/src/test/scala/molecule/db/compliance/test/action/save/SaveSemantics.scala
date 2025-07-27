@@ -16,7 +16,7 @@ case class SaveSemantics(
   import api.*
   import suite.*
 
-  "Attribute required for each entity" - refs { implicit conn =>
+  "Attribute required for each entity" - refs {
     for {
       _ <- A.B.i(1).save.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -31,7 +31,7 @@ case class SaveSemantics(
   }
 
 
-  "Duplicate attributes not allowed, flat - Same entity" - refs { implicit conn =>
+  "Duplicate attributes not allowed, flat - Same entity" - refs {
     for {
       _ <- A.i(1).i(2).save.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -40,7 +40,7 @@ case class SaveSemantics(
     } yield ()
   }
 
-  "Duplicate attributes not allowed, flat - After backref" - refs { implicit conn =>
+  "Duplicate attributes not allowed, flat - After backref" - refs {
     for {
       _ <- A.i(1).B.i(2)._A.i(3).save.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -60,7 +60,7 @@ case class SaveSemantics(
   }
 
 
-  "Nested data can only be inserted, not saved" - refs { implicit conn =>
+  "Nested data can only be inserted, not saved" - refs {
     for {
       _ <- A.i(0).Bb.*(B.i(1)).save.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

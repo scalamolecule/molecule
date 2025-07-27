@@ -16,7 +16,7 @@ case class FilterOne_Byte_(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     val a = (1, byte1)
     val b = (2, byte2)
     val c = (3, byte3)
@@ -67,7 +67,7 @@ case class FilterOne_Byte_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, c, x) = (1, 2, 3, 4)
     for {
       _ <- Entity.i.byte_?.insert(List(
@@ -124,7 +124,7 @@ case class FilterOne_Byte_(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     val a = (1, Some(byte1))
     val b = (2, Some(byte2))
     val c = (3, Some(byte3))
@@ -147,7 +147,7 @@ case class FilterOne_Byte_(
   }
 
 
-  "Combinations" - types { implicit conn =>
+  "Combinations" - types {
     for {
       _ <- Entity.i.byte.insert(
         (1, byte1),

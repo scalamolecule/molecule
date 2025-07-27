@@ -16,7 +16,7 @@ case class Aggr_OffsetDateTime_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.offsetDateTime.insert(List(
         (1, offsetDateTime1),
@@ -44,7 +44,7 @@ case class Aggr_OffsetDateTime_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.offsetDateTime.insert(
         (1, offsetDateTime1),
@@ -76,7 +76,7 @@ case class Aggr_OffsetDateTime_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.offsetDateTime.insert(
         (1, offsetDateTime1),
@@ -112,7 +112,7 @@ case class Aggr_OffsetDateTime_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4)
     for {
       _ <- Entity.offsetDateTime.insert(List(offsetDateTime1, offsetDateTime2, offsetDateTime3)).transact
@@ -123,7 +123,7 @@ case class Aggr_OffsetDateTime_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.offsetDateTime.insert(List(
         (1, offsetDateTime1),

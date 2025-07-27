@@ -17,7 +17,7 @@ case class Bind_LocalDate_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.localDate.insert(localDate1, localDate2, localDate3).transact
 
@@ -54,7 +54,7 @@ case class Bind_LocalDate_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.localDate.insert((1, localDate1), (2, localDate2), (3, localDate3)).transact
 

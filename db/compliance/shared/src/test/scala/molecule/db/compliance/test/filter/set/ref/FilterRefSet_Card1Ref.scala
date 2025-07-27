@@ -15,7 +15,7 @@ case class FilterRefSet_Card1Ref(
   import api.*
   import suite.*
 
-  "mandatory" - refs { implicit conn =>
+  "mandatory" - refs {
     for {
       _ <- A.i.B.iSet.insert(
         (1, Set(1, 2)),
@@ -68,7 +68,7 @@ case class FilterRefSet_Card1Ref(
   }
 
 
-  "tacit" - refs { implicit conn =>
+  "tacit" - refs {
     for {
       _ <- A.i.B.iSet.insert(
         (1, Set(1, 2)),

@@ -16,7 +16,7 @@ case class FilterSet_Boolean(
   import api.*
   import suite.*
 
-  "Mandatory: has" - types { implicit conn =>
+  "Mandatory: has" - types {
     val t  = (1, Set(true))
     val f  = (2, Set(false))
     val tf = (3, Set(true, false))
@@ -47,7 +47,7 @@ case class FilterSet_Boolean(
   }
 
 
-  "Mandatory: hasNo" - types { implicit conn =>
+  "Mandatory: hasNo" - types {
     val t  = (1, Set(true))
     val f  = (2, Set(false))
     val tf = (3, Set(true, false))
@@ -77,7 +77,7 @@ case class FilterSet_Boolean(
   }
 
 
-  "Tacit: has" - types { implicit conn =>
+  "Tacit: has" - types {
     val (t, f, tf) = (1, 2, 3)
     for {
       _ <- Entity.i.booleanSet.insert(List(
@@ -110,7 +110,7 @@ case class FilterSet_Boolean(
   }
 
 
-  "Tacit: hasNo" - types { implicit conn =>
+  "Tacit: hasNo" - types {
     val (t, f, tf) = (1, 2, 3)
     for {
       _ <- Entity.i.booleanSet.insert(List(

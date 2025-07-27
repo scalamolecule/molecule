@@ -23,7 +23,7 @@ case class SortAggr(
   import api.*
   import suite.*
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       case List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
 
@@ -106,7 +106,7 @@ case class SortAggr(
   }
 
 
-  "countDistinct" - types { implicit conn =>
+  "countDistinct" - types {
     for {
       case List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
 
@@ -189,7 +189,7 @@ case class SortAggr(
   }
 
 
-  "sum" - types { implicit conn =>
+  "sum" - types {
     for {
       _ <- Entity.i.int.insert(
         (1, int1),
@@ -224,7 +224,7 @@ case class SortAggr(
   }
 
 
-  "median" - types { implicit conn =>
+  "median" - types {
     if (Seq("mariadb", "mysql", "sqlite").contains(database)) {
       Entity.i.int(median).a1.query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -268,7 +268,7 @@ case class SortAggr(
   }
 
 
-  "avg" - types { implicit conn =>
+  "avg" - types {
     for {
       _ <- Entity.i.int.insert(
         (1, int1),
@@ -304,7 +304,7 @@ case class SortAggr(
   }
 
 
-  "variance" - types { implicit conn =>
+  "variance" - types {
     if (Seq("mariadb", "mysql", "sqlite").contains(database)) {
       Entity.i.int(variance).a1.query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -347,7 +347,7 @@ case class SortAggr(
   }
 
 
-  "stddev" - types { implicit conn =>
+  "stddev" - types {
     if (Seq("mariadb", "mysql", "sqlite").contains(database)) {
       Entity.i.int(stddev).a1.query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

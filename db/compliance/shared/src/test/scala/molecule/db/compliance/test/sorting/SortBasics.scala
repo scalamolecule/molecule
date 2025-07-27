@@ -16,7 +16,7 @@ case class SortBasics(
   import api.*
   import suite.*
 
-  "Types" - types { implicit conn =>
+  "Types" - types {
     for {
       case List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
 
@@ -97,7 +97,7 @@ case class SortBasics(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     for {
       case List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
 
@@ -178,7 +178,7 @@ case class SortBasics(
   }
 
 
-  "2 sort markers" - types { implicit conn =>
+  "2 sort markers" - types {
     for {
       _ <- Entity.i.int.insert(
         (2, 3),
@@ -231,7 +231,7 @@ case class SortBasics(
   }
 
 
-  "All 5 sort markers" - types { implicit conn =>
+  "All 5 sort markers" - types {
     for {
       _ <- Entity.boolean.string.uri.i.int.insert(
         (false, "b", uri4, 8, 16),
@@ -387,7 +387,7 @@ case class SortBasics(
   }
 
 
-  "Correct use of sort markers" - types { implicit conn =>
+  "Correct use of sort markers" - types {
     for {
       _ <- Entity.string.a1.int.a1.query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

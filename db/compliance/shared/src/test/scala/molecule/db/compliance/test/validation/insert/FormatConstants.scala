@@ -21,7 +21,7 @@ case class FormatConstants(
   import api.*
   import suite.*
 
-  "Default msg" - validation { implicit conn =>
+  "Default msg" - validation {
     for {
       _ <- Constants.noErrorMsg.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -67,7 +67,7 @@ case class FormatConstants(
   }
 
 
-  "Msg" - validation { implicit conn =>
+  "Msg" - validation {
     for {
       _ <- Constants.errorMsg.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -80,7 +80,7 @@ case class FormatConstants(
   }
 
 
-  "Msg with value" - validation { implicit conn =>
+  "Msg with value" - validation {
     for {
       _ <- Constants.errorMsgWithValue.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -93,7 +93,7 @@ case class FormatConstants(
   }
 
 
-  "Msg with quoted value" - validation { implicit conn =>
+  "Msg with quoted value" - validation {
     for {
       _ <- Constants.errorMsgWithValueQuoted.insert("hi").transact
         .map(_ ==> "Unexpected success").recover {
@@ -105,7 +105,7 @@ case class FormatConstants(
     } yield ()
   }
 
-  "Msg with quoted value 2" - validation { implicit conn =>
+  "Msg with quoted value 2" - validation {
     for {
       _ <- Constants.errorMsgWithValueQuoted2.insert("hi").transact
         .map(_ ==> "Unexpected success").recover {
@@ -118,7 +118,7 @@ case class FormatConstants(
   }
 
 
-  "Multi-line msg" - validation { implicit conn =>
+  "Multi-line msg" - validation {
     for {
       _ <- Constants.multilineErrorMsg.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -132,7 +132,7 @@ case class FormatConstants(
   }
 
 
-  "Multi-line msg with value" - validation { implicit conn =>
+  "Multi-line msg with value" - validation {
     for {
       _ <- Constants.multilineMsgWithValue.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -145,7 +145,7 @@ case class FormatConstants(
     } yield ()
   }
 
-  "Multi-line msg with value 2" - validation { implicit conn =>
+  "Multi-line msg with value 2" - validation {
     for {
       _ <- Constants.multilineMsgWithValue2.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -159,7 +159,7 @@ case class FormatConstants(
   }
 
 
-  "Multi-line test, default msg" - validation { implicit conn =>
+  "Multi-line test, default msg" - validation {
     for {
       _ <- Constants.multiLine.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -177,7 +177,7 @@ case class FormatConstants(
   }
 
 
-  "Multi-line test, msg" - validation { implicit conn =>
+  "Multi-line test, msg" - validation {
     for {
       _ <- Constants.multiLine2.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -190,7 +190,7 @@ case class FormatConstants(
   }
 
 
-  "Multi-line test, multi-line msg" - validation { implicit conn =>
+  "Multi-line test, multi-line msg" - validation {
     for {
       _ <- Constants.multiLine3.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -204,7 +204,7 @@ case class FormatConstants(
   }
 
 
-  "Single test line with logic" - validation { implicit conn =>
+  "Single test line with logic" - validation {
     for {
       _ <- Constants.logic.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -217,7 +217,7 @@ case class FormatConstants(
   }
 
 
-  "Multiple validations" - validation { implicit conn =>
+  "Multiple validations" - validation {
     for {
       _ <- Constants.multipleErrors.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
@@ -265,7 +265,7 @@ case class FormatConstants(
   }
 
 
-  "Multiple rows" - validation { implicit conn =>
+  "Multiple rows" - validation {
     for {
       // 0 and 11 are not valid
       _ <- Constants.multipleErrors.insert(
@@ -316,7 +316,7 @@ case class FormatConstants(
   }
 
 
-  "Multiple attribute validations" - validation { implicit conn =>
+  "Multiple attribute validations" - validation {
     for {
       _ <- Constants.errorMsg.multipleErrors.insert((1, 0)).transact
         .map(_ ==> "Unexpected success").recover {
@@ -346,7 +346,7 @@ case class FormatConstants(
   }
 
 
-  "3 rows, mixed errors with multi-errors" - validation { implicit conn =>
+  "3 rows, mixed errors with multi-errors" - validation {
     for {
       _ <- Constants.errorMsg.multipleErrors.insert(
           (1, 3), // bad  - ok

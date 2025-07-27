@@ -17,7 +17,7 @@ case class Bind_BigDecimal_(
   import suite.*
 
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     for {
       _ <- Entity.bigDecimal.insert(bigDecimal1, bigDecimal2, bigDecimal3).transact
 
@@ -54,7 +54,7 @@ case class Bind_BigDecimal_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       _ <- Entity.i.bigDecimal.insert((1, bigDecimal1), (2, bigDecimal2), (3, bigDecimal3)).transact
 

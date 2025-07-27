@@ -17,7 +17,7 @@ case class TypesOptional(
   import api.*
   import suite.*
 
-  "String" - unique { implicit conn =>
+  "String" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(string1)),
@@ -38,7 +38,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Int" - unique { implicit conn =>
+  "Int" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(int1)),
@@ -59,7 +59,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Long" - unique { implicit conn =>
+  "Long" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(long1)),
@@ -80,7 +80,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Float" - unique { implicit conn =>
+  "Float" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(float1)),
@@ -101,7 +101,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Double" - unique { implicit conn =>
+  "Double" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(double1)),
@@ -122,7 +122,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Boolean" - unique { implicit conn =>
+  "Boolean" - unique {
     // Can save only 2 unique boolean values
     val pairs      = List(
       (1, None),
@@ -139,7 +139,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "BigInt" - unique { implicit conn =>
+  "BigInt" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(bigInt1)),
@@ -167,7 +167,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "BigDecimal" - unique { implicit conn =>
+  "BigDecimal" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(bigDecimal1)),
@@ -188,7 +188,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Date" - unique { implicit conn =>
+  "Date" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(date1)),
@@ -209,7 +209,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Duration" - unique { implicit conn =>
+  "Duration" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(duration1)),
@@ -230,7 +230,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Instant" - unique { implicit conn =>
+  "Instant" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(instant1)),
@@ -251,7 +251,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "LocalDate" - unique { implicit conn =>
+  "LocalDate" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(localDate1)),
@@ -272,7 +272,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "LocalTime" - unique { implicit conn =>
+  "LocalTime" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(localTime1)),
@@ -293,7 +293,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "LocalDateTime" - unique { implicit conn =>
+  "LocalDateTime" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(localDateTime1)),
@@ -314,7 +314,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "OffsetTime" - unique { implicit conn =>
+  "OffsetTime" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(offsetTime1)),
@@ -335,7 +335,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "OffsetDateTime" - unique { implicit conn =>
+  "OffsetDateTime" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(offsetDateTime1)),
@@ -356,7 +356,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "ZonedDateTime" - unique { implicit conn =>
+  "ZonedDateTime" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(zonedDateTime1)),
@@ -377,7 +377,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Uuid" - unique { implicit conn =>
+  "Uuid" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(uuid1)),
@@ -398,7 +398,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Uri" - unique { implicit conn =>
+  "Uri" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(uri1)),
@@ -419,7 +419,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Byte" - unique { implicit conn =>
+  "Byte" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(byte1)),
@@ -440,7 +440,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Short" - unique { implicit conn =>
+  "Short" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(short1)),
@@ -461,7 +461,7 @@ case class TypesOptional(
     } yield ()
   }
 
-  "Char" - unique { implicit conn =>
+  "Char" - unique {
     val pairs               = List(
       (1, None),
       (1, Some(char1)),

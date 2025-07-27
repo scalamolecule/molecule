@@ -16,7 +16,7 @@ case class Aggr_Date_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.date.insert(List(
         (1, date1),
@@ -44,7 +44,7 @@ case class Aggr_Date_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.date.insert(
         (1, date1),
@@ -76,7 +76,7 @@ case class Aggr_Date_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.date.insert(
         (1, date1),
@@ -112,7 +112,7 @@ case class Aggr_Date_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(date1, date2, date3, date4)
     for {
       _ <- Entity.date.insert(List(date1, date2, date3)).transact
@@ -123,7 +123,7 @@ case class Aggr_Date_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.date.insert(List(
         (1, date1),

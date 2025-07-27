@@ -18,7 +18,7 @@ case class NestedOptional(
   import api.*
   import suite.*
 
-  "Mandatory attr, nested row" - refs { implicit conn =>
+  "Mandatory attr, nested row" - refs {
     for {
       _ <- A.s.Bb.*(B.i).insert(
         ("a", List(1)),
@@ -31,7 +31,7 @@ case class NestedOptional(
   }
 
 
-  "Mandatory attr, no nested row" - refs { implicit conn =>
+  "Mandatory attr, no nested row" - refs {
     for {
       _ <- A.s.Bb.*(B.i).insert(
         ("b", Nil),
@@ -44,7 +44,7 @@ case class NestedOptional(
   }
 
 
-  "Mandatory attr, 1 value" - refs { implicit conn =>
+  "Mandatory attr, 1 value" - refs {
     for {
       _ <- A.s.Bb.*(B.i).insert(
         ("a", List(1)),
@@ -62,7 +62,7 @@ case class NestedOptional(
     } yield ()
   }
 
-  "Mandatory attr, 2 values" - refs { implicit conn =>
+  "Mandatory attr, 2 values" - refs {
     for {
       _ <- A.s.Bb.*(B.i).insert(
         ("a", List(1, 2)),
@@ -81,7 +81,7 @@ case class NestedOptional(
   }
 
 
-  "Optional attr, 1 value" - refs { implicit conn =>
+  "Optional attr, 1 value" - refs {
     for {
       _ <- A.s.Bb.*(B.i_?).insert(
         ("a", List(Some(1))),
@@ -102,7 +102,7 @@ case class NestedOptional(
     } yield ()
   }
 
-  "Optional attr, 2 values" - refs { implicit conn =>
+  "Optional attr, 2 values" - refs {
     for {
       _ <- A.s.Bb.*(B.i_?).insert(
         ("a", List(Some(1), Some(2))),
@@ -133,7 +133,7 @@ case class NestedOptional(
   }
 
 
-  "Man/man attr" - refs { implicit conn =>
+  "Man/man attr" - refs {
     for {
       _ <- A.s.Bb.*(B.i.s).insert(
         ("a", List((1, "x"), (2, "y"))),
@@ -155,7 +155,7 @@ case class NestedOptional(
   }
 
 
-  "Man/opt attr" - refs { implicit conn =>
+  "Man/opt attr" - refs {
     for {
       _ <- A.s.Bb.*(B.i.s_?).insert(
         ("a", List((1, Some("x")), (2, Some("y")))),
@@ -183,7 +183,7 @@ case class NestedOptional(
   }
 
 
-  "Opt/man attr" - refs { implicit conn =>
+  "Opt/man attr" - refs {
     for {
       _ <- A.s.Bb.*(B.i_?.s).insert(
         ("a", List((Some(1), "x"), (Some(2), "y"))),
@@ -211,7 +211,7 @@ case class NestedOptional(
   }
 
 
-  "Opt/opt attr" - refs { implicit conn =>
+  "Opt/opt attr" - refs {
     for {
       _ <- A.s.Bb.*(B.i_?.s_?).insert(
         ("0", List((Some(1), Some("x")), (Some(2), Some("y")))),
@@ -266,7 +266,7 @@ case class NestedOptional(
   }
 
 
-  "2 levels" - refs { implicit conn =>
+  "2 levels" - refs {
     for {
       _ <- A.s.Bb.*(B.i_?.s.Cc.*(C.i.s_?)).insert(
         ("A", List(
@@ -306,7 +306,7 @@ case class NestedOptional(
     } yield ()
   }
 
-  "Expression inside optional nested" - refs { implicit conn =>
+  "Expression inside optional nested" - refs {
     // In SQL, expressions in optional nested queries are ok
     for {
       _ <- A.i.Bb.*(B.i).insert(List((1, List(1, 2, 3)))).transact
@@ -321,7 +321,7 @@ case class NestedOptional(
   }
 
 
-  "Arity 23 optional nested" - types { implicit conn =>
+  "Arity 23 optional nested" - types {
     for {
       _ <- Entity.i.Refs.*?(ref23).insert(
         (1, List(tpl23_1, tpl23_2)),

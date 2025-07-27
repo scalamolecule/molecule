@@ -16,7 +16,7 @@ case class FilterOne_Float_(
   import api.*
   import suite.*
 
-  "Mandatory" - types { implicit conn =>
+  "Mandatory" - types {
     val a = (1, float1)
     val b = (2, float2)
     val c = (3, float3)
@@ -67,7 +67,7 @@ case class FilterOne_Float_(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     val (a, b, c, x) = (1, 2, 3, 4)
     for {
       _ <- Entity.i.float_?.insert(List(
@@ -124,7 +124,7 @@ case class FilterOne_Float_(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     val a = (1, Some(float1))
     val b = (2, Some(float2))
     val c = (3, Some(float3))
@@ -147,7 +147,7 @@ case class FilterOne_Float_(
   }
 
 
-  "Combinations" - types { implicit conn =>
+  "Combinations" - types {
     for {
       _ <- Entity.i.float.insert(
         (1, float1),

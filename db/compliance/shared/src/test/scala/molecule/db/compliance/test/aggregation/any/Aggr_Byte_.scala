@@ -16,7 +16,7 @@ case class Aggr_Byte_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.byte.insert(List(
         (1, byte1),
@@ -44,7 +44,7 @@ case class Aggr_Byte_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.byte.insert(
         (1, byte1),
@@ -76,7 +76,7 @@ case class Aggr_Byte_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.byte.insert(
         (1, byte1),
@@ -112,7 +112,7 @@ case class Aggr_Byte_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(byte1, byte2, byte3, byte4)
     for {
       _ <- Entity.byte.insert(List(byte1, byte2, byte3)).transact
@@ -123,7 +123,7 @@ case class Aggr_Byte_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.byte.insert(List(
         (1, byte1),

@@ -17,7 +17,7 @@ case class MandatoryAttrs(
   import api.*
   import suite.*
 
-  "Missing attributes" - validation { implicit conn =>
+  "Missing attributes" - validation {
     for {
       _ <- MandatoryAttr.age(42).save.transact
         .map(_ ==> "Unexpected success").recover {
@@ -63,7 +63,7 @@ case class MandatoryAttrs(
   }
 
 
-  "No Set values" - validation { implicit conn =>
+  "No Set values" - validation {
 
     for {
       _ <- MandatoryAttr.name("Bob").age(42).hobbies(Set.empty[String]).save.transact
@@ -105,7 +105,7 @@ case class MandatoryAttrs(
   }
 
 
-  "Update, delete attr" - validation { implicit conn =>
+  "Update, delete attr" - validation {
     for {
       id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
 
@@ -140,7 +140,7 @@ case class MandatoryAttrs(
   }
 
 
-  "Update, remove last card-many value" - validation { implicit conn =>
+  "Update, remove last card-many value" - validation {
     for {
       id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
 

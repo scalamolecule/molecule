@@ -16,7 +16,7 @@ case class Semantics(
   import api.*
   import suite.*
 
-  "Compare to filter attribute of same entity" - types { implicit conn =>
+  "Compare to filter attribute of same entity" - types {
     for {
       _ <- Entity.i.int.insert(
         (1, 1),
@@ -29,7 +29,7 @@ case class Semantics(
   }
 
 
-  "Only tacit filter attributes allowed" - types { implicit conn =>
+  "Only tacit filter attributes allowed" - types {
     // Tacit filter attribute allowed
     Entity.i(Entity.int_)
 
@@ -39,7 +39,7 @@ case class Semantics(
   }
 
 
-  "No operations on filter attributes allowed" - types { implicit conn =>
+  "No operations on filter attributes allowed" - types {
     compileErrors("Entity.i(Entity.int_(3))")
     compileErrors("Entity.i(Entity.int_.not(3))")
     compileErrors("Entity.i(Entity.int_.>(3))")
@@ -72,7 +72,7 @@ case class Semantics(
   }
 
 
-  "Allowed card-one comparisons with filter attribute" - types { implicit conn =>
+  "Allowed card-one comparisons with filter attribute" - types {
     // Equal to
     Entity.i.apply(Entity.int_)
     // same as
@@ -93,7 +93,7 @@ case class Semantics(
     Entity.s.i_.>=(Entity.int_)
   }
 
-  "Allowed card Set comparisons with filter attribute" - types { implicit conn =>
+  "Allowed card Set comparisons with filter attribute" - types {
     Entity.iSet.has(Entity.int_)
     Entity.iSet.hasNo(Entity.int_)
 
@@ -101,7 +101,7 @@ case class Semantics(
     Entity.s.iSet_.hasNo(Entity.int_)
   }
 
-  "Allowed card Seq comparisons with filter attribute" - types { implicit conn =>
+  "Allowed card Seq comparisons with filter attribute" - types {
     Entity.iSeq.has(Entity.int_)
     Entity.iSeq.hasNo(Entity.int_)
 
@@ -110,7 +110,7 @@ case class Semantics(
   }
 
 
-  "Byte arrays not allowed to filter" - types { implicit conn =>
+  "Byte arrays not allowed to filter" - types {
     compileErrors("Entity.byteArray(Ref.byteArray_).Ref.byteArray")
     compileErrors("Entity.byteArray.not(Ref.byteArray_).Ref.byteArray")
     compileErrors("Entity.s.byteArray_(Ref.byteArray_).Ref.byteArray")
@@ -118,7 +118,7 @@ case class Semantics(
   }
 
 
-  "Missing filter attributes" - types { implicit conn =>
+  "Missing filter attributes" - types {
     for {
       _ <- Entity.i.Ref.int.insert(
         (1, 1),
@@ -136,7 +136,7 @@ case class Semantics(
   }
 
 
-  "Can't filter by same attribute" - types { implicit conn =>
+  "Can't filter by same attribute" - types {
     for {
       _ <- Entity.s.i(Entity.i_).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

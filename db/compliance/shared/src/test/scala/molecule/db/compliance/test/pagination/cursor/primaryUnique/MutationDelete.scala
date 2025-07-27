@@ -19,7 +19,7 @@ case class MutationDelete(
   import api.*
   import suite.*
 
-  "Forward: Delete row before" - unique { implicit conn =>
+  "Forward: Delete row before" - unique {
     for {
       List(e1, e2, e3, e4) <- Uniques.int.insert(1, 2, 3, 4).transact.map(_.ids)
       c <- query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
@@ -32,7 +32,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Forward: Delete row after" - unique { implicit conn =>
+  "Forward: Delete row after" - unique {
     for {
       List(e1, e2, e3, e4) <- Uniques.int.insert(1, 2, 3, 4).transact.map(_.ids)
       c <- query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
@@ -46,7 +46,7 @@ case class MutationDelete(
   }
 
 
-  "Backwards: Delete row before" - unique { implicit conn =>
+  "Backwards: Delete row before" - unique {
     for {
       List(e1, e2, e3, e4) <- Uniques.int.insert(1, 2, 3, 4).transact.map(_.ids)
       c <- query.from("").limit(-2).get.map { case (List(3, 4), c, true) => c }
@@ -59,7 +59,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Backwards: Delete row after" - unique { implicit conn =>
+  "Backwards: Delete row after" - unique {
     for {
       List(e1, e2, e3, e4) <- Uniques.int.insert(1, 2, 3, 4).transact.map(_.ids)
       c <- query.from("").limit(-2).get.map { case (List(3, 4), c, true) => c }

@@ -16,7 +16,7 @@ case class Aggr_BigInt_(
   import api.*
   import suite.*
 
-  "distinct" - types { implicit conn =>
+  "distinct" - types {
     for {
       _ <- Entity.i.bigInt.insert(List(
         (1, bigInt1),
@@ -44,7 +44,7 @@ case class Aggr_BigInt_(
   }
 
 
-  "min/max" - types { implicit conn =>
+  "min/max" - types {
     for {
       _ <- Entity.i.bigInt.insert(
         (1, bigInt1),
@@ -76,7 +76,7 @@ case class Aggr_BigInt_(
     } yield ()
   }
 
-  "min/max n" - types { implicit conn =>
+  "min/max n" - types {
     for {
       _ <- Entity.i.bigInt.insert(
         (1, bigInt1),
@@ -112,7 +112,7 @@ case class Aggr_BigInt_(
   }
 
 
-  "sample" - types { implicit futConn =>
+  "sample" - types {
     val all = Set(bigInt1, bigInt2, bigInt3, bigInt4)
     for {
       _ <- Entity.bigInt.insert(List(bigInt1, bigInt2, bigInt3)).transact
@@ -123,7 +123,7 @@ case class Aggr_BigInt_(
   }
 
 
-  "count" - types { implicit conn =>
+  "count" - types {
     for {
       _ <- Entity.i.bigInt.insert(List(
         (1, bigInt1),

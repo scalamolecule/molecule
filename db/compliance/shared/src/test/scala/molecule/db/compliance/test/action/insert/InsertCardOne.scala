@@ -19,7 +19,7 @@ case class InsertCardOne(
   import api.*
   import suite.*
 
-  "mandatory" - types { implicit conn =>
+  "mandatory" - types {
     for {
       _ <- Entity.string.insert(string1).transact
       _ <- Entity.int.insert(intMin, int1, intMax).transact
@@ -75,7 +75,7 @@ case class InsertCardOne(
   }
 
 
-  "Optional" - types { implicit conn =>
+  "Optional" - types {
     for {
       _ <- Entity.i.string_?.insert((1, Some(string1))).transact
       _ <- Entity.i.int_?.insert((1, Some(int1))).transact
@@ -154,7 +154,7 @@ case class InsertCardOne(
   }
 
 
-  "Tacit" - types { implicit conn =>
+  "Tacit" - types {
     for {
       // Can't insert tacit attributes
       _ <- Future(compileErrors("Entity.i.string_.insert(1, string1)"))

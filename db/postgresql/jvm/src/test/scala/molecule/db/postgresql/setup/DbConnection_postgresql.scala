@@ -41,8 +41,9 @@ object DbConnection_postgresql extends DbConnection {
     JdbcHandler_JVM.recreateDb(proxy, reusedSqlConn)
   }
 
-  def run(test: Conn => Any, metaDb: MetaDb_postgresql): Any = {
-    test(getConnection(metaDb))
+  def run(test: Conn ?=> Any, metaDb: MetaDb_postgresql): Any = {
+    given Conn = getConnection(metaDb)
+    test
   }
 
 

@@ -16,7 +16,7 @@ case class FlatOptRefAdjacent(
   import api.*
   import suite.*
 
-  "Basic adjacent optional refs" - refs { implicit conn =>
+  "Basic adjacent optional refs" - refs {
     for {
       _ <- A.i
         .B.?(B.i.s)
@@ -39,7 +39,7 @@ case class FlatOptRefAdjacent(
   }
 
 
-  "Adjacent optional refs with opt attr" - refs { implicit conn =>
+  "Adjacent optional refs with opt attr" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.i(2).B.i(20).save.transact
@@ -97,7 +97,7 @@ case class FlatOptRefAdjacent(
   }
 
 
-  "Adjacent refs for comparison" - refs { implicit conn =>
+  "Adjacent refs for comparison" - refs {
     for {
       _ <- A.i(1).save.transact
       _ <- A.i(2).B.i(20).save.transact
@@ -129,7 +129,7 @@ case class FlatOptRefAdjacent(
   }
 
 
-  "Adjacent optional refs with inner ref" - refs { implicit conn =>
+  "Adjacent optional refs with inner ref" - refs {
     for {
       _ <- A.i.a1.B.?(B.s.i.C.s.i).D.?(D.s.i).insert(List(
         (1, None, Some(("d", 1))),
