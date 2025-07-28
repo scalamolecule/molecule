@@ -4,7 +4,7 @@ import scala.annotation.nowarn
 
 trait RegexMatching {
 
-  extension (sc: StringContext) {
+  implicit class Regex(sc: StringContext) {
     // Allow for sbt-molecule use on scala 2.12
     @nowarn
     def r = new scala.util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)

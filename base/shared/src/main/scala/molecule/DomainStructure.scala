@@ -278,11 +278,11 @@ abstract class DomainStructure {
      *
      * @tparam EnumType Ref entity type
      */
-    def apply[EnumType <: Product](using x: DummyImplicit): Nothing = ???
+    def apply[EnumType <: Product](implicit x: DummyImplicit): Nothing = ???
 
     // We could be even more specific with reflect.Enum but avoid it for now to be able to test
     // projects directly (without publishing) in sbt-molecule that runs on Scala 2.12 (not having reflect.Enum)
-    //    def apply[EnumType <: reflect.Enum](using x: DummyImplicit): Nothing = ???
+    //    def apply[EnumType <: reflect.Enum](implicit x: DummyImplicit): Nothing = ???
 
     /**
      *
@@ -366,7 +366,7 @@ abstract class DomainStructure {
      *
      * @tparam Ref Ref entity type
      */
-    def apply[Ref](using x: DummyImplicit): refOptions[Self] = ???
+    def apply[Ref](implicit x: DummyImplicit): refOptions[Self] = ???
 
 
     /**

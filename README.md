@@ -300,11 +300,11 @@ lazy val yourProject = project.in(file("app"))
   .enablePlugins(MoleculePlugin)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule-db-h2" % "0.24.1",
-      "org.scalamolecule" %% "molecule-db-mariadb" % "0.24.1",
-      "org.scalamolecule" %% "molecule-db-mysql" % "0.24.1",
-      "org.scalamolecule" %% "molecule-db-postgresql" % "0.24.1",
-      "org.scalamolecule" %% "molecule-db-sqlite" % "0.24.1",
+      "org.scalamolecule" %% "molecule-db-h2" % "0.24.2",
+      "org.scalamolecule" %% "molecule-db-mariadb" % "0.24.2",
+      "org.scalamolecule" %% "molecule-db-mysql" % "0.24.2",
+      "org.scalamolecule" %% "molecule-db-postgresql" % "0.24.2",
+      "org.scalamolecule" %% "molecule-db-sqlite" % "0.24.2",
     )
   )
 ```
