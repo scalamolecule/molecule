@@ -233,7 +233,7 @@ class Test_Inspect extends MUnit with DbProviders_postgresql with TestUtils {
 
   "Inspect without deleting" - types {
     for {
-      case List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
+      List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
 
       // Inspect delete action without deleting
       _ <- Entity(a).delete.inspect.map(_ ==> {
@@ -275,7 +275,7 @@ class Test_Inspect extends MUnit with DbProviders_postgresql with TestUtils {
 
   "Inspect and delete" - types {
     for {
-      case List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
+      List(a, b) <- Entity.string.int.insert(("a", 1), ("b", 2)).transact.map(_.ids)
 
       // Delete data and print inspection
       _ <- Entity(a).delete.i.transact

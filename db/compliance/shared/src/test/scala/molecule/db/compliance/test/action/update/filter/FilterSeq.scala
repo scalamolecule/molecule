@@ -88,7 +88,7 @@ case class FilterSeq(
 
   "Has value" - types {
     for {
-      case List(a, b) <- Entity.iSeq.int.insert(
+      List(a, b) <- Entity.iSeq.int.insert(
         (List(0, 1, 2), 1),
         (List(2, 3, 4), 2),
       ).transact.map(_.ids)
@@ -121,7 +121,7 @@ case class FilterSeq(
 
   "Doesn't have value" - types {
     for {
-      case List(a, b) <- Entity.iSeq.int.insert(
+      List(a, b) <- Entity.iSeq.int.insert(
         (List(1, 2), 1),
         (List(2, 3), 2),
       ).transact.map(_.ids)

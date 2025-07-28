@@ -22,8 +22,7 @@ case class FilterOne_Enum(
     val b = (2, Green.toString)
     val c = (3, Blue.toString)
     for {
-      //      _ <- Entity.color.insert.apply("Red").transact
-      _ <- Entity.i.color.insert.apply(List(a, b, c)).transact
+      _ <- Entity.i.color.insert(List(a, b, c)).transact
 
       // Find all attribute values
       _ <- Entity.i.a1.color.query.get.map(_ ==> List(a, b, c))

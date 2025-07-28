@@ -11,7 +11,7 @@ class Adhoc_h2_jvm_sync extends MUnit with DbProviders_h2 with TestUtils {
   "basic" - types {
     import molecule.db.compliance.domains.dsl.Types.*
 
-    val List(a, b) = Entity.int.insert.apply(1, 2).transact.ids
+    val List(a, b) = Entity.int.insert(1, 2).transact.ids
     Entity.int(3).save.transact
     Entity.int.a1.query.get ==> List(1, 2, 3)
     Entity(a).int(10).update.transact

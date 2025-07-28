@@ -88,7 +88,7 @@ case class FilterSet(
 
   "Has value" - types {
     for {
-      case List(a, b) <- Entity.iSet.int.insert(
+      List(a, b) <- Entity.iSet.int.insert(
         (Set(0, 1, 2), 1),
         (Set(2, 3, 4), 2),
       ).transact.map(_.ids)
@@ -121,7 +121,7 @@ case class FilterSet(
 
   "Doesn't have value" - types {
     for {
-      case List(a, b) <- Entity.iSet.int.insert(
+      List(a, b) <- Entity.iSet.int.insert(
         (Set(1, 2), 1),
         (Set(2, 3), 2),
       ).transact.map(_.ids)

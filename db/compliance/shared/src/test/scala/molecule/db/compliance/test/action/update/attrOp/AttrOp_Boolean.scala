@@ -17,7 +17,7 @@ case class AttrOp_Boolean(
 
   "And" - types {
     for {
-      case List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
+      List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
       _ <- Entity(a, b).boolean.&&(true).update.transact
       _ <- Entity.id(a, b).a1.boolean.query.get.map(_ ==> List(
         (a, true), // true && true
@@ -36,7 +36,7 @@ case class AttrOp_Boolean(
 
   "Or" - types {
     for {
-      case List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
+      List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
       _ <- Entity(a, b).boolean.||(true).update.transact
       _ <- Entity.id(a, b).a1.boolean.query.get.map(_ ==> List(
         (a, true), // true || true
@@ -55,7 +55,7 @@ case class AttrOp_Boolean(
 
   "Not" - types {
     for {
-      case List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
+      List(a, b) <- Entity.boolean.insert(true, false).transact.map(_.ids)
       _ <- Entity(a, b).boolean.!.update.transact
       _ <- Entity.id(a, b).a1.boolean.query.get.map(_ ==> List(
         (a, false), // !true

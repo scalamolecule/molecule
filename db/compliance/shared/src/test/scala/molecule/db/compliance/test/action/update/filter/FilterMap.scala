@@ -77,7 +77,7 @@ case class FilterMap(
     // Filtering updates by equality of collections is not supported by molecule.
     // Instead, use has/hasNo.
     for {
-      case List(a, b) <- Entity.iMap.int.insert(
+      List(a, b) <- Entity.iMap.int.insert(
         (Map("a" -> 1, "b" -> 2), 1),
         (Map("b" -> 2, "c" -> 3), 2),
       ).transact.map(_.ids)
@@ -119,7 +119,7 @@ case class FilterMap(
     // Filtering updates by equality of collections is not supported by molecule.
     // Instead, use has/hasNo.
     for {
-      case List(a, b) <- Entity.iMap.int.insert(
+      List(a, b) <- Entity.iMap.int.insert(
         (Map("a" -> 1, "b" -> 2), 1),
         (Map("b" -> 2, "c" -> 3), 2),
       ).transact.map(_.ids)
@@ -152,7 +152,7 @@ case class FilterMap(
 
   "Has value" - types {
     for {
-      case List(a, b) <- Entity.iMap.int.insert(
+      List(a, b) <- Entity.iMap.int.insert(
         (Map("a" -> 1, "b" -> 2, "c" -> 3), 1),
         (Map("c" -> 3, "d" -> 4, "e" -> 5), 2),
       ).transact.map(_.ids)
@@ -185,7 +185,7 @@ case class FilterMap(
 
   "Doesn't have value" - types {
     for {
-      case List(a, b) <- Entity.iMap.int.insert(
+      List(a, b) <- Entity.iMap.int.insert(
         (Map("a" -> 1, "b" -> 2, "c" -> 3), 1),
         (Map("c" -> 3, "d" -> 4, "e" -> 5), 2),
       ).transact.map(_.ids)

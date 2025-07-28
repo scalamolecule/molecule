@@ -396,7 +396,7 @@ case class InsertRefs(
 
   "Optional entity 2 (right join)" - refs {
     for {
-      _ <- A.?(A.i.s).B.s.insert.apply(
+      _ <- A.?(A.i.s).B.s.insert(
         (Some((1, "x")), "a"),
         (None, "b"),
       ).transact
