@@ -6,21 +6,21 @@ import molecule.db.common.facade.JdbcConn_JS
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.Conn
-import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_MetaDb_sqlite
-import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_MetaDb_sqlite
-import molecule.db.compliance.domains.dsl.Types.metadb.Types_MetaDb_sqlite
-import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_MetaDb_sqlite
-import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_MetaDb_sqlite
+import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_sqlite
+import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_sqlite
+import molecule.db.compliance.domains.dsl.Types.metadb.Types_sqlite
+import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_sqlite
+import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_sqlite
 import molecule.db.compliance.setup.DbConnection
 import zio.{ZIO, ZLayer}
 
 trait DbConnection_sqlite extends DbConnection {
 
-  pickleMetaDb.addConcreteType[Types_MetaDb_sqlite]
-  pickleMetaDb.addConcreteType[Refs_MetaDb_sqlite]
-  pickleMetaDb.addConcreteType[Uniques_MetaDb_sqlite]
-  pickleMetaDb.addConcreteType[Validation_MetaDb_sqlite]
-  pickleMetaDb.addConcreteType[Segments_MetaDb_sqlite]
+  pickleMetaDb.addConcreteType[Types_sqlite]
+  pickleMetaDb.addConcreteType[Refs_sqlite]
+  pickleMetaDb.addConcreteType[Uniques_sqlite]
+  pickleMetaDb.addConcreteType[Validation_sqlite]
+  pickleMetaDb.addConcreteType[Segments_sqlite]
 
   def getConnection(metaDb: MetaDb_sqlite): JdbcConn_JS = {
     val proxy = JdbcProxy("jdbc:sqlite::memory:", metaDb)

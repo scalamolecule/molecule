@@ -57,43 +57,43 @@ object Run extends App {
       StdIn.readLine("Database: ").trim.toIntOption match {
         case Some(1) =>
           // Add concrete meta database definitions for boopickle to resolve on server side
-          pickleMetaDb.addConcreteType[Types_MetaDb_h2]
-          pickleMetaDb.addConcreteType[Refs_MetaDb_h2]
-          pickleMetaDb.addConcreteType[Uniques_MetaDb_h2]
-          pickleMetaDb.addConcreteType[Validation_MetaDb_h2]
-          pickleMetaDb.addConcreteType[Segments_MetaDb_h2]
+          pickleMetaDb.addConcreteType[Types_h2]
+          pickleMetaDb.addConcreteType[Refs_h2]
+          pickleMetaDb.addConcreteType[Uniques_h2]
+          pickleMetaDb.addConcreteType[Validation_h2]
+          pickleMetaDb.addConcreteType[Segments_h2]
           (Rpc_h2, "H2")
 
         case Some(2) =>
-          pickleMetaDb.addConcreteType[Types_MetaDb_mariadb]
-          pickleMetaDb.addConcreteType[Refs_MetaDb_mariadb]
-          pickleMetaDb.addConcreteType[Uniques_MetaDb_mariadb]
-          pickleMetaDb.addConcreteType[Validation_MetaDb_mariadb]
-          pickleMetaDb.addConcreteType[Segments_MetaDb_mariadb]
+          pickleMetaDb.addConcreteType[Types_mariadb]
+          pickleMetaDb.addConcreteType[Refs_mariadb]
+          pickleMetaDb.addConcreteType[Uniques_mariadb]
+          pickleMetaDb.addConcreteType[Validation_mariadb]
+          pickleMetaDb.addConcreteType[Segments_mariadb]
           (Rpc_mariadb, "MariaDB")
 
         case Some(3) =>
-          pickleMetaDb.addConcreteType[Types_MetaDb_mysql]
-          pickleMetaDb.addConcreteType[Refs_MetaDb_mysql]
-          pickleMetaDb.addConcreteType[Uniques_MetaDb_mysql]
-          pickleMetaDb.addConcreteType[Validation_MetaDb_mysql]
-          pickleMetaDb.addConcreteType[Segments_MetaDb_mysql]
+          pickleMetaDb.addConcreteType[Types_mysql]
+          pickleMetaDb.addConcreteType[Refs_mysql]
+          pickleMetaDb.addConcreteType[Uniques_mysql]
+          pickleMetaDb.addConcreteType[Validation_mysql]
+          pickleMetaDb.addConcreteType[Segments_mysql]
           (Rpc_mysql, "MySQL")
 
         case Some(4) =>
-          pickleMetaDb.addConcreteType[Types_MetaDb_postgresql]
-          pickleMetaDb.addConcreteType[Refs_MetaDb_postgresql]
-          pickleMetaDb.addConcreteType[Uniques_MetaDb_postgresql]
-          pickleMetaDb.addConcreteType[Validation_MetaDb_postgresql]
-          pickleMetaDb.addConcreteType[Segments_MetaDb_postgresql]
+          pickleMetaDb.addConcreteType[Types_postgresql]
+          pickleMetaDb.addConcreteType[Refs_postgresql]
+          pickleMetaDb.addConcreteType[Uniques_postgresql]
+          pickleMetaDb.addConcreteType[Validation_postgresql]
+          pickleMetaDb.addConcreteType[Segments_postgresql]
           (Rpc_postgresql, "PostgreSQL")
 
         case Some(5) =>
-          pickleMetaDb.addConcreteType[Types_MetaDb_sqlite]
-          pickleMetaDb.addConcreteType[Refs_MetaDb_sqlite]
-          pickleMetaDb.addConcreteType[Uniques_MetaDb_sqlite]
-          pickleMetaDb.addConcreteType[Validation_MetaDb_sqlite]
-          pickleMetaDb.addConcreteType[Segments_MetaDb_sqlite]
+          pickleMetaDb.addConcreteType[Types_sqlite]
+          pickleMetaDb.addConcreteType[Refs_sqlite]
+          pickleMetaDb.addConcreteType[Uniques_sqlite]
+          pickleMetaDb.addConcreteType[Validation_sqlite]
+          pickleMetaDb.addConcreteType[Segments_sqlite]
           (Rpc_sqlite, "SQlite")
 
         case _ =>

@@ -6,21 +6,21 @@ import molecule.db.common.facade.JdbcConn_JS
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.Conn
-import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_MetaDb_mariadb
-import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_MetaDb_mariadb
-import molecule.db.compliance.domains.dsl.Types.metadb.Types_MetaDb_mariadb
-import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_MetaDb_mariadb
-import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_MetaDb_mariadb
+import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_mariadb
+import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_mariadb
+import molecule.db.compliance.domains.dsl.Types.metadb.Types_mariadb
+import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_mariadb
+import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_mariadb
 import zio.{ZIO, ZLayer}
 import scala.util.Random
 
 object DbConnection_mariadb {
 
-  pickleMetaDb.addConcreteType[Types_MetaDb_mariadb]
-  pickleMetaDb.addConcreteType[Refs_MetaDb_mariadb]
-  pickleMetaDb.addConcreteType[Uniques_MetaDb_mariadb]
-  pickleMetaDb.addConcreteType[Validation_MetaDb_mariadb]
-  pickleMetaDb.addConcreteType[Segments_MetaDb_mariadb]
+  pickleMetaDb.addConcreteType[Types_mariadb]
+  pickleMetaDb.addConcreteType[Refs_mariadb]
+  pickleMetaDb.addConcreteType[Uniques_mariadb]
+  pickleMetaDb.addConcreteType[Validation_mariadb]
+  pickleMetaDb.addConcreteType[Segments_mariadb]
 
   def run(test: Conn ?=> Any, metaDb: MetaDb_mariadb): Any = {
     // Since RPC calls run in parallel we need a new connection for

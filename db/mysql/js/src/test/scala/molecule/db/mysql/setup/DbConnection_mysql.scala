@@ -6,21 +6,21 @@ import molecule.db.common.facade.JdbcConn_JS
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.Conn
-import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_MetaDb_mysql
-import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_MetaDb_mysql
-import molecule.db.compliance.domains.dsl.Types.metadb.Types_MetaDb_mysql
-import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_MetaDb_mysql
-import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_MetaDb_mysql
+import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_mysql
+import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_mysql
+import molecule.db.compliance.domains.dsl.Types.metadb.Types_mysql
+import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_mysql
+import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_mysql
 import zio.{ZIO, ZLayer}
 import scala.util.Random
 
 object DbConnection_mysql {
 
-  pickleMetaDb.addConcreteType[Types_MetaDb_mysql]
-  pickleMetaDb.addConcreteType[Refs_MetaDb_mysql]
-  pickleMetaDb.addConcreteType[Uniques_MetaDb_mysql]
-  pickleMetaDb.addConcreteType[Validation_MetaDb_mysql]
-  pickleMetaDb.addConcreteType[Segments_MetaDb_mysql]
+  pickleMetaDb.addConcreteType[Types_mysql]
+  pickleMetaDb.addConcreteType[Refs_mysql]
+  pickleMetaDb.addConcreteType[Uniques_mysql]
+  pickleMetaDb.addConcreteType[Validation_mysql]
+  pickleMetaDb.addConcreteType[Segments_mysql]
 
   def getConnection(metaDb: MetaDb_mysql): JdbcConn_JS = {
     // Since RPC calls run in parallel we need a new connection for

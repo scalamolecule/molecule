@@ -7,7 +7,7 @@ import molecule.db.common.api.MetaDb_sqlite
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.Conn
 import molecule.db.common.util.Executor.*
-import molecule.db.compliance.domains.dsl.Types.metadb.Types_MetaDb_sqlite
+import molecule.db.compliance.domains.dsl.Types.metadb.Types_sqlite
 import molecule.db.compliance.setup.DbConnection
 import molecule.db.sqlite.facade.JdbcHandlerSQlite_JVM
 import org.sqlite.SQLiteDataSource
