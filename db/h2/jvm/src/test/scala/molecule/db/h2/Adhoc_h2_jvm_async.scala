@@ -14,6 +14,9 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
 
   "types" - types {
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+
+//    val x = Entity.i.int.>(?).query
+
     for {
       //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
       //      _ <- Entity.int(3).save.transact
@@ -28,13 +31,20 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
         (2, 3),
       ).transact
 
-      _ <- Entity.i.int(count).query.i.get.map(_ ==> List(
-        (1, 2),
-        (2, 1),
-      ))
+//      _ <- Entity.i.int(count).query.i.get.map(_ ==> List(
+//        (1, 2),
+//        (2, 1),
+//      ))
+//
+//      _ <- Entity.i.int(count).>(1).query.i.get.map(_ ==> List(
+//        (1, 2),
+//      ))
 
-      _ <- Entity.i.int(count).>(1).query.i.get.map(_ ==> List(
-        (1, 2),
+      x = Entity.i.int(count).>(?).query
+//      x = Entity.i.int.>(?).query
+
+      _ <- x.apply(1).i.get.map(_ ==> List(
+      (1, 2),
       ))
 
     } yield ()

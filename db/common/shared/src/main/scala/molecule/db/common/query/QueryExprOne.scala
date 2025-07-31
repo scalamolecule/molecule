@@ -144,28 +144,28 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     res: ResOne[T],
   ): Unit = {
     op match {
-      case V                => attrV(col)
-      case Eq               => equal(col, args, res.one2sql, binding, res.bind, res.tpe)
-      case Neq              => neq(col, args, res.one2sql, binding, res.bind, res.tpe)
-      case Lt               => compare(col, args, "<", res.one2sql, binding, res.bind, res.tpe)
-      case Gt               => compare(col, args, ">", res.one2sql, binding, res.bind, res.tpe)
-      case Le               => compare(col, args, "<=", res.one2sql, binding, res.bind, res.tpe)
-      case Ge               => compare(col, args, ">=", res.one2sql, binding, res.bind, res.tpe)
-      case NoValue          => noValue(col)
-      case Fn(kw, n, op, v) => aggr(ent, attr, col, kw, n, res)
-      case StartsWith       => startsWith(col, args, binding, res.bind)
-      case EndsWith         => endsWith(col, args, binding, res.bind)
-      case Contains         => contains(col, args, binding, res.bind)
-      case Matches          => matches(col, args, binding, res.bind)
-      case Remainder        => remainder(col, args)
-      case Even             => even(col)
-      case Odd              => odd(col)
-      case AttrOp.Ceil      => ceil(col)
-      case AttrOp.Floor     => floor(col)
-      case And              => and(col, args.head)
-      case Or               => or(col, args.head)
-      case Not              => not(col)
-      case other            => unexpectedOp(other)
+      case V                              => attrV(col)
+      case Eq                             => equal(col, args, res.one2sql, binding, res.bind, res.tpe)
+      case Neq                            => neq(col, args, res.one2sql, binding, res.bind, res.tpe)
+      case Lt                             => compare(col, args, "<", res.one2sql, binding, res.bind, res.tpe)
+      case Gt                             => compare(col, args, ">", res.one2sql, binding, res.bind, res.tpe)
+      case Le                             => compare(col, args, "<=", res.one2sql, binding, res.bind, res.tpe)
+      case Ge                             => compare(col, args, ">=", res.one2sql, binding, res.bind, res.tpe)
+      case NoValue                        => noValue(col)
+      case Fn(kw, n, aggrOp, aggrOpValue) => aggr(ent, attr, col, kw, n, aggrOp, aggrOpValue, res)
+      case StartsWith                     => startsWith(col, args, binding, res.bind)
+      case EndsWith                       => endsWith(col, args, binding, res.bind)
+      case Contains                       => contains(col, args, binding, res.bind)
+      case Matches                        => matches(col, args, binding, res.bind)
+      case Remainder                      => remainder(col, args)
+      case Even                           => even(col)
+      case Odd                            => odd(col)
+      case AttrOp.Ceil                    => ceil(col)
+      case AttrOp.Floor                   => floor(col)
+      case And                            => and(col, args.head)
+      case Or                             => or(col, args.head)
+      case Not                            => not(col)
+      case other                          => unexpectedOp(other)
     }
   }
 
@@ -431,10 +431,21 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     col: String,
     fn: String,
     optN: Option[Int],
+    aggrOp: Option[Op],
+    aggrOpValue: Option[Value],
     res: ResOne[T]
   ): Unit = {
     checkAggrOne()
-    lazy val n = optN.getOrElse(0)
+    lazy val n  = optN.getOrElse(0)
+    lazy val op = aggrOp match {
+      case Some(Eq)  => "="
+      case Some(Neq) => "<>"
+      case Some(Lt)  => "<"
+      case Some(Le)  => "<="
+      case Some(Gt)  => ">"
+      case Some(Ge)  => ">="
+      case _         => ""
+    }
     // Replace find/casting with aggregate function/cast
     select -= col
     fn match {
@@ -507,6 +518,18 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT", "")
+        if (op.nonEmpty) {
+          aggrOpValue.fold {
+            val paramIndex = binders.length + 1
+            bindIndex = bindIndex + 1
+            val bindIndexStable = bindIndex
+            binders += ((ps: PrepStmt) => res.bind(ps, paramIndex, bindIndexStable, bindValues(bindIndexStable)))
+            having += s"COUNT($col) $op ?"
+          } {
+            case OneInt(v) => having += s"COUNT($col) $op $v"
+            case _         => ???
+          }
+        }
         castStrategy.replace(toInt)
 
       case "countDistinct" =>

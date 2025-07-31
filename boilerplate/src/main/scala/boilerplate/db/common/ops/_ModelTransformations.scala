@@ -87,39 +87,40 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |    dataModel.copy(elements = es.init :+ last)
        |  }
        |
-       |  def addAggrOp[T](dataModel: DataModel, op: Op, v: Option[T]): DataModel = {
+       |  def addAggrOp[T](dataModel: DataModel, aggrOp: Op, aggrOpV: Option[T]): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneMan =>
        |        val fn = a.op.asInstanceOf[Fn]
        |         a match {
-       |          case a: AttrOneManID             => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneLong(v.asInstanceOf[Long])))))
-       |          case a: AttrOneManString         => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneString(v.asInstanceOf[String])))))
-       |          case a: AttrOneManInt            => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneInt(v.asInstanceOf[Int])))))
-       |          case a: AttrOneManLong           => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneLong(v.asInstanceOf[Long])))))
-       |          case a: AttrOneManFloat          => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneFloat(v.asInstanceOf[Float])))))
-       |          case a: AttrOneManDouble         => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneDouble(v.asInstanceOf[Double])))))
-       |          case a: AttrOneManBoolean        => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneBoolean(v.asInstanceOf[Boolean])))))
-       |          case a: AttrOneManBigInt         => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneBigInt(v.asInstanceOf[BigInt])))))
-       |          case a: AttrOneManBigDecimal     => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneBigDecimal(v.asInstanceOf[BigDecimal])))))
-       |          case a: AttrOneManDate           => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneDate(v.asInstanceOf[Date])))))
-       |          case a: AttrOneManDuration       => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneDuration(v.asInstanceOf[Duration])))))
-       |          case a: AttrOneManInstant        => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneInstant(v.asInstanceOf[Instant])))))
-       |          case a: AttrOneManLocalDate      => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneLocalDate(v.asInstanceOf[LocalDate])))))
-       |          case a: AttrOneManLocalTime      => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneLocalTime(v.asInstanceOf[LocalTime])))))
-       |          case a: AttrOneManLocalDateTime  => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneLocalDateTime(v.asInstanceOf[LocalDateTime])))))
-       |          case a: AttrOneManOffsetTime     => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneOffsetTime(v.asInstanceOf[OffsetTime])))))
-       |          case a: AttrOneManOffsetDateTime => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneOffsetDateTime(v.asInstanceOf[OffsetDateTime])))))
-       |          case a: AttrOneManZonedDateTime  => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneZonedDateTime(v.asInstanceOf[ZonedDateTime])))))
-       |          case a: AttrOneManUUID           => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneUUID(v.asInstanceOf[UUID])))))
-       |          case a: AttrOneManURI            => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneURI(v.asInstanceOf[URI])))))
-       |          case a: AttrOneManByte           => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneByte(v.asInstanceOf[Byte])))))
-       |          case a: AttrOneManShort          => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneShort(v.asInstanceOf[Short])))))
-       |          case a: AttrOneManChar           => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), Some(OneChar(v.asInstanceOf[Char])))))
+       |          case a: AttrOneManID             => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneLong(v.asInstanceOf[Long])))))
+       |          case a: AttrOneManString         => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneString(v.asInstanceOf[String])))))
+       |          case a: AttrOneManInt            => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneInt(v.asInstanceOf[Int])))))
+       |          case a: AttrOneManLong           => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneLong(v.asInstanceOf[Long])))))
+       |          case a: AttrOneManFloat          => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneFloat(v.asInstanceOf[Float])))))
+       |          case a: AttrOneManDouble         => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneDouble(v.asInstanceOf[Double])))))
+       |          case a: AttrOneManBoolean        => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneBoolean(v.asInstanceOf[Boolean])))))
+       |          case a: AttrOneManBigInt         => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneBigInt(v.asInstanceOf[BigInt])))))
+       |          case a: AttrOneManBigDecimal     => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneBigDecimal(v.asInstanceOf[BigDecimal])))))
+       |          case a: AttrOneManDate           => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneDate(v.asInstanceOf[Date])))))
+       |          case a: AttrOneManDuration       => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneDuration(v.asInstanceOf[Duration])))))
+       |          case a: AttrOneManInstant        => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneInstant(v.asInstanceOf[Instant])))))
+       |          case a: AttrOneManLocalDate      => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneLocalDate(v.asInstanceOf[LocalDate])))))
+       |          case a: AttrOneManLocalTime      => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneLocalTime(v.asInstanceOf[LocalTime])))))
+       |          case a: AttrOneManLocalDateTime  => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneLocalDateTime(v.asInstanceOf[LocalDateTime])))))
+       |          case a: AttrOneManOffsetTime     => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneOffsetTime(v.asInstanceOf[OffsetTime])))))
+       |          case a: AttrOneManOffsetDateTime => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneOffsetDateTime(v.asInstanceOf[OffsetDateTime])))))
+       |          case a: AttrOneManZonedDateTime  => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneZonedDateTime(v.asInstanceOf[ZonedDateTime])))))
+       |          case a: AttrOneManUUID           => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneUUID(v.asInstanceOf[UUID])))))
+       |          case a: AttrOneManURI            => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneURI(v.asInstanceOf[URI])))))
+       |          case a: AttrOneManByte           => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneByte(v.asInstanceOf[Byte])))))
+       |          case a: AttrOneManShort          => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneShort(v.asInstanceOf[Short])))))
+       |          case a: AttrOneManChar           => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneChar(v.asInstanceOf[Char])))))
        |        }
        |      case a             => unexpected(a)
        |    }
-       |    dataModel.copy(elements = es.init :+ last)
+       |    val binds = dataModel.binds + (if aggrOpV.isEmpty then 1 else 0)
+       |    dataModel.copy(elements = es.init :+ last, binds = binds)
        |  }
        |
        |  def addOne[T](dataModel: DataModel, op: Op, vs: Seq[T], binding: Boolean = false): DataModel = {
