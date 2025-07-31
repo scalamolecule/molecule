@@ -35,18 +35,26 @@ case class One_Decimal(
     lazy val b3: Set[Float] = Entity.float.apply(min(3)).query.get.head
     lazy val b4: Double     = Entity.float.apply(avg).query.get.head
 
-    lazy val b5: Int        = Entity.float.apply(count).a1.query.get.head
-    lazy val b6: Float      = Entity.float.apply(min).a1.query.get.head
-    lazy val b7: Set[Float] = Entity.float.apply(min(3)).a1.query.get.head
-    lazy val b8: Double     = Entity.float.apply(avg).a1.query.get.head
+    lazy val c1: Int        = Entity.float.apply(count).a1.query.get.head
+    lazy val c2: Float      = Entity.float.apply(min).a1.query.get.head
+    lazy val c3: Set[Float] = Entity.float.apply(min(3)).a1.query.get.head
+    lazy val c4: Double     = Entity.float.apply(avg).a1.query.get.head
+
+    lazy val d1: Int        = Entity.float.apply(count).>(1).query.get.head
+    lazy val d2: Float      = Entity.float.apply(min).>(1.5f).query.get.head
+    lazy val d3: Double     = Entity.float.apply(avg).>(1.5).query.get.head
+
+    lazy val e1: Int        = Entity.float.apply(count).>(1).a1.query.get.head
+    lazy val e2: Float      = Entity.float.apply(min).>(1.5f).a1.query.get.head
+    lazy val e3: Double     = Entity.float.apply(avg).>(1.5).a1.query.get.head
 
 
     // Optional
-    lazy val c1: Option[Float] = Entity.float_?.query.get.head
-    lazy val c2: Option[Float] = Entity.float_?.apply(Some(float1)).query.get.head
+    lazy val f1: Option[Float] = Entity.float_?.query.get.head
+    lazy val f2: Option[Float] = Entity.float_?.apply(Some(float1)).query.get.head
 
-    lazy val c3: Option[Float] = Entity.float_?.a1.query.get.head
-    lazy val c4: Option[Float] = Entity.float_?.apply(Some(float1)).a1.query.get.head
+    lazy val g1: Option[Float] = Entity.float_?.a1.query.get.head
+    lazy val g2: Option[Float] = Entity.float_?.apply(Some(float1)).a1.query.get.head
   }
 
 
@@ -76,18 +84,26 @@ case class One_Decimal(
     lazy val c3: (String, Set[Float]) = Entity.s.float.apply(min(3)).query.get.head
     lazy val c4: (String, Double)     = Entity.s.float.apply(avg).query.get.head
 
-    lazy val c5: (String, Int)        = Entity.s.float.apply(count).a1.query.get.head
-    lazy val c6: (String, Float)      = Entity.s.float.apply(min).a1.query.get.head
-    lazy val c7: (String, Set[Float]) = Entity.s.float.apply(min(3)).a1.query.get.head
-    lazy val c8: (String, Double)     = Entity.s.float.apply(avg).a1.query.get.head
+    lazy val d1: (String, Int)        = Entity.s.float.apply(count).a1.query.get.head
+    lazy val d2: (String, Float)      = Entity.s.float.apply(min).a1.query.get.head
+    lazy val d3: (String, Set[Float]) = Entity.s.float.apply(min(3)).a1.query.get.head
+    lazy val d4: (String, Double)     = Entity.s.float.apply(avg).a1.query.get.head
+
+    lazy val e1: (String, Int)        = Entity.s.float.apply(count).>(1).query.get.head
+    lazy val e2: (String, Float)      = Entity.s.float.apply(min).>(1.5f).query.get.head
+    lazy val e3: (String, Double)     = Entity.s.float.apply(avg).>(1.5).query.get.head
+
+    lazy val f1: (String, Int)        = Entity.s.float.apply(count).>(1).a1.query.get.head
+    lazy val f2: (String, Float)      = Entity.s.float.apply(min).>(1.5f).a1.query.get.head
+    lazy val f3: (String, Double)     = Entity.s.float.apply(avg).>(1.5).a1.query.get.head
 
 
     // Optional
-    lazy val d1: (String, Option[Float]) = Entity.s.float_?.query.get.head
-    lazy val d2: (String, Option[Float]) = Entity.s.float_?.apply(Some(float1)).query.get.head
+    lazy val g1: (String, Option[Float]) = Entity.s.float_?.query.get.head
+    lazy val g2: (String, Option[Float]) = Entity.s.float_?.apply(Some(float1)).query.get.head
 
-    lazy val d3: (String, Option[Float]) = Entity.s.float_?.a1.query.get.head
-    lazy val d4: (String, Option[Float]) = Entity.s.float_?.apply(Some(float1)).a1.query.get.head
+    lazy val h1: (String, Option[Float]) = Entity.s.float_?.a1.query.get.head
+    lazy val h2: (String, Option[Float]) = Entity.s.float_?.apply(Some(float1)).a1.query.get.head
   }
 
 

@@ -33,13 +33,16 @@ case class One_Boolean(
     lazy val b1: Int = Entity.boolean.apply(count).query.get.head
     lazy val b2: Int = Entity.boolean.apply(count).a1.query.get.head
 
+    lazy val c1: Int = Entity.boolean.apply(count).>(1).query.get.head
+    lazy val c2: Int = Entity.boolean.apply(count).>(1).a1.query.get.head
+
 
     // Optional
-    lazy val c1: Option[Boolean] = Entity.boolean_?.query.get.head
-    lazy val c2: Option[Boolean] = Entity.boolean_?.apply(Some(boolean1)).query.get.head
+    lazy val d1: Option[Boolean] = Entity.boolean_?.query.get.head
+    lazy val d2: Option[Boolean] = Entity.boolean_?.apply(Some(boolean1)).query.get.head
 
-    lazy val c3: Option[Boolean] = Entity.boolean_?.a1.query.get.head
-    lazy val c4: Option[Boolean] = Entity.boolean_?.apply(Some(boolean1)).a1.query.get.head
+    lazy val e1: Option[Boolean] = Entity.boolean_?.a1.query.get.head
+    lazy val e2: Option[Boolean] = Entity.boolean_?.apply(Some(boolean1)).a1.query.get.head
   }
 
 
@@ -67,13 +70,16 @@ case class One_Boolean(
     lazy val c1: (String, Int) = Entity.s.boolean.apply(count).query.get.head
     lazy val c2: (String, Int) = Entity.s.boolean.apply(count).a1.query.get.head
 
+    lazy val d1: (String, Int) = Entity.s.boolean.apply(count).>(1).query.get.head
+    lazy val d2: (String, Int) = Entity.s.boolean.apply(count).>(1).a1.query.get.head
+
 
     // Optional
-    lazy val d1: (String, Option[Boolean]) = Entity.s.boolean_?.query.get.head
-    lazy val d2: (String, Option[Boolean]) = Entity.s.boolean_?.apply(Some(boolean1)).query.get.head
+    lazy val e1: (String, Option[Boolean]) = Entity.s.boolean_?.query.get.head
+    lazy val e2: (String, Option[Boolean]) = Entity.s.boolean_?.apply(Some(boolean1)).query.get.head
 
-    lazy val d3: (String, Option[Boolean]) = Entity.s.boolean_?.a1.query.get.head
-    lazy val d4: (String, Option[Boolean]) = Entity.s.boolean_?.apply(Some(boolean1)).a1.query.get.head
+    lazy val f1: (String, Option[Boolean]) = Entity.s.boolean_?.a1.query.get.head
+    lazy val f2: (String, Option[Boolean]) = Entity.s.boolean_?.apply(Some(boolean1)).a1.query.get.head
   }
 
 

@@ -35,17 +35,23 @@ case class One_(
     lazy val b2: Date      = Entity.date.apply(min).query.get.head
     lazy val b3: Set[Date] = Entity.date.apply(min(3)).query.get.head
 
-    lazy val b5: Int       = Entity.date.apply(count).a1.query.get.head
-    lazy val b6: Date      = Entity.date.apply(min).a1.query.get.head
-    lazy val b7: Set[Date] = Entity.date.apply(min(3)).a1.query.get.head
+    lazy val c1: Int       = Entity.date.apply(count).a1.query.get.head
+    lazy val c2: Date      = Entity.date.apply(min).a1.query.get.head
+    lazy val c3: Set[Date] = Entity.date.apply(min(3)).a1.query.get.head
+
+    lazy val d1: Int       = Entity.date.apply(count).>(1).query.get.head
+    lazy val d2: Date      = Entity.date.apply(min).>(new Date(0)).query.get.head
+
+    lazy val e51: Int       = Entity.date.apply(count).>(1).a1.query.get.head
+    lazy val e62: Date      = Entity.date.apply(min).>(new Date(0)).a1.query.get.head
 
 
     // Optional
-    lazy val c1: Option[Date] = Entity.date_?.query.get.head
-    lazy val c2: Option[Date] = Entity.date_?.apply(Some(date1)).query.get.head
+    lazy val f1: Option[Date] = Entity.date_?.query.get.head
+    lazy val f2: Option[Date] = Entity.date_?.apply(Some(date1)).query.get.head
 
-    lazy val c3: Option[Date] = Entity.date_?.a1.query.get.head
-    lazy val c4: Option[Date] = Entity.date_?.apply(Some(date1)).a1.query.get.head
+    lazy val g1: Option[Date] = Entity.date_?.a1.query.get.head
+    lazy val g2: Option[Date] = Entity.date_?.apply(Some(date1)).a1.query.get.head
   }
 
 
@@ -74,17 +80,23 @@ case class One_(
     lazy val c2: (String, Date)      = Entity.s.date.apply(min).query.get.head
     lazy val c3: (String, Set[Date]) = Entity.s.date.apply(min(3)).query.get.head
 
-    lazy val c5: (String, Int)       = Entity.s.date.apply(count).a1.query.get.head
-    lazy val c6: (String, Date)      = Entity.s.date.apply(min).a1.query.get.head
-    lazy val c7: (String, Set[Date]) = Entity.s.date.apply(min(3)).a1.query.get.head
+    lazy val d1: (String, Int)       = Entity.s.date.apply(count).a1.query.get.head
+    lazy val d2: (String, Date)      = Entity.s.date.apply(min).a1.query.get.head
+    lazy val d3: (String, Set[Date]) = Entity.s.date.apply(min(3)).a1.query.get.head
+
+    lazy val e1: (String, Int)       = Entity.s.date.apply(count).>(1).query.get.head
+    lazy val e2: (String, Date)      = Entity.s.date.apply(min).>(new Date(0)).query.get.head
+
+    lazy val f1: (String, Int)       = Entity.s.date.apply(count).>(1).a1.query.get.head
+    lazy val f2: (String, Date)      = Entity.s.date.apply(min).>(new Date(0)).a1.query.get.head
 
 
     // Optional
-    lazy val d1: (String, Option[Date]) = Entity.s.date_?.query.get.head
-    lazy val d2: (String, Option[Date]) = Entity.s.date_?.apply(Some(date1)).query.get.head
+    lazy val g1: (String, Option[Date]) = Entity.s.date_?.query.get.head
+    lazy val g2: (String, Option[Date]) = Entity.s.date_?.apply(Some(date1)).query.get.head
 
-    lazy val d3: (String, Option[Date]) = Entity.s.date_?.a1.query.get.head
-    lazy val d4: (String, Option[Date]) = Entity.s.date_?.apply(Some(date1)).a1.query.get.head
+    lazy val h1: (String, Option[Date]) = Entity.s.date_?.a1.query.get.head
+    lazy val h2: (String, Option[Date]) = Entity.s.date_?.apply(Some(date1)).a1.query.get.head
   }
 
 

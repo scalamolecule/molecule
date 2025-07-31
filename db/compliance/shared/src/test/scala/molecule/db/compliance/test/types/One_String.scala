@@ -34,17 +34,23 @@ case class One_String(
     lazy val b2: String      = Entity.string.apply(min).query.get.head
     lazy val b3: Set[String] = Entity.string.apply(min(3)).query.get.head
 
-    lazy val b5: Int         = Entity.string.apply(count).a1.query.get.head
-    lazy val b6: String      = Entity.string.apply(min).a1.query.get.head
-    lazy val b7: Set[String] = Entity.string.apply(min(3)).a1.query.get.head
+    lazy val c1: Int         = Entity.string.apply(count).a1.query.get.head
+    lazy val c2: String      = Entity.string.apply(min).a1.query.get.head
+    lazy val c3: Set[String] = Entity.string.apply(min(3)).a1.query.get.head
+
+    lazy val d1: Int         = Entity.string.apply(count).>(1).query.get.head
+    lazy val d2: String      = Entity.string.apply(min).>("a").query.get.head
+
+    lazy val e1: Int         = Entity.string.apply(count).>(1).a1.query.get.head
+    lazy val e2: String      = Entity.string.apply(min).>("a").a1.query.get.head
 
 
     // Optional
-    lazy val c1: Option[String] = Entity.string_?.query.get.head
-    lazy val c2: Option[String] = Entity.string_?.apply(Some(string1)).query.get.head
+    lazy val f1: Option[String] = Entity.string_?.query.get.head
+    lazy val f2: Option[String] = Entity.string_?.apply(Some(string1)).query.get.head
 
-    lazy val c3: Option[String] = Entity.string_?.a1.query.get.head
-    lazy val c4: Option[String] = Entity.string_?.apply(Some(string1)).a1.query.get.head
+    lazy val g1: Option[String] = Entity.string_?.a1.query.get.head
+    lazy val g2: Option[String] = Entity.string_?.apply(Some(string1)).a1.query.get.head
   }
 
 
@@ -73,17 +79,23 @@ case class One_String(
     lazy val c2: (Boolean, String)      = Entity.boolean.string.apply(min).query.get.head
     lazy val c3: (Boolean, Set[String]) = Entity.boolean.string.apply(min(3)).query.get.head
 
-    lazy val c5: (Boolean, Int)         = Entity.boolean.string.apply(count).a1.query.get.head
-    lazy val c6: (Boolean, String)      = Entity.boolean.string.apply(min).a1.query.get.head
-    lazy val c7: (Boolean, Set[String]) = Entity.boolean.string.apply(min(3)).a1.query.get.head
+    lazy val d1: (Boolean, Int)         = Entity.boolean.string.apply(count).a1.query.get.head
+    lazy val d2: (Boolean, String)      = Entity.boolean.string.apply(min).a1.query.get.head
+    lazy val d3: (Boolean, Set[String]) = Entity.boolean.string.apply(min(3)).a1.query.get.head
+
+    lazy val e1: (Boolean, Int)         = Entity.boolean.string.apply(count).>(1).a1.query.get.head
+    lazy val e2: (Boolean, String)      = Entity.boolean.string.apply(min).>("a").a1.query.get.head
+
+    lazy val f1: (Boolean, Int)         = Entity.boolean.string.apply(count).>(1).a1.query.get.head
+    lazy val f2: (Boolean, String)      = Entity.boolean.string.apply(min).>("a").a1.query.get.head
 
 
     // Optional
-    lazy val d1: (Boolean, Option[String]) = Entity.boolean.string_?.query.get.head
-    lazy val d2: (Boolean, Option[String]) = Entity.boolean.string_?.apply(Some(string1)).query.get.head
+    lazy val g1: (Boolean, Option[String]) = Entity.boolean.string_?.query.get.head
+    lazy val g2: (Boolean, Option[String]) = Entity.boolean.string_?.apply(Some(string1)).query.get.head
 
-    lazy val d3: (Boolean, Option[String]) = Entity.boolean.string_?.a1.query.get.head
-    lazy val d4: (Boolean, Option[String]) = Entity.boolean.string_?.apply(Some(string1)).a1.query.get.head
+    lazy val h1: (Boolean, Option[String]) = Entity.boolean.string_?.a1.query.get.head
+    lazy val h2: (Boolean, Option[String]) = Entity.boolean.string_?.apply(Some(string1)).a1.query.get.head
   }
 
 

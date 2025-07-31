@@ -58,14 +58,14 @@ trait ExprOneMan_n_String[T, Tpl <: Tuple, Entity[_ <: Tuple]](
 }
 
 
-trait ExprOneMan_n_String_Aggr[T, Tpl <: Tuple, Entity[_ <: Tuple]](
-  entity: [tpl <: Tuple] => DataModel => Entity[tpl]
+trait ExprOneMan_n_String_Aggr[T, Tpl <: Tuple, Entity[_, _ <: Tuple]](
+  entity: [t, tpl <: Tuple] => DataModel => Entity[t, tpl]
 ) extends CardOne { self: Molecule =>
-  def apply(kw: count)        : Entity[Init[Tpl] :* Int] = entity[Init[Tpl] :* Int](toInt(dataModel, kw))
-  def apply(kw: countDistinct): Entity[Init[Tpl] :* Int] = entity[Init[Tpl] :* Int](toInt(dataModel, kw))
-  def apply(kw: min)          : Entity[Init[Tpl] :* T  ] = entity[Init[Tpl] :* T  ](asIs (dataModel, kw))
-  def apply(kw: max)          : Entity[Init[Tpl] :* T  ] = entity[Init[Tpl] :* T  ](asIs (dataModel, kw))
-  def apply(kw: sample)       : Entity[Init[Tpl] :* T  ] = entity[Init[Tpl] :* T  ](asIs (dataModel, kw))
+  def apply(kw: count)        : Entity[Int, Init[Tpl] :* Int] = entity[Int, Init[Tpl] :* Int](toInt(dataModel, kw))
+  def apply(kw: countDistinct): Entity[Int, Init[Tpl] :* Int] = entity[Int, Init[Tpl] :* Int](toInt(dataModel, kw))
+  def apply(kw: min)          : Entity[T  , Init[Tpl] :* T  ] = entity[T  , Init[Tpl] :* T  ](asIs (dataModel, kw))
+  def apply(kw: max)          : Entity[T  , Init[Tpl] :* T  ] = entity[T  , Init[Tpl] :* T  ](asIs (dataModel, kw))
+  def apply(kw: sample)       : Entity[T  , Init[Tpl] :* T  ] = entity[T  , Init[Tpl] :* T  ](asIs (dataModel, kw))
 }
 
 
