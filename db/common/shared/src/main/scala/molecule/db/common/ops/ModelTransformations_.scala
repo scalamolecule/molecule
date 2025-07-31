@@ -55,19 +55,6 @@ trait ModelTransformations_ {
     val es   = dataModel.elements
     val last = es.last match {
       case a: AttrOneMan => AttrOneManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
-      case a: AttrSetMan => a match {
-        case _: AttrSetManBoolean =>
-          if (kw.isInstanceOf[count] || kw.isInstanceOf[countDistinct]) {
-            // Catch unsupported aggregation of Sets of boolean values
-            AttrSetManInt(a.ent, a.attr, Fn(kw.toString, Some(-1)), ref = a.ref, coord = a.coord)
-          } else {
-            AttrSetManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
-          }
-
-        case _ => AttrSetManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
-      }
-      case a: AttrSeqMan => AttrSeqManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, sort = a.sort, coord = a.coord)
-      case a: AttrMapMan => AttrMapManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, sort = a.sort, coord = a.coord)
       case a             => unexpected(a)
     }
     dataModel.copy(elements = es.init :+ last)
@@ -77,9 +64,6 @@ trait ModelTransformations_ {
     val es   = dataModel.elements
     val last = es.last match {
       case a: AttrOneMan => AttrOneManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
-      case a: AttrSetMan => AttrSetManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
-      case a: AttrSeqMan => AttrSeqManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
-      case a: AttrMapMan => AttrMapManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
       case a             => unexpected(a)
     }
     dataModel.copy(elements = es.init :+ last)
@@ -113,81 +97,41 @@ trait ModelTransformations_ {
         case a: AttrOneManShort          => a.copy(op = Fn(kw.toString, n))
         case a: AttrOneManChar           => a.copy(op = Fn(kw.toString, n))
       }
-      case a: AttrSetMan => a match {
-        case a: AttrSetManID             => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManString         => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManInt            => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManLong           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManFloat          => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManDouble         => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManBoolean        => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManBigInt         => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManBigDecimal     => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManDate           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManDuration       => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManInstant        => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManLocalDate      => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManLocalTime      => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManLocalDateTime  => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManOffsetTime     => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManOffsetDateTime => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManZonedDateTime  => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManUUID           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManURI            => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManByte           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManShort          => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSetManChar           => a.copy(op = Fn(kw.toString, n))
-      }
-      case a: AttrSeqMan => a match {
-        case a: AttrSeqManID             => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManString         => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManInt            => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManLong           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManFloat          => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManDouble         => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManBoolean        => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManBigInt         => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManBigDecimal     => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManDate           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManDuration       => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManInstant        => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManLocalDate      => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManLocalTime      => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManLocalDateTime  => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManOffsetTime     => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManOffsetDateTime => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManZonedDateTime  => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManUUID           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManURI            => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManByte           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManShort          => a.copy(op = Fn(kw.toString, n))
-        case a: AttrSeqManChar           => a.copy(op = Fn(kw.toString, n))
-      }
-      case a: AttrMapMan => a match {
-        case a: AttrMapManID             => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManString         => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManInt            => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManLong           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManFloat          => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManDouble         => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManBoolean        => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManBigInt         => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManBigDecimal     => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManDate           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManDuration       => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManInstant        => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManLocalDate      => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManLocalTime      => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManLocalDateTime  => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManOffsetTime     => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManOffsetDateTime => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManZonedDateTime  => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManUUID           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManURI            => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManByte           => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManShort          => a.copy(op = Fn(kw.toString, n))
-        case a: AttrMapManChar           => a.copy(op = Fn(kw.toString, n))
-      }
+      case a             => unexpected(a)
+    }
+    dataModel.copy(elements = es.init :+ last)
+  }
+
+  def addAggrOp[T](dataModel: DataModel, op: Op, v: Option[T]): DataModel = {
+    val es   = dataModel.elements
+    val last = es.last match {
+      case a: AttrOneMan =>
+        val fn = a.op.asInstanceOf[Fn]
+         a match {
+          case a: AttrOneManID             => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneLong(v.asInstanceOf[Long])))))
+          case a: AttrOneManString         => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneString(v.asInstanceOf[String])))))
+          case a: AttrOneManInt            => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneInt(v.asInstanceOf[Int])))))
+          case a: AttrOneManLong           => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneLong(v.asInstanceOf[Long])))))
+          case a: AttrOneManFloat          => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneFloat(v.asInstanceOf[Float])))))
+          case a: AttrOneManDouble         => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneDouble(v.asInstanceOf[Double])))))
+          case a: AttrOneManBoolean        => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneBoolean(v.asInstanceOf[Boolean])))))
+          case a: AttrOneManBigInt         => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneBigInt(v.asInstanceOf[BigInt])))))
+          case a: AttrOneManBigDecimal     => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneBigDecimal(v.asInstanceOf[BigDecimal])))))
+          case a: AttrOneManDate           => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneDate(v.asInstanceOf[Date])))))
+          case a: AttrOneManDuration       => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneDuration(v.asInstanceOf[Duration])))))
+          case a: AttrOneManInstant        => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneInstant(v.asInstanceOf[Instant])))))
+          case a: AttrOneManLocalDate      => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneLocalDate(v.asInstanceOf[LocalDate])))))
+          case a: AttrOneManLocalTime      => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneLocalTime(v.asInstanceOf[LocalTime])))))
+          case a: AttrOneManLocalDateTime  => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneLocalDateTime(v.asInstanceOf[LocalDateTime])))))
+          case a: AttrOneManOffsetTime     => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneOffsetTime(v.asInstanceOf[OffsetTime])))))
+          case a: AttrOneManOffsetDateTime => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneOffsetDateTime(v.asInstanceOf[OffsetDateTime])))))
+          case a: AttrOneManZonedDateTime  => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneZonedDateTime(v.asInstanceOf[ZonedDateTime])))))
+          case a: AttrOneManUUID           => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneUUID(v.asInstanceOf[UUID])))))
+          case a: AttrOneManURI            => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneURI(v.asInstanceOf[URI])))))
+          case a: AttrOneManByte           => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneByte(v.asInstanceOf[Byte])))))
+          case a: AttrOneManShort          => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneShort(v.asInstanceOf[Short])))))
+          case a: AttrOneManChar           => v.fold(a.copy(op = fn.copy(op = Some(op))))(v => a.copy(op = fn.copy(op = Some(op), v = Some(OneChar(v.asInstanceOf[Char])))))
+        }
       case a             => unexpected(a)
     }
     dataModel.copy(elements = es.init :+ last)

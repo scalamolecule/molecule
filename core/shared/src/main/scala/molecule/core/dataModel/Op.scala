@@ -24,7 +24,12 @@ case object GetV extends Op
 case object Add extends Op
 case object Remove extends Op
 
-case class Fn(fn: String, n: Option[Int] = None) extends Op
+case class Fn(
+  fn: String,
+  n: Option[Int] = None,
+  op: Option[Op] = None,
+  v: Option[Value] = None
+) extends Op
 
 
 sealed trait AttrOp extends Op
