@@ -1,5 +1,6 @@
 package molecule.db.h2
 
+import scala.concurrent.Future
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
 import molecule.db.h2.async.*
@@ -13,13 +14,47 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
 
   "types" - types {
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+
+
+
+    //    val a1: Future[List[(Int, Int)]]  = Entity.i.int.a1.query.get
+    //    val a2: Entity_n_Sort[(Int, Int)] = Entity.i.int.apply(count)
+    //    val a2: Future[List[(Int, Int)]]  = Entity.i.int.apply(count).query.get
+    //    val a3: Future[List[(Int, Int)]] = Entity.i.int.apply(count).a1.query.get
+
+
+    val a1 = Entity.int.a1.query.get
+    val a2 = Entity.int.apply(count).query.get
+    val a3 = Entity.int.apply(count).a1.query.get
+    val a4 = Entity.int.apply(count).>(7).query.get
+    val a5 = Entity.int.apply(count).>(7).a1.query.get
+
+    val b1: Future[List[(Int, Int)]] = Entity.i.int.a1.query.get
+    val b2: Future[List[(Int, Int)]] = Entity.i.int.apply(count).query.get
+    val b3: Future[List[(Int, Int)]] = Entity.i.int.apply(count).a1.query.get
+    val b4: Future[List[(Int, Int)]] = Entity.i.int.apply(count).>(7).query.get
+    val b5: Future[List[(Int, Int)]] = Entity.i.int.apply(count).>(7).a1.query.get
+
+
     for {
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- Entity(a).int(10).update.transact
-      _ <- Entity(b).delete.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+      //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      //      _ <- Entity.int(3).save.transact
+      //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      //      _ <- Entity(a).int(10).update.transact
+      //      _ <- Entity(b).delete.transact
+      //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+
+
+      _ <- Entity.i.int.insert(
+        (1, 1),
+        (1, 2),
+        (2, 3),
+      ).transact
+
+      _ <- Entity.i.int.apply(count).a1.query.get.map(_ ==> List(
+        (2, 1),
+        (1, 2),
+      ))
 
     } yield ()
   }

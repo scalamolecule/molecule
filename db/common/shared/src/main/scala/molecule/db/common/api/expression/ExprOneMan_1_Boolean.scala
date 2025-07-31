@@ -20,12 +20,25 @@ trait ExprOneMan_1_Boolean[T, Entity[_]](entity: [t] => DataModel => Entity[t]) 
   def apply(a: Molecule_0 & CardOne): Entity[T] = entity[T](filterAttr(dataModel, Eq , a))
   def not  (a: Molecule_0 & CardOne): Entity[T] = entity[T](filterAttr(dataModel, Neq, a))
 
-  def apply(kw: count)        : Entity[Int   ] = entity[Int   ](toInt(dataModel, kw            ))
-  def apply(kw: countDistinct): Entity[Int   ] = entity[Int   ](toInt(dataModel, kw            ))
-  def apply(kw: distinct)     : Entity[Set[T]] = entity[Set[T]](asIs (dataModel, kw            ))
+  def apply(kw: distinct): Entity[Set[T]] = entity[Set[T]](asIs (dataModel, kw))
 
   def &&(bool: T): Entity[T] = entity[T](addOne(dataModel, AttrOp.And, Seq(bool)))
   def ||(bool: T): Entity[T] = entity[T](addOne(dataModel, AttrOp.Or , Seq(bool)))
   def !          : Entity[T] = entity[T](addOne(dataModel, AttrOp.Not, Nil      ))
+}
+
+
+trait ExprOneMan_1_Boolean_Aggr[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends CardOne { self: Molecule  =>
+  def apply(kw: count)        : Entity[Int] = entity[Int](toInt(dataModel, kw))
+  def apply(kw: countDistinct): Entity[Int] = entity[Int](toInt(dataModel, kw))
+}
+
+
+trait ExprOneMan_1_Boolean_AggrOps[T, Entity <: Molecule](entity: DataModel => Entity) extends CardOne { self: Molecule  =>
+  def apply(v : T): Entity = entity(addOne(dataModel, Eq , Seq(v)))
+  def not  (v : T): Entity = entity(addOne(dataModel, Neq, Seq(v)))
+
+  def apply(v: qm): Entity = entity(addOne(dataModel, Eq , Nil, true))
+  def not  (v: qm): Entity = entity(addOne(dataModel, Neq, Nil, true))
 }
 
