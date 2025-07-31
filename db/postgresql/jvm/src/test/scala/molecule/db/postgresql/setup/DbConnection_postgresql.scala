@@ -15,6 +15,7 @@ object DbConnection_postgresql extends DbConnection {
 
   println(s"Starting $baseUrl docker container...")
   val container = new PostgreSQLContainer(baseUrl)
+  container.withReuse(true)
   container.start()
   println("Postgresql docker container started")
 
@@ -44,6 +45,12 @@ object DbConnection_postgresql extends DbConnection {
   def run(test: Conn ?=> Any, metaDb: MetaDb_postgresql): Any = {
     given Conn = getConnection(metaDb)
     test
+  }
+
+  def shutdown(): Unit = {
+    println("Shutting down PostgreSQL container...")
+    reusedSqlConn.close()
+    container.stop()
   }
 
 

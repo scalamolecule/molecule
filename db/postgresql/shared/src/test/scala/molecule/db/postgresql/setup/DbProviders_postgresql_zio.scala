@@ -9,7 +9,7 @@ import molecule.db.compliance.setup.{DbConnection, DbProviders_zio, Platform}
 import zio.ZLayer
 
 trait DbProviders_postgresql_zio extends DbProviders_zio with DbConnection with Platform {
-  override val database: String = "mariadb"
+  override val database: String = "postgresql"
   private  val db               = DbConnection_postgresql
 
   override def types: ZLayer[Any, Throwable, Conn] = db.connZLayer(Types_postgresql())

@@ -9,53 +9,12 @@ import org.scalactic.Equality
 
 class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with TestUtils {
 
+
   "types" - types {
     import molecule.db.compliance.domains.dsl.Types.*
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
-
-//      id <- Entity.i(42).save.transact.map(_.id)
-//
-//      // Map attribute not yet asserted
-//      _ <- Entity.intMap.query.get.map(_ ==> Nil)
-//
-//      // When attribute is not already asserted, an update has no effect
-//      _ <- Entity(id).intMap(Map(pint1, pint2)).update.i.transact
-//      _ <- Entity.intMap.query.get.map(_ ==> Nil)
-
-
-      _ <- Entity.uuid.insert(uuid1, uuid2, uuid3).transact
-
-      _ <- Entity.uuid(uuid1).a1.query.i.get
-      eq = Entity.uuid(?).a1.query.i
-      _ <- eq(uuid1).get.map(_ ==> List(uuid1))
-      _ <- eq(uuid2).get.map(_ ==> List(uuid2))
-      _ <- eq(uuid3).get.map(_ ==> List(uuid3))
-
-      ne = Entity.uuid.not(?).a1.query
-      _ <- ne(uuid1).get.map(_ ==> List(uuid2, uuid3))
-      _ <- ne(uuid2).get.map(_ ==> List(uuid1, uuid3))
-      _ <- ne(uuid3).get.map(_ ==> List(uuid1, uuid2))
-
-      lt = Entity.uuid.<(?).a1.query
-      _ <- lt(uuid1).get.map(_ ==> List())
-      _ <- lt(uuid2).get.map(_ ==> List(uuid1))
-      _ <- lt(uuid3).get.map(_ ==> List(uuid1, uuid2))
-
-      le = Entity.uuid.<=(?).a1.query
-      _ <- le(uuid1).get.map(_ ==> List(uuid1))
-      _ <- le(uuid2).get.map(_ ==> List(uuid1, uuid2))
-      _ <- le(uuid3).get.map(_ ==> List(uuid1, uuid2, uuid3))
-
-      gt = Entity.uuid.>(?).a1.query
-      _ <- gt(uuid1).get.map(_ ==> List(uuid2, uuid3))
-      _ <- gt(uuid2).get.map(_ ==> List(uuid3))
-      _ <- gt(uuid3).get.map(_ ==> List())
-
-      ge = Entity.uuid.>=(?).a1.query
-      _ <- ge(uuid1).get.map(_ ==> List(uuid1, uuid2, uuid3))
-      _ <- ge(uuid2).get.map(_ ==> List(uuid2, uuid3))
-      _ <- ge(uuid3).get.map(_ ==> List(uuid3))
+      id <- Entity.i(42).save.transact.map(_.id)
     } yield ()
   }
 
