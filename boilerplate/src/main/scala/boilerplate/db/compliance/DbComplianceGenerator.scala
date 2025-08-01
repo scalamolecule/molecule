@@ -1,8 +1,8 @@
 package boilerplate.db.compliance
 
 object DbComplianceGenerator extends App {
-//    test.aggregation.any._Aggr.generate()
-    test.aggregation.number._AggrNum.generate()
+  //  test.aggregation.any._Aggr.generate()
+  //  test.aggregation.number._AggrNum.generate()
   //  test.bind.types._BindTypes.generate()
   //  test.filter.map.types._FilterMap.generate()
   //  test.filter.one.decimal._FilterOneDecimal.generate()

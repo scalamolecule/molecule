@@ -17,4 +17,3 @@ class SortDynamicTest extends MUnit {
 class SortNestedTest extends MUnit {
   SortNested(this, Api_sqlite_async)
 }
-

@@ -23,6 +23,9 @@ case class SortAggr(
   import api.*
   import suite.*
 
+  val noFloat = "sum/median/avg/variance/stddev operations on aggregated Float values are not supported " +
+    "to avoid floating precision problems."
+
   "count" - types {
     for {
       case List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
@@ -102,6 +105,54 @@ case class SortAggr(
       _ <- Entity.i.short(count).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
       _ <- Entity.i.char(count).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
       _ <- Entity.i.ref(count).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+
+      _ <- Entity.i.string(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.int(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.long(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.float(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.double(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.boolean(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.bigInt(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.bigDecimal(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.date(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.duration(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.instant(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.localDate(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.localTime(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.localDateTime(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.offsetTime(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.offsetDateTime(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.zonedDateTime(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.uuid(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.uri(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.byte(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.short(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.char(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+      _ <- Entity.i.ref(count).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
+
+      _ <- Entity.i.string(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.int(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.long(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.float(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.double(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.boolean(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.bigInt(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.bigDecimal(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.date(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.duration(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.instant(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.localDate(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.localTime(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.localDateTime(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.offsetTime(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.offsetDateTime(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.zonedDateTime(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.uuid(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.uri(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.byte(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.short(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.char(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
+      _ <- Entity.i.ref(count).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
     } yield ()
   }
 
@@ -185,6 +236,54 @@ case class SortAggr(
       _ <- Entity.i.short(countDistinct).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
       _ <- Entity.i.char(countDistinct).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
       _ <- Entity.i.ref(countDistinct).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+
+      _ <- Entity.i.string(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.int(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.long(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.float(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.double(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.boolean(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.bigInt(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.bigDecimal(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.date(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.duration(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.instant(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.localDate(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.localTime(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.localDateTime(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.offsetTime(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.offsetDateTime(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.zonedDateTime(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.uuid(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.uri(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.byte(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.short(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.char(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+      _ <- Entity.i.ref(countDistinct).>(0).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
+
+      _ <- Entity.i.string(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.int(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.long(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.float(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.double(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.boolean(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.bigInt(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.bigDecimal(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.date(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.duration(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.instant(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.localDate(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.localTime(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.localDateTime(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.offsetTime(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.offsetDateTime(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.zonedDateTime(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.uuid(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.uri(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.byte(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.short(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.char(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
+      _ <- Entity.i.ref(countDistinct).>(0).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
     } yield ()
   }
 
@@ -220,6 +319,27 @@ case class SortAggr(
       _ <- Entity.i.bigDecimal(sum).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
       _ <- Entity.i.byte(sum).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
       _ <- Entity.i.short(sum).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
+
+      _ <- Entity.i.int(sum).>(0).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
+      _ <- Entity.i.long(sum).>(0).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
+      _ <- Entity.i.double(sum).>(0).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
+      _ <- Entity.i.bigInt(sum).>(0).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
+      _ <- Entity.i.bigDecimal(sum).>(0).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
+      _ <- Entity.i.byte(sum).>(byte0).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
+      _ <- Entity.i.short(sum).>(short0).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
+
+      _ <- Entity.i.int(sum).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
+      _ <- Entity.i.long(sum).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
+      _ <- Entity.i.double(sum).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
+      _ <- Entity.i.bigInt(sum).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
+      _ <- Entity.i.bigDecimal(sum).>(0).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
+      _ <- Entity.i.byte(sum).>(byte0).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
+      _ <- Entity.i.short(sum).>(short0).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
+
+      _ <- Entity.i.float(sum).>(0).a1.query.get.map(_ ==> "Unexpected success")
+        .recover { case ModelError(err) => err ==> noFloat }
+      _ <- Entity.i.float(sum).>(0).d1.query.get.map(_ ==> "Unexpected success")
+        .recover { case ModelError(err) => err ==> noFloat }
     } yield ()
   }
 
@@ -263,6 +383,27 @@ case class SortAggr(
         _ <- Entity.i.bigDecimal(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
         _ <- Entity.i.byte(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
         _ <- Entity.i.short(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+
+        _ <- Entity.i.int(median).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+        _ <- Entity.i.long(median).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+        _ <- Entity.i.double(median).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+        _ <- Entity.i.bigInt(median).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+        _ <- Entity.i.bigDecimal(median).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+        _ <- Entity.i.byte(median).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+        _ <- Entity.i.short(median).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+
+        _ <- Entity.i.int(median).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+        _ <- Entity.i.long(median).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+        _ <- Entity.i.double(median).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+        _ <- Entity.i.bigInt(median).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+        _ <- Entity.i.bigDecimal(median).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+        _ <- Entity.i.byte(median).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+        _ <- Entity.i.short(median).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+
+        _ <- Entity.i.float(median).>(0).a1.query.get.map(_ ==> "Unexpected success")
+          .recover { case ModelError(err) => err ==> noFloat }
+        _ <- Entity.i.float(median).>(0).d1.query.get.map(_ ==> "Unexpected success")
+          .recover { case ModelError(err) => err ==> noFloat }
       } yield ()
     }
   }
@@ -300,6 +441,27 @@ case class SortAggr(
       _ <- Entity.i.bigDecimal(avg).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
       _ <- Entity.i.byte(avg).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
       _ <- Entity.i.short(avg).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+
+      _ <- Entity.i.int(avg).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+      _ <- Entity.i.long(avg).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+      _ <- Entity.i.double(avg).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+      _ <- Entity.i.bigInt(avg).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+      _ <- Entity.i.bigDecimal(avg).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+      _ <- Entity.i.byte(avg).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+      _ <- Entity.i.short(avg).>(0).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
+
+      _ <- Entity.i.int(avg).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+      _ <- Entity.i.long(avg).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+      _ <- Entity.i.double(avg).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+      _ <- Entity.i.bigInt(avg).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+      _ <- Entity.i.bigDecimal(avg).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+      _ <- Entity.i.byte(avg).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+      _ <- Entity.i.short(avg).>(0).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+
+      _ <- Entity.i.float(avg).>(0).a1.query.get.map(_ ==> "Unexpected success")
+        .recover { case ModelError(err) => err ==> noFloat }
+      _ <- Entity.i.float(avg).>(0).d1.query.get.map(_ ==> "Unexpected success")
+        .recover { case ModelError(err) => err ==> noFloat }
     } yield ()
   }
 
@@ -342,6 +504,27 @@ case class SortAggr(
         _ <- Entity.i.bigDecimal(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
         _ <- Entity.i.byte(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
         _ <- Entity.i.short(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+
+        _ <- Entity.i.int(variance).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.long(variance).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.double(variance).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.bigInt(variance).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.bigDecimal(variance).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.byte(variance).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.short(variance).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+
+        _ <- Entity.i.int(variance).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.long(variance).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.double(variance).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.bigInt(variance).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.bigDecimal(variance).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.byte(variance).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.short(variance).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+
+        _ <- Entity.i.float(variance).>(-1.0).a1.query.get.map(_ ==> "Unexpected success")
+          .recover { case ModelError(err) => err ==> noFloat }
+        _ <- Entity.i.float(variance).>(-1.0).d1.query.get.map(_ ==> "Unexpected success")
+          .recover { case ModelError(err) => err ==> noFloat }
       } yield ()
     }
   }
@@ -385,6 +568,27 @@ case class SortAggr(
         _ <- Entity.i.bigDecimal(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
         _ <- Entity.i.byte(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
         _ <- Entity.i.short(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+
+        _ <- Entity.i.int(stddev).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.long(stddev).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.double(stddev).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.bigInt(stddev).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.bigDecimal(stddev).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.byte(stddev).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+        _ <- Entity.i.short(stddev).>(-1.0).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+
+        _ <- Entity.i.int(stddev).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.long(stddev).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.double(stddev).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.bigInt(stddev).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.bigDecimal(stddev).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.byte(stddev).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        _ <- Entity.i.short(stddev).>(-1.0).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+
+        _ <- Entity.i.float(stddev).>(-1.0).a1.query.get.map(_ ==> "Unexpected success")
+          .recover { case ModelError(err) => err ==> noFloat }
+        _ <- Entity.i.float(stddev).>(-1.0).d1.query.get.map(_ ==> "Unexpected success")
+          .recover { case ModelError(err) => err ==> noFloat }
       } yield ()
     }
   }

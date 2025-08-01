@@ -121,7 +121,7 @@ trait QueryExprOne_mariadb
 
       case "sum" =>
         aggregate = true
-        selectWithOrder(col, "SUM", "", "", "ROUND(", ", 6)")
+        selectWithOrder(col, "SUM", "", "", "ROUND(", ", 10)")
         groupByCols -= col
         havingOp(s"ROUND(SUM($col), 6)")
 
@@ -144,9 +144,9 @@ trait QueryExprOne_mariadb
 
       case "avg" =>
         aggregate = true
-        selectWithOrder(col, "AVG", "", "", "ROUND(", ", 6)")
+        selectWithOrder(col, "AVG", "", "", "ROUND(", ", 10)")
         groupByCols -= col
-        havingOp(s"ROUND(AVG($col), 6)")
+        havingOp(s"ROUND(AVG($col), 10)")
 
       case "variance" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {

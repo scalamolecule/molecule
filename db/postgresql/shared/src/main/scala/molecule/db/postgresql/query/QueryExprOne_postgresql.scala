@@ -172,7 +172,6 @@ trait QueryExprOne_postgresql
       case "sample" =>
         distinct = false
         select += col
-        //        havingOp("RAND()")
         addWhere(col, aggrOp, aggrOpValue, res)
         orderBy += ((level, -1, "RANDOM()", ""))
         hardLimit = 1
@@ -221,7 +220,6 @@ trait QueryExprOne_postgresql
           selectWithOrder(col, "percentile_cont(0.5) WITHIN GROUP (ORDER BY ", "", "", "ROUND(", s")$castAggrOpV, 10)")
           addHaving(baseType, fn, s"ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY $col)$castAggrOpV, 10)",
             aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
-
         }
 
       case "avg" =>

@@ -141,8 +141,9 @@ trait QueryExprOne_sqlite
 
       case "mins" =>
         aggregate = true
-        select += "<replace>" // add to maintain correct indexing
+        // OBS: select2 has to set be before setting select += ...
         select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "ASC"))
+        select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
@@ -156,6 +157,7 @@ trait QueryExprOne_sqlite
 
       case "maxs" =>
         aggregate = true
+        // OBS: select2 has to set be before setting select += ...
         select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "DESC"))
         select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
@@ -164,14 +166,15 @@ trait QueryExprOne_sqlite
         )
 
       case "sample" =>
-        select += "<replace>" // add to maintain correct indexing
         select2 = select2 + (select.length -> sampleSelect(ent, attr))
+        select += "<replace>" // add to maintain correct indexing
         addWhere(col, aggrOp, aggrOpValue, res) // ?
 
       case "samples" =>
         aggregate = true
-        select += "<replace>" // add to maintain correct indexing
+        // OBS: select2 has to set be before setting select += ...
         select2 = select2 + (select.length -> samplesSelect(ent, attr, n))
+        select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
@@ -195,9 +198,21 @@ trait QueryExprOne_sqlite
 
       case "sum" =>
         aggregate = true
-        selectWithOrder(col, "SUM", "")
         groupByCols -= col
-        havingOp(s"SUM($col)")
+        res.tpe match {
+          case "BigInt" =>
+            selectWithOrder(col, "SUM", "")
+            addHaving(baseType, fn, s"SUM($col)", aggrOp, aggrOpValue, res, "CAST(", " AS BIGINT)")
+
+          case "BigDecimal" | "Double" =>
+            selectWithOrder(col, "SUM", "", "", "ROUND(", ", 10)")
+            addHaving(baseType, fn, s"ROUND(SUM($col), 10)", aggrOp, aggrOpValue, res, "CAST(", " AS REAL)")
+
+          case _ =>
+            selectWithOrder(col, "SUM", "")
+            havingOp(s"SUM($col)")
+        }
+
 
       case "median" =>
         //        select += s"AVG(_$col)"
@@ -220,6 +235,9 @@ trait QueryExprOne_sqlite
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by median not implemented for this database.")
         }
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on median not implemented for this database.")
+        }
         aggregate = true
         // Falling back on calculating the median for each returned json array of values
         select += s"json_group_array($col)"
@@ -231,13 +249,17 @@ trait QueryExprOne_sqlite
 
       case "avg" =>
         aggregate = true
-        selectWithOrder(col, "AVG", "")
+        selectWithOrder(col, "AVG", "", "", "ROUND(", ", 10)")
         groupByCols -= col
-        havingOp(s"AVG($col)")
+        havingOp(s"ROUND(AVG($col), 10)")
+
 
       case "variance" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by variance not implemented for this database.")
+        }
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on variance not implemented for this database.")
         }
         aggregate = true
         // Falling back on calculating the median for each returned json array of values
@@ -252,6 +274,9 @@ trait QueryExprOne_sqlite
       case "stddev" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by standard deviation not implemented for this database.")
+        }
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on stddev not implemented for this database.")
         }
         aggregate = true
         select += s"json_group_array($col)"
