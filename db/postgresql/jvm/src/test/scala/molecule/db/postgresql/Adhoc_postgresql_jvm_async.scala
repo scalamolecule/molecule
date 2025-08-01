@@ -9,45 +9,19 @@ import org.scalactic.Equality
 
 class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with TestUtils {
 
-
   "types" - types {
     import molecule.db.compliance.domains.dsl.Types.*
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
 
-
-
     for {
-      _ <- Entity.i.int.insert(
-        (1, int1),
-        (1, int2),
-        (1, int3),
-        (2, int4),
-      ).transact
-//      _ <- Entity.i.long.insert((1, long1), (1, long2), (1, long3), (2, long4)).transact
-//      _ <- Entity.i.float.insert((1, float1), (1, float2), (1, float3), (2, float4)).transact
-//      _ <- Entity.i.double.insert((1, double1), (1, double2), (1, double3), (2, double4)).transact
-//      _ <- Entity.i.bigInt.insert((1, bigInt1), (1, bigInt2), (1, bigInt3), (2, bigInt4)).transact
-//      _ <- Entity.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal2), (1, bigDecimal3), (2, bigDecimal4)).transact
-//      _ <- Entity.i.byte.insert((1, byte1), (1, byte2), (1, byte3), (2, byte4)).transact
-//      _ <- Entity.i.short.insert((1, short1), (1, short2), (1, short3), (2, short4)).transact
 
-      _ <- Entity.i.int(median).a1.query.i.get.map(_ ==> List((1, 2), (2, 4)))
-//      _ <- Entity.i.long(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-//      _ <- Entity.i.float(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-//      _ <- Entity.i.double(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-//      _ <- Entity.i.bigInt(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-//      _ <- Entity.i.bigDecimal(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-//      _ <- Entity.i.byte(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-//      _ <- Entity.i.short(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-//
-//      _ <- Entity.i.int(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-//      _ <- Entity.i.long(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-//      _ <- Entity.i.float(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-//      _ <- Entity.i.double(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-//      _ <- Entity.i.bigInt(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-//      _ <- Entity.i.bigDecimal(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-//      _ <- Entity.i.byte(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-//      _ <- Entity.i.short(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+      _ <- Entity.i.long.insert((1, long1), (1, long2), (1, long3), (2, long4)).transact
+      _ <- Entity.i.float.insert((1, float1), (1, float2), (1, float3), (2, float4)).transact
+      _ <- Entity.i.double.insert((1, double1), (1, double2), (1, double3), (2, double4)).transact
+      _ <- Entity.i.bigInt.insert((1, bigInt1), (1, bigInt2), (1, bigInt3), (2, bigInt4)).transact
+      _ <- Entity.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal2), (1, bigDecimal3), (2, bigDecimal4)).transact
+      _ <- Entity.i.byte.insert((1, byte1), (1, byte2), (1, byte3), (2, byte4)).transact
+      _ <- Entity.i.short.insert((1, short1), (1, short2), (1, short3), (2, short4)).transact
 
 
       //      _ <- rawQuery(

@@ -217,7 +217,7 @@ trait QueryExprOne_postgresql
         aggrOp.fold {
           selectWithOrder(col, "percentile_cont", "0.5) WITHIN GROUP (ORDER BY ")
         } { op =>
-          selectWithOrder(col, "percentile_cont(0.5) WITHIN GROUP (ORDER BY ", "", "", "ROUND(", s")$castAggrOpV, 10)")
+          selectWithOrder(col, "percentile_cont", "0.5) WITHIN GROUP (ORDER BY ", "", "ROUND(", s"$castAggrOpV, 10)")
           addHaving(baseType, fn, s"ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY $col)$castAggrOpV, 10)",
             aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
         }
