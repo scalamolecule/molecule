@@ -112,7 +112,7 @@ Molecule supports:
 - H2
 - (more can easily be added...)
 
-All Molecule queries behave identically across these databases. Each backend passes the same SPI compliance test suite with +1800 tests.
+All Molecule queries behave identically across these databases. Each backend passes the same SPI compliance test suite with +2000 tests.
 
 
 ## Features
@@ -291,7 +291,7 @@ sbt.version = 1.11.3
 
 `project/plugins.sbt`:
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.19.6")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.20.0")
 ```
 
 `build.sbt`:
@@ -301,11 +301,11 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // import for the database(s) that you need
-      "org.scalamolecule" %% "molecule-db-h2" % "0.24.2",
-      "org.scalamolecule" %% "molecule-db-mariadb" % "0.24.2",
-      "org.scalamolecule" %% "molecule-db-mysql" % "0.24.2",
-      "org.scalamolecule" %% "molecule-db-postgresql" % "0.24.2",
-      "org.scalamolecule" %% "molecule-db-sqlite" % "0.24.2",
+      "org.scalamolecule" %% "molecule-db-h2" % "0.25.0",
+      "org.scalamolecule" %% "molecule-db-mariadb" % "0.25.0",
+      "org.scalamolecule" %% "molecule-db-mysql" % "0.25.0",
+      "org.scalamolecule" %% "molecule-db-postgresql" % "0.25.0",
+      "org.scalamolecule" %% "molecule-db-sqlite" % "0.25.0",
     )
   )
 ```
@@ -315,7 +315,7 @@ Use `%%%` instead of `%%` for Scala.js.
 
 ## Explore code
 
-The `dbCompliance` module in this repo has several domain structure definitions and +1800 tests that show all details of
+The `dbCompliance` module in this repo has several domain structure definitions and +2000 tests that show all details of
 how molecule can be used. This forms the tests that each database implementation needs to comply with
 in order to offer all functionality of Molecule and be a compliant implementation.
 

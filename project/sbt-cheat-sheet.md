@@ -77,7 +77,7 @@ And lastly molecule for scala 3:
 
 Sonatype doesn't allow missing library dependencies. So we need to be careful to publish in the right order since we have a circular reference between molecule and sbt-molecule.
 
-1. Set new non-snapshot version in molecule, sbt-molecule and molecule-samples projects (search and replace for all occurrences in subproject sbt files). But keep sbt-molecule snapshot version in molecule plugins settings for now.
+1. Set new non-snapshot molecule version in molecule, sbt-molecule and molecule-samples projects (search and replace for all occurrences in subproject sbt files). But keep sbt-molecule snapshot version in molecule plugins settings for now.
 
 2. Publish molecule 2.12 first so that sbt-molecule can then refer to it:
 
@@ -86,14 +86,14 @@ sbt ++2.12.20 "project baseJVM" clean publishSigned -Ddocs=true
 sbt sonaRelease
 ```
 
-3. Publish sbt-molecule:
+3. Set non-snapshot sbt-molecule version in sbt-molecule and publish it:
 
 ```
 sbt clean publishSigned
 sbt sonaRelease
 ```
 
-4. Set new sbt-molecule new version in molecule project/plugins. Publish molecule for scala 3 (depends on sbt-molecule):
+4. Set new sbt-molecule version in molecule project/plugins. Publish molecule for scala 3 (depends on sbt-molecule):
 
 ```
 sbt ++3.7.1 clean publishSigned -Ddocs=true
