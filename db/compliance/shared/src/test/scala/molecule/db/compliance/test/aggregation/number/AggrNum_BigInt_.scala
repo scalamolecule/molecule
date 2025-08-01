@@ -312,23 +312,33 @@ case class AggrNum_BigInt_(
 
 
         // n attributes
-        _ <- Entity.i.a1.bigInt(variance)(variance1).query.get.map(_ ==> List(a))
+
+        _ <- Entity.i.a1.bigInt(variance)(variance1).query.get.map(_.head._2 ==~ variance1)
         _ <- Entity.i.a1.bigInt(variance)(1.0).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.bigInt(variance).not(1.0).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.bigInt(variance).not(variance1).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.bigInt(variance).not(1.0).query.get.map { res =>
+          res(0)._2 ==~ variance1
+          res(1)._2 ==~ variance2
+        }
+        _ <- Entity.i.a1.bigInt(variance).not(variance1).query.get.map(_.head._2 ==~ variance2)
 
-        _ <- Entity.i.a1.bigInt(variance).<(variance2).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.bigInt(variance).<(variance2).query.get.map(_.head._2 ==~ variance1)
         _ <- Entity.i.a1.bigInt(variance).<(variance1).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.bigInt(variance).<=(variance2).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.bigInt(variance).<=(variance1).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.bigInt(variance).<=(variance2).query.get.map { res =>
+          res(0)._2 ==~ variance1
+          res(1)._2 ==~ variance2
+        }
+        _ <- Entity.i.a1.bigInt(variance).<=(variance1).query.get.map(_.head._2 ==~ variance1)
 
-        _ <- Entity.i.a1.bigInt(variance).>(variance1).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.bigInt(variance).>(variance1).query.get.map(_.head._2 ==~ variance2)
         _ <- Entity.i.a1.bigInt(variance).>(variance2).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.bigInt(variance).>=(variance1).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.bigInt(variance).>=(variance2).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.bigInt(variance).>=(variance1).query.get.map { res =>
+          res(0)._2 ==~ variance1
+          res(1)._2 ==~ variance2
+        }
+        _ <- Entity.i.a1.bigInt(variance).>=(variance2).query.get.map(_.head._2 ==~ variance2)
       } yield ()
     }
   }
@@ -404,23 +414,32 @@ case class AggrNum_BigInt_(
 
 
         // n attributes
-        _ <- Entity.i.a1.bigInt(stddev)(stddev1).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.bigInt(stddev)(stddev1).query.get.map(_.head._2 ==~ stddev1)
         _ <- Entity.i.a1.bigInt(stddev)(1.0).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.bigInt(stddev).not(1.0).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.bigInt(stddev).not(stddev1).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.bigInt(stddev).not(1.0).query.get.map { res =>
+          res(0)._2 ==~ stddev1
+          res(1)._2 ==~ stddev2
+        }
+        _ <- Entity.i.a1.bigInt(stddev).not(stddev1).query.get.map(_.head._2 ==~ stddev2)
 
-        _ <- Entity.i.a1.bigInt(stddev).<(stddev2).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.bigInt(stddev).<(stddev2).query.get.map(_.head._2 ==~ stddev1)
         _ <- Entity.i.a1.bigInt(stddev).<(stddev1).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.bigInt(stddev).<=(stddev2).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.bigInt(stddev).<=(stddev1).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.bigInt(stddev).<=(stddev2).query.get.map { res =>
+          res(0)._2 ==~ stddev1
+          res(1)._2 ==~ stddev2
+        }
+        _ <- Entity.i.a1.bigInt(stddev).<=(stddev1).query.get.map(_.head._2 ==~ stddev1)
 
-        _ <- Entity.i.a1.bigInt(stddev).>(stddev1).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.bigInt(stddev).>(stddev1).query.get.map(_.head._2 ==~ stddev2)
         _ <- Entity.i.a1.bigInt(stddev).>(stddev2).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.bigInt(stddev).>=(stddev1).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.bigInt(stddev).>=(stddev2).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.bigInt(stddev).>=(stddev1).query.get.map { res =>
+          res(0)._2 ==~ stddev1
+          res(1)._2 ==~ stddev2
+        }
+        _ <- Entity.i.a1.bigInt(stddev).>=(stddev2).query.get.map(_.head._2 ==~ stddev2)
       } yield ()
     }
   }

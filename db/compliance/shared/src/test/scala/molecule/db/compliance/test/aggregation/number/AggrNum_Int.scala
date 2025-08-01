@@ -311,23 +311,33 @@ case class AggrNum_Int(
 
 
         // n attributes
-        _ <- Entity.i.a1.int(variance)(variance1).query.get.map(_ ==> List(a))
+
+        _ <- Entity.i.a1.int(variance)(variance1).query.get.map(_.head._2 ==~ variance1)
         _ <- Entity.i.a1.int(variance)(1.0).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.int(variance).not(1.0).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.int(variance).not(variance1).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.int(variance).not(1.0).query.get.map { res =>
+          res(0)._2 ==~ variance1
+          res(1)._2 ==~ variance2
+        }
+        _ <- Entity.i.a1.int(variance).not(variance1).query.get.map(_.head._2 ==~ variance2)
 
-        _ <- Entity.i.a1.int(variance).<(variance2).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.int(variance).<(variance2).query.get.map(_.head._2 ==~ variance1)
         _ <- Entity.i.a1.int(variance).<(variance1).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.int(variance).<=(variance2).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.int(variance).<=(variance1).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.int(variance).<=(variance2).query.get.map { res =>
+          res(0)._2 ==~ variance1
+          res(1)._2 ==~ variance2
+        }
+        _ <- Entity.i.a1.int(variance).<=(variance1).query.get.map(_.head._2 ==~ variance1)
 
-        _ <- Entity.i.a1.int(variance).>(variance1).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.int(variance).>(variance1).query.get.map(_.head._2 ==~ variance2)
         _ <- Entity.i.a1.int(variance).>(variance2).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.int(variance).>=(variance1).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.int(variance).>=(variance2).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.int(variance).>=(variance1).query.get.map { res =>
+          res(0)._2 ==~ variance1
+          res(1)._2 ==~ variance2
+        }
+        _ <- Entity.i.a1.int(variance).>=(variance2).query.get.map(_.head._2 ==~ variance2)
       } yield ()
     }
   }
@@ -403,23 +413,32 @@ case class AggrNum_Int(
 
 
         // n attributes
-        _ <- Entity.i.a1.int(stddev)(stddev1).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.int(stddev)(stddev1).query.get.map(_.head._2 ==~ stddev1)
         _ <- Entity.i.a1.int(stddev)(1.0).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.int(stddev).not(1.0).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.int(stddev).not(stddev1).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.int(stddev).not(1.0).query.get.map { res =>
+          res(0)._2 ==~ stddev1
+          res(1)._2 ==~ stddev2
+        }
+        _ <- Entity.i.a1.int(stddev).not(stddev1).query.get.map(_.head._2 ==~ stddev2)
 
-        _ <- Entity.i.a1.int(stddev).<(stddev2).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.int(stddev).<(stddev2).query.get.map(_.head._2 ==~ stddev1)
         _ <- Entity.i.a1.int(stddev).<(stddev1).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.int(stddev).<=(stddev2).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.int(stddev).<=(stddev1).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.int(stddev).<=(stddev2).query.get.map { res =>
+          res(0)._2 ==~ stddev1
+          res(1)._2 ==~ stddev2
+        }
+        _ <- Entity.i.a1.int(stddev).<=(stddev1).query.get.map(_.head._2 ==~ stddev1)
 
-        _ <- Entity.i.a1.int(stddev).>(stddev1).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.int(stddev).>(stddev1).query.get.map(_.head._2 ==~ stddev2)
         _ <- Entity.i.a1.int(stddev).>(stddev2).query.get.map(_ ==> Nil)
 
-        _ <- Entity.i.a1.int(stddev).>=(stddev1).query.get.map(_ ==> List(a, b))
-        _ <- Entity.i.a1.int(stddev).>=(stddev2).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.int(stddev).>=(stddev1).query.get.map { res =>
+          res(0)._2 ==~ stddev1
+          res(1)._2 ==~ stddev2
+        }
+        _ <- Entity.i.a1.int(stddev).>=(stddev2).query.get.map(_.head._2 ==~ stddev2)
       } yield ()
     }
   }

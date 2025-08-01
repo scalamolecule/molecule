@@ -118,29 +118,27 @@ trait QueryExprOne_postgresql
       case "Boolean" | "UUID" => "::text"
       case _                  => ""
     }
-    def addAggrOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
-    val castAggrOpV = aggrOpValue match {
-      case Some(OneBoolean(_)) => "::text"
-      case Some(OneUUID(_))    => "::text"
-      case _                   => ""
-    }
+    def havingOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
+
+    lazy val castAggrOpV = getCast(aggrOpValue, res)
 
     // Replace find/casting with aggregate function/cast
     select -= col
     fn match {
       case "distinct" =>
+        aggregate = true
         select += s"ARRAY_AGG(DISTINCT $col)"
         groupByCols -= col
-        aggregate = true
         castStrategy.replace(res.array2set)
 
       case "min" =>
+        aggregate = true
         select += s"MIN($col$castText)"
         groupByCols -= col
-        aggregate = true
-        addAggrOp(s"MIN($col$castAggrOpV)")
+        havingOp(s"MIN($col$castAggrOpV)")
 
       case "mins" =>
+        aggregate = true
         select +=
           s"""TRIM_ARRAY(
              |    ARRAY_AGG(DISTINCT $col order by $col ASC),
@@ -150,16 +148,16 @@ trait QueryExprOne_postgresql
              |    )
              |  )""".stripMargin
         groupByCols -= col
-        aggregate = true
         castStrategy.replace(res.array2set)
 
       case "max" =>
+        aggregate = true
         select += s"MAX($col$castText)"
         groupByCols -= col
-        aggregate = true
-        addAggrOp(s"MAX($col$castAggrOpV)")
+        havingOp(s"MAX($col$castAggrOpV)")
 
       case "maxs" =>
+        aggregate = true
         select +=
           s"""TRIM_ARRAY(
              |    ARRAY_AGG(DISTINCT $col order by $col DESC),
@@ -169,17 +167,18 @@ trait QueryExprOne_postgresql
              |    )
              |  )""".stripMargin
         groupByCols -= col
-        aggregate = true
         castStrategy.replace(res.array2set)
 
       case "sample" =>
         distinct = false
         select += col
-        addAggrOp("RAND()")
+        //        havingOp("RAND()")
+        addWhere(col, aggrOp, aggrOpValue, res)
         orderBy += ((level, -1, "RANDOM()", ""))
         hardLimit = 1
 
       case "samples" =>
+        aggregate = true
         select +=
           s"""TRIM_ARRAY(
              |    ARRAY_AGG($col order by random()),
@@ -189,55 +188,77 @@ trait QueryExprOne_postgresql
              |    )
              |  )""".stripMargin
         groupByCols -= col
-        aggregate = true
         castStrategy.replace(res.array2set)
 
       case "count" =>
+        aggregate = true
         distinct = false
         selectWithOrder(col, "COUNT", "")
         groupByCols -= col
-        aggregate = true
-        addAggrOp(s"COUNT($col)")
+        havingOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
+        aggregate = true
         distinct = false
         selectWithOrder(col, "COUNT")
         groupByCols -= col
-        aggregate = true
-        addAggrOp(s"COUNT(DISTINCT $col)")
+        havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
-        selectWithOrder(col, "SUM", "")
-        groupByCols -= col
         aggregate = true
-        addAggrOp(s"SUM($col)")
+        groupByCols -= col
+        selectWithOrder(col, "SUM", "", "", "ROUND(", s"$castAggrOpV, 10)")
+        addHaving(baseType, fn, s"ROUND(SUM($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case "median" =>
-        groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "percentile_cont", "0.5) WITHIN GROUP (ORDER BY ")
+        groupByCols -= col
+        aggrOp.fold {
+          selectWithOrder(col, "percentile_cont", "0.5) WITHIN GROUP (ORDER BY ")
+        } { op =>
+          selectWithOrder(col, "percentile_cont(0.5) WITHIN GROUP (ORDER BY ", "", "", "ROUND(", s")$castAggrOpV, 10)")
+          addHaving(baseType, fn, s"ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY $col)$castAggrOpV, 10)",
+            aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
+
+        }
 
       case "avg" =>
-        selectWithOrder(col, "AVG", "")
-        groupByCols -= col
-        addAggrOp(s"AVG($col)")
         aggregate = true
+        selectWithOrder(col, "AVG", "", "", "ROUND(", s"$castAggrOpV, 10)")
+        groupByCols -= col
+        addHaving(baseType, fn, s"ROUND(AVG($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case "variance" =>
-        selectWithOrder(col, "VAR_POP", "")
-        groupByCols -= col
-        addAggrOp(s"VAR_POP($col)")
         aggregate = true
+        selectWithOrder(col, "VAR_POP", "", "", "ROUND(", s"$castAggrOpV, 10)")
+        groupByCols -= col
+        addHaving(baseType, fn, s"ROUND(VAR_POP($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case "stddev" =>
+        aggregate = true
         selectWithOrder(col, "STDDEV_POP", "")
         groupByCols -= col
-        addAggrOp(s"STDDEV_POP($col)")
-        aggregate = true
+        addHaving(baseType, fn, s"ROUND(STDDEV_POP($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case other => unexpectedKw(other)
+    }
+  }
+
+  private def getCast[T: ClassTag](aggrOpValue: Option[Value], res: ResOne[T]): String = {
+    aggrOpValue.fold(
+      res.tpe match {
+        case "Double"     => "::NUMERIC"
+        case "BigDecimal" => "::DECIMAL"
+        case _            => ""
+      }
+    ) {
+      case OneDouble(_)     => "::DECIMAL"
+      case OneBigDecimal(_) => "::DECIMAL"
+      case OneBoolean(_)    => "::text"
+      case OneUUID(_)       => "::text"
+      case _                => ""
     }
   }
 }

@@ -41,7 +41,7 @@ trait QueryExprOne_mysql
     lazy val sep     = "0x1D" // Use invisible ascii Group Selector to separate concatenated values
     lazy val sepChar = 29.toChar
     lazy val n       = optN.getOrElse(0)
-    def addAggrOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
+    def havingOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
 
     // If large number of mins/maxs/samples is needed, group_concat max size can be raised from default 1024 char
     // https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_group_concat_max_len
@@ -49,90 +49,96 @@ trait QueryExprOne_mysql
     select -= col
     fn match {
       case "distinct" =>
+        aggregate = true
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
-        aggregate = true
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
 
       case "min" =>
+        aggregate = true
         select += s"MIN($col)"
         groupByCols -= col
-        aggregate = true
-        addAggrOp(s"MIN($col)")
+        havingOp(s"MIN($col)")
 
       case "mins" =>
+        aggregate = true
         select += s"GROUP_CONCAT(DISTINCT $col SEPARATOR $sep)"
         groupByCols -= col
-        aggregate = true
         castStrategy.replace((row: RS, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
 
       case "max" =>
+        aggregate = true
         select += s"MAX($col)"
         groupByCols -= col
-        aggregate = true
-        addAggrOp(s"MAX($col)")
+        havingOp(s"MAX($col)")
 
       case "maxs" =>
+        aggregate = true
         select += s"GROUP_CONCAT(DISTINCT $col ORDER BY $col DESC SEPARATOR $sep)"
         groupByCols -= col
-        aggregate = true
         castStrategy.replace((row: RS, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
 
       case "sample" =>
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on sample not implemented for this database.")
+        }
+        aggregate = true
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
-        aggregate = true
+        havingOp("RAND()")
         castStrategy.replace((row: RS, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
           val rnd   = new Random().nextInt(array.length)
           array(rnd)
         })
-        addAggrOp("RAND()")
 
       case "samples" =>
+        aggregate = true
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
-        aggregate = true
         castStrategy.replace((row: RS, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
           Random.shuffle(array.toSet).take(n)
         })
 
       case "count" =>
-        selectWithOrder(col, "COUNT", "")
-        distinct = false
-        groupByCols -= col
         aggregate = true
-        addAggrOp(s"COUNT($col)")
+        distinct = false
+        selectWithOrder(col, "COUNT", "")
+        groupByCols -= col
+        havingOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
-        selectWithOrder(col, "COUNT")
-        distinct = false
-        groupByCols -= col
         aggregate = true
-        addAggrOp(s"COUNT(DISTINCT $col)")
+        distinct = false
+        selectWithOrder(col, "COUNT")
+        groupByCols -= col
+        havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
-        selectWithOrder(col, "SUM", "")
-        groupByCols -= col
         aggregate = true
-        addAggrOp(s"SUM($col)")
+        selectWithOrder(col, "SUM", "", "", "ROUND(", ", 6)")
+        groupByCols -= col
+        havingOp(s"ROUND(SUM($col), 6)")
 
       case "median" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by median not implemented for this database.")
         }
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on median not implemented for this database.")
+        }
+        aggregate = true
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
-        aggregate = true
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
@@ -141,19 +147,22 @@ trait QueryExprOne_mysql
         )
 
       case "avg" =>
-        selectWithOrder(col, "AVG", "")
-        groupByCols -= col
-        addAggrOp(s"AVG($col)")
         aggregate = true
+        selectWithOrder(col, "AVG", "", "", "ROUND(", ", 6)")
+        groupByCols -= col
+        havingOp(s"ROUND(AVG($col), 6)")
 
       case "variance" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by variance not implemented for this database.")
         }
-        groupByCols -= col
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on variance not implemented for this database.")
+        }
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
-        addAggrOp(s"VAR_POP($col)")
+        groupByCols -= col
+        havingOp(s"VAR_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
@@ -165,10 +174,13 @@ trait QueryExprOne_mysql
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by standard deviation not implemented for this database.")
         }
-        groupByCols -= col
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on stddev not implemented for this database.")
+        }
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
-        addAggrOp(s"STDDEV_POP($col)")
+        groupByCols -= col
+        havingOp(s"STDDEV_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)

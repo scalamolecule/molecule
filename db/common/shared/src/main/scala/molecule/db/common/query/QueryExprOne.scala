@@ -445,24 +445,25 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   ): Unit = {
     checkAggrOne()
     lazy val n = optN.getOrElse(0)
-    def addAggrOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
+    def havingOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
 
     // Replace find/casting with aggregate function/cast
     select -= col
     fn match {
       case "distinct" =>
+        aggregate = true
         select += s"ARRAY_AGG(DISTINCT $col)"
         groupByCols -= col
-        aggregate = true
         castStrategy.replace(res.array2set)
 
       case "min" =>
+        aggregate = true
         select += s"MIN($col)"
         groupByCols -= col
-        aggregate = true
-        addAggrOp(s"MIN($col)")
+        havingOp(s"MIN($col)")
 
       case "mins" =>
+        aggregate = true
         select +=
           s"""ARRAY_SLICE(
              |    ARRAY_AGG(DISTINCT $col order by $col ASC),
@@ -473,16 +474,16 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
              |    )
              |  )""".stripMargin
         groupByCols -= col
-        aggregate = true
         castStrategy.replace(res.array2set)
 
       case "max" =>
+        aggregate = true
         select += s"MAX($col)"
         groupByCols -= col
-        aggregate = true
-        addAggrOp(s"MAX($col)")
+        havingOp(s"MAX($col)")
 
       case "maxs" =>
+        aggregate = true
         select +=
           s"""ARRAY_SLICE(
              |    ARRAY_AGG(DISTINCT $col order by $col DESC),
@@ -493,17 +494,17 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
              |    )
              |  )""".stripMargin
         groupByCols -= col
-        aggregate = true
         castStrategy.replace(res.array2set)
 
       case "sample" =>
         distinct = false
         select += col
+        addWhere(col, aggrOp, aggrOpValue, res)
         orderBy += ((level, -1, "RAND()", ""))
         hardLimit = 1
-        addWhere(col, aggrOp, aggrOpValue, res)
 
       case "samples" =>
+        aggregate = true
         select +=
           s"""ARRAY_SLICE(
              |    ARRAY_AGG(DISTINCT $col order by RAND()),
@@ -514,54 +515,53 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
              |    )
              |  )""".stripMargin
         groupByCols -= col
-        aggregate = true
         castStrategy.replace(res.array2set)
 
       case "count" =>
-        distinct = false
-        groupByCols -= col
         aggregate = true
+        distinct = false
         selectWithOrder(col, "COUNT", "")
-        addAggrOp(s"COUNT($col)")
+        groupByCols -= col
+        havingOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
-        distinct = false
-        groupByCols -= col
         aggregate = true
+        distinct = false
         selectWithOrder(col, "COUNT")
-        addAggrOp(s"COUNT(DISTINCT $col)")
+        groupByCols -= col
+        havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
-        groupByCols -= col
         aggregate = true
         selectWithOrder(col, "SUM", "")
-        addAggrOp(s"SUM($col)")
+        groupByCols -= col
+        havingOp(s"SUM($col)")
 
       case "median" =>
-        groupByCols -= col
         aggregate = true
         selectWithOrder(col, "MEDIAN", "")
-        addAggrOp(s"MEDIAN($col)")
+        groupByCols -= col
+        havingOp(s"MEDIAN($col)")
 
       case "avg" =>
-        groupByCols -= col
         aggregate = true
         selectWithOrder(col, "AVG", "")
-        addAggrOp(s"AVG($col)")
+        groupByCols -= col
+        havingOp(s"AVG($col)")
 
       case "variance" =>
-        groupByCols -= col
         aggregate = true
         selectWithOrder(col, "VAR_POP", "")
-        addAggrOp(s"VAR_POP($col)")
+        groupByCols -= col
+        havingOp(s"VAR_POP($col)")
 
       case "stddev" =>
-        groupByCols -= col
         aggregate = true
         selectWithOrder(col, "STDDEV_POP", "")
-        addAggrOp(s"STDDEV_POP($col)")
+        groupByCols -= col
+        havingOp(s"STDDEV_POP($col)")
 
       case other => unexpectedKw(other)
     }
@@ -590,17 +590,18 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     fn: String,
     distinct: String = "DISTINCT ",
     cast: String = "",
+    prefix: String = "",
     suffix: String = ""
   ): Unit = {
     if (orderBy.nonEmpty && orderBy.last._3 == col) {
       // order by aggregate alias instead
       val alias = col.replace('.', '_') + "_" + fn.toLowerCase
-      select += s"$fn($distinct$col$cast)$suffix $alias"
+      select += s"$prefix$fn($distinct$col$cast)$suffix $alias"
       val (level, _, _, dir) = orderBy.last
       orderBy.remove(orderBy.size - 1)
       orderBy += ((level, 1, alias, dir))
     } else {
-      select += s"$fn($distinct$col$cast)$suffix"
+      select += s"$prefix$fn($distinct$col$cast)$suffix"
     }
   }
 
@@ -622,7 +623,9 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     expr: String,
     aggrOp: Option[Op],
     aggrOpValue: Option[Value],
-    res: ResOne[T]
+    res: ResOne[T] ,
+    prefix: String = "",
+    suffix: String = "",
   ): Unit = {
     val op = getAggrOp(aggrOp)
     if (baseType == "Float" && aggrOp.isDefined) {
@@ -641,28 +644,28 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
         binders += ((ps: PrepStmt) => res.bind(ps, paramIndex, bindIndexStable, bindValues(bindIndexStable)))
         having += s"$expr $op ?"
       } {
-        case OneString(v)         => having += s"$expr $op " + one2sqlString(v)
-        case OneInt(v)            => having += s"$expr $op " + one2sqlInt(v)
-        case OneLong(v)           => having += s"$expr $op " + one2sqlLong(v)
-        case OneFloat(v)          => having += s"$expr $op " + one2sqlFloat(v)
-        case OneDouble(v)         => having += s"$expr $op " + one2sqlDouble(v)
-        case OneBoolean(v)        => having += s"$expr $op " + one2sqlBoolean(v)
-        case OneBigInt(v)         => having += s"$expr $op " + one2sqlBigInt(v)
-        case OneBigDecimal(v)     => having += s"$expr $op " + one2sqlBigDecimal(v)
-        case OneDate(v)           => having += s"$expr $op " + one2sqlDate(v)
-        case OneDuration(v)       => having += s"$expr $op " + one2sqlDuration(v)
-        case OneInstant(v)        => having += s"$expr $op " + one2sqlInstant(v)
-        case OneLocalDate(v)      => having += s"$expr $op " + one2sqlLocalDate(v)
-        case OneLocalTime(v)      => having += s"$expr $op " + one2sqlLocalTime(v)
-        case OneLocalDateTime(v)  => having += s"$expr $op " + one2sqlLocalDateTime(v)
-        case OneOffsetTime(v)     => having += s"$expr $op " + one2sqlOffsetTime(v)
-        case OneOffsetDateTime(v) => having += s"$expr $op " + one2sqlOffsetDateTime(v)
-        case OneZonedDateTime(v)  => having += s"$expr $op " + one2sqlZonedDateTime(v)
-        case OneUUID(v)           => having += s"$expr $op " + one2sqlUUID(v)
-        case OneURI(v)            => having += s"$expr $op " + one2sqlURI(v)
-        case OneByte(v)           => having += s"$expr $op " + one2sqlByte(v)
-        case OneShort(v)          => having += s"$expr $op " + one2sqlShort(v)
-        case OneChar(v)           => having += s"$expr $op " + one2sqlChar(v)
+        case OneString(v)         => having += s"$expr $op $prefix" + one2sqlString(v) + suffix
+        case OneInt(v)            => having += s"$expr $op $prefix" + one2sqlInt(v) + suffix
+        case OneLong(v)           => having += s"$expr $op $prefix" + one2sqlLong(v) + suffix
+        case OneFloat(v)          => having += s"$expr $op $prefix" + one2sqlFloat(v) + suffix
+        case OneDouble(v)         => having += s"$expr $op $prefix" + one2sqlDouble(v) + suffix
+        case OneBoolean(v)        => having += s"$expr $op $prefix" + one2sqlBoolean(v) + suffix
+        case OneBigInt(v)         => having += s"$expr $op $prefix" + one2sqlBigInt(v) + suffix
+        case OneBigDecimal(v)     => having += s"$expr $op $prefix" + one2sqlBigDecimal(v) + suffix
+        case OneDate(v)           => having += s"$expr $op $prefix" + one2sqlDate(v) + suffix
+        case OneDuration(v)       => having += s"$expr $op $prefix" + one2sqlDuration(v) + suffix
+        case OneInstant(v)        => having += s"$expr $op $prefix" + one2sqlInstant(v) + suffix
+        case OneLocalDate(v)      => having += s"$expr $op $prefix" + one2sqlLocalDate(v) + suffix
+        case OneLocalTime(v)      => having += s"$expr $op $prefix" + one2sqlLocalTime(v) + suffix
+        case OneLocalDateTime(v)  => having += s"$expr $op $prefix" + one2sqlLocalDateTime(v) + suffix
+        case OneOffsetTime(v)     => having += s"$expr $op $prefix" + one2sqlOffsetTime(v) + suffix
+        case OneOffsetDateTime(v) => having += s"$expr $op $prefix" + one2sqlOffsetDateTime(v) + suffix
+        case OneZonedDateTime(v)  => having += s"$expr $op $prefix" + one2sqlZonedDateTime(v) + suffix
+        case OneUUID(v)           => having += s"$expr $op $prefix" + one2sqlUUID(v) + suffix
+        case OneURI(v)            => having += s"$expr $op $prefix" + one2sqlURI(v) + suffix
+        case OneByte(v)           => having += s"$expr $op $prefix" + one2sqlByte(v) + suffix
+        case OneShort(v)          => having += s"$expr $op $prefix" + one2sqlShort(v) + suffix
+        case OneChar(v)           => having += s"$expr $op $prefix" + one2sqlChar(v) + suffix
         case _                    => throw new Exception("Unexpected Value type for aggregation Having clause.")
       }
     }

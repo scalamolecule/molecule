@@ -112,7 +112,7 @@ trait QueryExprOne_sqlite
   ): Unit = {
     checkAggrOne()
     lazy val n = optN.getOrElse(0)
-    def addAggrOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
+    def havingOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
 
     // Replace find/casting with aggregate function/cast
     select -= col
@@ -126,79 +126,78 @@ trait QueryExprOne_sqlite
 
     fn match {
       case "distinct" =>
+        aggregate = true
         select += s"json_group_array(DISTINCT $col)"
         groupByCols -= col
-        aggregate = true
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
 
       case "min" =>
+        aggregate = true
         select += s"MIN($col)"
         groupByCols -= col
-        aggregate = true
-        addAggrOp(s"MIN($col)")
+        havingOp(s"MIN($col)")
 
       case "mins" =>
-        select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "ASC"))
-        select += "<replace>" // add to maintain correct indexing
-        groupByCols -= col
         aggregate = true
+        select += "<replace>" // add to maintain correct indexing
+        select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "ASC"))
+        groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
 
       case "max" =>
+        aggregate = true
         select += s"MAX($col)"
         groupByCols -= col
-        aggregate = true
-        addAggrOp(s"MAX($col)")
+        havingOp(s"MAX($col)")
 
       case "maxs" =>
+        aggregate = true
         select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "DESC"))
         select += "<replace>" // add to maintain correct indexing
         groupByCols -= col
-        aggregate = true
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
 
       case "sample" =>
-        select2 = select2 + (select.length -> sampleSelect(ent, attr))
         select += "<replace>" // add to maintain correct indexing
-        //        addAggrOp("RAND()")
+        select2 = select2 + (select.length -> sampleSelect(ent, attr))
         addWhere(col, aggrOp, aggrOpValue, res) // ?
 
       case "samples" =>
-        select2 = select2 + (select.length -> samplesSelect(ent, attr, n))
-        select += "<replace>" // add to maintain correct indexing
-        groupByCols -= col
         aggregate = true
+        select += "<replace>" // add to maintain correct indexing
+        select2 = select2 + (select.length -> samplesSelect(ent, attr, n))
+        groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
 
       case "count" =>
-        distinct = false
-        groupByCols -= col
         aggregate = true
+        distinct = false
         selectWithOrder(col, "COUNT", "")
-        addAggrOp(s"COUNT($col)")
+        groupByCols -= col
+        havingOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
-        distinct = false
-        groupByCols -= col
         aggregate = true
+        distinct = false
         selectWithOrder(col, "COUNT")
-        addAggrOp(s"COUNT(DISTINCT $col)")
+        groupByCols -= col
+        havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
-        groupByCols -= col
         aggregate = true
         selectWithOrder(col, "SUM", "")
-        addAggrOp(s"SUM($col)")
+        groupByCols -= col
+        havingOp(s"SUM($col)")
 
       case "median" =>
         //        select += s"AVG(_$col)"
@@ -221,30 +220,30 @@ trait QueryExprOne_sqlite
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by median not implemented for this database.")
         }
+        aggregate = true
         // Falling back on calculating the median for each returned json array of values
         select += s"json_group_array($col)"
         groupByCols -= col
-        aggregate = true
         castStrategy.replace(
           (row: RS, paramIndex: Int) =>
             getMedian(jsonArray2doubles(row.getString(paramIndex)))
         )
 
       case "avg" =>
-        groupByCols -= col
         aggregate = true
         selectWithOrder(col, "AVG", "")
-        addAggrOp(s"AVG($col)")
+        groupByCols -= col
+        havingOp(s"AVG($col)")
 
       case "variance" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by variance not implemented for this database.")
         }
+        aggregate = true
         // Falling back on calculating the median for each returned json array of values
         select += s"json_group_array($col)"
         groupByCols -= col
-        aggregate = true
-        addAggrOp(s"VAR_POP($col)")
+        havingOp(s"VAR_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) =>
             varianceOf(jsonArray2doubles(row.getString(paramIndex)))
@@ -254,10 +253,10 @@ trait QueryExprOne_sqlite
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by standard deviation not implemented for this database.")
         }
-        groupByCols -= col
         aggregate = true
         select += s"json_group_array($col)"
-        addAggrOp(s"STDDEV_POP($col)")
+        groupByCols -= col
+        havingOp(s"STDDEV_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) =>
             stdDevOf(jsonArray2doubles(row.getString(paramIndex)))
