@@ -80,26 +80,49 @@ case class AggrNum_Float(
       // 1 attribute
       _ <- Entity.float(median).query.get.map(_.head ==~ float2.toString.toDouble) // middle number
 
-      _ <- Entity.float(median)(double1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(median).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(median).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(median).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(median).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(median).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-
-
       // n attributes
       _ <- Entity.i.a1.float(median).query.get.map { res =>
         res(0)._2 ==~ (float1 + float2) / 2.0
         res(1)._2 ==~ float5.toString.toDouble // middle number
       }
-      _ <- Entity.i.float(median)(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(median).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(median).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(median).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(median).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(median).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
     } yield ()
+  }
+
+
+  "median ops" - types {
+    if (Seq("mariadb", "mysql", "sqlite").contains(database)) {
+      Entity.float(median)(1.0).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on median not implemented for this database."
+        }
+    } else {
+      given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+      for {
+        _ <- Entity.i.float.insert(List(
+          (1, float1),
+          (1, float2),
+          (2, float2),
+          (2, float5),
+          (2, float9),
+        )).transact
+
+        // 1 attribute
+        _ <- Entity.float(median)(double1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(median).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(median).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(median).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(median).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(median).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+
+        // n attributes
+        _ <- Entity.i.float(median)(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(median).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(median).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(median).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(median).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(median).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+      } yield ()
+    }
   }
 
 
@@ -153,25 +176,48 @@ case class AggrNum_Float(
       // 1 attribute
       _ <- Entity.float(variance).query.get.map(_.head ==~ varianceOf(float1, float2, float2, float3, float4))
 
-      _ <- Entity.float(variance)(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(variance).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(variance).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(variance).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(variance).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(variance).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-
       // n attributes
       _ <- Entity.i.a1.float(variance).query.get.map { res =>
         res(0)._2 ==~ varianceOf(float1, float2)
         res(1)._2 ==~ varianceOf(float2, float3, float4)
       }
-      _ <- Entity.i.float(variance)(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(variance).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(variance).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(variance).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(variance).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(variance).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
     } yield ()
+  }
+
+  "variance ops" - types {
+    if (Seq("mariadb", "mysql", "sqlite").contains(database)) {
+      Entity.float(variance)(1.0).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on variance not implemented for this database."
+        }
+    } else {
+      given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+      for {
+        _ <- Entity.i.float.insert(List(
+          (1, float1),
+          (1, float2),
+          (2, float2),
+          (2, float3),
+          (2, float4),
+        )).transact
+
+        // 1 attribute
+        _ <- Entity.float(variance)(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(variance).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(variance).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(variance).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(variance).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(variance).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+
+        // n attributes
+        _ <- Entity.i.float(variance)(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(variance).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(variance).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(variance).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(variance).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(variance).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+      } yield ()
+    }
   }
 
 
@@ -189,24 +235,47 @@ case class AggrNum_Float(
       // 1 attribute
       _ <- Entity.float(stddev).query.get.map(_.head ==~ stdDevOf(float1, float2, float2, float3, float4))
 
-      _ <- Entity.float(stddev)(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(stddev).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(stddev).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(stddev).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(stddev).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.float(stddev).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-
       // n attributes
       _ <- Entity.i.a1.float(stddev).query.get.map { res =>
         res(0)._2 ==~ stdDevOf(float1, float2)
         res(1)._2 ==~ stdDevOf(float2, float3, float4)
       }
-      _ <- Entity.i.float(stddev)(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(stddev).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(stddev).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(stddev).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(stddev).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
-      _ <- Entity.i.float(stddev).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
     } yield ()
+  }
+
+  "stddev ops" - types {
+    if (Seq("mariadb", "mysql", "sqlite").contains(database)) {
+      Entity.float(stddev)(1.0).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on stddev not implemented for this database."
+        }
+    } else {
+      given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+      for {
+        _ <- Entity.i.float.insert(List(
+          (1, float1),
+          (1, float2),
+          (2, float2),
+          (2, float3),
+          (2, float4),
+        )).transact
+
+        // 1 attribute
+        _ <- Entity.float(stddev)(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(stddev).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(stddev).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(stddev).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(stddev).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.float(stddev).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+
+        // n attributes
+        _ <- Entity.i.float(stddev)(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(stddev).not(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(stddev).<(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(stddev).>(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(stddev).<=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+        _ <- Entity.i.float(stddev).>=(float1).query.get.map(_ ==> wrong).recover { case ModelError(err) => err ==> msg }
+      } yield ()
+    }
   }
 }

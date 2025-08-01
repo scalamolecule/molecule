@@ -166,7 +166,8 @@ trait QueryExprOne_sqlite
       case "sample" =>
         select2 = select2 + (select.length -> sampleSelect(ent, attr))
         select += "<replace>" // add to maintain correct indexing
-        addAggrOp("RAND()")
+        //        addAggrOp("RAND()")
+        addWhere(col, aggrOp, aggrOpValue, res) // ?
 
       case "samples" =>
         select2 = select2 + (select.length -> samplesSelect(ent, attr, n))
@@ -190,7 +191,7 @@ trait QueryExprOne_sqlite
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT")
-        addAggrOp(s"COUNT($col)")
+        addAggrOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>

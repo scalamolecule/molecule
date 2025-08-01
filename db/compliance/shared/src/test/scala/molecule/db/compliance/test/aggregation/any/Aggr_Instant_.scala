@@ -2,13 +2,13 @@
 package molecule.db.compliance.test.aggregation.any
 
 import java.time.Instant
+import molecule.base.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
-import org.scalactic.Equality
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 import org.scalactic.Equality
 
 case class Aggr_Instant_(
@@ -212,65 +212,82 @@ case class Aggr_Instant_(
 
 
   "sample" - types {
-    val all       = Set(instant1, instant2, instant3)
-    val (a, b, c) = ((1, instant1), (2, instant2), (3, instant3))
-    val allPairs  = List(a, b, c)
+    val all      = Set(instant1, instant2, instant3)
+    val allPairs = List((1, instant1), (2, instant2), (3, instant3))
     for {
       _ <- Entity.i.instant.insert(allPairs).transact
 
       // 1 attribute
       _ <- Entity.instant(sample).query.get.map(res => all.contains(res.head) ==> true)
 
-      // Checking for equality on a sample doesn't make sense
-      // _ <- Entity.instant(sample)(instant2).query.get.map(res => all.contains(res.head) ==> true)
-      // If you want a specific value, this would be the natural query
-      _ <- Entity.instant(instant2).query.get.map(_ ==> List(instant2))
-
-      _ <- Entity.instant(sample).not(instant2).query.get.map { res =>
-        List(instant1, instant3).contains(res.head) ==> true
-        (res.head == instant2) ==> false
-      }
-      _ <- Entity.instant(sample).<(instant3).query.get.map { res =>
-        List(instant1, instant2).contains(res.head) ==> true
-        (res.head == instant3) ==> false
-      }
-      _ <- Entity.instant(sample).<=(instant2).query.get.map { res =>
-        List(instant1, instant2).contains(res.head) ==> true
-        (res.head == instant3) ==> false
-      }
-      _ <- Entity.instant(sample).>(instant1).query.get.map { res =>
-        List(instant2, instant3).contains(res.head) ==> true
-        (res.head == instant1) ==> false
-      }
-      _ <- Entity.instant(sample).>=(instant2).query.get.map { res =>
-        List(instant2, instant3).contains(res.head) ==> true
-        (res.head == instant1) ==> false
-      }
-
       // 1 attribute
       _ <- Entity.i.instant(sample).query.get.map(res => allPairs.contains(res.head) ==> true)
-
-      _ <- Entity.i.instant(sample).not(instant2).query.get.map { res =>
-        List(a, c).contains(res.head) ==> true
-        (res.head == b) ==> false
-      }
-      _ <- Entity.i.instant(sample).<(instant3).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.instant(sample).<=(instant2).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.instant(sample).>(instant1).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
-      _ <- Entity.i.instant(sample).>=(instant2).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
     } yield ()
+  }
+
+  "sample ops" - types {
+    if (Seq("mariadb", "mysql").contains(database)) {
+      Entity.instant(sample)(instant1).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on sample not implemented for this database."
+        }
+    } else {
+      val all       = Set(instant1, instant2, instant3)
+      val (a, b, c) = ((1, instant1), (2, instant2), (3, instant3))
+      val allPairs  = List(a, b, c)
+      for {
+        _ <- Entity.i.instant.insert(allPairs).transact
+
+        // 1 attribute
+        // Checking for equality on a sample doesn't make sense
+        // _ <- Entity.instant(sample)(instant2).query.get.map(res => all.contains(res.head) ==> true)
+        // If you want a specific value, this would be the natural query
+        _ <- Entity.instant(instant2).query.get.map(_ ==> List(instant2))
+
+        _ <- Entity.instant(sample).not(instant2).query.get.map { res =>
+          List(instant1, instant3).contains(res.head) ==> true
+          (res.head == instant2) ==> false
+        }
+        _ <- Entity.instant(sample).<(instant3).query.get.map { res =>
+          List(instant1, instant2).contains(res.head) ==> true
+          (res.head == instant3) ==> false
+        }
+        _ <- Entity.instant(sample).<=(instant2).query.get.map { res =>
+          List(instant1, instant2).contains(res.head) ==> true
+          (res.head == instant3) ==> false
+        }
+        _ <- Entity.instant(sample).>(instant1).query.get.map { res =>
+          List(instant2, instant3).contains(res.head) ==> true
+          (res.head == instant1) ==> false
+        }
+        _ <- Entity.instant(sample).>=(instant2).query.get.map { res =>
+          List(instant2, instant3).contains(res.head) ==> true
+          (res.head == instant1) ==> false
+        }
+
+        // 1 attribute
+        _ <- Entity.i.instant(sample).not(instant2).query.get.map { res =>
+          List(a, c).contains(res.head) ==> true
+          (res.head == b) ==> false
+        }
+        _ <- Entity.i.instant(sample).<(instant3).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.instant(sample).<=(instant2).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.instant(sample).>(instant1).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+        _ <- Entity.i.instant(sample).>=(instant2).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+      } yield ()
+    }
   }
 
 

@@ -2,13 +2,13 @@
 package molecule.db.compliance.test.aggregation.any
 
 import java.time.LocalDateTime
+import molecule.base.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
-import org.scalactic.Equality
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 import org.scalactic.Equality
 
 case class Aggr_LocalDateTime_(
@@ -212,65 +212,82 @@ case class Aggr_LocalDateTime_(
 
 
   "sample" - types {
-    val all       = Set(localDateTime1, localDateTime2, localDateTime3)
-    val (a, b, c) = ((1, localDateTime1), (2, localDateTime2), (3, localDateTime3))
-    val allPairs  = List(a, b, c)
+    val all      = Set(localDateTime1, localDateTime2, localDateTime3)
+    val allPairs = List((1, localDateTime1), (2, localDateTime2), (3, localDateTime3))
     for {
       _ <- Entity.i.localDateTime.insert(allPairs).transact
 
       // 1 attribute
       _ <- Entity.localDateTime(sample).query.get.map(res => all.contains(res.head) ==> true)
 
-      // Checking for equality on a sample doesn't make sense
-      // _ <- Entity.localDateTime(sample)(localDateTime2).query.get.map(res => all.contains(res.head) ==> true)
-      // If you want a specific value, this would be the natural query
-      _ <- Entity.localDateTime(localDateTime2).query.get.map(_ ==> List(localDateTime2))
-
-      _ <- Entity.localDateTime(sample).not(localDateTime2).query.get.map { res =>
-        List(localDateTime1, localDateTime3).contains(res.head) ==> true
-        (res.head == localDateTime2) ==> false
-      }
-      _ <- Entity.localDateTime(sample).<(localDateTime3).query.get.map { res =>
-        List(localDateTime1, localDateTime2).contains(res.head) ==> true
-        (res.head == localDateTime3) ==> false
-      }
-      _ <- Entity.localDateTime(sample).<=(localDateTime2).query.get.map { res =>
-        List(localDateTime1, localDateTime2).contains(res.head) ==> true
-        (res.head == localDateTime3) ==> false
-      }
-      _ <- Entity.localDateTime(sample).>(localDateTime1).query.get.map { res =>
-        List(localDateTime2, localDateTime3).contains(res.head) ==> true
-        (res.head == localDateTime1) ==> false
-      }
-      _ <- Entity.localDateTime(sample).>=(localDateTime2).query.get.map { res =>
-        List(localDateTime2, localDateTime3).contains(res.head) ==> true
-        (res.head == localDateTime1) ==> false
-      }
-
       // 1 attribute
       _ <- Entity.i.localDateTime(sample).query.get.map(res => allPairs.contains(res.head) ==> true)
-
-      _ <- Entity.i.localDateTime(sample).not(localDateTime2).query.get.map { res =>
-        List(a, c).contains(res.head) ==> true
-        (res.head == b) ==> false
-      }
-      _ <- Entity.i.localDateTime(sample).<(localDateTime3).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.localDateTime(sample).<=(localDateTime2).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.localDateTime(sample).>(localDateTime1).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
-      _ <- Entity.i.localDateTime(sample).>=(localDateTime2).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
     } yield ()
+  }
+
+  "sample ops" - types {
+    if (Seq("mariadb", "mysql").contains(database)) {
+      Entity.localDateTime(sample)(localDateTime1).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on sample not implemented for this database."
+        }
+    } else {
+      val all       = Set(localDateTime1, localDateTime2, localDateTime3)
+      val (a, b, c) = ((1, localDateTime1), (2, localDateTime2), (3, localDateTime3))
+      val allPairs  = List(a, b, c)
+      for {
+        _ <- Entity.i.localDateTime.insert(allPairs).transact
+
+        // 1 attribute
+        // Checking for equality on a sample doesn't make sense
+        // _ <- Entity.localDateTime(sample)(localDateTime2).query.get.map(res => all.contains(res.head) ==> true)
+        // If you want a specific value, this would be the natural query
+        _ <- Entity.localDateTime(localDateTime2).query.get.map(_ ==> List(localDateTime2))
+
+        _ <- Entity.localDateTime(sample).not(localDateTime2).query.get.map { res =>
+          List(localDateTime1, localDateTime3).contains(res.head) ==> true
+          (res.head == localDateTime2) ==> false
+        }
+        _ <- Entity.localDateTime(sample).<(localDateTime3).query.get.map { res =>
+          List(localDateTime1, localDateTime2).contains(res.head) ==> true
+          (res.head == localDateTime3) ==> false
+        }
+        _ <- Entity.localDateTime(sample).<=(localDateTime2).query.get.map { res =>
+          List(localDateTime1, localDateTime2).contains(res.head) ==> true
+          (res.head == localDateTime3) ==> false
+        }
+        _ <- Entity.localDateTime(sample).>(localDateTime1).query.get.map { res =>
+          List(localDateTime2, localDateTime3).contains(res.head) ==> true
+          (res.head == localDateTime1) ==> false
+        }
+        _ <- Entity.localDateTime(sample).>=(localDateTime2).query.get.map { res =>
+          List(localDateTime2, localDateTime3).contains(res.head) ==> true
+          (res.head == localDateTime1) ==> false
+        }
+
+        // 1 attribute
+        _ <- Entity.i.localDateTime(sample).not(localDateTime2).query.get.map { res =>
+          List(a, c).contains(res.head) ==> true
+          (res.head == b) ==> false
+        }
+        _ <- Entity.i.localDateTime(sample).<(localDateTime3).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.localDateTime(sample).<=(localDateTime2).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.localDateTime(sample).>(localDateTime1).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+        _ <- Entity.i.localDateTime(sample).>=(localDateTime2).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+      } yield ()
+    }
   }
 
 

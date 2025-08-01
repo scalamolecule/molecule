@@ -1,13 +1,13 @@
 // GENERATED CODE ********************************
 package molecule.db.compliance.test.aggregation.any
 
+import molecule.base.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
-import org.scalactic.Equality
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 import org.scalactic.Equality
 
 case class Aggr_Byte_(
@@ -211,65 +211,82 @@ case class Aggr_Byte_(
 
 
   "sample" - types {
-    val all       = Set(byte1, byte2, byte3)
-    val (a, b, c) = ((1, byte1), (2, byte2), (3, byte3))
-    val allPairs  = List(a, b, c)
+    val all      = Set(byte1, byte2, byte3)
+    val allPairs = List((1, byte1), (2, byte2), (3, byte3))
     for {
       _ <- Entity.i.byte.insert(allPairs).transact
 
       // 1 attribute
       _ <- Entity.byte(sample).query.get.map(res => all.contains(res.head) ==> true)
 
-      // Checking for equality on a sample doesn't make sense
-      // _ <- Entity.byte(sample)(byte2).query.get.map(res => all.contains(res.head) ==> true)
-      // If you want a specific value, this would be the natural query
-      _ <- Entity.byte(byte2).query.get.map(_ ==> List(byte2))
-
-      _ <- Entity.byte(sample).not(byte2).query.get.map { res =>
-        List(byte1, byte3).contains(res.head) ==> true
-        (res.head == byte2) ==> false
-      }
-      _ <- Entity.byte(sample).<(byte3).query.get.map { res =>
-        List(byte1, byte2).contains(res.head) ==> true
-        (res.head == byte3) ==> false
-      }
-      _ <- Entity.byte(sample).<=(byte2).query.get.map { res =>
-        List(byte1, byte2).contains(res.head) ==> true
-        (res.head == byte3) ==> false
-      }
-      _ <- Entity.byte(sample).>(byte1).query.get.map { res =>
-        List(byte2, byte3).contains(res.head) ==> true
-        (res.head == byte1) ==> false
-      }
-      _ <- Entity.byte(sample).>=(byte2).query.get.map { res =>
-        List(byte2, byte3).contains(res.head) ==> true
-        (res.head == byte1) ==> false
-      }
-
       // 1 attribute
       _ <- Entity.i.byte(sample).query.get.map(res => allPairs.contains(res.head) ==> true)
-
-      _ <- Entity.i.byte(sample).not(byte2).query.get.map { res =>
-        List(a, c).contains(res.head) ==> true
-        (res.head == b) ==> false
-      }
-      _ <- Entity.i.byte(sample).<(byte3).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.byte(sample).<=(byte2).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.byte(sample).>(byte1).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
-      _ <- Entity.i.byte(sample).>=(byte2).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
     } yield ()
+  }
+
+  "sample ops" - types {
+    if (Seq("mariadb", "mysql").contains(database)) {
+      Entity.byte(sample)(byte1).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on sample not implemented for this database."
+        }
+    } else {
+      val all       = Set(byte1, byte2, byte3)
+      val (a, b, c) = ((1, byte1), (2, byte2), (3, byte3))
+      val allPairs  = List(a, b, c)
+      for {
+        _ <- Entity.i.byte.insert(allPairs).transact
+
+        // 1 attribute
+        // Checking for equality on a sample doesn't make sense
+        // _ <- Entity.byte(sample)(byte2).query.get.map(res => all.contains(res.head) ==> true)
+        // If you want a specific value, this would be the natural query
+        _ <- Entity.byte(byte2).query.get.map(_ ==> List(byte2))
+
+        _ <- Entity.byte(sample).not(byte2).query.get.map { res =>
+          List(byte1, byte3).contains(res.head) ==> true
+          (res.head == byte2) ==> false
+        }
+        _ <- Entity.byte(sample).<(byte3).query.get.map { res =>
+          List(byte1, byte2).contains(res.head) ==> true
+          (res.head == byte3) ==> false
+        }
+        _ <- Entity.byte(sample).<=(byte2).query.get.map { res =>
+          List(byte1, byte2).contains(res.head) ==> true
+          (res.head == byte3) ==> false
+        }
+        _ <- Entity.byte(sample).>(byte1).query.get.map { res =>
+          List(byte2, byte3).contains(res.head) ==> true
+          (res.head == byte1) ==> false
+        }
+        _ <- Entity.byte(sample).>=(byte2).query.get.map { res =>
+          List(byte2, byte3).contains(res.head) ==> true
+          (res.head == byte1) ==> false
+        }
+
+        // 1 attribute
+        _ <- Entity.i.byte(sample).not(byte2).query.get.map { res =>
+          List(a, c).contains(res.head) ==> true
+          (res.head == b) ==> false
+        }
+        _ <- Entity.i.byte(sample).<(byte3).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.byte(sample).<=(byte2).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.byte(sample).>(byte1).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+        _ <- Entity.i.byte(sample).>=(byte2).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+      } yield ()
+    }
   }
 
 

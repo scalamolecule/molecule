@@ -1,7 +1,7 @@
 package molecule.db.mariadb.query
 
 import molecule.base.error.ModelError
-import molecule.core.dataModel.{Op, Value}
+import molecule.core.dataModel.*
 import molecule.db.common.javaSql.PrepStmt
 import molecule.db.common.query.{LambdasOne, Model2Query, QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
@@ -81,6 +81,9 @@ trait QueryExprOne_mariadb
         )
 
       case "sample" =>
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on sample not implemented for this database.")
+        }
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
@@ -113,23 +116,25 @@ trait QueryExprOne_mariadb
         distinct = false
         groupByCols -= col
         aggregate = true
-        addAggrOp(s"COUNT($col)")
+        addAggrOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
-        selectWithOrder(col, "SUM", "")
+        selectWithOrder(col, "ROUND(SUM", "", "", ", 6)")
         groupByCols -= col
         aggregate = true
-        addAggrOp(s"SUM($col)")
+        addAggrOp(s"ROUND(SUM($col), 6)")
 
       case "median" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by median not implemented for this database.")
         }
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on median not implemented for this database.")
+        }
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
-        addAggrOp(s"MEDIAN($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
@@ -138,14 +143,17 @@ trait QueryExprOne_mariadb
         )
 
       case "avg" =>
-        selectWithOrder(col, "AVG", "")
+        selectWithOrder(col, "ROUND(AVG", "", "", ", 6)")
         groupByCols -= col
-        addAggrOp(s"AVG($col)")
+        addAggrOp(s"ROUND(AVG($col), 6)")
         aggregate = true
 
       case "variance" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by variance not implemented for this database.")
+        }
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on variance not implemented for this database.")
         }
         groupByCols -= col
         aggregate = true
@@ -161,6 +169,9 @@ trait QueryExprOne_mariadb
       case "stddev" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by standard deviation not implemented for this database.")
+        }
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on stddev not implemented for this database.")
         }
         groupByCols -= col
         aggregate = true

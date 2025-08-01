@@ -205,7 +205,7 @@ trait QueryExprOne_postgresql
         selectWithOrder(col, "COUNT")
         groupByCols -= col
         aggregate = true
-        addAggrOp(s"COUNT($col)")
+        addAggrOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>

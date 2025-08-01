@@ -1,13 +1,13 @@
 // GENERATED CODE ********************************
 package molecule.db.compliance.test.aggregation.any
 
+import molecule.base.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
-import org.scalactic.Equality
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 import org.scalactic.Equality
 
 case class Aggr_Float_(
@@ -211,65 +211,82 @@ case class Aggr_Float_(
 
 
   "sample" - types {
-    val all       = Set(float1, float2, float3)
-    val (a, b, c) = ((1, float1), (2, float2), (3, float3))
-    val allPairs  = List(a, b, c)
+    val all      = Set(float1, float2, float3)
+    val allPairs = List((1, float1), (2, float2), (3, float3))
     for {
       _ <- Entity.i.float.insert(allPairs).transact
 
       // 1 attribute
       _ <- Entity.float(sample).query.get.map(res => all.contains(res.head) ==> true)
 
-      // Checking for equality on a sample doesn't make sense
-      // _ <- Entity.float(sample)(float2).query.get.map(res => all.contains(res.head) ==> true)
-      // If you want a specific value, this would be the natural query
-      _ <- Entity.float(float2).query.get.map(_ ==> List(float2))
-
-      _ <- Entity.float(sample).not(float2).query.get.map { res =>
-        List(float1, float3).contains(res.head) ==> true
-        (res.head == float2) ==> false
-      }
-      _ <- Entity.float(sample).<(float3).query.get.map { res =>
-        List(float1, float2).contains(res.head) ==> true
-        (res.head == float3) ==> false
-      }
-      _ <- Entity.float(sample).<=(float2).query.get.map { res =>
-        List(float1, float2).contains(res.head) ==> true
-        (res.head == float3) ==> false
-      }
-      _ <- Entity.float(sample).>(float1).query.get.map { res =>
-        List(float2, float3).contains(res.head) ==> true
-        (res.head == float1) ==> false
-      }
-      _ <- Entity.float(sample).>=(float2).query.get.map { res =>
-        List(float2, float3).contains(res.head) ==> true
-        (res.head == float1) ==> false
-      }
-
       // 1 attribute
       _ <- Entity.i.float(sample).query.get.map(res => allPairs.contains(res.head) ==> true)
-
-      _ <- Entity.i.float(sample).not(float2).query.get.map { res =>
-        List(a, c).contains(res.head) ==> true
-        (res.head == b) ==> false
-      }
-      _ <- Entity.i.float(sample).<(float3).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.float(sample).<=(float2).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.float(sample).>(float1).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
-      _ <- Entity.i.float(sample).>=(float2).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
     } yield ()
+  }
+
+  "sample ops" - types {
+    if (Seq("mariadb", "mysql").contains(database)) {
+      Entity.float(sample)(float1).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on sample not implemented for this database."
+        }
+    } else {
+      val all       = Set(float1, float2, float3)
+      val (a, b, c) = ((1, float1), (2, float2), (3, float3))
+      val allPairs  = List(a, b, c)
+      for {
+        _ <- Entity.i.float.insert(allPairs).transact
+
+        // 1 attribute
+        // Checking for equality on a sample doesn't make sense
+        // _ <- Entity.float(sample)(float2).query.get.map(res => all.contains(res.head) ==> true)
+        // If you want a specific value, this would be the natural query
+        _ <- Entity.float(float2).query.get.map(_ ==> List(float2))
+
+        _ <- Entity.float(sample).not(float2).query.get.map { res =>
+          List(float1, float3).contains(res.head) ==> true
+          (res.head == float2) ==> false
+        }
+        _ <- Entity.float(sample).<(float3).query.get.map { res =>
+          List(float1, float2).contains(res.head) ==> true
+          (res.head == float3) ==> false
+        }
+        _ <- Entity.float(sample).<=(float2).query.get.map { res =>
+          List(float1, float2).contains(res.head) ==> true
+          (res.head == float3) ==> false
+        }
+        _ <- Entity.float(sample).>(float1).query.get.map { res =>
+          List(float2, float3).contains(res.head) ==> true
+          (res.head == float1) ==> false
+        }
+        _ <- Entity.float(sample).>=(float2).query.get.map { res =>
+          List(float2, float3).contains(res.head) ==> true
+          (res.head == float1) ==> false
+        }
+
+        // 1 attribute
+        _ <- Entity.i.float(sample).not(float2).query.get.map { res =>
+          List(a, c).contains(res.head) ==> true
+          (res.head == b) ==> false
+        }
+        _ <- Entity.i.float(sample).<(float3).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.float(sample).<=(float2).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.float(sample).>(float1).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+        _ <- Entity.i.float(sample).>=(float2).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+      } yield ()
+    }
   }
 
 

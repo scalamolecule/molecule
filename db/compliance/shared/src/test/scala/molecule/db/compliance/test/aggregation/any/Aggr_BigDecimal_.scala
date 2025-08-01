@@ -1,13 +1,13 @@
 // GENERATED CODE ********************************
 package molecule.db.compliance.test.aggregation.any
 
+import molecule.base.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
-import org.scalactic.Equality
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 import org.scalactic.Equality
 
 case class Aggr_BigDecimal_(
@@ -211,65 +211,82 @@ case class Aggr_BigDecimal_(
 
 
   "sample" - types {
-    val all       = Set(bigDecimal1, bigDecimal2, bigDecimal3)
-    val (a, b, c) = ((1, bigDecimal1), (2, bigDecimal2), (3, bigDecimal3))
-    val allPairs  = List(a, b, c)
+    val all      = Set(bigDecimal1, bigDecimal2, bigDecimal3)
+    val allPairs = List((1, bigDecimal1), (2, bigDecimal2), (3, bigDecimal3))
     for {
       _ <- Entity.i.bigDecimal.insert(allPairs).transact
 
       // 1 attribute
       _ <- Entity.bigDecimal(sample).query.get.map(res => all.contains(res.head) ==> true)
 
-      // Checking for equality on a sample doesn't make sense
-      // _ <- Entity.bigDecimal(sample)(bigDecimal2).query.get.map(res => all.contains(res.head) ==> true)
-      // If you want a specific value, this would be the natural query
-      _ <- Entity.bigDecimal(bigDecimal2).query.get.map(_ ==> List(bigDecimal2))
-
-      _ <- Entity.bigDecimal(sample).not(bigDecimal2).query.get.map { res =>
-        List(bigDecimal1, bigDecimal3).contains(res.head) ==> true
-        (res.head == bigDecimal2) ==> false
-      }
-      _ <- Entity.bigDecimal(sample).<(bigDecimal3).query.get.map { res =>
-        List(bigDecimal1, bigDecimal2).contains(res.head) ==> true
-        (res.head == bigDecimal3) ==> false
-      }
-      _ <- Entity.bigDecimal(sample).<=(bigDecimal2).query.get.map { res =>
-        List(bigDecimal1, bigDecimal2).contains(res.head) ==> true
-        (res.head == bigDecimal3) ==> false
-      }
-      _ <- Entity.bigDecimal(sample).>(bigDecimal1).query.get.map { res =>
-        List(bigDecimal2, bigDecimal3).contains(res.head) ==> true
-        (res.head == bigDecimal1) ==> false
-      }
-      _ <- Entity.bigDecimal(sample).>=(bigDecimal2).query.get.map { res =>
-        List(bigDecimal2, bigDecimal3).contains(res.head) ==> true
-        (res.head == bigDecimal1) ==> false
-      }
-
       // 1 attribute
       _ <- Entity.i.bigDecimal(sample).query.get.map(res => allPairs.contains(res.head) ==> true)
-
-      _ <- Entity.i.bigDecimal(sample).not(bigDecimal2).query.get.map { res =>
-        List(a, c).contains(res.head) ==> true
-        (res.head == b) ==> false
-      }
-      _ <- Entity.i.bigDecimal(sample).<(bigDecimal3).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.bigDecimal(sample).<=(bigDecimal2).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.bigDecimal(sample).>(bigDecimal1).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
-      _ <- Entity.i.bigDecimal(sample).>=(bigDecimal2).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
     } yield ()
+  }
+
+  "sample ops" - types {
+    if (Seq("mariadb", "mysql").contains(database)) {
+      Entity.bigDecimal(sample)(bigDecimal1).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on sample not implemented for this database."
+        }
+    } else {
+      val all       = Set(bigDecimal1, bigDecimal2, bigDecimal3)
+      val (a, b, c) = ((1, bigDecimal1), (2, bigDecimal2), (3, bigDecimal3))
+      val allPairs  = List(a, b, c)
+      for {
+        _ <- Entity.i.bigDecimal.insert(allPairs).transact
+
+        // 1 attribute
+        // Checking for equality on a sample doesn't make sense
+        // _ <- Entity.bigDecimal(sample)(bigDecimal2).query.get.map(res => all.contains(res.head) ==> true)
+        // If you want a specific value, this would be the natural query
+        _ <- Entity.bigDecimal(bigDecimal2).query.get.map(_ ==> List(bigDecimal2))
+
+        _ <- Entity.bigDecimal(sample).not(bigDecimal2).query.get.map { res =>
+          List(bigDecimal1, bigDecimal3).contains(res.head) ==> true
+          (res.head == bigDecimal2) ==> false
+        }
+        _ <- Entity.bigDecimal(sample).<(bigDecimal3).query.get.map { res =>
+          List(bigDecimal1, bigDecimal2).contains(res.head) ==> true
+          (res.head == bigDecimal3) ==> false
+        }
+        _ <- Entity.bigDecimal(sample).<=(bigDecimal2).query.get.map { res =>
+          List(bigDecimal1, bigDecimal2).contains(res.head) ==> true
+          (res.head == bigDecimal3) ==> false
+        }
+        _ <- Entity.bigDecimal(sample).>(bigDecimal1).query.get.map { res =>
+          List(bigDecimal2, bigDecimal3).contains(res.head) ==> true
+          (res.head == bigDecimal1) ==> false
+        }
+        _ <- Entity.bigDecimal(sample).>=(bigDecimal2).query.get.map { res =>
+          List(bigDecimal2, bigDecimal3).contains(res.head) ==> true
+          (res.head == bigDecimal1) ==> false
+        }
+
+        // 1 attribute
+        _ <- Entity.i.bigDecimal(sample).not(bigDecimal2).query.get.map { res =>
+          List(a, c).contains(res.head) ==> true
+          (res.head == b) ==> false
+        }
+        _ <- Entity.i.bigDecimal(sample).<(bigDecimal3).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.bigDecimal(sample).<=(bigDecimal2).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.bigDecimal(sample).>(bigDecimal1).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+        _ <- Entity.i.bigDecimal(sample).>=(bigDecimal2).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+      } yield ()
+    }
   }
 
 

@@ -589,17 +589,18 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     col: String,
     fn: String,
     distinct: String = "DISTINCT ",
-    cast: String = ""
+    cast: String = "",
+    suffix: String = ""
   ): Unit = {
     if (orderBy.nonEmpty && orderBy.last._3 == col) {
       // order by aggregate alias instead
       val alias = col.replace('.', '_') + "_" + fn.toLowerCase
-      select += s"$fn($distinct$col$cast) $alias"
+      select += s"$fn($distinct$col$cast)$suffix $alias"
       val (level, _, _, dir) = orderBy.last
       orderBy.remove(orderBy.size - 1)
       orderBy += ((level, 1, alias, dir))
     } else {
-      select += s"$fn($distinct$col$cast)"
+      select += s"$fn($distinct$col$cast)$suffix"
     }
   }
 
@@ -632,8 +633,6 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
         )
       }
     }
-
-
     if (op.nonEmpty) {
       aggrOpValue.fold {
         val paramIndex = binders.length + 1
@@ -669,7 +668,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     }
   }
 
-  protected def addWhere[T: ClassTag](col: String, aggrOp: Option[Op], aggrOpValue: Option[Value], res: ResOne[T]): Unit = {
+  protected def addWhere[T: ClassTag](expr: String, aggrOp: Option[Op], aggrOpValue: Option[Value], res: ResOne[T]): Unit = {
     val op = getAggrOp(aggrOp)
     if (op.nonEmpty) {
       aggrOpValue.fold {
@@ -677,30 +676,30 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
         bindIndex = bindIndex + 1
         val bindIndexStable = bindIndex
         binders += ((ps: PrepStmt) => res.bind(ps, paramIndex, bindIndexStable, bindValues(bindIndexStable)))
-        where += ((s"$col $op ?", ""))
+        where += ((s"$expr $op ?", ""))
       } {
-        case OneString(v)         => where += ((s"$col $op " + one2sqlString(v), ""))
-        case OneInt(v)            => where += ((s"$col $op " + one2sqlInt(v), ""))
-        case OneLong(v)           => where += ((s"$col $op " + one2sqlLong(v), ""))
-        case OneFloat(v)          => where += ((s"$col $op " + one2sqlFloat(v), ""))
-        case OneDouble(v)         => where += ((s"$col $op " + one2sqlDouble(v), ""))
-        case OneBoolean(v)        => where += ((s"$col $op " + one2sqlBoolean(v), ""))
-        case OneBigInt(v)         => where += ((s"$col $op " + one2sqlBigInt(v), ""))
-        case OneBigDecimal(v)     => where += ((s"$col $op " + one2sqlBigDecimal(v), ""))
-        case OneDate(v)           => where += ((s"$col $op " + one2sqlDate(v), ""))
-        case OneDuration(v)       => where += ((s"$col $op " + one2sqlDuration(v), ""))
-        case OneInstant(v)        => where += ((s"$col $op " + one2sqlInstant(v), ""))
-        case OneLocalDate(v)      => where += ((s"$col $op " + one2sqlLocalDate(v), ""))
-        case OneLocalTime(v)      => where += ((s"$col $op " + one2sqlLocalTime(v), ""))
-        case OneLocalDateTime(v)  => where += ((s"$col $op " + one2sqlLocalDateTime(v), ""))
-        case OneOffsetTime(v)     => where += ((s"$col $op " + one2sqlOffsetTime(v), ""))
-        case OneOffsetDateTime(v) => where += ((s"$col $op " + one2sqlOffsetDateTime(v), ""))
-        case OneZonedDateTime(v)  => where += ((s"$col $op " + one2sqlZonedDateTime(v), ""))
-        case OneUUID(v)           => where += ((s"$col $op " + one2sqlUUID(v), ""))
-        case OneURI(v)            => where += ((s"$col $op " + one2sqlURI(v), ""))
-        case OneByte(v)           => where += ((s"$col $op " + one2sqlByte(v), ""))
-        case OneShort(v)          => where += ((s"$col $op " + one2sqlShort(v), ""))
-        case OneChar(v)           => where += ((s"$col $op " + one2sqlChar(v), ""))
+        case OneString(v)         => where += ((s"$expr $op " + one2sqlString(v), ""))
+        case OneInt(v)            => where += ((s"$expr $op " + one2sqlInt(v), ""))
+        case OneLong(v)           => where += ((s"$expr $op " + one2sqlLong(v), ""))
+        case OneFloat(v)          => where += ((s"$expr $op " + one2sqlFloat(v), ""))
+        case OneDouble(v)         => where += ((s"$expr $op " + one2sqlDouble(v), ""))
+        case OneBoolean(v)        => where += ((s"$expr $op " + one2sqlBoolean(v), ""))
+        case OneBigInt(v)         => where += ((s"$expr $op " + one2sqlBigInt(v), ""))
+        case OneBigDecimal(v)     => where += ((s"$expr $op " + one2sqlBigDecimal(v), ""))
+        case OneDate(v)           => where += ((s"$expr $op " + one2sqlDate(v), ""))
+        case OneDuration(v)       => where += ((s"$expr $op " + one2sqlDuration(v), ""))
+        case OneInstant(v)        => where += ((s"$expr $op " + one2sqlInstant(v), ""))
+        case OneLocalDate(v)      => where += ((s"$expr $op " + one2sqlLocalDate(v), ""))
+        case OneLocalTime(v)      => where += ((s"$expr $op " + one2sqlLocalTime(v), ""))
+        case OneLocalDateTime(v)  => where += ((s"$expr $op " + one2sqlLocalDateTime(v), ""))
+        case OneOffsetTime(v)     => where += ((s"$expr $op " + one2sqlOffsetTime(v), ""))
+        case OneOffsetDateTime(v) => where += ((s"$expr $op " + one2sqlOffsetDateTime(v), ""))
+        case OneZonedDateTime(v)  => where += ((s"$expr $op " + one2sqlZonedDateTime(v), ""))
+        case OneUUID(v)           => where += ((s"$expr $op " + one2sqlUUID(v), ""))
+        case OneURI(v)            => where += ((s"$expr $op " + one2sqlURI(v), ""))
+        case OneByte(v)           => where += ((s"$expr $op " + one2sqlByte(v), ""))
+        case OneShort(v)          => where += ((s"$expr $op " + one2sqlShort(v), ""))
+        case OneChar(v)           => where += ((s"$expr $op " + one2sqlChar(v), ""))
         case _                    => throw new Exception("Unexpected Value type for aggregation Having clause.")
       }
     }

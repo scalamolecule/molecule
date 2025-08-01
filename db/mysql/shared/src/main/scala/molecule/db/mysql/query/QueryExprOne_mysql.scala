@@ -117,7 +117,7 @@ trait QueryExprOne_mysql
         distinct = false
         groupByCols -= col
         aggregate = true
-        addAggrOp(s"COUNT($col)")
+        addAggrOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>

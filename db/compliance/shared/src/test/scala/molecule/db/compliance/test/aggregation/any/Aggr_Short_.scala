@@ -1,13 +1,13 @@
 // GENERATED CODE ********************************
 package molecule.db.compliance.test.aggregation.any
 
+import molecule.base.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
-import org.scalactic.Equality
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 import org.scalactic.Equality
 
 case class Aggr_Short_(
@@ -211,65 +211,82 @@ case class Aggr_Short_(
 
 
   "sample" - types {
-    val all       = Set(short1, short2, short3)
-    val (a, b, c) = ((1, short1), (2, short2), (3, short3))
-    val allPairs  = List(a, b, c)
+    val all      = Set(short1, short2, short3)
+    val allPairs = List((1, short1), (2, short2), (3, short3))
     for {
       _ <- Entity.i.short.insert(allPairs).transact
 
       // 1 attribute
       _ <- Entity.short(sample).query.get.map(res => all.contains(res.head) ==> true)
 
-      // Checking for equality on a sample doesn't make sense
-      // _ <- Entity.short(sample)(short2).query.get.map(res => all.contains(res.head) ==> true)
-      // If you want a specific value, this would be the natural query
-      _ <- Entity.short(short2).query.get.map(_ ==> List(short2))
-
-      _ <- Entity.short(sample).not(short2).query.get.map { res =>
-        List(short1, short3).contains(res.head) ==> true
-        (res.head == short2) ==> false
-      }
-      _ <- Entity.short(sample).<(short3).query.get.map { res =>
-        List(short1, short2).contains(res.head) ==> true
-        (res.head == short3) ==> false
-      }
-      _ <- Entity.short(sample).<=(short2).query.get.map { res =>
-        List(short1, short2).contains(res.head) ==> true
-        (res.head == short3) ==> false
-      }
-      _ <- Entity.short(sample).>(short1).query.get.map { res =>
-        List(short2, short3).contains(res.head) ==> true
-        (res.head == short1) ==> false
-      }
-      _ <- Entity.short(sample).>=(short2).query.get.map { res =>
-        List(short2, short3).contains(res.head) ==> true
-        (res.head == short1) ==> false
-      }
-
       // 1 attribute
       _ <- Entity.i.short(sample).query.get.map(res => allPairs.contains(res.head) ==> true)
-
-      _ <- Entity.i.short(sample).not(short2).query.get.map { res =>
-        List(a, c).contains(res.head) ==> true
-        (res.head == b) ==> false
-      }
-      _ <- Entity.i.short(sample).<(short3).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.short(sample).<=(short2).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.short(sample).>(short1).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
-      _ <- Entity.i.short(sample).>=(short2).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
     } yield ()
+  }
+
+  "sample ops" - types {
+    if (Seq("mariadb", "mysql").contains(database)) {
+      Entity.short(sample)(short1).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on sample not implemented for this database."
+        }
+    } else {
+      val all       = Set(short1, short2, short3)
+      val (a, b, c) = ((1, short1), (2, short2), (3, short3))
+      val allPairs  = List(a, b, c)
+      for {
+        _ <- Entity.i.short.insert(allPairs).transact
+
+        // 1 attribute
+        // Checking for equality on a sample doesn't make sense
+        // _ <- Entity.short(sample)(short2).query.get.map(res => all.contains(res.head) ==> true)
+        // If you want a specific value, this would be the natural query
+        _ <- Entity.short(short2).query.get.map(_ ==> List(short2))
+
+        _ <- Entity.short(sample).not(short2).query.get.map { res =>
+          List(short1, short3).contains(res.head) ==> true
+          (res.head == short2) ==> false
+        }
+        _ <- Entity.short(sample).<(short3).query.get.map { res =>
+          List(short1, short2).contains(res.head) ==> true
+          (res.head == short3) ==> false
+        }
+        _ <- Entity.short(sample).<=(short2).query.get.map { res =>
+          List(short1, short2).contains(res.head) ==> true
+          (res.head == short3) ==> false
+        }
+        _ <- Entity.short(sample).>(short1).query.get.map { res =>
+          List(short2, short3).contains(res.head) ==> true
+          (res.head == short1) ==> false
+        }
+        _ <- Entity.short(sample).>=(short2).query.get.map { res =>
+          List(short2, short3).contains(res.head) ==> true
+          (res.head == short1) ==> false
+        }
+
+        // 1 attribute
+        _ <- Entity.i.short(sample).not(short2).query.get.map { res =>
+          List(a, c).contains(res.head) ==> true
+          (res.head == b) ==> false
+        }
+        _ <- Entity.i.short(sample).<(short3).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.short(sample).<=(short2).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.short(sample).>(short1).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+        _ <- Entity.i.short(sample).>=(short2).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+      } yield ()
+    }
   }
 
 

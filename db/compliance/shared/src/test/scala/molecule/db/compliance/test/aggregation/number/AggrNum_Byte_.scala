@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.compliance.test.aggregation.number
 
+import molecule.base.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.DbProviders
@@ -90,8 +91,6 @@ case class AggrNum_Byte_(
     val medianAll = byte2.toString.toDouble // middle number
     val median1   = ((byte1 + byte2).toDouble * 100) / 200.0 // average of 2 middle numbers (avoid rounding errors)
     val median2   = byte5.toString.toDouble // middle number
-    val a         = (1, median1)
-    val b         = (2, median2)
     for {
       _ <- Entity.i.byte.insert(List(
         (1, byte1),
@@ -104,49 +103,78 @@ case class AggrNum_Byte_(
       // 1 attribute
       _ <- Entity.byte(median).query.get.map(_.head ==~ medianAll)
 
-      _ <- Entity.byte(median)(medianAll).query.get.map(_.head ==~ medianAll)
-      _ <- Entity.byte(median)(1.0).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(median).not(1.0).query.get.map(_.head ==~ medianAll)
-      _ <- Entity.byte(median).not(medianAll).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(median).<(medianAll + 1.0).query.get.map(_.head ==~ medianAll)
-      _ <- Entity.byte(median).<(medianAll).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(median).<=(medianAll).query.get.map(_.head ==~ medianAll)
-      _ <- Entity.byte(median).<=(1.0).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(median).>(1.0).query.get.map(_.head ==~ medianAll)
-      _ <- Entity.byte(median).>(medianAll).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(median).>=(medianAll).query.get.map(_.head ==~ medianAll)
-      _ <- Entity.byte(median).>=(medianAll + 1.0).query.get.map(_ ==> Nil)
-
-
       // n attributes
       _ <- Entity.i.a1.byte(median).query.get.map { res =>
         res(0)._2 ==~ median1
         res(1)._2 ==~ median2
       }
-
-      _ <- Entity.i.a1.byte(median)(median1).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.byte(median)(1.0).query.get.map(_ ==> Nil)
-
-      _ <- Entity.i.a1.byte(median).not(1.0).query.get.map(_ ==> List(a, b))
-      _ <- Entity.i.a1.byte(median).not(median1).query.get.map(_ ==> List(b))
-
-      _ <- Entity.i.a1.byte(median).<(median2).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.byte(median).<(median1).query.get.map(_ ==> Nil)
-
-      _ <- Entity.i.a1.byte(median).<=(median1).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.byte(median).<=(1.0).query.get.map(_ ==> Nil)
-
-      _ <- Entity.i.a1.byte(median).>(1.0).query.get.map(_ ==> List(a, b))
-      _ <- Entity.i.a1.byte(median).>(median1).query.get.map(_ ==> List(b))
-
-      _ <- Entity.i.a1.byte(median).>=(median1).query.get.map(_ ==> List(a, b))
-      _ <- Entity.i.a1.byte(median).>=(median2).query.get.map(_ ==> List(b))
     } yield ()
+  }
+
+
+  "median ops" - types {
+    if (Seq("mariadb", "mysql", "sqlite").contains(database)) {
+      Entity.byte(median)(1.0).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on median not implemented for this database."
+        }
+    } else {
+      given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+      val medianAll = byte2.toString.toDouble // middle number
+      val median1   = ((byte1 + byte2).toDouble * 100) / 200.0 // average of 2 middle numbers (avoid rounding errors)
+      val median2   = byte5.toString.toDouble // middle number
+      val a         = (1, median1)
+      val b         = (2, median2)
+
+      for {
+        _ <- Entity.i.byte.insert(List(
+          (1, byte1),
+          (1, byte2),
+          (2, byte2),
+          (2, byte5),
+          (2, byte9),
+        )).transact
+
+        // 1 attribute
+        _ <- Entity.byte(median)(medianAll).query.get.map(_.head ==~ medianAll)
+        _ <- Entity.byte(median)(1.0).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(median).not(1.0).query.get.map(_.head ==~ medianAll)
+        _ <- Entity.byte(median).not(medianAll).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(median).<(medianAll + 1.0).query.get.map(_.head ==~ medianAll)
+        _ <- Entity.byte(median).<(medianAll).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(median).<=(medianAll).query.get.map(_.head ==~ medianAll)
+        _ <- Entity.byte(median).<=(1.0).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(median).>(1.0).query.get.map(_.head ==~ medianAll)
+        _ <- Entity.byte(median).>(medianAll).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(median).>=(medianAll).query.get.map(_.head ==~ medianAll)
+        _ <- Entity.byte(median).>=(medianAll + 1.0).query.get.map(_ ==> Nil)
+
+
+        // n attributes
+        _ <- Entity.i.a1.byte(median)(median1).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.byte(median)(1.0).query.get.map(_ ==> Nil)
+
+        _ <- Entity.i.a1.byte(median).not(1.0).query.get.map(_ ==> List(a, b))
+        _ <- Entity.i.a1.byte(median).not(median1).query.get.map(_ ==> List(b))
+
+        _ <- Entity.i.a1.byte(median).<(median2).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.byte(median).<(median1).query.get.map(_ ==> Nil)
+
+        _ <- Entity.i.a1.byte(median).<=(median1).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.byte(median).<=(1.0).query.get.map(_ ==> Nil)
+
+        _ <- Entity.i.a1.byte(median).>(1.0).query.get.map(_ ==> List(a, b))
+        _ <- Entity.i.a1.byte(median).>(median1).query.get.map(_ ==> List(b))
+
+        _ <- Entity.i.a1.byte(median).>=(median1).query.get.map(_ ==> List(a, b))
+        _ <- Entity.i.a1.byte(median).>=(median2).query.get.map(_ ==> List(b))
+      } yield ()
+    }
   }
 
 
@@ -220,8 +248,6 @@ case class AggrNum_Byte_(
     val varianceAll = varianceOf(byte1, byte2, byte2, byte3, byte4)
     val variance1   = varianceOf(byte1, byte2)
     val variance2   = varianceOf(byte2, byte3, byte4)
-    val a      = (1, variance1)
-    val b      = (2, variance2)
     for {
       _ <- Entity.i.byte.insert(List(
         (1, byte1),
@@ -234,49 +260,77 @@ case class AggrNum_Byte_(
       // 1 attribute
       _ <- Entity.byte(variance).query.get.map(_.head ==~ varianceAll)
 
-      _ <- Entity.byte(variance)(varianceAll).query.get.map(_.head ==~ varianceAll)
-      _ <- Entity.byte(variance)(1.0).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(variance).not(1.0).query.get.map(_.head ==~ varianceAll)
-      _ <- Entity.byte(variance).not(varianceAll).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(variance).<(varianceAll + 1.0).query.get.map(_.head ==~ varianceAll)
-      _ <- Entity.byte(variance).<(varianceAll).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(variance).<=(varianceAll).query.get.map(_.head ==~ varianceAll)
-      _ <- Entity.byte(variance).<=(1.0).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(variance).>(1.0).query.get.map(_.head ==~ varianceAll)
-      _ <- Entity.byte(variance).>(varianceAll).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(variance).>=(varianceAll).query.get.map(_.head ==~ varianceAll)
-      _ <- Entity.byte(variance).>=(varianceAll + 1.0).query.get.map(_ ==> Nil)
-
-
       // n attributes
       _ <- Entity.i.a1.byte(variance).query.get.map { res =>
         res(0)._2 ==~ variance1
         res(1)._2 ==~ variance2
       }
-
-      _ <- Entity.i.a1.byte(variance)(variance1).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.byte(variance)(1.0).query.get.map(_ ==> Nil)
-
-      _ <- Entity.i.a1.byte(variance).not(1.0).query.get.map(_ ==> List(a, b))
-      _ <- Entity.i.a1.byte(variance).not(variance1).query.get.map(_ ==> List(b))
-
-      _ <- Entity.i.a1.byte(variance).<(variance2).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.byte(variance).<(variance1).query.get.map(_ ==> Nil)
-
-      _ <- Entity.i.a1.byte(variance).<=(variance2).query.get.map(_ ==> List(a, b))
-      _ <- Entity.i.a1.byte(variance).<=(variance1).query.get.map(_ ==> List(a))
-
-      _ <- Entity.i.a1.byte(variance).>(variance1).query.get.map(_ ==> List(b))
-      _ <- Entity.i.a1.byte(variance).>(variance2).query.get.map(_ ==> Nil)
-
-      _ <- Entity.i.a1.byte(variance).>=(variance1).query.get.map(_ ==> List(a, b))
-      _ <- Entity.i.a1.byte(variance).>=(variance2).query.get.map(_ ==> List(b))
     } yield ()
+  }
+
+
+  "variance ops" - types {
+    if (Seq("mariadb", "mysql", "sqlite").contains(database)) {
+      Entity.byte(variance)(1.0).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on variance not implemented for this database."
+        }
+    } else {
+      given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+      val varianceAll = varianceOf(byte1, byte2, byte2, byte3, byte4)
+      val variance1   = varianceOf(byte1, byte2)
+      val variance2   = varianceOf(byte2, byte3, byte4)
+      val a           = (1, variance1)
+      val b           = (2, variance2)
+      for {
+        _ <- Entity.i.byte.insert(List(
+          (1, byte1),
+          (1, byte2),
+          (2, byte2),
+          (2, byte3),
+          (2, byte4),
+        )).transact
+
+        // 1 attribute
+        _ <- Entity.byte(variance)(varianceAll).query.get.map(_.head ==~ varianceAll)
+        _ <- Entity.byte(variance)(1.0).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(variance).not(1.0).query.get.map(_.head ==~ varianceAll)
+        _ <- Entity.byte(variance).not(varianceAll).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(variance).<(varianceAll + 1.0).query.get.map(_.head ==~ varianceAll)
+        _ <- Entity.byte(variance).<(varianceAll).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(variance).<=(varianceAll).query.get.map(_.head ==~ varianceAll)
+        _ <- Entity.byte(variance).<=(1.0).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(variance).>(1.0).query.get.map(_.head ==~ varianceAll)
+        _ <- Entity.byte(variance).>(varianceAll).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(variance).>=(varianceAll).query.get.map(_.head ==~ varianceAll)
+        _ <- Entity.byte(variance).>=(varianceAll + 1.0).query.get.map(_ ==> Nil)
+
+
+        // n attributes
+        _ <- Entity.i.a1.byte(variance)(variance1).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.byte(variance)(1.0).query.get.map(_ ==> Nil)
+
+        _ <- Entity.i.a1.byte(variance).not(1.0).query.get.map(_ ==> List(a, b))
+        _ <- Entity.i.a1.byte(variance).not(variance1).query.get.map(_ ==> List(b))
+
+        _ <- Entity.i.a1.byte(variance).<(variance2).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.byte(variance).<(variance1).query.get.map(_ ==> Nil)
+
+        _ <- Entity.i.a1.byte(variance).<=(variance2).query.get.map(_ ==> List(a, b))
+        _ <- Entity.i.a1.byte(variance).<=(variance1).query.get.map(_ ==> List(a))
+
+        _ <- Entity.i.a1.byte(variance).>(variance1).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.byte(variance).>(variance2).query.get.map(_ ==> Nil)
+
+        _ <- Entity.i.a1.byte(variance).>=(variance1).query.get.map(_ ==> List(a, b))
+        _ <- Entity.i.a1.byte(variance).>=(variance2).query.get.map(_ ==> List(b))
+      } yield ()
+    }
   }
 
 
@@ -285,8 +339,8 @@ case class AggrNum_Byte_(
     val stddevAll = stdDevOf(byte1, byte2, byte2, byte3, byte4)
     val stddev1   = stdDevOf(byte1, byte2)
     val stddev2   = stdDevOf(byte2, byte3, byte4)
-    val a      = (1, stddev1)
-    val b      = (2, stddev2)
+    val a         = (1, stddev1)
+    val b         = (2, stddev2)
     for {
       _ <- Entity.i.byte.insert(List(
         (1, byte1),
@@ -299,48 +353,75 @@ case class AggrNum_Byte_(
       // 1 attribute
       _ <- Entity.byte(stddev).query.get.map(_.head ==~ stddevAll)
 
-      _ <- Entity.byte(stddev)(stddevAll).query.get.map(_.head ==~ stddevAll)
-      _ <- Entity.byte(stddev)(1.0).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(stddev).not(1.0).query.get.map(_.head ==~ stddevAll)
-      _ <- Entity.byte(stddev).not(stddevAll).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(stddev).<(stddevAll + 1.0).query.get.map(_.head ==~ stddevAll)
-      _ <- Entity.byte(stddev).<(stddevAll).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(stddev).<=(stddevAll).query.get.map(_.head ==~ stddevAll)
-      _ <- Entity.byte(stddev).<=(1.0).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(stddev).>(1.0).query.get.map(_.head ==~ stddevAll)
-      _ <- Entity.byte(stddev).>(stddevAll).query.get.map(_ ==> Nil)
-
-      _ <- Entity.byte(stddev).>=(stddevAll).query.get.map(_.head ==~ stddevAll)
-      _ <- Entity.byte(stddev).>=(stddevAll + 1.0).query.get.map(_ ==> Nil)
-
-
       // n attributes
       _ <- Entity.i.a1.byte(stddev).query.get.map { res =>
         res(0)._2 ==~ stddev1
         res(1)._2 ==~ stddev2
       }
-
-      _ <- Entity.i.a1.byte(stddev)(stddev1).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.byte(stddev)(1.0).query.get.map(_ ==> Nil)
-
-      _ <- Entity.i.a1.byte(stddev).not(1.0).query.get.map(_ ==> List(a, b))
-      _ <- Entity.i.a1.byte(stddev).not(stddev1).query.get.map(_ ==> List(b))
-
-      _ <- Entity.i.a1.byte(stddev).<(stddev2).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.byte(stddev).<(stddev1).query.get.map(_ ==> Nil)
-
-      _ <- Entity.i.a1.byte(stddev).<=(stddev2).query.get.map(_ ==> List(a, b))
-      _ <- Entity.i.a1.byte(stddev).<=(stddev1).query.get.map(_ ==> List(a))
-
-      _ <- Entity.i.a1.byte(stddev).>(stddev1).query.get.map(_ ==> List(b))
-      _ <- Entity.i.a1.byte(stddev).>(stddev2).query.get.map(_ ==> Nil)
-
-      _ <- Entity.i.a1.byte(stddev).>=(stddev1).query.get.map(_ ==> List(a, b))
-      _ <- Entity.i.a1.byte(stddev).>=(stddev2).query.get.map(_ ==> List(b))
     } yield ()
+  }
+
+  "stddev ops" - types {
+    if (Seq("mariadb", "mysql", "sqlite").contains(database)) {
+      Entity.byte(stddev)(1.0).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on stddev not implemented for this database."
+        }
+    } else {
+      given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+      val stddevAll = stdDevOf(byte1, byte2, byte2, byte3, byte4)
+      val stddev1   = stdDevOf(byte1, byte2)
+      val stddev2   = stdDevOf(byte2, byte3, byte4)
+      val a         = (1, stddev1)
+      val b         = (2, stddev2)
+      for {
+        _ <- Entity.i.byte.insert(List(
+          (1, byte1),
+          (1, byte2),
+          (2, byte2),
+          (2, byte3),
+          (2, byte4),
+        )).transact
+
+        // 1 attribute
+        _ <- Entity.byte(stddev)(stddevAll).query.get.map(_.head ==~ stddevAll)
+        _ <- Entity.byte(stddev)(1.0).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(stddev).not(1.0).query.get.map(_.head ==~ stddevAll)
+        _ <- Entity.byte(stddev).not(stddevAll).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(stddev).<(stddevAll + 1.0).query.get.map(_.head ==~ stddevAll)
+        _ <- Entity.byte(stddev).<(stddevAll).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(stddev).<=(stddevAll).query.get.map(_.head ==~ stddevAll)
+        _ <- Entity.byte(stddev).<=(1.0).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(stddev).>(1.0).query.get.map(_.head ==~ stddevAll)
+        _ <- Entity.byte(stddev).>(stddevAll).query.get.map(_ ==> Nil)
+
+        _ <- Entity.byte(stddev).>=(stddevAll).query.get.map(_.head ==~ stddevAll)
+        _ <- Entity.byte(stddev).>=(stddevAll + 1.0).query.get.map(_ ==> Nil)
+
+
+        // n attributes
+        _ <- Entity.i.a1.byte(stddev)(stddev1).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.byte(stddev)(1.0).query.get.map(_ ==> Nil)
+
+        _ <- Entity.i.a1.byte(stddev).not(1.0).query.get.map(_ ==> List(a, b))
+        _ <- Entity.i.a1.byte(stddev).not(stddev1).query.get.map(_ ==> List(b))
+
+        _ <- Entity.i.a1.byte(stddev).<(stddev2).query.get.map(_ ==> List(a))
+        _ <- Entity.i.a1.byte(stddev).<(stddev1).query.get.map(_ ==> Nil)
+
+        _ <- Entity.i.a1.byte(stddev).<=(stddev2).query.get.map(_ ==> List(a, b))
+        _ <- Entity.i.a1.byte(stddev).<=(stddev1).query.get.map(_ ==> List(a))
+
+        _ <- Entity.i.a1.byte(stddev).>(stddev1).query.get.map(_ ==> List(b))
+        _ <- Entity.i.a1.byte(stddev).>(stddev2).query.get.map(_ ==> Nil)
+
+        _ <- Entity.i.a1.byte(stddev).>=(stddev1).query.get.map(_ ==> List(a, b))
+        _ <- Entity.i.a1.byte(stddev).>=(stddev2).query.get.map(_ ==> List(b))
+      } yield ()
+    }
   }
 }

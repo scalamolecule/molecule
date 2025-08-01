@@ -1,13 +1,13 @@
 // GENERATED CODE ********************************
 package molecule.db.compliance.test.aggregation.any
 
+import molecule.base.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
-import org.scalactic.Equality
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 import org.scalactic.Equality
 
 case class Aggr_BigInt_(
@@ -211,65 +211,82 @@ case class Aggr_BigInt_(
 
 
   "sample" - types {
-    val all       = Set(bigInt1, bigInt2, bigInt3)
-    val (a, b, c) = ((1, bigInt1), (2, bigInt2), (3, bigInt3))
-    val allPairs  = List(a, b, c)
+    val all      = Set(bigInt1, bigInt2, bigInt3)
+    val allPairs = List((1, bigInt1), (2, bigInt2), (3, bigInt3))
     for {
       _ <- Entity.i.bigInt.insert(allPairs).transact
 
       // 1 attribute
       _ <- Entity.bigInt(sample).query.get.map(res => all.contains(res.head) ==> true)
 
-      // Checking for equality on a sample doesn't make sense
-      // _ <- Entity.bigInt(sample)(bigInt2).query.get.map(res => all.contains(res.head) ==> true)
-      // If you want a specific value, this would be the natural query
-      _ <- Entity.bigInt(bigInt2).query.get.map(_ ==> List(bigInt2))
-
-      _ <- Entity.bigInt(sample).not(bigInt2).query.get.map { res =>
-        List(bigInt1, bigInt3).contains(res.head) ==> true
-        (res.head == bigInt2) ==> false
-      }
-      _ <- Entity.bigInt(sample).<(bigInt3).query.get.map { res =>
-        List(bigInt1, bigInt2).contains(res.head) ==> true
-        (res.head == bigInt3) ==> false
-      }
-      _ <- Entity.bigInt(sample).<=(bigInt2).query.get.map { res =>
-        List(bigInt1, bigInt2).contains(res.head) ==> true
-        (res.head == bigInt3) ==> false
-      }
-      _ <- Entity.bigInt(sample).>(bigInt1).query.get.map { res =>
-        List(bigInt2, bigInt3).contains(res.head) ==> true
-        (res.head == bigInt1) ==> false
-      }
-      _ <- Entity.bigInt(sample).>=(bigInt2).query.get.map { res =>
-        List(bigInt2, bigInt3).contains(res.head) ==> true
-        (res.head == bigInt1) ==> false
-      }
-
       // 1 attribute
       _ <- Entity.i.bigInt(sample).query.get.map(res => allPairs.contains(res.head) ==> true)
-
-      _ <- Entity.i.bigInt(sample).not(bigInt2).query.get.map { res =>
-        List(a, c).contains(res.head) ==> true
-        (res.head == b) ==> false
-      }
-      _ <- Entity.i.bigInt(sample).<(bigInt3).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.bigInt(sample).<=(bigInt2).query.get.map { res =>
-        List(a, b).contains(res.head) ==> true
-        (res.head == c) ==> false
-      }
-      _ <- Entity.i.bigInt(sample).>(bigInt1).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
-      _ <- Entity.i.bigInt(sample).>=(bigInt2).query.get.map { res =>
-        List(b, c).contains(res.head) ==> true
-        (res.head == a) ==> false
-      }
     } yield ()
+  }
+
+  "sample ops" - types {
+    if (Seq("mariadb", "mysql").contains(database)) {
+      Entity.bigInt(sample)(bigInt1).query.get
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Operations on sample not implemented for this database."
+        }
+    } else {
+      val all       = Set(bigInt1, bigInt2, bigInt3)
+      val (a, b, c) = ((1, bigInt1), (2, bigInt2), (3, bigInt3))
+      val allPairs  = List(a, b, c)
+      for {
+        _ <- Entity.i.bigInt.insert(allPairs).transact
+
+        // 1 attribute
+        // Checking for equality on a sample doesn't make sense
+        // _ <- Entity.bigInt(sample)(bigInt2).query.get.map(res => all.contains(res.head) ==> true)
+        // If you want a specific value, this would be the natural query
+        _ <- Entity.bigInt(bigInt2).query.get.map(_ ==> List(bigInt2))
+
+        _ <- Entity.bigInt(sample).not(bigInt2).query.get.map { res =>
+          List(bigInt1, bigInt3).contains(res.head) ==> true
+          (res.head == bigInt2) ==> false
+        }
+        _ <- Entity.bigInt(sample).<(bigInt3).query.get.map { res =>
+          List(bigInt1, bigInt2).contains(res.head) ==> true
+          (res.head == bigInt3) ==> false
+        }
+        _ <- Entity.bigInt(sample).<=(bigInt2).query.get.map { res =>
+          List(bigInt1, bigInt2).contains(res.head) ==> true
+          (res.head == bigInt3) ==> false
+        }
+        _ <- Entity.bigInt(sample).>(bigInt1).query.get.map { res =>
+          List(bigInt2, bigInt3).contains(res.head) ==> true
+          (res.head == bigInt1) ==> false
+        }
+        _ <- Entity.bigInt(sample).>=(bigInt2).query.get.map { res =>
+          List(bigInt2, bigInt3).contains(res.head) ==> true
+          (res.head == bigInt1) ==> false
+        }
+
+        // 1 attribute
+        _ <- Entity.i.bigInt(sample).not(bigInt2).query.get.map { res =>
+          List(a, c).contains(res.head) ==> true
+          (res.head == b) ==> false
+        }
+        _ <- Entity.i.bigInt(sample).<(bigInt3).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.bigInt(sample).<=(bigInt2).query.get.map { res =>
+          List(a, b).contains(res.head) ==> true
+          (res.head == c) ==> false
+        }
+        _ <- Entity.i.bigInt(sample).>(bigInt1).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+        _ <- Entity.i.bigInt(sample).>=(bigInt2).query.get.map { res =>
+          List(b, c).contains(res.head) ==> true
+          (res.head == a) ==> false
+        }
+      } yield ()
+    }
   }
 
 
