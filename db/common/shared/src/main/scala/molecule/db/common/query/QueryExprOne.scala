@@ -6,6 +6,10 @@ import molecule.core.dataModel.AttrOp.*
 import molecule.db.common.javaSql.PrepStmt
 import scala.reflect.ClassTag
 
+/** Base class for cardinality-one attribute expressions
+ *
+ * H2 implementations serve as the outset for the other databases to override
+ */
 trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & LambdasOne =>
 
   override protected def queryIdMan(a: AttrOneMan): Unit = queryAttrOneMan(a)
@@ -38,6 +42,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
       case at: AttrOneManShort          => man(attr, at.vs, resShort1)
       case at: AttrOneManChar           => man(attr, at.vs, resChar1)
     }
+
   }
 
   override protected def queryAttrOneTac(attr: AttrOneTac): Unit = {
@@ -144,28 +149,31 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     res: ResOne[T],
   ): Unit = {
     op match {
-      case V                              => attrV(col)
-      case Eq                             => equal(col, args, res.one2sql, binding, res.bind, res.tpe)
-      case Neq                            => neq(col, args, res.one2sql, binding, res.bind, res.tpe)
-      case Lt                             => compare(col, args, "<", res.one2sql, binding, res.bind, res.tpe)
-      case Gt                             => compare(col, args, ">", res.one2sql, binding, res.bind, res.tpe)
-      case Le                             => compare(col, args, "<=", res.one2sql, binding, res.bind, res.tpe)
-      case Ge                             => compare(col, args, ">=", res.one2sql, binding, res.bind, res.tpe)
-      case NoValue                        => noValue(col)
-      case Fn(kw, n, aggrOp, aggrOpValue) => aggr(ent, attr, col, kw, n, aggrOp, aggrOpValue, res)
-      case StartsWith                     => startsWith(col, args, binding, res.bind)
-      case EndsWith                       => endsWith(col, args, binding, res.bind)
-      case Contains                       => contains(col, args, binding, res.bind)
-      case Matches                        => matches(col, args, binding, res.bind)
-      case Remainder                      => remainder(col, args)
-      case Even                           => even(col)
-      case Odd                            => odd(col)
-      case AttrOp.Ceil                    => ceil(col)
-      case AttrOp.Floor                   => floor(col)
-      case And                            => and(col, args.head)
-      case Or                             => or(col, args.head)
-      case Not                            => not(col)
-      case other                          => unexpectedOp(other)
+      case V            => attrV(col)
+      case Eq           => equal(col, args, res.one2sql, binding, res.bind, res.tpe)
+      case Neq          => neq(col, args, res.one2sql, binding, res.bind, res.tpe)
+      case Lt           => compare(col, args, "<", res.one2sql, binding, res.bind, res.tpe)
+      case Gt           => compare(col, args, ">", res.one2sql, binding, res.bind, res.tpe)
+      case Le           => compare(col, args, "<=", res.one2sql, binding, res.bind, res.tpe)
+      case Ge           => compare(col, args, ">=", res.one2sql, binding, res.bind, res.tpe)
+      case NoValue      => noValue(col)
+      case StartsWith   => startsWith(col, args, binding, res.bind)
+      case EndsWith     => endsWith(col, args, binding, res.bind)
+      case Contains     => contains(col, args, binding, res.bind)
+      case Matches      => matches(col, args, binding, res.bind)
+      case Remainder    => remainder(col, args)
+      case Even         => even(col)
+      case Odd          => odd(col)
+      case AttrOp.Ceil  => ceil(col)
+      case AttrOp.Floor => floor(col)
+      case And          => and(col, args.head)
+      case Or           => or(col, args.head)
+      case Not          => not(col)
+
+      case Fn(baseType, kw, n, aggrOp, aggrOpValue) =>
+        aggr(baseType, ent, attr, col, kw, n, aggrOp, aggrOpValue, res)
+
+      case other => unexpectedOp(other)
     }
   }
 
@@ -422,10 +430,10 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   }
 
 
-
   // aggregation ---------------------------------------------------------------
 
   protected def aggr[T: ClassTag](
+    baseType: String,
     ent: String,
     attr: String,
     col: String,
@@ -436,16 +444,9 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     res: ResOne[T]
   ): Unit = {
     checkAggrOne()
-    lazy val n  = optN.getOrElse(0)
-    lazy val op = aggrOp match {
-      case Some(Eq)  => "="
-      case Some(Neq) => "<>"
-      case Some(Lt)  => "<"
-      case Some(Le)  => "<="
-      case Some(Gt)  => ">"
-      case Some(Ge)  => ">="
-      case _         => ""
-    }
+    lazy val n = optN.getOrElse(0)
+    def addAggrOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
+
     // Replace find/casting with aggregate function/cast
     select -= col
     fn match {
@@ -459,6 +460,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
         select += s"MIN($col)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"MIN($col)")
 
       case "mins" =>
         select +=
@@ -478,6 +480,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
         select += s"MAX($col)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"MAX($col)")
 
       case "maxs" =>
         select +=
@@ -498,6 +501,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
         select += col
         orderBy += ((level, -1, "RAND()", ""))
         hardLimit = 1
+        addWhere(col, aggrOp, aggrOpValue, res)
 
       case "samples" =>
         select +=
@@ -518,18 +522,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT", "")
-        if (op.nonEmpty) {
-          aggrOpValue.fold {
-            val paramIndex = binders.length + 1
-            bindIndex = bindIndex + 1
-            val bindIndexStable = bindIndex
-            binders += ((ps: PrepStmt) => res.bind(ps, paramIndex, bindIndexStable, bindValues(bindIndexStable)))
-            having += s"COUNT($col) $op ?"
-          } {
-            case OneInt(v) => having += s"COUNT($col) $op $v"
-            case _         => ???
-          }
-        }
+        addAggrOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
@@ -537,32 +530,38 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT")
+        addAggrOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "SUM", "")
+        addAggrOp(s"SUM($col)")
 
       case "median" =>
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "MEDIAN", "")
+        addAggrOp(s"MEDIAN($col)")
 
       case "avg" =>
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "AVG", "")
+        addAggrOp(s"AVG($col)")
 
       case "variance" =>
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "VAR_POP", "")
+        addAggrOp(s"VAR_POP($col)")
 
       case "stddev" =>
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "STDDEV_POP", "")
+        addAggrOp(s"STDDEV_POP($col)")
 
       case other => unexpectedKw(other)
     }
@@ -601,6 +600,109 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
       orderBy += ((level, 1, alias, dir))
     } else {
       select += s"$fn($distinct$col$cast)"
+    }
+  }
+
+  private def getAggrOp(aggrOp: Option[Op]): String = {
+    aggrOp match {
+      case Some(Eq)  => "="
+      case Some(Neq) => "<>"
+      case Some(Lt)  => "<"
+      case Some(Le)  => "<="
+      case Some(Gt)  => ">"
+      case Some(Ge)  => ">="
+      case _         => ""
+    }
+  }
+
+  protected def addHaving[T: ClassTag](
+    baseType: String,
+    fn: String,
+    expr: String,
+    aggrOp: Option[Op],
+    aggrOpValue: Option[Value],
+    res: ResOne[T]
+  ): Unit = {
+    val op = getAggrOp(aggrOp)
+    if (baseType == "Float" && aggrOp.isDefined) {
+      if (List("sum", "median", "avg", "variance", "stddev").contains(fn)) {
+        throw ModelError(
+          "sum/median/avg/variance/stddev operations on aggregated Float values are not supported " +
+            "to avoid floating precision problems."
+        )
+      }
+    }
+
+
+    if (op.nonEmpty) {
+      aggrOpValue.fold {
+        val paramIndex = binders.length + 1
+        bindIndex = bindIndex + 1
+        val bindIndexStable = bindIndex
+        binders += ((ps: PrepStmt) => res.bind(ps, paramIndex, bindIndexStable, bindValues(bindIndexStable)))
+        having += s"$expr $op ?"
+      } {
+        case OneString(v)         => having += s"$expr $op " + one2sqlString(v)
+        case OneInt(v)            => having += s"$expr $op " + one2sqlInt(v)
+        case OneLong(v)           => having += s"$expr $op " + one2sqlLong(v)
+        case OneFloat(v)          => having += s"$expr $op " + one2sqlFloat(v)
+        case OneDouble(v)         => having += s"$expr $op " + one2sqlDouble(v)
+        case OneBoolean(v)        => having += s"$expr $op " + one2sqlBoolean(v)
+        case OneBigInt(v)         => having += s"$expr $op " + one2sqlBigInt(v)
+        case OneBigDecimal(v)     => having += s"$expr $op " + one2sqlBigDecimal(v)
+        case OneDate(v)           => having += s"$expr $op " + one2sqlDate(v)
+        case OneDuration(v)       => having += s"$expr $op " + one2sqlDuration(v)
+        case OneInstant(v)        => having += s"$expr $op " + one2sqlInstant(v)
+        case OneLocalDate(v)      => having += s"$expr $op " + one2sqlLocalDate(v)
+        case OneLocalTime(v)      => having += s"$expr $op " + one2sqlLocalTime(v)
+        case OneLocalDateTime(v)  => having += s"$expr $op " + one2sqlLocalDateTime(v)
+        case OneOffsetTime(v)     => having += s"$expr $op " + one2sqlOffsetTime(v)
+        case OneOffsetDateTime(v) => having += s"$expr $op " + one2sqlOffsetDateTime(v)
+        case OneZonedDateTime(v)  => having += s"$expr $op " + one2sqlZonedDateTime(v)
+        case OneUUID(v)           => having += s"$expr $op " + one2sqlUUID(v)
+        case OneURI(v)            => having += s"$expr $op " + one2sqlURI(v)
+        case OneByte(v)           => having += s"$expr $op " + one2sqlByte(v)
+        case OneShort(v)          => having += s"$expr $op " + one2sqlShort(v)
+        case OneChar(v)           => having += s"$expr $op " + one2sqlChar(v)
+        case _                    => throw new Exception("Unexpected Value type for aggregation Having clause.")
+      }
+    }
+  }
+
+  protected def addWhere[T: ClassTag](col: String, aggrOp: Option[Op], aggrOpValue: Option[Value], res: ResOne[T]): Unit = {
+    val op = getAggrOp(aggrOp)
+    if (op.nonEmpty) {
+      aggrOpValue.fold {
+        val paramIndex = binders.length + 1
+        bindIndex = bindIndex + 1
+        val bindIndexStable = bindIndex
+        binders += ((ps: PrepStmt) => res.bind(ps, paramIndex, bindIndexStable, bindValues(bindIndexStable)))
+        where += ((s"$col $op ?", ""))
+      } {
+        case OneString(v)         => where += ((s"$col $op " + one2sqlString(v), ""))
+        case OneInt(v)            => where += ((s"$col $op " + one2sqlInt(v), ""))
+        case OneLong(v)           => where += ((s"$col $op " + one2sqlLong(v), ""))
+        case OneFloat(v)          => where += ((s"$col $op " + one2sqlFloat(v), ""))
+        case OneDouble(v)         => where += ((s"$col $op " + one2sqlDouble(v), ""))
+        case OneBoolean(v)        => where += ((s"$col $op " + one2sqlBoolean(v), ""))
+        case OneBigInt(v)         => where += ((s"$col $op " + one2sqlBigInt(v), ""))
+        case OneBigDecimal(v)     => where += ((s"$col $op " + one2sqlBigDecimal(v), ""))
+        case OneDate(v)           => where += ((s"$col $op " + one2sqlDate(v), ""))
+        case OneDuration(v)       => where += ((s"$col $op " + one2sqlDuration(v), ""))
+        case OneInstant(v)        => where += ((s"$col $op " + one2sqlInstant(v), ""))
+        case OneLocalDate(v)      => where += ((s"$col $op " + one2sqlLocalDate(v), ""))
+        case OneLocalTime(v)      => where += ((s"$col $op " + one2sqlLocalTime(v), ""))
+        case OneLocalDateTime(v)  => where += ((s"$col $op " + one2sqlLocalDateTime(v), ""))
+        case OneOffsetTime(v)     => where += ((s"$col $op " + one2sqlOffsetTime(v), ""))
+        case OneOffsetDateTime(v) => where += ((s"$col $op " + one2sqlOffsetDateTime(v), ""))
+        case OneZonedDateTime(v)  => where += ((s"$col $op " + one2sqlZonedDateTime(v), ""))
+        case OneUUID(v)           => where += ((s"$col $op " + one2sqlUUID(v), ""))
+        case OneURI(v)            => where += ((s"$col $op " + one2sqlURI(v), ""))
+        case OneByte(v)           => where += ((s"$col $op " + one2sqlByte(v), ""))
+        case OneShort(v)          => where += ((s"$col $op " + one2sqlShort(v), ""))
+        case OneChar(v)           => where += ((s"$col $op " + one2sqlChar(v), ""))
+        case _                    => throw new Exception("Unexpected Value type for aggregation Having clause.")
+      }
     }
   }
 }

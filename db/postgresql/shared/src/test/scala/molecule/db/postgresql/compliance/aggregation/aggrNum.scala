@@ -12,7 +12,7 @@ class AggrNum_Long_Test extends MUnit {
   AggrNum_Long_(this, Api_postgresql_async)
 }
 class AggrNum_Float_Test extends MUnit {
-  AggrNum_Float_(this, Api_postgresql_async)
+  AggrNum_Float(this, Api_postgresql_async)
 }
 class AggrNum_Double_Test extends MUnit {
   AggrNum_Double_(this, Api_postgresql_async)

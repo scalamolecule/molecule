@@ -25,10 +25,11 @@ case object Add extends Op
 case object Remove extends Op
 
 case class Fn(
+  baseType: String,
   fn: String,
   n: Option[Int] = None,
   op: Option[Op] = None,
-  v: Option[Value] = None
+  v: Option[Value] = None,
 ) extends Op
 
 

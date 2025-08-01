@@ -6,7 +6,7 @@ import boilerplate.db.compliance.DbComplianceGenBase
 
 object _AggrNum extends Base  {
 
-  def generate(): Unit = numberTypes.foreach { case (name, tpe, v) =>
+  def generate(): Unit = numberTypes.filterNot(_._1 == "Float").foreach { case (name, tpe, v) =>
     TransformFile(name, tpe, v).generate()
   }
 

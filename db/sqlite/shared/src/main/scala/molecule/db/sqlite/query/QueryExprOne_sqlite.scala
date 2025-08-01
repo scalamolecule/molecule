@@ -1,7 +1,7 @@
 package molecule.db.sqlite.query
 
 import molecule.base.error.ModelError
-import molecule.core.dataModel.Value
+import molecule.core.dataModel.{Op, Value}
 import molecule.db.common.javaSql.PrepStmt
 import molecule.db.common.query.{Model2Query, QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
@@ -100,15 +100,20 @@ trait QueryExprOne_sqlite
   }
 
   override protected def aggr[T: ClassTag](
+    baseType: String,
     ent: String,
     attr: String,
     col: String,
     fn: String,
     optN: Option[Int],
+    aggrOp: Option[Op],
+    aggrOpValue: Option[Value],
     res: ResOne[T]
   ): Unit = {
     checkAggrOne()
     lazy val n = optN.getOrElse(0)
+    def addAggrOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
+
     // Replace find/casting with aggregate function/cast
     select -= col
 
@@ -132,6 +137,7 @@ trait QueryExprOne_sqlite
         select += s"MIN($col)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"MIN($col)")
 
       case "mins" =>
         select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "ASC"))
@@ -146,6 +152,7 @@ trait QueryExprOne_sqlite
         select += s"MAX($col)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"MAX($col)")
 
       case "maxs" =>
         select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "DESC"))
@@ -159,6 +166,7 @@ trait QueryExprOne_sqlite
       case "sample" =>
         select2 = select2 + (select.length -> sampleSelect(ent, attr))
         select += "<replace>" // add to maintain correct indexing
+        addAggrOp("RAND()")
 
       case "samples" =>
         select2 = select2 + (select.length -> samplesSelect(ent, attr, n))
@@ -174,6 +182,7 @@ trait QueryExprOne_sqlite
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT", "")
+        addAggrOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
@@ -181,12 +190,14 @@ trait QueryExprOne_sqlite
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "COUNT")
+        addAggrOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "SUM", "")
+        addAggrOp(s"SUM($col)")
 
       case "median" =>
         //        select += s"AVG(_$col)"
@@ -222,6 +233,7 @@ trait QueryExprOne_sqlite
         groupByCols -= col
         aggregate = true
         selectWithOrder(col, "AVG", "")
+        addAggrOp(s"AVG($col)")
 
       case "variance" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
@@ -231,6 +243,7 @@ trait QueryExprOne_sqlite
         select += s"json_group_array($col)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"VAR_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) =>
             varianceOf(jsonArray2doubles(row.getString(paramIndex)))
@@ -243,6 +256,7 @@ trait QueryExprOne_sqlite
         groupByCols -= col
         aggregate = true
         select += s"json_group_array($col)"
+        addAggrOp(s"STDDEV_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) =>
             stdDevOf(jsonArray2doubles(row.getString(paramIndex)))

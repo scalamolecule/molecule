@@ -1,7 +1,7 @@
 package molecule.db.mysql.query
 
 import molecule.base.error.ModelError
-import molecule.core.dataModel.Value
+import molecule.core.dataModel.{Op, Value}
 import molecule.db.common.javaSql.PrepStmt
 import molecule.db.common.query.{Model2Query, QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
@@ -27,17 +27,21 @@ trait QueryExprOne_mysql
   }
 
   override protected def aggr[T: ClassTag](
+    baseType: String,
     ent: String,
     attr: String,
     col: String,
     fn: String,
     optN: Option[Int],
+    aggrOp: Option[Op],
+    aggrOpValue: Option[Value],
     res: ResOne[T]
   ): Unit = {
     checkAggrOne()
     lazy val sep     = "0x1D" // Use invisible ascii Group Selector to separate concatenated values
     lazy val sepChar = 29.toChar
     lazy val n       = optN.getOrElse(0)
+    def addAggrOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
 
     // If large number of mins/maxs/samples is needed, group_concat max size can be raised from default 1024 char
     // https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_group_concat_max_len
@@ -56,6 +60,7 @@ trait QueryExprOne_mysql
         select += s"MIN($col)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"MIN($col)")
 
       case "mins" =>
         select += s"GROUP_CONCAT(DISTINCT $col SEPARATOR $sep)"
@@ -69,6 +74,7 @@ trait QueryExprOne_mysql
         select += s"MAX($col)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"MAX($col)")
 
       case "maxs" =>
         select += s"GROUP_CONCAT(DISTINCT $col ORDER BY $col DESC SEPARATOR $sep)"
@@ -87,6 +93,7 @@ trait QueryExprOne_mysql
           val rnd   = new Random().nextInt(array.length)
           array(rnd)
         })
+        addAggrOp("RAND()")
 
       case "samples" =>
         select += s"JSON_ARRAYAGG($col)"
@@ -102,6 +109,7 @@ trait QueryExprOne_mysql
         distinct = false
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
@@ -109,12 +117,14 @@ trait QueryExprOne_mysql
         distinct = false
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
         selectWithOrder(col, "SUM", "")
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"SUM($col)")
 
       case "median" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
@@ -133,6 +143,7 @@ trait QueryExprOne_mysql
       case "avg" =>
         selectWithOrder(col, "AVG", "")
         groupByCols -= col
+        addAggrOp(s"AVG($col)")
         aggregate = true
 
       case "variance" =>
@@ -142,6 +153,7 @@ trait QueryExprOne_mysql
         groupByCols -= col
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
+        addAggrOp(s"VAR_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
@@ -156,6 +168,7 @@ trait QueryExprOne_mysql
         groupByCols -= col
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
+        addAggrOp(s"STDDEV_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)

@@ -1,6 +1,7 @@
 package molecule.db.h2
 
 import scala.concurrent.Future
+import molecule.base.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
 import molecule.db.h2.async.*
@@ -14,38 +15,13 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
 
   "types" - types {
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
-
-//    val x = Entity.i.int.>(?).query
-
     for {
-      //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      //      _ <- Entity.int(3).save.transact
-      //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      //      _ <- Entity(a).int(10).update.transact
-      //      _ <- Entity(b).delete.transact
-      //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-
-      _ <- Entity.i.int.insert(
-        (1, 1),
-        (1, 2),
-        (2, 3),
-      ).transact
-
-//      _ <- Entity.i.int(count).query.i.get.map(_ ==> List(
-//        (1, 2),
-//        (2, 1),
-//      ))
-//
-//      _ <- Entity.i.int(count).>(1).query.i.get.map(_ ==> List(
-//        (1, 2),
-//      ))
-
-      x = Entity.i.int(count).>(?).query
-//      x = Entity.i.int.>(?).query
-
-      _ <- x.apply(1).i.get.map(_ ==> List(
-      (1, 2),
-      ))
+      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      _ <- Entity.int(3).save.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- Entity(a).int(10).update.transact
+      _ <- Entity(b).delete.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
     } yield ()
   }

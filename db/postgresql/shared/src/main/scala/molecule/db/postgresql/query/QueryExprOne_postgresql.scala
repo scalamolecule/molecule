@@ -101,21 +101,30 @@ trait QueryExprOne_postgresql
     }
   }
 
-  private def castText(tpe: String): String = tpe match {
-    case "Boolean" | "UUID" => "::text"
-    case _                  => ""
-  }
-
   override protected def aggr[T: ClassTag](
+    baseType: String,
     ent: String,
     attr: String,
     col: String,
     fn: String,
     optN: Option[Int],
+    aggrOp: Option[Op],
+    aggrOpValue: Option[Value],
     res: ResOne[T]
   ): Unit = {
     checkAggrOne()
-    lazy val n = optN.getOrElse(0)
+    lazy val n        = optN.getOrElse(0)
+    lazy val castText = res.tpe match {
+      case "Boolean" | "UUID" => "::text"
+      case _                  => ""
+    }
+    def addAggrOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
+    val castAggrOpV = aggrOpValue match {
+      case Some(OneBoolean(_)) => "::text"
+      case Some(OneUUID(_))    => "::text"
+      case _                   => ""
+    }
+
     // Replace find/casting with aggregate function/cast
     select -= col
     fn match {
@@ -126,9 +135,10 @@ trait QueryExprOne_postgresql
         castStrategy.replace(res.array2set)
 
       case "min" =>
-        select += s"MIN($col${castText(res.tpe)})"
+        select += s"MIN($col$castText)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"MIN($col$castAggrOpV)")
 
       case "mins" =>
         select +=
@@ -144,9 +154,10 @@ trait QueryExprOne_postgresql
         castStrategy.replace(res.array2set)
 
       case "max" =>
-        select += s"MAX($col${castText(res.tpe)})"
+        select += s"MAX($col$castText)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"MAX($col$castAggrOpV)")
 
       case "maxs" =>
         select +=
@@ -164,6 +175,7 @@ trait QueryExprOne_postgresql
       case "sample" =>
         distinct = false
         select += col
+        addAggrOp("RAND()")
         orderBy += ((level, -1, "RANDOM()", ""))
         hardLimit = 1
 
@@ -182,22 +194,25 @@ trait QueryExprOne_postgresql
 
       case "count" =>
         distinct = false
+        selectWithOrder(col, "COUNT", "")
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "COUNT", "")
+        addAggrOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
         distinct = false
+        selectWithOrder(col, "COUNT")
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "COUNT")
+        addAggrOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
+        selectWithOrder(col, "SUM", "")
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "SUM", "")
+        addAggrOp(s"SUM($col)")
 
       case "median" =>
         groupByCols -= col
@@ -205,19 +220,22 @@ trait QueryExprOne_postgresql
         selectWithOrder(col, "percentile_cont", "0.5) WITHIN GROUP (ORDER BY ")
 
       case "avg" =>
-        groupByCols -= col
-        aggregate = true
         selectWithOrder(col, "AVG", "")
+        groupByCols -= col
+        addAggrOp(s"AVG($col)")
+        aggregate = true
 
       case "variance" =>
-        groupByCols -= col
-        aggregate = true
         selectWithOrder(col, "VAR_POP", "")
+        groupByCols -= col
+        addAggrOp(s"VAR_POP($col)")
+        aggregate = true
 
       case "stddev" =>
-        groupByCols -= col
-        aggregate = true
         selectWithOrder(col, "STDDEV_POP", "")
+        groupByCols -= col
+        addAggrOp(s"STDDEV_POP($col)")
+        aggregate = true
 
       case other => unexpectedKw(other)
     }

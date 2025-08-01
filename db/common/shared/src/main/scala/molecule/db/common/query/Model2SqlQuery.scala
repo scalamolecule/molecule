@@ -116,7 +116,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
   }
 
   private def mkHaving: String = {
-    if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
+    if (having.isEmpty) "" else having.mkString("\nHAVING ", " AND ", "")
   }
 
   private def mkOrderBy(isBackwards: Boolean): String = {

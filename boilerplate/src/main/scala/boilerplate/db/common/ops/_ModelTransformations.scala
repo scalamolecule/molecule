@@ -58,10 +58,36 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |    )
        |  }
        |
+       |  private def getFn(a: AttrOneMan, kw: Kw, n: Option[Int] = None): Fn = a match {
+       |    case a: AttrOneManID             => Fn("Long", kw.toString, n)
+       |    case a: AttrOneManString         => Fn("String", kw.toString, n)
+       |    case a: AttrOneManInt            => Fn("Int", kw.toString, n)
+       |    case a: AttrOneManLong           => Fn("Long", kw.toString, n)
+       |    case a: AttrOneManFloat          => Fn("Float", kw.toString, n)
+       |    case a: AttrOneManDouble         => Fn("Double", kw.toString, n)
+       |    case a: AttrOneManBoolean        => Fn("Boolean", kw.toString, n)
+       |    case a: AttrOneManBigInt         => Fn("BigInt", kw.toString, n)
+       |    case a: AttrOneManBigDecimal     => Fn("BigDecimal", kw.toString, n)
+       |    case a: AttrOneManDate           => Fn("Date", kw.toString, n)
+       |    case a: AttrOneManDuration       => Fn("Duration", kw.toString, n)
+       |    case a: AttrOneManInstant        => Fn("Instant", kw.toString, n)
+       |    case a: AttrOneManLocalDate      => Fn("LocalDate", kw.toString, n)
+       |    case a: AttrOneManLocalTime      => Fn("LocalTime", kw.toString, n)
+       |    case a: AttrOneManLocalDateTime  => Fn("LocalDateTime", kw.toString, n)
+       |    case a: AttrOneManOffsetTime     => Fn("OffsetTime", kw.toString, n)
+       |    case a: AttrOneManOffsetDateTime => Fn("OffsetDateTime", kw.toString, n)
+       |    case a: AttrOneManZonedDateTime  => Fn("ZonedDateTime", kw.toString, n)
+       |    case a: AttrOneManUUID           => Fn("UUID", kw.toString, n)
+       |    case a: AttrOneManURI            => Fn("URI", kw.toString, n)
+       |    case a: AttrOneManByte           => Fn("Byte", kw.toString, n)
+       |    case a: AttrOneManShort          => Fn("Short", kw.toString, n)
+       |    case a: AttrOneManChar           => Fn("Char", kw.toString, n)
+       |  }
+       |
        |  def toInt(dataModel: DataModel, kw: Kw): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
-       |      case a: AttrOneMan => AttrOneManInt(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
+       |      case a: AttrOneMan => AttrOneManInt(a.ent, a.attr, getFn(a, kw), ref = a.ref, coord = a.coord)
        |      case a             => unexpected(a)
        |    }
        |    dataModel.copy(elements = es.init :+ last)
@@ -70,7 +96,7 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |  def toDouble(dataModel: DataModel, kw: Kw): DataModel = {
        |    val es   = dataModel.elements
        |    val last = es.last match {
-       |      case a: AttrOneMan => AttrOneManDouble(a.ent, a.attr, Fn(kw.toString), ref = a.ref, coord = a.coord)
+       |      case a: AttrOneMan => AttrOneManDouble(a.ent, a.attr, getFn(a, kw), ref = a.ref, coord = a.coord)
        |      case a             => unexpected(a)
        |    }
        |    dataModel.copy(elements = es.init :+ last)
@@ -80,7 +106,29 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |    val es   = dataModel.elements
        |    val last = es.last match {
        |      case a: AttrOneMan => a match {
-       |        ${asIs("One")}
+       |        case a: AttrOneManID             => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManString         => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManInt            => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManLong           => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManFloat          => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManDouble         => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManBoolean        => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManBigInt         => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManBigDecimal     => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManDate           => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManDuration       => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManInstant        => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManLocalDate      => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManLocalTime      => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManLocalDateTime  => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManOffsetTime     => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManOffsetDateTime => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManZonedDateTime  => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManUUID           => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManURI            => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManByte           => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManShort          => a.copy(op = getFn(a, kw, n))
+       |        case a: AttrOneManChar           => a.copy(op = getFn(a, kw, n))
        |      }
        |      case a             => unexpected(a)
        |    }

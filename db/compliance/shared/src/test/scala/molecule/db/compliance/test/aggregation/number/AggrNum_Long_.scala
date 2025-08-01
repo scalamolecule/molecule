@@ -21,6 +21,12 @@ case class AggrNum_Long_(
 
   "sum" - types {
     given Equality[Long] = tolerantLongEquality(toleranceLong)
+    val sumAll = ((long1 + long2 + long2 + long3 + long4) * 100 / long100).asInstanceOf[Long]
+    val sum1   = ((long1 + long2) * 100 / long100).asInstanceOf[Long]
+    val sum2   = ((long2 + long3 + long4) * 100 / long100).asInstanceOf[Long]
+    val a      = (1, sum1)
+    val b      = (2, sum2)
+    val bigger = (sumAll + long1).asInstanceOf[Long]
     for {
       _ <- Entity.i.long.insert(List(
         (1, long1),
@@ -30,21 +36,62 @@ case class AggrNum_Long_(
         (2, long4),
       )).transact
 
-      // Sum of all values
-      _ <- Entity.long(sum).query.get.map(
-        _.head ==~ long1 + long2 + long2 + long3 + long4
-      )
+      // 1 attribute
+      _ <- Entity.long(sum).query.get.map(_.head ==~ sumAll)
 
-      _ <- Entity.i.long(sum).query.get.map(_.collect {
-        case (1, sum) => sum ==~ long1 + long2
-        case (2, sum) => sum ==~ long2 + long3 + long4
-      })
+      _ <- Entity.long(sum)(sumAll).query.get.map(_.head ==~ sumAll)
+      _ <- Entity.long(sum)(long1).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(sum).not(long1).query.get.map(_.head ==~ sumAll)
+      _ <- Entity.long(sum).not(sumAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(sum).<(bigger).query.get.map(_.head ==~ sumAll)
+      _ <- Entity.long(sum).<(sumAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(sum).<=(sumAll).query.get.map(_.head ==~ sumAll)
+      _ <- Entity.long(sum).<=(long1).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(sum).>(long1).query.get.map(_.head ==~ sumAll)
+      _ <- Entity.long(sum).>(sumAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(sum).>=(sumAll).query.get.map(_.head ==~ sumAll)
+      _ <- Entity.long(sum).>=(bigger).query.get.map(_ ==> Nil)
+
+
+      // n attributes
+      _ <- Entity.i.a1.long(sum).query.get.map { res =>
+        res(0)._2 ==~ sum1
+        res(1)._2 ==~ sum2
+      }
+
+      _ <- Entity.i.a1.long(sum)(sum1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(sum)(long1).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(sum).not(long1).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(sum).not(sum1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.a1.long(sum).<(sum2).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(sum).<(sum1).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(sum).<=(sum1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(sum).<=(long1).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(sum).>(long1).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(sum).>(sum1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.a1.long(sum).>=(sum1).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(sum).>=(sum2).query.get.map(_ ==> List(b))
     } yield ()
   }
 
 
   "median" - types {
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+    val medianAll = long2.toString.toDouble // middle number
+    val median1   = ((long1 + long2).toDouble * 100) / 200.0 // average of 2 middle numbers (avoid rounding errors)
+    val median2   = long5.toString.toDouble // middle number
+    val a         = (1, median1)
+    val b         = (2, median2)
     for {
       _ <- Entity.i.long.insert(List(
         (1, long1),
@@ -54,18 +101,62 @@ case class AggrNum_Long_(
         (2, long9),
       )).transact
 
-      _ <- Entity.long(median).query.get.map(_.head ==~ long2.toString.toDouble) // middle number
+      // 1 attribute
+      _ <- Entity.long(median).query.get.map(_.head ==~ medianAll)
 
-      _ <- Entity.i.long(median).query.get.map(_.collect {
-        case (1, median) => median ==~ (long1 + long2).toDouble / 2.0 // average of 2 middle numbers
-        case (2, median) => median ==~ long5.toString.toDouble // middle number
-      })
+      _ <- Entity.long(median)(medianAll).query.get.map(_.head ==~ medianAll)
+      _ <- Entity.long(median)(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(median).not(1.0).query.get.map(_.head ==~ medianAll)
+      _ <- Entity.long(median).not(medianAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(median).<(medianAll + 1.0).query.get.map(_.head ==~ medianAll)
+      _ <- Entity.long(median).<(medianAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(median).<=(medianAll).query.get.map(_.head ==~ medianAll)
+      _ <- Entity.long(median).<=(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(median).>(1.0).query.get.map(_.head ==~ medianAll)
+      _ <- Entity.long(median).>(medianAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(median).>=(medianAll).query.get.map(_.head ==~ medianAll)
+      _ <- Entity.long(median).>=(medianAll + 1.0).query.get.map(_ ==> Nil)
+
+
+      // n attributes
+      _ <- Entity.i.a1.long(median).query.get.map { res =>
+        res(0)._2 ==~ median1
+        res(1)._2 ==~ median2
+      }
+
+      _ <- Entity.i.a1.long(median)(median1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(median)(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(median).not(1.0).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(median).not(median1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.a1.long(median).<(median2).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(median).<(median1).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(median).<=(median1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(median).<=(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(median).>(1.0).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(median).>(median1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.a1.long(median).>=(median1).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(median).>=(median2).query.get.map(_ ==> List(b))
     } yield ()
   }
 
 
   "avg" - types {
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+    val avgAll = ((long1 + long2 + long2 + long3 + long4).toDouble * 100 / 500.0)
+    val avg1   = ((long1 + long2).toDouble * 100 / 200.0)
+    val avg2   = ((long2 + long3 + long4).toDouble * 100 / 300.0)
+    val a      = (1, avg1)
+    val b      = (2, avg2)
     for {
       _ <- Entity.i.long.insert(List(
         (1, long1),
@@ -75,21 +166,62 @@ case class AggrNum_Long_(
         (2, long4),
       )).transact
 
-      // Average of all values
-      _ <- Entity.long(avg).query.get.map(
-        _.head ==~ (long1 + long2 + long2 + long3 + long4).toDouble / 5.0
-      )
+      // 1 attribute
+      _ <- Entity.long(avg).query.get.map(_.head ==~ avgAll)
 
-      _ <- Entity.i.long(avg).query.get.map(_.collect {
-        case (1, avg) => avg ==~ (long1 + long2).toDouble / 2.0
-        case (2, avg) => avg ==~ (long2 + long3 + long4).toDouble / 3.0
-      })
+      _ <- Entity.long(avg)(avgAll).query.get.map(_.head ==~ avgAll)
+      _ <- Entity.long(avg)(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(avg).not(1.0).query.get.map(_.head ==~ avgAll)
+      _ <- Entity.long(avg).not(avgAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(avg).<(avgAll + 1.0).query.get.map(_.head ==~ avgAll)
+      _ <- Entity.long(avg).<(avgAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(avg).<=(avgAll).query.get.map(_.head ==~ avgAll)
+      _ <- Entity.long(avg).<=(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(avg).>(1.0).query.get.map(_.head ==~ avgAll)
+      _ <- Entity.long(avg).>(avgAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(avg).>=(avgAll).query.get.map(_.head ==~ avgAll)
+      _ <- Entity.long(avg).>=(avgAll + 1.0).query.get.map(_ ==> Nil)
+
+
+      // n attributes
+      _ <- Entity.i.a1.long(avg).query.get.map { res =>
+        res(0)._2 ==~ avg1
+        res(1)._2 ==~ avg2
+      }
+
+      _ <- Entity.i.a1.long(avg)(avg1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(avg)(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(avg).not(1.0).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(avg).not(avg1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.a1.long(avg).<(avg2).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(avg).<(avg1).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(avg).<=(avg1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(avg).<=(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(avg).>(1.0).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(avg).>(avg1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.a1.long(avg).>=(avg1).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(avg).>=(avg2).query.get.map(_ ==> List(b))
     } yield ()
   }
 
 
   "variance" - types {
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+    val varianceAll = varianceOf(long1, long2, long2, long3, long4)
+    val variance1   = varianceOf(long1, long2)
+    val variance2   = varianceOf(long2, long3, long4)
+    val a      = (1, variance1)
+    val b      = (2, variance2)
     for {
       _ <- Entity.i.long.insert(List(
         (1, long1),
@@ -99,21 +231,62 @@ case class AggrNum_Long_(
         (2, long4),
       )).transact
 
-      // Variance of all values
-      _ <- Entity.long(variance).query.get.map(
-        _.head ==~ varianceOf(long1, long2, long2, long3, long4)
-      )
+      // 1 attribute
+      _ <- Entity.long(variance).query.get.map(_.head ==~ varianceAll)
 
-      _ <- Entity.i.long(variance).query.get.map(_.collect {
-        case (1, variance) => variance ==~ varianceOf(long1, long2)
-        case (2, variance) => variance ==~ varianceOf(long2, long3, long4)
-      })
+      _ <- Entity.long(variance)(varianceAll).query.get.map(_.head ==~ varianceAll)
+      _ <- Entity.long(variance)(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(variance).not(1.0).query.get.map(_.head ==~ varianceAll)
+      _ <- Entity.long(variance).not(varianceAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(variance).<(varianceAll + 1.0).query.get.map(_.head ==~ varianceAll)
+      _ <- Entity.long(variance).<(varianceAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(variance).<=(varianceAll).query.get.map(_.head ==~ varianceAll)
+      _ <- Entity.long(variance).<=(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(variance).>(1.0).query.get.map(_.head ==~ varianceAll)
+      _ <- Entity.long(variance).>(varianceAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(variance).>=(varianceAll).query.get.map(_.head ==~ varianceAll)
+      _ <- Entity.long(variance).>=(varianceAll + 1.0).query.get.map(_ ==> Nil)
+
+
+      // n attributes
+      _ <- Entity.i.a1.long(variance).query.get.map { res =>
+        res(0)._2 ==~ variance1
+        res(1)._2 ==~ variance2
+      }
+
+      _ <- Entity.i.a1.long(variance)(variance1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(variance)(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(variance).not(1.0).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(variance).not(variance1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.a1.long(variance).<(variance2).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(variance).<(variance1).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(variance).<=(variance2).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(variance).<=(variance1).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.a1.long(variance).>(variance1).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.long(variance).>(variance2).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(variance).>=(variance1).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(variance).>=(variance2).query.get.map(_ ==> List(b))
     } yield ()
   }
 
 
   "stddev" - types {
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+    val stddevAll = stdDevOf(long1, long2, long2, long3, long4)
+    val stddev1   = stdDevOf(long1, long2)
+    val stddev2   = stdDevOf(long2, long3, long4)
+    val a      = (1, stddev1)
+    val b      = (2, stddev2)
     for {
       _ <- Entity.i.long.insert(List(
         (1, long1),
@@ -123,15 +296,51 @@ case class AggrNum_Long_(
         (2, long4),
       )).transact
 
-      // Standard deviation of all values
-      _ <- Entity.long(stddev).query.get.map(
-        _.head ==~ stdDevOf(long1, long2, long2, long3, long4)
-      )
+      // 1 attribute
+      _ <- Entity.long(stddev).query.get.map(_.head ==~ stddevAll)
 
-      _ <- Entity.i.long(stddev).query.get.map(_.collect {
-        case (1, stddev) => stddev ==~ stdDevOf(long1, long2)
-        case (2, stddev) => stddev ==~ stdDevOf(long2, long3, long4)
-      })
+      _ <- Entity.long(stddev)(stddevAll).query.get.map(_.head ==~ stddevAll)
+      _ <- Entity.long(stddev)(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(stddev).not(1.0).query.get.map(_.head ==~ stddevAll)
+      _ <- Entity.long(stddev).not(stddevAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(stddev).<(stddevAll + 1.0).query.get.map(_.head ==~ stddevAll)
+      _ <- Entity.long(stddev).<(stddevAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(stddev).<=(stddevAll).query.get.map(_.head ==~ stddevAll)
+      _ <- Entity.long(stddev).<=(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(stddev).>(1.0).query.get.map(_.head ==~ stddevAll)
+      _ <- Entity.long(stddev).>(stddevAll).query.get.map(_ ==> Nil)
+
+      _ <- Entity.long(stddev).>=(stddevAll).query.get.map(_.head ==~ stddevAll)
+      _ <- Entity.long(stddev).>=(stddevAll + 1.0).query.get.map(_ ==> Nil)
+
+
+      // n attributes
+      _ <- Entity.i.a1.long(stddev).query.get.map { res =>
+        res(0)._2 ==~ stddev1
+        res(1)._2 ==~ stddev2
+      }
+
+      _ <- Entity.i.a1.long(stddev)(stddev1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(stddev)(1.0).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(stddev).not(1.0).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(stddev).not(stddev1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.a1.long(stddev).<(stddev2).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.long(stddev).<(stddev1).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(stddev).<=(stddev2).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(stddev).<=(stddev1).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.a1.long(stddev).>(stddev1).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.long(stddev).>(stddev2).query.get.map(_ ==> Nil)
+
+      _ <- Entity.i.a1.long(stddev).>=(stddev1).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.long(stddev).>=(stddev2).query.get.map(_ ==> List(b))
     } yield ()
   }
 }

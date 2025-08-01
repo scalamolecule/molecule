@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.compliance.test.aggregation.any
 
+import java.net.URI
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.DbProviders
@@ -46,37 +47,133 @@ case class Aggr_URI_(
   }
 
 
+  "min" - types {
+    val (a, b) = ((1, uri1), (1, uri2))
+    for {
+      _ <- Entity.i.uri.insert(a, b).transact
+
+      // 1 attribute
+      _ <- Entity.uri(min).query.get.map(_ ==> List(uri1))
+
+      _ <- Entity.uri(min)(uri1).query.get.map(_ ==> List(uri1))
+      _ <- Entity.uri(min)(uri2).query.get.map(_ ==> List())
+
+      _ <- Entity.uri(min).not(uri1).query.get.map(_ ==> List())
+      _ <- Entity.uri(min).not(uri2).query.get.map(_ ==> List(uri1))
+
+      _ <- Entity.uri(min).<(uri1).query.get.map(_ ==> List())
+      _ <- Entity.uri(min).<(uri2).query.get.map(_ ==> List(uri1))
+
+      _ <- Entity.uri(min).<=(uri0).query.get.map(_ ==> List())
+      _ <- Entity.uri(min).<=(uri1).query.get.map(_ ==> List(uri1))
+
+      _ <- Entity.uri(min).>(uri1).query.get.map(_ ==> List())
+      _ <- Entity.uri(min).>(uri0).query.get.map(_ ==> List(uri1))
+
+      _ <- Entity.uri(min).>=(uri1).query.get.map(_ ==> List(uri1))
+      _ <- Entity.uri(min).>=(uri2).query.get.map(_ ==> List())
+
+
+      // n attributes
+      _ <- Entity.i.uri(min).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.uri(min)(uri1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.uri(min)(uri2).query.get.map(_ ==> List())
+
+      _ <- Entity.i.uri(min).not(uri1).query.get.map(_ ==> List())
+      _ <- Entity.i.uri(min).not(uri2).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.uri(min).<(uri1).query.get.map(_ ==> List())
+      _ <- Entity.i.uri(min).<(uri2).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.uri(min).<=(uri0).query.get.map(_ ==> List())
+      _ <- Entity.i.uri(min).<=(uri1).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.uri(min).>(uri1).query.get.map(_ ==> List())
+      _ <- Entity.i.uri(min).>(uri0).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.uri(min).>=(uri1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.uri(min).>=(uri2).query.get.map(_ ==> List())
+    } yield ()
+  }
+
+
+  "max" - types {
+    val (a, b) = ((1, uri1), (1, uri2))
+    for {
+      _ <- Entity.i.uri.insert(a, b).transact
+
+      // 1 attribute
+      _ <- Entity.uri(max).query.get.map(_ ==> List(uri2))
+
+      _ <- Entity.uri(max)(uri2).query.get.map(_ ==> List(uri2))
+      _ <- Entity.uri(max)(uri1).query.get.map(_ ==> List())
+
+      _ <- Entity.uri(max).not(uri2).query.get.map(_ ==> List())
+      _ <- Entity.uri(max).not(uri1).query.get.map(_ ==> List(uri2))
+
+      _ <- Entity.uri(max).<(uri2).query.get.map(_ ==> List())
+      _ <- Entity.uri(max).<(uri3).query.get.map(_ ==> List(uri2))
+
+      _ <- Entity.uri(max).<=(uri1).query.get.map(_ ==> List())
+      _ <- Entity.uri(max).<=(uri2).query.get.map(_ ==> List(uri2))
+
+      _ <- Entity.uri(max).>(uri2).query.get.map(_ ==> List())
+      _ <- Entity.uri(max).>(uri1).query.get.map(_ ==> List(uri2))
+
+      _ <- Entity.uri(max).>=(uri2).query.get.map(_ ==> List(uri2))
+      _ <- Entity.uri(max).>=(uri3).query.get.map(_ ==> List())
+
+
+      // n attributes
+      _ <- Entity.i.uri(max).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.uri(max)(uri2).query.get.map(_ ==> List(b))
+      _ <- Entity.i.uri(max)(uri1).query.get.map(_ ==> List())
+
+      _ <- Entity.i.uri(max).not(uri2).query.get.map(_ ==> List())
+      _ <- Entity.i.uri(max).not(uri1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.uri(max).<(uri2).query.get.map(_ ==> List())
+      _ <- Entity.i.uri(max).<(uri3).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.uri(max).<=(uri1).query.get.map(_ ==> List())
+      _ <- Entity.i.uri(max).<=(uri2).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.uri(max).>(uri2).query.get.map(_ ==> List())
+      _ <- Entity.i.uri(max).>(uri1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.uri(max).>=(uri2).query.get.map(_ ==> List(b))
+      _ <- Entity.i.uri(max).>=(uri3).query.get.map(_ ==> List())
+    } yield ()
+  }
+
+
   "min/max" - types {
     for {
       _ <- Entity.i.uri.insert(
         (1, uri1),
         (1, uri2),
-        (1, uri3),
+        (2, uri3),
         (2, uri4),
-        (2, uri5),
-        (2, uri6),
       ).transact
 
-      _ <- Entity.uri(min).query.get.map(_ ==> List(uri1))
-      _ <- Entity.uri(max).query.get.map(_ ==> List(uri6))
-      _ <- Entity.uri(min).uri(max).query.get.map(_ ==> List((uri1, uri6)))
+      _ <- Entity.uri(min).uri(max).query.get.map(_ ==> List((uri1, uri4)))
 
-      _ <- Entity.i.a1.uri(min).query.get.map(_ ==> List(
-        (1, uri1),
-        (2, uri4)
-      ))
+      _ <- Entity.uri(min)(uri1).uri(max)(uri4).query.get.map(_ ==> List((uri1, uri4)))
+      _ <- Entity.uri(min)(uri1).uri(max)(uri5).query.get.map(_ ==> List())
 
-      _ <- Entity.i.a1.uri(max).query.get.map(_ ==> List(
-        (1, uri3),
-        (2, uri6)
-      ))
+      _ <- Entity.uri(min).not(uri2).uri(max).not(uri3).query.get.map(_ ==> List((uri1, uri4)))
+      _ <- Entity.uri(min).not(uri2).uri(max).not(uri4).query.get.map(_ ==> List())
 
-      _ <- Entity.i.a1.uri(min).uri(max).query.get.map(_ ==> List(
-        (1, uri1, uri3),
-        (2, uri4, uri6)
-      ))
+      _ <- Entity.uri(min).<(uri2).uri(max).>(uri3).query.get.map(_ ==> List((uri1, uri4)))
+      _ <- Entity.uri(min).<(uri2).uri(max).>(uri4).query.get.map(_ ==> List())
+
+      _ <- Entity.uri(min).<=(uri1).uri(max).>=(uri4).query.get.map(_ ==> List((uri1, uri4)))
+      _ <- Entity.uri(min).<=(uri1).uri(max).>=(uri5).query.get.map(_ ==> List())
     } yield ()
   }
+
 
   "min/max n" - types {
     for {
@@ -115,10 +212,72 @@ case class Aggr_URI_(
 
 
   "sample" - types {
-    val all = Set(uri1, uri2, uri3, uri4)
+    val all       = Set(uri1, uri2, uri3)
+    val (a, b, c) = ((1, uri1), (2, uri2), (3, uri3))
+    val allPairs  = List(a, b, c)
+    for {
+      _ <- Entity.i.uri.insert(allPairs).transact
+
+      // 1 attribute
+      _ <- Entity.uri(sample).query.get.map(res => all.contains(res.head) ==> true)
+
+      // Checking for equality on a sample doesn't make sense
+      // _ <- Entity.uri(sample)(uri2).query.get.map(res => all.contains(res.head) ==> true)
+      // If you want a specific value, this would be the natural query
+      _ <- Entity.uri(uri2).query.get.map(_ ==> List(uri2))
+
+      _ <- Entity.uri(sample).not(uri2).query.get.map { res =>
+        List(uri1, uri3).contains(res.head) ==> true
+        (res.head == uri2) ==> false
+      }
+      _ <- Entity.uri(sample).<(uri3).query.get.map { res =>
+        List(uri1, uri2).contains(res.head) ==> true
+        (res.head == uri3) ==> false
+      }
+      _ <- Entity.uri(sample).<=(uri2).query.get.map { res =>
+        List(uri1, uri2).contains(res.head) ==> true
+        (res.head == uri3) ==> false
+      }
+      _ <- Entity.uri(sample).>(uri1).query.get.map { res =>
+        List(uri2, uri3).contains(res.head) ==> true
+        (res.head == uri1) ==> false
+      }
+      _ <- Entity.uri(sample).>=(uri2).query.get.map { res =>
+        List(uri2, uri3).contains(res.head) ==> true
+        (res.head == uri1) ==> false
+      }
+
+      // 1 attribute
+      _ <- Entity.i.uri(sample).query.get.map(res => allPairs.contains(res.head) ==> true)
+
+      _ <- Entity.i.uri(sample).not(uri2).query.get.map { res =>
+        List(a, c).contains(res.head) ==> true
+        (res.head == b) ==> false
+      }
+      _ <- Entity.i.uri(sample).<(uri3).query.get.map { res =>
+        List(a, b).contains(res.head) ==> true
+        (res.head == c) ==> false
+      }
+      _ <- Entity.i.uri(sample).<=(uri2).query.get.map { res =>
+        List(a, b).contains(res.head) ==> true
+        (res.head == c) ==> false
+      }
+      _ <- Entity.i.uri(sample).>(uri1).query.get.map { res =>
+        List(b, c).contains(res.head) ==> true
+        (res.head == a) ==> false
+      }
+      _ <- Entity.i.uri(sample).>=(uri2).query.get.map { res =>
+        List(b, c).contains(res.head) ==> true
+        (res.head == a) ==> false
+      }
+    } yield ()
+  }
+
+
+  "samples(n)" - types {
+    val all = Set(uri1, uri2, uri3)
     for {
       _ <- Entity.uri.insert(List(uri1, uri2, uri3)).transact
-      _ <- Entity.uri(sample).query.get.map(res => all.contains(res.head) ==> true)
       _ <- Entity.uri(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
       _ <- Entity.uri(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
     } yield ()
@@ -126,6 +285,7 @@ case class Aggr_URI_(
 
 
   "count" - types {
+    val (a, b) = ((1, 1), (2, 3))
     for {
       _ <- Entity.i.uri.insert(List(
         (1, uri1),
@@ -134,17 +294,104 @@ case class Aggr_URI_(
         (2, uri3),
       )).transact
 
+      // 1 attribute
       _ <- Entity.uri(count).query.get.map(_ ==> List(4))
-      _ <- Entity.i.a1.uri(count).query.get.map(_ ==> List(
-        (1, 1),
-        (2, 3)
-      ))
 
+      _ <- Entity.uri(count)(3).query.get.map(_ ==> List())
+      _ <- Entity.uri(count)(4).query.get.map(_ ==> List(4))
+
+      _ <- Entity.uri(count).not(3).query.get.map(_ ==> List(4))
+      _ <- Entity.uri(count).not(4).query.get.map(_ ==> List())
+
+      _ <- Entity.uri(count).<(5).query.get.map(_ ==> List(4))
+      _ <- Entity.uri(count).<(4).query.get.map(_ ==> List())
+
+      _ <- Entity.uri(count).<=(4).query.get.map(_ ==> List(4))
+      _ <- Entity.uri(count).<=(3).query.get.map(_ ==> List())
+
+      _ <- Entity.uri(count).>(3).query.get.map(_ ==> List(4))
+      _ <- Entity.uri(count).>(4).query.get.map(_ ==> List())
+
+      _ <- Entity.uri(count).>=(4).query.get.map(_ ==> List(4))
+      _ <- Entity.uri(count).>=(5).query.get.map(_ ==> List())
+
+
+      // n attributes
+      _ <- Entity.i.a1.uri(count).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.uri(count)(3).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.uri(count)(2).query.get.map(_ ==> List())
+
+      _ <- Entity.i.a1.uri(count).not(3).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.uri(count).not(2).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.uri(count).<(3).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.uri(count).<(4).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.uri(count).<=(3).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.uri(count).<=(2).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.a1.uri(count).>(2).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.uri(count).>(3).query.get.map(_ ==> List())
+
+      _ <- Entity.i.a1.uri(count).>=(3).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.uri(count).>=(4).query.get.map(_ ==> List())
+    } yield ()
+  }
+
+
+  "countDistinct" - types {
+    val (a, b) = ((1, 1), (2, 2))
+    for {
+      _ <- Entity.i.uri.insert(List(
+        (1, uri1),
+        (2, uri2),
+        (2, uri2),
+        (2, uri3),
+      )).transact
+
+      // 1 attribute
       _ <- Entity.uri(countDistinct).query.get.map(_ ==> List(3))
-      _ <- Entity.i.a1.uri(countDistinct).query.get.map(_ ==> List(
-        (1, 1),
-        (2, 2)
-      ))
+
+      _ <- Entity.uri(countDistinct)(2).query.get.map(_ ==> List())
+      _ <- Entity.uri(countDistinct)(3).query.get.map(_ ==> List(3))
+
+      _ <- Entity.uri(countDistinct).not(2).query.get.map(_ ==> List(3))
+      _ <- Entity.uri(countDistinct).not(3).query.get.map(_ ==> List())
+
+      _ <- Entity.uri(countDistinct).<(4).query.get.map(_ ==> List(3))
+      _ <- Entity.uri(countDistinct).<(3).query.get.map(_ ==> List())
+
+      _ <- Entity.uri(countDistinct).<=(3).query.get.map(_ ==> List(3))
+      _ <- Entity.uri(countDistinct).<=(2).query.get.map(_ ==> List())
+
+      _ <- Entity.uri(countDistinct).>(2).query.get.map(_ ==> List(3))
+      _ <- Entity.uri(countDistinct).>(3).query.get.map(_ ==> List())
+
+      _ <- Entity.uri(countDistinct).>=(3).query.get.map(_ ==> List(3))
+      _ <- Entity.uri(countDistinct).>=(4).query.get.map(_ ==> List())
+
+
+      // n attributes
+      _ <- Entity.i.a1.uri(countDistinct).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.uri(countDistinct)(2).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.uri(countDistinct)(3).query.get.map(_ ==> List())
+
+      _ <- Entity.i.a1.uri(countDistinct).not(2).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.uri(countDistinct).not(3).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.uri(countDistinct).<(2).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.uri(countDistinct).<(3).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.uri(countDistinct).<=(2).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.uri(countDistinct).<=(1).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.a1.uri(countDistinct).>(1).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.uri(countDistinct).>(2).query.get.map(_ ==> List())
+
+      _ <- Entity.i.a1.uri(countDistinct).>=(2).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.uri(countDistinct).>=(3).query.get.map(_ ==> List())
     } yield ()
   }
 }

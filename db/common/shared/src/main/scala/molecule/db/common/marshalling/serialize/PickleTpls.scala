@@ -379,13 +379,13 @@ case class PickleTpls(
 
   private def pickleAttrOneMan(a: AttrOneMan, tplIndex: Int): Product => Unit = {
     a.op match {
-      case Fn(kw, _, _, _) => kw match {
+      case Fn(_, kw, _, _, _) => kw match {
         case "count" | "countDistinct"                => pickleAttrOneManInt(tplIndex)
         case "distinct" | "mins" | "maxs" | "samples" => pickleAttrOneManSet(a, tplIndex)
         case "avg" | "variance" | "stddev"            => pickleAttrOneManDouble(tplIndex)
         case _                                        => pickleAttrOneManV(a, tplIndex)
       }
-      case _               => pickleAttrOneManV(a, tplIndex)
+      case _                  => pickleAttrOneManV(a, tplIndex)
     }
   }
   private def pickleAttrOneManInt(tplIndex: Int): Product => Unit = {

@@ -46,37 +46,133 @@ case class Aggr_Byte_(
   }
 
 
+  "min" - types {
+    val (a, b) = ((1, byte1), (1, byte2))
+    for {
+      _ <- Entity.i.byte.insert(a, b).transact
+
+      // 1 attribute
+      _ <- Entity.byte(min).query.get.map(_ ==> List(byte1))
+
+      _ <- Entity.byte(min)(byte1).query.get.map(_ ==> List(byte1))
+      _ <- Entity.byte(min)(byte2).query.get.map(_ ==> List())
+
+      _ <- Entity.byte(min).not(byte1).query.get.map(_ ==> List())
+      _ <- Entity.byte(min).not(byte2).query.get.map(_ ==> List(byte1))
+
+      _ <- Entity.byte(min).<(byte1).query.get.map(_ ==> List())
+      _ <- Entity.byte(min).<(byte2).query.get.map(_ ==> List(byte1))
+
+      _ <- Entity.byte(min).<=(byte0).query.get.map(_ ==> List())
+      _ <- Entity.byte(min).<=(byte1).query.get.map(_ ==> List(byte1))
+
+      _ <- Entity.byte(min).>(byte1).query.get.map(_ ==> List())
+      _ <- Entity.byte(min).>(byte0).query.get.map(_ ==> List(byte1))
+
+      _ <- Entity.byte(min).>=(byte1).query.get.map(_ ==> List(byte1))
+      _ <- Entity.byte(min).>=(byte2).query.get.map(_ ==> List())
+
+
+      // n attributes
+      _ <- Entity.i.byte(min).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.byte(min)(byte1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.byte(min)(byte2).query.get.map(_ ==> List())
+
+      _ <- Entity.i.byte(min).not(byte1).query.get.map(_ ==> List())
+      _ <- Entity.i.byte(min).not(byte2).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.byte(min).<(byte1).query.get.map(_ ==> List())
+      _ <- Entity.i.byte(min).<(byte2).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.byte(min).<=(byte0).query.get.map(_ ==> List())
+      _ <- Entity.i.byte(min).<=(byte1).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.byte(min).>(byte1).query.get.map(_ ==> List())
+      _ <- Entity.i.byte(min).>(byte0).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.byte(min).>=(byte1).query.get.map(_ ==> List(a))
+      _ <- Entity.i.byte(min).>=(byte2).query.get.map(_ ==> List())
+    } yield ()
+  }
+
+
+  "max" - types {
+    val (a, b) = ((1, byte1), (1, byte2))
+    for {
+      _ <- Entity.i.byte.insert(a, b).transact
+
+      // 1 attribute
+      _ <- Entity.byte(max).query.get.map(_ ==> List(byte2))
+
+      _ <- Entity.byte(max)(byte2).query.get.map(_ ==> List(byte2))
+      _ <- Entity.byte(max)(byte1).query.get.map(_ ==> List())
+
+      _ <- Entity.byte(max).not(byte2).query.get.map(_ ==> List())
+      _ <- Entity.byte(max).not(byte1).query.get.map(_ ==> List(byte2))
+
+      _ <- Entity.byte(max).<(byte2).query.get.map(_ ==> List())
+      _ <- Entity.byte(max).<(byte3).query.get.map(_ ==> List(byte2))
+
+      _ <- Entity.byte(max).<=(byte1).query.get.map(_ ==> List())
+      _ <- Entity.byte(max).<=(byte2).query.get.map(_ ==> List(byte2))
+
+      _ <- Entity.byte(max).>(byte2).query.get.map(_ ==> List())
+      _ <- Entity.byte(max).>(byte1).query.get.map(_ ==> List(byte2))
+
+      _ <- Entity.byte(max).>=(byte2).query.get.map(_ ==> List(byte2))
+      _ <- Entity.byte(max).>=(byte3).query.get.map(_ ==> List())
+
+
+      // n attributes
+      _ <- Entity.i.byte(max).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.byte(max)(byte2).query.get.map(_ ==> List(b))
+      _ <- Entity.i.byte(max)(byte1).query.get.map(_ ==> List())
+
+      _ <- Entity.i.byte(max).not(byte2).query.get.map(_ ==> List())
+      _ <- Entity.i.byte(max).not(byte1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.byte(max).<(byte2).query.get.map(_ ==> List())
+      _ <- Entity.i.byte(max).<(byte3).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.byte(max).<=(byte1).query.get.map(_ ==> List())
+      _ <- Entity.i.byte(max).<=(byte2).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.byte(max).>(byte2).query.get.map(_ ==> List())
+      _ <- Entity.i.byte(max).>(byte1).query.get.map(_ ==> List(b))
+
+      _ <- Entity.i.byte(max).>=(byte2).query.get.map(_ ==> List(b))
+      _ <- Entity.i.byte(max).>=(byte3).query.get.map(_ ==> List())
+    } yield ()
+  }
+
+
   "min/max" - types {
     for {
       _ <- Entity.i.byte.insert(
         (1, byte1),
         (1, byte2),
-        (1, byte3),
+        (2, byte3),
         (2, byte4),
-        (2, byte5),
-        (2, byte6),
       ).transact
 
-      _ <- Entity.byte(min).query.get.map(_ ==> List(byte1))
-      _ <- Entity.byte(max).query.get.map(_ ==> List(byte6))
-      _ <- Entity.byte(min).byte(max).query.get.map(_ ==> List((byte1, byte6)))
+      _ <- Entity.byte(min).byte(max).query.get.map(_ ==> List((byte1, byte4)))
 
-      _ <- Entity.i.a1.byte(min).query.get.map(_ ==> List(
-        (1, byte1),
-        (2, byte4)
-      ))
+      _ <- Entity.byte(min)(byte1).byte(max)(byte4).query.get.map(_ ==> List((byte1, byte4)))
+      _ <- Entity.byte(min)(byte1).byte(max)(byte5).query.get.map(_ ==> List())
 
-      _ <- Entity.i.a1.byte(max).query.get.map(_ ==> List(
-        (1, byte3),
-        (2, byte6)
-      ))
+      _ <- Entity.byte(min).not(byte2).byte(max).not(byte3).query.get.map(_ ==> List((byte1, byte4)))
+      _ <- Entity.byte(min).not(byte2).byte(max).not(byte4).query.get.map(_ ==> List())
 
-      _ <- Entity.i.a1.byte(min).byte(max).query.get.map(_ ==> List(
-        (1, byte1, byte3),
-        (2, byte4, byte6)
-      ))
+      _ <- Entity.byte(min).<(byte2).byte(max).>(byte3).query.get.map(_ ==> List((byte1, byte4)))
+      _ <- Entity.byte(min).<(byte2).byte(max).>(byte4).query.get.map(_ ==> List())
+
+      _ <- Entity.byte(min).<=(byte1).byte(max).>=(byte4).query.get.map(_ ==> List((byte1, byte4)))
+      _ <- Entity.byte(min).<=(byte1).byte(max).>=(byte5).query.get.map(_ ==> List())
     } yield ()
   }
+
 
   "min/max n" - types {
     for {
@@ -115,10 +211,72 @@ case class Aggr_Byte_(
 
 
   "sample" - types {
-    val all = Set(byte1, byte2, byte3, byte4)
+    val all       = Set(byte1, byte2, byte3)
+    val (a, b, c) = ((1, byte1), (2, byte2), (3, byte3))
+    val allPairs  = List(a, b, c)
+    for {
+      _ <- Entity.i.byte.insert(allPairs).transact
+
+      // 1 attribute
+      _ <- Entity.byte(sample).query.get.map(res => all.contains(res.head) ==> true)
+
+      // Checking for equality on a sample doesn't make sense
+      // _ <- Entity.byte(sample)(byte2).query.get.map(res => all.contains(res.head) ==> true)
+      // If you want a specific value, this would be the natural query
+      _ <- Entity.byte(byte2).query.get.map(_ ==> List(byte2))
+
+      _ <- Entity.byte(sample).not(byte2).query.get.map { res =>
+        List(byte1, byte3).contains(res.head) ==> true
+        (res.head == byte2) ==> false
+      }
+      _ <- Entity.byte(sample).<(byte3).query.get.map { res =>
+        List(byte1, byte2).contains(res.head) ==> true
+        (res.head == byte3) ==> false
+      }
+      _ <- Entity.byte(sample).<=(byte2).query.get.map { res =>
+        List(byte1, byte2).contains(res.head) ==> true
+        (res.head == byte3) ==> false
+      }
+      _ <- Entity.byte(sample).>(byte1).query.get.map { res =>
+        List(byte2, byte3).contains(res.head) ==> true
+        (res.head == byte1) ==> false
+      }
+      _ <- Entity.byte(sample).>=(byte2).query.get.map { res =>
+        List(byte2, byte3).contains(res.head) ==> true
+        (res.head == byte1) ==> false
+      }
+
+      // 1 attribute
+      _ <- Entity.i.byte(sample).query.get.map(res => allPairs.contains(res.head) ==> true)
+
+      _ <- Entity.i.byte(sample).not(byte2).query.get.map { res =>
+        List(a, c).contains(res.head) ==> true
+        (res.head == b) ==> false
+      }
+      _ <- Entity.i.byte(sample).<(byte3).query.get.map { res =>
+        List(a, b).contains(res.head) ==> true
+        (res.head == c) ==> false
+      }
+      _ <- Entity.i.byte(sample).<=(byte2).query.get.map { res =>
+        List(a, b).contains(res.head) ==> true
+        (res.head == c) ==> false
+      }
+      _ <- Entity.i.byte(sample).>(byte1).query.get.map { res =>
+        List(b, c).contains(res.head) ==> true
+        (res.head == a) ==> false
+      }
+      _ <- Entity.i.byte(sample).>=(byte2).query.get.map { res =>
+        List(b, c).contains(res.head) ==> true
+        (res.head == a) ==> false
+      }
+    } yield ()
+  }
+
+
+  "samples(n)" - types {
+    val all = Set(byte1, byte2, byte3)
     for {
       _ <- Entity.byte.insert(List(byte1, byte2, byte3)).transact
-      _ <- Entity.byte(sample).query.get.map(res => all.contains(res.head) ==> true)
       _ <- Entity.byte(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
       _ <- Entity.byte(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
     } yield ()
@@ -126,6 +284,7 @@ case class Aggr_Byte_(
 
 
   "count" - types {
+    val (a, b) = ((1, 1), (2, 3))
     for {
       _ <- Entity.i.byte.insert(List(
         (1, byte1),
@@ -134,17 +293,104 @@ case class Aggr_Byte_(
         (2, byte3),
       )).transact
 
+      // 1 attribute
       _ <- Entity.byte(count).query.get.map(_ ==> List(4))
-      _ <- Entity.i.a1.byte(count).query.get.map(_ ==> List(
-        (1, 1),
-        (2, 3)
-      ))
 
+      _ <- Entity.byte(count)(3).query.get.map(_ ==> List())
+      _ <- Entity.byte(count)(4).query.get.map(_ ==> List(4))
+
+      _ <- Entity.byte(count).not(3).query.get.map(_ ==> List(4))
+      _ <- Entity.byte(count).not(4).query.get.map(_ ==> List())
+
+      _ <- Entity.byte(count).<(5).query.get.map(_ ==> List(4))
+      _ <- Entity.byte(count).<(4).query.get.map(_ ==> List())
+
+      _ <- Entity.byte(count).<=(4).query.get.map(_ ==> List(4))
+      _ <- Entity.byte(count).<=(3).query.get.map(_ ==> List())
+
+      _ <- Entity.byte(count).>(3).query.get.map(_ ==> List(4))
+      _ <- Entity.byte(count).>(4).query.get.map(_ ==> List())
+
+      _ <- Entity.byte(count).>=(4).query.get.map(_ ==> List(4))
+      _ <- Entity.byte(count).>=(5).query.get.map(_ ==> List())
+
+
+      // n attributes
+      _ <- Entity.i.a1.byte(count).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.byte(count)(3).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.byte(count)(2).query.get.map(_ ==> List())
+
+      _ <- Entity.i.a1.byte(count).not(3).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.byte(count).not(2).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.byte(count).<(3).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.byte(count).<(4).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.byte(count).<=(3).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.byte(count).<=(2).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.a1.byte(count).>(2).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.byte(count).>(3).query.get.map(_ ==> List())
+
+      _ <- Entity.i.a1.byte(count).>=(3).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.byte(count).>=(4).query.get.map(_ ==> List())
+    } yield ()
+  }
+
+
+  "countDistinct" - types {
+    val (a, b) = ((1, 1), (2, 2))
+    for {
+      _ <- Entity.i.byte.insert(List(
+        (1, byte1),
+        (2, byte2),
+        (2, byte2),
+        (2, byte3),
+      )).transact
+
+      // 1 attribute
       _ <- Entity.byte(countDistinct).query.get.map(_ ==> List(3))
-      _ <- Entity.i.a1.byte(countDistinct).query.get.map(_ ==> List(
-        (1, 1),
-        (2, 2)
-      ))
+
+      _ <- Entity.byte(countDistinct)(2).query.get.map(_ ==> List())
+      _ <- Entity.byte(countDistinct)(3).query.get.map(_ ==> List(3))
+
+      _ <- Entity.byte(countDistinct).not(2).query.get.map(_ ==> List(3))
+      _ <- Entity.byte(countDistinct).not(3).query.get.map(_ ==> List())
+
+      _ <- Entity.byte(countDistinct).<(4).query.get.map(_ ==> List(3))
+      _ <- Entity.byte(countDistinct).<(3).query.get.map(_ ==> List())
+
+      _ <- Entity.byte(countDistinct).<=(3).query.get.map(_ ==> List(3))
+      _ <- Entity.byte(countDistinct).<=(2).query.get.map(_ ==> List())
+
+      _ <- Entity.byte(countDistinct).>(2).query.get.map(_ ==> List(3))
+      _ <- Entity.byte(countDistinct).>(3).query.get.map(_ ==> List())
+
+      _ <- Entity.byte(countDistinct).>=(3).query.get.map(_ ==> List(3))
+      _ <- Entity.byte(countDistinct).>=(4).query.get.map(_ ==> List())
+
+
+      // n attributes
+      _ <- Entity.i.a1.byte(countDistinct).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.byte(countDistinct)(2).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.byte(countDistinct)(3).query.get.map(_ ==> List())
+
+      _ <- Entity.i.a1.byte(countDistinct).not(2).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.byte(countDistinct).not(3).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.byte(countDistinct).<(2).query.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.byte(countDistinct).<(3).query.get.map(_ ==> List(a, b))
+
+      _ <- Entity.i.a1.byte(countDistinct).<=(2).query.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.byte(countDistinct).<=(1).query.get.map(_ ==> List(a))
+
+      _ <- Entity.i.a1.byte(countDistinct).>(1).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.byte(countDistinct).>(2).query.get.map(_ ==> List())
+
+      _ <- Entity.i.a1.byte(countDistinct).>=(2).query.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.byte(countDistinct).>=(3).query.get.map(_ ==> List())
     } yield ()
   }
 }

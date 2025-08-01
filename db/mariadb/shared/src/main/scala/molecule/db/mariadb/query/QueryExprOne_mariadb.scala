@@ -1,7 +1,7 @@
 package molecule.db.mariadb.query
 
 import molecule.base.error.ModelError
-import molecule.core.dataModel.Value
+import molecule.core.dataModel.{Op, Value}
 import molecule.db.common.javaSql.PrepStmt
 import molecule.db.common.query.{LambdasOne, Model2Query, QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
@@ -27,17 +27,21 @@ trait QueryExprOne_mariadb
   }
 
   override protected def aggr[T: ClassTag](
+    baseType: String,
     ent: String,
     attr: String,
     col: String,
     fn: String,
     optN: Option[Int],
+    aggrOp: Option[Op],
+    aggrOpValue: Option[Value],
     res: ResOne[T]
   ): Unit = {
     checkAggrOne()
     lazy val sep     = "0x1D" // Use invisible ascii Group Selector to separate concatenated values
     lazy val sepChar = 29.toChar
     lazy val n       = optN.getOrElse(0)
+    def addAggrOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
     select -= col
     fn match {
       case "distinct" =>
@@ -52,6 +56,7 @@ trait QueryExprOne_mariadb
         select += s"MIN($col)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"MIN($col)")
 
       case "mins" =>
         select += s"GROUP_CONCAT(DISTINCT $col SEPARATOR $sep)"
@@ -65,6 +70,7 @@ trait QueryExprOne_mariadb
         select += s"MAX($col)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"MAX($col)")
 
       case "maxs" =>
         select += s"GROUP_CONCAT(DISTINCT $col ORDER BY $col DESC SEPARATOR $sep)"
@@ -83,6 +89,7 @@ trait QueryExprOne_mariadb
           val rnd   = new Random().nextInt(array.length)
           array(rnd)
         })
+        addAggrOp("RAND()")
 
       case "samples" =>
         select += s"JSON_ARRAYAGG($col)"
@@ -98,6 +105,7 @@ trait QueryExprOne_mariadb
         distinct = false
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
@@ -105,12 +113,14 @@ trait QueryExprOne_mariadb
         distinct = false
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
         selectWithOrder(col, "SUM", "")
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"SUM($col)")
 
       case "median" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
@@ -119,6 +129,7 @@ trait QueryExprOne_mariadb
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
+        addAggrOp(s"MEDIAN($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
@@ -129,6 +140,7 @@ trait QueryExprOne_mariadb
       case "avg" =>
         selectWithOrder(col, "AVG", "")
         groupByCols -= col
+        addAggrOp(s"AVG($col)")
         aggregate = true
 
       case "variance" =>
@@ -138,6 +150,7 @@ trait QueryExprOne_mariadb
         groupByCols -= col
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
+        addAggrOp(s"VAR_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
@@ -152,6 +165,7 @@ trait QueryExprOne_mariadb
         groupByCols -= col
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
+        addAggrOp(s"STDDEV_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
