@@ -43,6 +43,18 @@ case class Aggr_Instant_(
       _ <- Entity.instant(distinct).query.get.map(_.head ==> Set(
         instant1, instant2, instant3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.instant.a1.instant(distinct).query.get.map(_ ==> List(
+        (instant1, Set(instant1)),
+        (instant2, Set(instant2)),
+        (instant3, Set(instant3)),
+      ))
+      _ <- Entity.instant(distinct).instant.a1.query.get.map(_ ==> List(
+        (Set(instant1), instant1),
+        (Set(instant2), instant2),
+        (Set(instant3), instant3),
+      ))
     } yield ()
   }
 
@@ -73,7 +85,6 @@ case class Aggr_Instant_(
       _ <- Entity.instant(min).>=(instant1).query.get.map(_ ==> List(instant1))
       _ <- Entity.instant(min).>=(instant2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.instant(min).query.get.map(_ ==> List(a))
 
@@ -94,6 +105,16 @@ case class Aggr_Instant_(
 
       _ <- Entity.i.instant(min).>=(instant1).query.get.map(_ ==> List(a))
       _ <- Entity.i.instant(min).>=(instant2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.instant.a1.instant(min).query.get.map(_ ==> List(
+        (instant1, instant1),
+        (instant2, instant2),
+      ))
+      _ <- Entity.instant(min).instant.a1.query.get.map(_ ==> List(
+        (instant1, instant1),
+        (instant2, instant2),
+      ))
     } yield ()
   }
 
@@ -124,7 +145,6 @@ case class Aggr_Instant_(
       _ <- Entity.instant(max).>=(instant2).query.get.map(_ ==> List(instant2))
       _ <- Entity.instant(max).>=(instant3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.instant(max).query.get.map(_ ==> List(b))
 
@@ -145,6 +165,16 @@ case class Aggr_Instant_(
 
       _ <- Entity.i.instant(max).>=(instant2).query.get.map(_ ==> List(b))
       _ <- Entity.i.instant(max).>=(instant3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.instant.a1.instant(max).query.get.map(_ ==> List(
+        (instant1, instant1),
+        (instant2, instant2),
+      ))
+      _ <- Entity.instant(max).instant.a1.query.get.map(_ ==> List(
+        (instant1, instant1),
+        (instant2, instant2),
+      ))
     } yield ()
   }
 
@@ -206,6 +236,41 @@ case class Aggr_Instant_(
       _ <- Entity.i.a1.instant(min(2)).instant(max(2)).query.get.map(_ ==> List(
         (1, Set(instant1, instant2), Set(instant2, instant3)),
         (2, Set(instant4, instant5), Set(instant5, instant6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.instant.a1.instant(min(2)).query.get.map(_ ==> List(
+        (instant1, Set(instant1)),
+        (instant2, Set(instant2)),
+        (instant3, Set(instant3)),
+        (instant4, Set(instant4)),
+        (instant5, Set(instant5)),
+        (instant6, Set(instant6)),
+      ))
+      _ <- Entity.instant(min(2)).instant.a1.query.get.map(_ ==> List(
+        (Set(instant1), instant1),
+        (Set(instant2), instant2),
+        (Set(instant3), instant3),
+        (Set(instant4), instant4),
+        (Set(instant5), instant5),
+        (Set(instant6), instant6),
+      ))
+
+      _ <- Entity.instant.a1.instant(max(2)).query.get.map(_ ==> List(
+        (instant1, Set(instant1)),
+        (instant2, Set(instant2)),
+        (instant3, Set(instant3)),
+        (instant4, Set(instant4)),
+        (instant5, Set(instant5)),
+        (instant6, Set(instant6)),
+      ))
+      _ <- Entity.instant(max(2)).instant.a1.query.get.map(_ ==> List(
+        (Set(instant1), instant1),
+        (Set(instant2), instant2),
+        (Set(instant3), instant3),
+        (Set(instant4), instant4),
+        (Set(instant5), instant5),
+        (Set(instant6), instant6),
       ))
     } yield ()
   }
@@ -332,7 +397,6 @@ case class Aggr_Instant_(
       _ <- Entity.instant(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.instant(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.instant(count).query.get.map(_ ==> List(a, b))
 
@@ -353,6 +417,18 @@ case class Aggr_Instant_(
 
       _ <- Entity.i.a1.instant(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.instant(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.instant.a1.instant(count).query.get.map(_ ==> List(
+        (instant1, 1),
+        (instant2, 2),
+        (instant3, 1),
+      ))
+      _ <- Entity.instant(count).instant.a1.query.get.map(_ ==> List(
+        (1, instant1),
+        (2, instant2),
+        (1, instant3),
+      ))
     } yield ()
   }
 
@@ -388,7 +464,6 @@ case class Aggr_Instant_(
       _ <- Entity.instant(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.instant(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.instant(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -409,6 +484,18 @@ case class Aggr_Instant_(
 
       _ <- Entity.i.a1.instant(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.instant(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.instant.a1.instant(countDistinct).query.get.map(_ ==> List(
+        (instant1, 1),
+        (instant2, 1),
+        (instant3, 1),
+      ))
+      _ <- Entity.instant(countDistinct).instant.a1.query.get.map(_ ==> List(
+        (1, instant1),
+        (1, instant2),
+        (1, instant3),
+      ))
     } yield ()
   }
 }

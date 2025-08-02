@@ -82,6 +82,20 @@ case class AggrNum_BigDecimal_(
 
       _ <- Entity.i.a1.bigDecimal(sum).>=(sum1).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.bigDecimal(sum).>=(sum2).query.get.map(_ ==> List(b))
+
+      // Include aggregated attribute too
+      _ <- Entity.bigDecimal.a1.bigDecimal(sum).query.get.map(_ ==> List(
+        (bigDecimal1, bigDecimal1),
+        (bigDecimal2, bigDecimal2 + bigDecimal2),
+        (bigDecimal3, bigDecimal3),
+        (bigDecimal4, bigDecimal4),
+      ))
+      _ <- Entity.bigDecimal(sum).bigDecimal.a1.query.get.map(_ ==> List(
+        (bigDecimal1, bigDecimal1),
+        (bigDecimal2 + bigDecimal2, bigDecimal2),
+        (bigDecimal3, bigDecimal3),
+        (bigDecimal4, bigDecimal4),
+      ))
     } yield ()
   }
 
@@ -173,6 +187,36 @@ case class AggrNum_BigDecimal_(
 
         _ <- Entity.i.a1.bigDecimal(median).>=(median1).query.get.map(_ ==> List(a, b))
         _ <- Entity.i.a1.bigDecimal(median).>=(median2).query.get.map(_ ==> List(b))
+
+
+        // Include aggregated attribute too
+        _ <- Entity.bigDecimal.a1.bigDecimal(median).query.get.map { res =>
+          res(0)._1 ==> bigDecimal1
+          res(0)._2 ==~ bigDecimal1
+
+          res(1)._1 ==> bigDecimal2
+          res(1)._2 ==~ (bigDecimal2 + bigDecimal2).toDouble * 100 / 200.0
+
+          res(2)._1 ==> bigDecimal5
+          res(2)._2 ==~ bigDecimal5
+
+          res(3)._1 ==> bigDecimal9
+          res(3)._2 ==~ bigDecimal9
+        }
+
+        _ <- Entity.bigDecimal.bigDecimal(median).d1.query.get.map { res =>
+          res(0)._1 ==> bigDecimal9
+          res(0)._2 ==~ bigDecimal9
+
+          res(1)._1 ==> bigDecimal5
+          res(1)._2 ==~ bigDecimal5
+
+          res(2)._1 ==> bigDecimal2
+          res(2)._2 ==~ (bigDecimal2 + bigDecimal2).toDouble * 100 / 200.0
+
+          res(3)._1 ==> bigDecimal1
+          res(3)._2 ==~ bigDecimal1
+        }
       } yield ()
     }
   }
@@ -239,6 +283,36 @@ case class AggrNum_BigDecimal_(
 
       _ <- Entity.i.a1.bigDecimal(avg).>=(avg1).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.bigDecimal(avg).>=(avg2).query.get.map(_ ==> List(b))
+
+
+      // Include aggregated attribute too
+      _ <- Entity.bigDecimal.a1.bigDecimal(avg).query.get.map { res =>
+        res(0)._1 ==> bigDecimal1
+        res(0)._2 ==~ bigDecimal1
+
+        res(1)._1 ==> bigDecimal2
+        res(1)._2 ==~ (bigDecimal2 + bigDecimal2).toDouble * 100 / 200.0
+
+        res(2)._1 ==> bigDecimal3
+        res(2)._2 ==~ bigDecimal3
+
+        res(3)._1 ==> bigDecimal4
+        res(3)._2 ==~ bigDecimal4
+      }
+
+      _ <- Entity.bigDecimal.bigDecimal(avg).d1.query.get.map { res =>
+        res(0)._1 ==> bigDecimal4
+        res(0)._2 ==~ bigDecimal4
+
+        res(1)._1 ==> bigDecimal3
+        res(1)._2 ==~ bigDecimal3
+
+        res(2)._1 ==> bigDecimal2
+        res(2)._2 ==~ (bigDecimal2 + bigDecimal2).toDouble * 100 / 200.0
+
+        res(3)._1 ==> bigDecimal1
+        res(3)._2 ==~ bigDecimal1
+      }
     } yield ()
   }
 
@@ -339,6 +413,36 @@ case class AggrNum_BigDecimal_(
           res(1)._2 ==~ variance2
         }
         _ <- Entity.i.a1.bigDecimal(variance).>=(variance2).query.get.map(_.head._2 ==~ variance2)
+
+
+        // Include aggregated attribute too
+        _ <- Entity.bigDecimal.a1.bigDecimal(variance).query.get.map { res =>
+          res(0)._1 ==> bigDecimal1
+          res(0)._2 ==~ 0
+
+          res(1)._1 ==> bigDecimal2
+          res(1)._2 ==~ varianceOf(bigDecimal2, bigDecimal2) // always 0
+
+          res(2)._1 ==> bigDecimal3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> bigDecimal4
+          res(3)._2 ==~ 0
+        }
+
+        _ <- Entity.bigDecimal.a2.bigDecimal(variance).d1.query.get.map { res =>
+          res(0)._1 ==> bigDecimal1
+          res(0)._2 ==~ varianceOf(bigDecimal2, bigDecimal2) // always 0
+
+          res(1)._1 ==> bigDecimal2
+          res(1)._2 ==~ 0
+
+          res(2)._1 ==> bigDecimal3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> bigDecimal4
+          res(3)._2 ==~ 0
+        }
       } yield ()
     }
   }
@@ -440,6 +544,36 @@ case class AggrNum_BigDecimal_(
           res(1)._2 ==~ stddev2
         }
         _ <- Entity.i.a1.bigDecimal(stddev).>=(stddev2).query.get.map(_.head._2 ==~ stddev2)
+
+
+        // Include aggregated attribute too
+        _ <- Entity.bigDecimal.a1.bigDecimal(stddev).query.get.map { res =>
+          res(0)._1 ==> bigDecimal1
+          res(0)._2 ==~ 0
+
+          res(1)._1 ==> bigDecimal2
+          res(1)._2 ==~ stdDevOf(bigDecimal2, bigDecimal2) // always 0
+
+          res(2)._1 ==> bigDecimal3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> bigDecimal4
+          res(3)._2 ==~ 0
+        }
+
+        _ <- Entity.bigDecimal.a2.bigDecimal(stddev).d1.query.get.map { res =>
+          res(0)._1 ==> bigDecimal1
+          res(0)._2 ==~ stdDevOf(bigDecimal2, bigDecimal2) // always 0
+
+          res(1)._1 ==> bigDecimal2
+          res(1)._2 ==~ 0
+
+          res(2)._1 ==> bigDecimal3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> bigDecimal4
+          res(3)._2 ==~ 0
+        }
       } yield ()
     }
   }

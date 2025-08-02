@@ -42,6 +42,18 @@ case class Aggr_BigDecimal_(
       _ <- Entity.bigDecimal(distinct).query.get.map(_.head ==> Set(
         bigDecimal1, bigDecimal2, bigDecimal3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.bigDecimal.a1.bigDecimal(distinct).query.get.map(_ ==> List(
+        (bigDecimal1, Set(bigDecimal1)),
+        (bigDecimal2, Set(bigDecimal2)),
+        (bigDecimal3, Set(bigDecimal3)),
+      ))
+      _ <- Entity.bigDecimal(distinct).bigDecimal.a1.query.get.map(_ ==> List(
+        (Set(bigDecimal1), bigDecimal1),
+        (Set(bigDecimal2), bigDecimal2),
+        (Set(bigDecimal3), bigDecimal3),
+      ))
     } yield ()
   }
 
@@ -72,7 +84,6 @@ case class Aggr_BigDecimal_(
       _ <- Entity.bigDecimal(min).>=(bigDecimal1).query.get.map(_ ==> List(bigDecimal1))
       _ <- Entity.bigDecimal(min).>=(bigDecimal2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.bigDecimal(min).query.get.map(_ ==> List(a))
 
@@ -93,6 +104,16 @@ case class Aggr_BigDecimal_(
 
       _ <- Entity.i.bigDecimal(min).>=(bigDecimal1).query.get.map(_ ==> List(a))
       _ <- Entity.i.bigDecimal(min).>=(bigDecimal2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.bigDecimal.a1.bigDecimal(min).query.get.map(_ ==> List(
+        (bigDecimal1, bigDecimal1),
+        (bigDecimal2, bigDecimal2),
+      ))
+      _ <- Entity.bigDecimal(min).bigDecimal.a1.query.get.map(_ ==> List(
+        (bigDecimal1, bigDecimal1),
+        (bigDecimal2, bigDecimal2),
+      ))
     } yield ()
   }
 
@@ -123,7 +144,6 @@ case class Aggr_BigDecimal_(
       _ <- Entity.bigDecimal(max).>=(bigDecimal2).query.get.map(_ ==> List(bigDecimal2))
       _ <- Entity.bigDecimal(max).>=(bigDecimal3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.bigDecimal(max).query.get.map(_ ==> List(b))
 
@@ -144,6 +164,16 @@ case class Aggr_BigDecimal_(
 
       _ <- Entity.i.bigDecimal(max).>=(bigDecimal2).query.get.map(_ ==> List(b))
       _ <- Entity.i.bigDecimal(max).>=(bigDecimal3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.bigDecimal.a1.bigDecimal(max).query.get.map(_ ==> List(
+        (bigDecimal1, bigDecimal1),
+        (bigDecimal2, bigDecimal2),
+      ))
+      _ <- Entity.bigDecimal(max).bigDecimal.a1.query.get.map(_ ==> List(
+        (bigDecimal1, bigDecimal1),
+        (bigDecimal2, bigDecimal2),
+      ))
     } yield ()
   }
 
@@ -205,6 +235,41 @@ case class Aggr_BigDecimal_(
       _ <- Entity.i.a1.bigDecimal(min(2)).bigDecimal(max(2)).query.get.map(_ ==> List(
         (1, Set(bigDecimal1, bigDecimal2), Set(bigDecimal2, bigDecimal3)),
         (2, Set(bigDecimal4, bigDecimal5), Set(bigDecimal5, bigDecimal6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.bigDecimal.a1.bigDecimal(min(2)).query.get.map(_ ==> List(
+        (bigDecimal1, Set(bigDecimal1)),
+        (bigDecimal2, Set(bigDecimal2)),
+        (bigDecimal3, Set(bigDecimal3)),
+        (bigDecimal4, Set(bigDecimal4)),
+        (bigDecimal5, Set(bigDecimal5)),
+        (bigDecimal6, Set(bigDecimal6)),
+      ))
+      _ <- Entity.bigDecimal(min(2)).bigDecimal.a1.query.get.map(_ ==> List(
+        (Set(bigDecimal1), bigDecimal1),
+        (Set(bigDecimal2), bigDecimal2),
+        (Set(bigDecimal3), bigDecimal3),
+        (Set(bigDecimal4), bigDecimal4),
+        (Set(bigDecimal5), bigDecimal5),
+        (Set(bigDecimal6), bigDecimal6),
+      ))
+
+      _ <- Entity.bigDecimal.a1.bigDecimal(max(2)).query.get.map(_ ==> List(
+        (bigDecimal1, Set(bigDecimal1)),
+        (bigDecimal2, Set(bigDecimal2)),
+        (bigDecimal3, Set(bigDecimal3)),
+        (bigDecimal4, Set(bigDecimal4)),
+        (bigDecimal5, Set(bigDecimal5)),
+        (bigDecimal6, Set(bigDecimal6)),
+      ))
+      _ <- Entity.bigDecimal(max(2)).bigDecimal.a1.query.get.map(_ ==> List(
+        (Set(bigDecimal1), bigDecimal1),
+        (Set(bigDecimal2), bigDecimal2),
+        (Set(bigDecimal3), bigDecimal3),
+        (Set(bigDecimal4), bigDecimal4),
+        (Set(bigDecimal5), bigDecimal5),
+        (Set(bigDecimal6), bigDecimal6),
       ))
     } yield ()
   }
@@ -331,7 +396,6 @@ case class Aggr_BigDecimal_(
       _ <- Entity.bigDecimal(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.bigDecimal(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.bigDecimal(count).query.get.map(_ ==> List(a, b))
 
@@ -352,6 +416,18 @@ case class Aggr_BigDecimal_(
 
       _ <- Entity.i.a1.bigDecimal(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.bigDecimal(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.bigDecimal.a1.bigDecimal(count).query.get.map(_ ==> List(
+        (bigDecimal1, 1),
+        (bigDecimal2, 2),
+        (bigDecimal3, 1),
+      ))
+      _ <- Entity.bigDecimal(count).bigDecimal.a1.query.get.map(_ ==> List(
+        (1, bigDecimal1),
+        (2, bigDecimal2),
+        (1, bigDecimal3),
+      ))
     } yield ()
   }
 
@@ -387,7 +463,6 @@ case class Aggr_BigDecimal_(
       _ <- Entity.bigDecimal(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.bigDecimal(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.bigDecimal(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -408,6 +483,18 @@ case class Aggr_BigDecimal_(
 
       _ <- Entity.i.a1.bigDecimal(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.bigDecimal(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.bigDecimal.a1.bigDecimal(countDistinct).query.get.map(_ ==> List(
+        (bigDecimal1, 1),
+        (bigDecimal2, 1),
+        (bigDecimal3, 1),
+      ))
+      _ <- Entity.bigDecimal(countDistinct).bigDecimal.a1.query.get.map(_ ==> List(
+        (1, bigDecimal1),
+        (1, bigDecimal2),
+        (1, bigDecimal3),
+      ))
     } yield ()
   }
 }

@@ -43,6 +43,18 @@ case class Aggr_OffsetDateTime_(
       _ <- Entity.offsetDateTime(distinct).query.get.map(_.head ==> Set(
         offsetDateTime1, offsetDateTime2, offsetDateTime3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.offsetDateTime.a1.offsetDateTime(distinct).query.get.map(_ ==> List(
+        (offsetDateTime1, Set(offsetDateTime1)),
+        (offsetDateTime2, Set(offsetDateTime2)),
+        (offsetDateTime3, Set(offsetDateTime3)),
+      ))
+      _ <- Entity.offsetDateTime(distinct).offsetDateTime.a1.query.get.map(_ ==> List(
+        (Set(offsetDateTime1), offsetDateTime1),
+        (Set(offsetDateTime2), offsetDateTime2),
+        (Set(offsetDateTime3), offsetDateTime3),
+      ))
     } yield ()
   }
 
@@ -73,7 +85,6 @@ case class Aggr_OffsetDateTime_(
       _ <- Entity.offsetDateTime(min).>=(offsetDateTime1).query.get.map(_ ==> List(offsetDateTime1))
       _ <- Entity.offsetDateTime(min).>=(offsetDateTime2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.offsetDateTime(min).query.get.map(_ ==> List(a))
 
@@ -94,6 +105,16 @@ case class Aggr_OffsetDateTime_(
 
       _ <- Entity.i.offsetDateTime(min).>=(offsetDateTime1).query.get.map(_ ==> List(a))
       _ <- Entity.i.offsetDateTime(min).>=(offsetDateTime2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.offsetDateTime.a1.offsetDateTime(min).query.get.map(_ ==> List(
+        (offsetDateTime1, offsetDateTime1),
+        (offsetDateTime2, offsetDateTime2),
+      ))
+      _ <- Entity.offsetDateTime(min).offsetDateTime.a1.query.get.map(_ ==> List(
+        (offsetDateTime1, offsetDateTime1),
+        (offsetDateTime2, offsetDateTime2),
+      ))
     } yield ()
   }
 
@@ -124,7 +145,6 @@ case class Aggr_OffsetDateTime_(
       _ <- Entity.offsetDateTime(max).>=(offsetDateTime2).query.get.map(_ ==> List(offsetDateTime2))
       _ <- Entity.offsetDateTime(max).>=(offsetDateTime3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.offsetDateTime(max).query.get.map(_ ==> List(b))
 
@@ -145,6 +165,16 @@ case class Aggr_OffsetDateTime_(
 
       _ <- Entity.i.offsetDateTime(max).>=(offsetDateTime2).query.get.map(_ ==> List(b))
       _ <- Entity.i.offsetDateTime(max).>=(offsetDateTime3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.offsetDateTime.a1.offsetDateTime(max).query.get.map(_ ==> List(
+        (offsetDateTime1, offsetDateTime1),
+        (offsetDateTime2, offsetDateTime2),
+      ))
+      _ <- Entity.offsetDateTime(max).offsetDateTime.a1.query.get.map(_ ==> List(
+        (offsetDateTime1, offsetDateTime1),
+        (offsetDateTime2, offsetDateTime2),
+      ))
     } yield ()
   }
 
@@ -206,6 +236,41 @@ case class Aggr_OffsetDateTime_(
       _ <- Entity.i.a1.offsetDateTime(min(2)).offsetDateTime(max(2)).query.get.map(_ ==> List(
         (1, Set(offsetDateTime1, offsetDateTime2), Set(offsetDateTime2, offsetDateTime3)),
         (2, Set(offsetDateTime4, offsetDateTime5), Set(offsetDateTime5, offsetDateTime6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.offsetDateTime.a1.offsetDateTime(min(2)).query.get.map(_ ==> List(
+        (offsetDateTime1, Set(offsetDateTime1)),
+        (offsetDateTime2, Set(offsetDateTime2)),
+        (offsetDateTime3, Set(offsetDateTime3)),
+        (offsetDateTime4, Set(offsetDateTime4)),
+        (offsetDateTime5, Set(offsetDateTime5)),
+        (offsetDateTime6, Set(offsetDateTime6)),
+      ))
+      _ <- Entity.offsetDateTime(min(2)).offsetDateTime.a1.query.get.map(_ ==> List(
+        (Set(offsetDateTime1), offsetDateTime1),
+        (Set(offsetDateTime2), offsetDateTime2),
+        (Set(offsetDateTime3), offsetDateTime3),
+        (Set(offsetDateTime4), offsetDateTime4),
+        (Set(offsetDateTime5), offsetDateTime5),
+        (Set(offsetDateTime6), offsetDateTime6),
+      ))
+
+      _ <- Entity.offsetDateTime.a1.offsetDateTime(max(2)).query.get.map(_ ==> List(
+        (offsetDateTime1, Set(offsetDateTime1)),
+        (offsetDateTime2, Set(offsetDateTime2)),
+        (offsetDateTime3, Set(offsetDateTime3)),
+        (offsetDateTime4, Set(offsetDateTime4)),
+        (offsetDateTime5, Set(offsetDateTime5)),
+        (offsetDateTime6, Set(offsetDateTime6)),
+      ))
+      _ <- Entity.offsetDateTime(max(2)).offsetDateTime.a1.query.get.map(_ ==> List(
+        (Set(offsetDateTime1), offsetDateTime1),
+        (Set(offsetDateTime2), offsetDateTime2),
+        (Set(offsetDateTime3), offsetDateTime3),
+        (Set(offsetDateTime4), offsetDateTime4),
+        (Set(offsetDateTime5), offsetDateTime5),
+        (Set(offsetDateTime6), offsetDateTime6),
       ))
     } yield ()
   }
@@ -332,7 +397,6 @@ case class Aggr_OffsetDateTime_(
       _ <- Entity.offsetDateTime(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.offsetDateTime(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.offsetDateTime(count).query.get.map(_ ==> List(a, b))
 
@@ -353,6 +417,18 @@ case class Aggr_OffsetDateTime_(
 
       _ <- Entity.i.a1.offsetDateTime(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.offsetDateTime(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.offsetDateTime.a1.offsetDateTime(count).query.get.map(_ ==> List(
+        (offsetDateTime1, 1),
+        (offsetDateTime2, 2),
+        (offsetDateTime3, 1),
+      ))
+      _ <- Entity.offsetDateTime(count).offsetDateTime.a1.query.get.map(_ ==> List(
+        (1, offsetDateTime1),
+        (2, offsetDateTime2),
+        (1, offsetDateTime3),
+      ))
     } yield ()
   }
 
@@ -388,7 +464,6 @@ case class Aggr_OffsetDateTime_(
       _ <- Entity.offsetDateTime(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.offsetDateTime(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.offsetDateTime(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -409,6 +484,18 @@ case class Aggr_OffsetDateTime_(
 
       _ <- Entity.i.a1.offsetDateTime(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.offsetDateTime(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.offsetDateTime.a1.offsetDateTime(countDistinct).query.get.map(_ ==> List(
+        (offsetDateTime1, 1),
+        (offsetDateTime2, 1),
+        (offsetDateTime3, 1),
+      ))
+      _ <- Entity.offsetDateTime(countDistinct).offsetDateTime.a1.query.get.map(_ ==> List(
+        (1, offsetDateTime1),
+        (1, offsetDateTime2),
+        (1, offsetDateTime3),
+      ))
     } yield ()
   }
 }

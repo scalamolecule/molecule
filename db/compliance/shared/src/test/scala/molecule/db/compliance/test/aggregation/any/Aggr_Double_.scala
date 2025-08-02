@@ -42,6 +42,18 @@ case class Aggr_Double_(
       _ <- Entity.double(distinct).query.get.map(_.head ==> Set(
         double1, double2, double3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.double.a1.double(distinct).query.get.map(_ ==> List(
+        (double1, Set(double1)),
+        (double2, Set(double2)),
+        (double3, Set(double3)),
+      ))
+      _ <- Entity.double(distinct).double.a1.query.get.map(_ ==> List(
+        (Set(double1), double1),
+        (Set(double2), double2),
+        (Set(double3), double3),
+      ))
     } yield ()
   }
 
@@ -72,7 +84,6 @@ case class Aggr_Double_(
       _ <- Entity.double(min).>=(double1).query.get.map(_ ==> List(double1))
       _ <- Entity.double(min).>=(double2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.double(min).query.get.map(_ ==> List(a))
 
@@ -93,6 +104,16 @@ case class Aggr_Double_(
 
       _ <- Entity.i.double(min).>=(double1).query.get.map(_ ==> List(a))
       _ <- Entity.i.double(min).>=(double2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.double.a1.double(min).query.get.map(_ ==> List(
+        (double1, double1),
+        (double2, double2),
+      ))
+      _ <- Entity.double(min).double.a1.query.get.map(_ ==> List(
+        (double1, double1),
+        (double2, double2),
+      ))
     } yield ()
   }
 
@@ -123,7 +144,6 @@ case class Aggr_Double_(
       _ <- Entity.double(max).>=(double2).query.get.map(_ ==> List(double2))
       _ <- Entity.double(max).>=(double3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.double(max).query.get.map(_ ==> List(b))
 
@@ -144,6 +164,16 @@ case class Aggr_Double_(
 
       _ <- Entity.i.double(max).>=(double2).query.get.map(_ ==> List(b))
       _ <- Entity.i.double(max).>=(double3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.double.a1.double(max).query.get.map(_ ==> List(
+        (double1, double1),
+        (double2, double2),
+      ))
+      _ <- Entity.double(max).double.a1.query.get.map(_ ==> List(
+        (double1, double1),
+        (double2, double2),
+      ))
     } yield ()
   }
 
@@ -205,6 +235,41 @@ case class Aggr_Double_(
       _ <- Entity.i.a1.double(min(2)).double(max(2)).query.get.map(_ ==> List(
         (1, Set(double1, double2), Set(double2, double3)),
         (2, Set(double4, double5), Set(double5, double6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.double.a1.double(min(2)).query.get.map(_ ==> List(
+        (double1, Set(double1)),
+        (double2, Set(double2)),
+        (double3, Set(double3)),
+        (double4, Set(double4)),
+        (double5, Set(double5)),
+        (double6, Set(double6)),
+      ))
+      _ <- Entity.double(min(2)).double.a1.query.get.map(_ ==> List(
+        (Set(double1), double1),
+        (Set(double2), double2),
+        (Set(double3), double3),
+        (Set(double4), double4),
+        (Set(double5), double5),
+        (Set(double6), double6),
+      ))
+
+      _ <- Entity.double.a1.double(max(2)).query.get.map(_ ==> List(
+        (double1, Set(double1)),
+        (double2, Set(double2)),
+        (double3, Set(double3)),
+        (double4, Set(double4)),
+        (double5, Set(double5)),
+        (double6, Set(double6)),
+      ))
+      _ <- Entity.double(max(2)).double.a1.query.get.map(_ ==> List(
+        (Set(double1), double1),
+        (Set(double2), double2),
+        (Set(double3), double3),
+        (Set(double4), double4),
+        (Set(double5), double5),
+        (Set(double6), double6),
       ))
     } yield ()
   }
@@ -331,7 +396,6 @@ case class Aggr_Double_(
       _ <- Entity.double(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.double(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.double(count).query.get.map(_ ==> List(a, b))
 
@@ -352,6 +416,18 @@ case class Aggr_Double_(
 
       _ <- Entity.i.a1.double(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.double(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.double.a1.double(count).query.get.map(_ ==> List(
+        (double1, 1),
+        (double2, 2),
+        (double3, 1),
+      ))
+      _ <- Entity.double(count).double.a1.query.get.map(_ ==> List(
+        (1, double1),
+        (2, double2),
+        (1, double3),
+      ))
     } yield ()
   }
 
@@ -387,7 +463,6 @@ case class Aggr_Double_(
       _ <- Entity.double(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.double(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.double(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -408,6 +483,18 @@ case class Aggr_Double_(
 
       _ <- Entity.i.a1.double(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.double(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.double.a1.double(countDistinct).query.get.map(_ ==> List(
+        (double1, 1),
+        (double2, 1),
+        (double3, 1),
+      ))
+      _ <- Entity.double(countDistinct).double.a1.query.get.map(_ ==> List(
+        (1, double1),
+        (1, double2),
+        (1, double3),
+      ))
     } yield ()
   }
 }

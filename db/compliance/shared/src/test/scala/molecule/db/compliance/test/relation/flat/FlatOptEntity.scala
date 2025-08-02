@@ -222,7 +222,6 @@ case class FlatOptEntity(
 
 
   "Expression inside optional nested" - refs {
-    // Seems not possible to add expressions inside Datomic nested pulls
     for {
       _ <- A.?(A.i).B.i.insert(
         (None, 0),

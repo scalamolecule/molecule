@@ -35,6 +35,7 @@ trait QueryExprOne_mariadb
     optN: Option[Int],
     aggrOp: Option[Op],
     aggrOpValue: Option[Value],
+    hasSort: Boolean,
     res: ResOne[T]
   ): Unit = {
     checkAggrOne()
@@ -47,7 +48,7 @@ trait QueryExprOne_mariadb
       case "distinct" =>
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
@@ -55,13 +56,13 @@ trait QueryExprOne_mariadb
       case "min" =>
         aggregate = true
         select += s"MIN($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"MIN($col)")
 
       case "mins" =>
         aggregate = true
         select += s"GROUP_CONCAT(DISTINCT $col SEPARATOR $sep)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
@@ -69,13 +70,13 @@ trait QueryExprOne_mariadb
       case "max" =>
         aggregate = true
         select += s"MAX($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"MAX($col)")
 
       case "maxs" =>
         aggregate = true
         select += s"GROUP_CONCAT(DISTINCT $col ORDER BY $col DESC SEPARATOR $sep)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
@@ -86,7 +87,7 @@ trait QueryExprOne_mariadb
         }
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp("RAND()")
         castStrategy.replace((row: RS, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
@@ -97,7 +98,7 @@ trait QueryExprOne_mariadb
       case "samples" =>
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
           Random.shuffle(array.toSet).take(n)
@@ -106,23 +107,23 @@ trait QueryExprOne_mariadb
       case "count" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT", "")
-        groupByCols -= col
+        selectWithOrder(col, "COUNT", hasSort, "")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT")
-        groupByCols -= col
+        selectWithOrder(col, "COUNT", hasSort)
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
         aggregate = true
-        selectWithOrder(col, "SUM", "", "", "ROUND(", ", 10)")
-        groupByCols -= col
+        selectWithOrder(col, "SUM", hasSort, "", "", "ROUND(", ", 10)")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"ROUND(SUM($col), 6)")
 
       case "median" =>
@@ -134,7 +135,7 @@ trait QueryExprOne_mariadb
         }
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
@@ -144,8 +145,8 @@ trait QueryExprOne_mariadb
 
       case "avg" =>
         aggregate = true
-        selectWithOrder(col, "AVG", "", "", "ROUND(", ", 10)")
-        groupByCols -= col
+        selectWithOrder(col, "AVG", hasSort, "", "", "ROUND(", ", 10)")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"ROUND(AVG($col), 10)")
 
       case "variance" =>
@@ -157,7 +158,7 @@ trait QueryExprOne_mariadb
         }
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"VAR_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
@@ -175,7 +176,7 @@ trait QueryExprOne_mariadb
         }
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"STDDEV_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {

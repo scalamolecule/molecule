@@ -110,6 +110,7 @@ trait QueryExprOne_postgresql
     optN: Option[Int],
     aggrOp: Option[Op],
     aggrOpValue: Option[Value],
+    hasSort: Boolean,
     res: ResOne[T]
   ): Unit = {
     checkAggrOne()
@@ -128,13 +129,13 @@ trait QueryExprOne_postgresql
       case "distinct" =>
         aggregate = true
         select += s"ARRAY_AGG(DISTINCT $col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(res.array2set)
 
       case "min" =>
         aggregate = true
         select += s"MIN($col$castText)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"MIN($col$castAggrOpV)")
 
       case "mins" =>
@@ -147,13 +148,13 @@ trait QueryExprOne_postgresql
              |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
              |    )
              |  )""".stripMargin
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(res.array2set)
 
       case "max" =>
         aggregate = true
         select += s"MAX($col$castText)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"MAX($col$castAggrOpV)")
 
       case "maxs" =>
@@ -166,7 +167,7 @@ trait QueryExprOne_postgresql
              |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
              |    )
              |  )""".stripMargin
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(res.array2set)
 
       case "sample" =>
@@ -186,58 +187,58 @@ trait QueryExprOne_postgresql
              |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
              |    )
              |  )""".stripMargin
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(res.array2set)
 
       case "count" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT", "")
-        groupByCols -= col
+        selectWithOrder(col, "COUNT", hasSort, "")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT")
-        groupByCols -= col
+        selectWithOrder(col, "COUNT", hasSort)
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
         aggregate = true
-        groupByCols -= col
-        selectWithOrder(col, "SUM", "", "", "ROUND(", s"$castAggrOpV, 10)")
+        if (!select.contains(col)) groupByCols -= col
+        selectWithOrder(col, "SUM", hasSort, "", "", "ROUND(", s"$castAggrOpV, 10)")
         addHaving(baseType, fn, s"ROUND(SUM($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case "median" =>
         aggregate = true
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         aggrOp.fold {
-          selectWithOrder(col, "percentile_cont", "0.5) WITHIN GROUP (ORDER BY ")
+          selectWithOrder(col, "percentile_cont", hasSort, "0.5) WITHIN GROUP (ORDER BY ")
         } { op =>
-          selectWithOrder(col, "percentile_cont", "0.5) WITHIN GROUP (ORDER BY ", "", "ROUND(", s"$castAggrOpV, 10)")
+          selectWithOrder(col, "percentile_cont", hasSort, "0.5) WITHIN GROUP (ORDER BY ", "", "ROUND(", s"$castAggrOpV, 10)")
           addHaving(baseType, fn, s"ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY $col)$castAggrOpV, 10)",
             aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
         }
 
       case "avg" =>
         aggregate = true
-        selectWithOrder(col, "AVG", "", "", "ROUND(", s"$castAggrOpV, 10)")
-        groupByCols -= col
+        selectWithOrder(col, "AVG", hasSort, "", "", "ROUND(", s"$castAggrOpV, 10)")
+        if (!select.contains(col)) groupByCols -= col
         addHaving(baseType, fn, s"ROUND(AVG($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case "variance" =>
         aggregate = true
-        selectWithOrder(col, "VAR_POP", "", "", "ROUND(", s"$castAggrOpV, 10)")
-        groupByCols -= col
+        selectWithOrder(col, "VAR_POP", hasSort, "", "", "ROUND(", s"$castAggrOpV, 10)")
+        if (!select.contains(col)) groupByCols -= col
         addHaving(baseType, fn, s"ROUND(VAR_POP($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case "stddev" =>
         aggregate = true
-        selectWithOrder(col, "STDDEV_POP", "")
-        groupByCols -= col
+        selectWithOrder(col, "STDDEV_POP", hasSort, "")
+        if (!select.contains(col)) groupByCols -= col
         addHaving(baseType, fn, s"ROUND(STDDEV_POP($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case other => unexpectedKw(other)

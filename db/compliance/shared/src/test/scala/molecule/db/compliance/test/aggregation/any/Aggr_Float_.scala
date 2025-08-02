@@ -42,6 +42,18 @@ case class Aggr_Float_(
       _ <- Entity.float(distinct).query.get.map(_.head ==> Set(
         float1, float2, float3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.float.a1.float(distinct).query.get.map(_ ==> List(
+        (float1, Set(float1)),
+        (float2, Set(float2)),
+        (float3, Set(float3)),
+      ))
+      _ <- Entity.float(distinct).float.a1.query.get.map(_ ==> List(
+        (Set(float1), float1),
+        (Set(float2), float2),
+        (Set(float3), float3),
+      ))
     } yield ()
   }
 
@@ -72,7 +84,6 @@ case class Aggr_Float_(
       _ <- Entity.float(min).>=(float1).query.get.map(_ ==> List(float1))
       _ <- Entity.float(min).>=(float2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.float(min).query.get.map(_ ==> List(a))
 
@@ -93,6 +104,16 @@ case class Aggr_Float_(
 
       _ <- Entity.i.float(min).>=(float1).query.get.map(_ ==> List(a))
       _ <- Entity.i.float(min).>=(float2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.float.a1.float(min).query.get.map(_ ==> List(
+        (float1, float1),
+        (float2, float2),
+      ))
+      _ <- Entity.float(min).float.a1.query.get.map(_ ==> List(
+        (float1, float1),
+        (float2, float2),
+      ))
     } yield ()
   }
 
@@ -123,7 +144,6 @@ case class Aggr_Float_(
       _ <- Entity.float(max).>=(float2).query.get.map(_ ==> List(float2))
       _ <- Entity.float(max).>=(float3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.float(max).query.get.map(_ ==> List(b))
 
@@ -144,6 +164,16 @@ case class Aggr_Float_(
 
       _ <- Entity.i.float(max).>=(float2).query.get.map(_ ==> List(b))
       _ <- Entity.i.float(max).>=(float3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.float.a1.float(max).query.get.map(_ ==> List(
+        (float1, float1),
+        (float2, float2),
+      ))
+      _ <- Entity.float(max).float.a1.query.get.map(_ ==> List(
+        (float1, float1),
+        (float2, float2),
+      ))
     } yield ()
   }
 
@@ -205,6 +235,41 @@ case class Aggr_Float_(
       _ <- Entity.i.a1.float(min(2)).float(max(2)).query.get.map(_ ==> List(
         (1, Set(float1, float2), Set(float2, float3)),
         (2, Set(float4, float5), Set(float5, float6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.float.a1.float(min(2)).query.get.map(_ ==> List(
+        (float1, Set(float1)),
+        (float2, Set(float2)),
+        (float3, Set(float3)),
+        (float4, Set(float4)),
+        (float5, Set(float5)),
+        (float6, Set(float6)),
+      ))
+      _ <- Entity.float(min(2)).float.a1.query.get.map(_ ==> List(
+        (Set(float1), float1),
+        (Set(float2), float2),
+        (Set(float3), float3),
+        (Set(float4), float4),
+        (Set(float5), float5),
+        (Set(float6), float6),
+      ))
+
+      _ <- Entity.float.a1.float(max(2)).query.get.map(_ ==> List(
+        (float1, Set(float1)),
+        (float2, Set(float2)),
+        (float3, Set(float3)),
+        (float4, Set(float4)),
+        (float5, Set(float5)),
+        (float6, Set(float6)),
+      ))
+      _ <- Entity.float(max(2)).float.a1.query.get.map(_ ==> List(
+        (Set(float1), float1),
+        (Set(float2), float2),
+        (Set(float3), float3),
+        (Set(float4), float4),
+        (Set(float5), float5),
+        (Set(float6), float6),
       ))
     } yield ()
   }
@@ -331,7 +396,6 @@ case class Aggr_Float_(
       _ <- Entity.float(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.float(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.float(count).query.get.map(_ ==> List(a, b))
 
@@ -352,6 +416,18 @@ case class Aggr_Float_(
 
       _ <- Entity.i.a1.float(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.float(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.float.a1.float(count).query.get.map(_ ==> List(
+        (float1, 1),
+        (float2, 2),
+        (float3, 1),
+      ))
+      _ <- Entity.float(count).float.a1.query.get.map(_ ==> List(
+        (1, float1),
+        (2, float2),
+        (1, float3),
+      ))
     } yield ()
   }
 
@@ -387,7 +463,6 @@ case class Aggr_Float_(
       _ <- Entity.float(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.float(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.float(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -408,6 +483,18 @@ case class Aggr_Float_(
 
       _ <- Entity.i.a1.float(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.float(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.float.a1.float(countDistinct).query.get.map(_ ==> List(
+        (float1, 1),
+        (float2, 1),
+        (float3, 1),
+      ))
+      _ <- Entity.float(countDistinct).float.a1.query.get.map(_ ==> List(
+        (1, float1),
+        (1, float2),
+        (1, float3),
+      ))
     } yield ()
   }
 }

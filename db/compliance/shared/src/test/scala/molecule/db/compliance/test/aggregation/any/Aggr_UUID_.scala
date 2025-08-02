@@ -43,6 +43,18 @@ case class Aggr_UUID_(
       _ <- Entity.uuid(distinct).query.get.map(_.head ==> Set(
         uuid1, uuid2, uuid3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.uuid.a1.uuid(distinct).query.get.map(_ ==> List(
+        (uuid1, Set(uuid1)),
+        (uuid2, Set(uuid2)),
+        (uuid3, Set(uuid3)),
+      ))
+      _ <- Entity.uuid(distinct).uuid.a1.query.get.map(_ ==> List(
+        (Set(uuid1), uuid1),
+        (Set(uuid2), uuid2),
+        (Set(uuid3), uuid3),
+      ))
     } yield ()
   }
 
@@ -73,7 +85,6 @@ case class Aggr_UUID_(
       _ <- Entity.uuid(min).>=(uuid1).query.get.map(_ ==> List(uuid1))
       _ <- Entity.uuid(min).>=(uuid2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.uuid(min).query.get.map(_ ==> List(a))
 
@@ -94,6 +105,16 @@ case class Aggr_UUID_(
 
       _ <- Entity.i.uuid(min).>=(uuid1).query.get.map(_ ==> List(a))
       _ <- Entity.i.uuid(min).>=(uuid2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.uuid.a1.uuid(min).query.get.map(_ ==> List(
+        (uuid1, uuid1),
+        (uuid2, uuid2),
+      ))
+      _ <- Entity.uuid(min).uuid.a1.query.get.map(_ ==> List(
+        (uuid1, uuid1),
+        (uuid2, uuid2),
+      ))
     } yield ()
   }
 
@@ -124,7 +145,6 @@ case class Aggr_UUID_(
       _ <- Entity.uuid(max).>=(uuid2).query.get.map(_ ==> List(uuid2))
       _ <- Entity.uuid(max).>=(uuid3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.uuid(max).query.get.map(_ ==> List(b))
 
@@ -145,6 +165,16 @@ case class Aggr_UUID_(
 
       _ <- Entity.i.uuid(max).>=(uuid2).query.get.map(_ ==> List(b))
       _ <- Entity.i.uuid(max).>=(uuid3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.uuid.a1.uuid(max).query.get.map(_ ==> List(
+        (uuid1, uuid1),
+        (uuid2, uuid2),
+      ))
+      _ <- Entity.uuid(max).uuid.a1.query.get.map(_ ==> List(
+        (uuid1, uuid1),
+        (uuid2, uuid2),
+      ))
     } yield ()
   }
 
@@ -206,6 +236,41 @@ case class Aggr_UUID_(
       _ <- Entity.i.a1.uuid(min(2)).uuid(max(2)).query.get.map(_ ==> List(
         (1, Set(uuid1, uuid2), Set(uuid2, uuid3)),
         (2, Set(uuid4, uuid5), Set(uuid5, uuid6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.uuid.a1.uuid(min(2)).query.get.map(_ ==> List(
+        (uuid1, Set(uuid1)),
+        (uuid2, Set(uuid2)),
+        (uuid3, Set(uuid3)),
+        (uuid4, Set(uuid4)),
+        (uuid5, Set(uuid5)),
+        (uuid6, Set(uuid6)),
+      ))
+      _ <- Entity.uuid(min(2)).uuid.a1.query.get.map(_ ==> List(
+        (Set(uuid1), uuid1),
+        (Set(uuid2), uuid2),
+        (Set(uuid3), uuid3),
+        (Set(uuid4), uuid4),
+        (Set(uuid5), uuid5),
+        (Set(uuid6), uuid6),
+      ))
+
+      _ <- Entity.uuid.a1.uuid(max(2)).query.get.map(_ ==> List(
+        (uuid1, Set(uuid1)),
+        (uuid2, Set(uuid2)),
+        (uuid3, Set(uuid3)),
+        (uuid4, Set(uuid4)),
+        (uuid5, Set(uuid5)),
+        (uuid6, Set(uuid6)),
+      ))
+      _ <- Entity.uuid(max(2)).uuid.a1.query.get.map(_ ==> List(
+        (Set(uuid1), uuid1),
+        (Set(uuid2), uuid2),
+        (Set(uuid3), uuid3),
+        (Set(uuid4), uuid4),
+        (Set(uuid5), uuid5),
+        (Set(uuid6), uuid6),
       ))
     } yield ()
   }
@@ -332,7 +397,6 @@ case class Aggr_UUID_(
       _ <- Entity.uuid(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.uuid(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.uuid(count).query.get.map(_ ==> List(a, b))
 
@@ -353,6 +417,18 @@ case class Aggr_UUID_(
 
       _ <- Entity.i.a1.uuid(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.uuid(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.uuid.a1.uuid(count).query.get.map(_ ==> List(
+        (uuid1, 1),
+        (uuid2, 2),
+        (uuid3, 1),
+      ))
+      _ <- Entity.uuid(count).uuid.a1.query.get.map(_ ==> List(
+        (1, uuid1),
+        (2, uuid2),
+        (1, uuid3),
+      ))
     } yield ()
   }
 
@@ -388,7 +464,6 @@ case class Aggr_UUID_(
       _ <- Entity.uuid(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.uuid(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.uuid(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -409,6 +484,18 @@ case class Aggr_UUID_(
 
       _ <- Entity.i.a1.uuid(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.uuid(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.uuid.a1.uuid(countDistinct).query.get.map(_ ==> List(
+        (uuid1, 1),
+        (uuid2, 1),
+        (uuid3, 1),
+      ))
+      _ <- Entity.uuid(countDistinct).uuid.a1.query.get.map(_ ==> List(
+        (1, uuid1),
+        (1, uuid2),
+        (1, uuid3),
+      ))
     } yield ()
   }
 }

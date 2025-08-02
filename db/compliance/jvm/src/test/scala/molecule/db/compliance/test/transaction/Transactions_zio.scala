@@ -1,4 +1,4 @@
-package molecule.db.compliance.test.action
+package molecule.db.compliance.test.transaction
 
 import molecule.base.error.ExecutionError
 import molecule.core.setup.TestUtils

@@ -1,4 +1,4 @@
-package molecule.db.mariadb.compliance.transaction.save
+package molecule.db.mariadb.compliance.action.save
 
 import molecule.core.setup.{MUnit, MUnit_arrays}
 import molecule.db

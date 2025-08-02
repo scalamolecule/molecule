@@ -42,6 +42,18 @@ case class Aggr_Byte_(
       _ <- Entity.byte(distinct).query.get.map(_.head ==> Set(
         byte1, byte2, byte3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.byte.a1.byte(distinct).query.get.map(_ ==> List(
+        (byte1, Set(byte1)),
+        (byte2, Set(byte2)),
+        (byte3, Set(byte3)),
+      ))
+      _ <- Entity.byte(distinct).byte.a1.query.get.map(_ ==> List(
+        (Set(byte1), byte1),
+        (Set(byte2), byte2),
+        (Set(byte3), byte3),
+      ))
     } yield ()
   }
 
@@ -72,7 +84,6 @@ case class Aggr_Byte_(
       _ <- Entity.byte(min).>=(byte1).query.get.map(_ ==> List(byte1))
       _ <- Entity.byte(min).>=(byte2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.byte(min).query.get.map(_ ==> List(a))
 
@@ -93,6 +104,16 @@ case class Aggr_Byte_(
 
       _ <- Entity.i.byte(min).>=(byte1).query.get.map(_ ==> List(a))
       _ <- Entity.i.byte(min).>=(byte2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.byte.a1.byte(min).query.get.map(_ ==> List(
+        (byte1, byte1),
+        (byte2, byte2),
+      ))
+      _ <- Entity.byte(min).byte.a1.query.get.map(_ ==> List(
+        (byte1, byte1),
+        (byte2, byte2),
+      ))
     } yield ()
   }
 
@@ -123,7 +144,6 @@ case class Aggr_Byte_(
       _ <- Entity.byte(max).>=(byte2).query.get.map(_ ==> List(byte2))
       _ <- Entity.byte(max).>=(byte3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.byte(max).query.get.map(_ ==> List(b))
 
@@ -144,6 +164,16 @@ case class Aggr_Byte_(
 
       _ <- Entity.i.byte(max).>=(byte2).query.get.map(_ ==> List(b))
       _ <- Entity.i.byte(max).>=(byte3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.byte.a1.byte(max).query.get.map(_ ==> List(
+        (byte1, byte1),
+        (byte2, byte2),
+      ))
+      _ <- Entity.byte(max).byte.a1.query.get.map(_ ==> List(
+        (byte1, byte1),
+        (byte2, byte2),
+      ))
     } yield ()
   }
 
@@ -205,6 +235,41 @@ case class Aggr_Byte_(
       _ <- Entity.i.a1.byte(min(2)).byte(max(2)).query.get.map(_ ==> List(
         (1, Set(byte1, byte2), Set(byte2, byte3)),
         (2, Set(byte4, byte5), Set(byte5, byte6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.byte.a1.byte(min(2)).query.get.map(_ ==> List(
+        (byte1, Set(byte1)),
+        (byte2, Set(byte2)),
+        (byte3, Set(byte3)),
+        (byte4, Set(byte4)),
+        (byte5, Set(byte5)),
+        (byte6, Set(byte6)),
+      ))
+      _ <- Entity.byte(min(2)).byte.a1.query.get.map(_ ==> List(
+        (Set(byte1), byte1),
+        (Set(byte2), byte2),
+        (Set(byte3), byte3),
+        (Set(byte4), byte4),
+        (Set(byte5), byte5),
+        (Set(byte6), byte6),
+      ))
+
+      _ <- Entity.byte.a1.byte(max(2)).query.get.map(_ ==> List(
+        (byte1, Set(byte1)),
+        (byte2, Set(byte2)),
+        (byte3, Set(byte3)),
+        (byte4, Set(byte4)),
+        (byte5, Set(byte5)),
+        (byte6, Set(byte6)),
+      ))
+      _ <- Entity.byte(max(2)).byte.a1.query.get.map(_ ==> List(
+        (Set(byte1), byte1),
+        (Set(byte2), byte2),
+        (Set(byte3), byte3),
+        (Set(byte4), byte4),
+        (Set(byte5), byte5),
+        (Set(byte6), byte6),
       ))
     } yield ()
   }
@@ -331,7 +396,6 @@ case class Aggr_Byte_(
       _ <- Entity.byte(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.byte(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.byte(count).query.get.map(_ ==> List(a, b))
 
@@ -352,6 +416,18 @@ case class Aggr_Byte_(
 
       _ <- Entity.i.a1.byte(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.byte(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.byte.a1.byte(count).query.get.map(_ ==> List(
+        (byte1, 1),
+        (byte2, 2),
+        (byte3, 1),
+      ))
+      _ <- Entity.byte(count).byte.a1.query.get.map(_ ==> List(
+        (1, byte1),
+        (2, byte2),
+        (1, byte3),
+      ))
     } yield ()
   }
 
@@ -387,7 +463,6 @@ case class Aggr_Byte_(
       _ <- Entity.byte(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.byte(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.byte(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -408,6 +483,18 @@ case class Aggr_Byte_(
 
       _ <- Entity.i.a1.byte(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.byte(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.byte.a1.byte(countDistinct).query.get.map(_ ==> List(
+        (byte1, 1),
+        (byte2, 1),
+        (byte3, 1),
+      ))
+      _ <- Entity.byte(countDistinct).byte.a1.query.get.map(_ ==> List(
+        (1, byte1),
+        (1, byte2),
+        (1, byte3),
+      ))
     } yield ()
   }
 }

@@ -82,6 +82,20 @@ case class AggrNum_Long_(
 
       _ <- Entity.i.a1.long(sum).>=(sum1).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.long(sum).>=(sum2).query.get.map(_ ==> List(b))
+
+      // Include aggregated attribute too
+      _ <- Entity.long.a1.long(sum).query.get.map(_ ==> List(
+        (long1, long1),
+        (long2, long2 + long2),
+        (long3, long3),
+        (long4, long4),
+      ))
+      _ <- Entity.long(sum).long.a1.query.get.map(_ ==> List(
+        (long1, long1),
+        (long2 + long2, long2),
+        (long3, long3),
+        (long4, long4),
+      ))
     } yield ()
   }
 
@@ -173,6 +187,36 @@ case class AggrNum_Long_(
 
         _ <- Entity.i.a1.long(median).>=(median1).query.get.map(_ ==> List(a, b))
         _ <- Entity.i.a1.long(median).>=(median2).query.get.map(_ ==> List(b))
+
+
+        // Include aggregated attribute too
+        _ <- Entity.long.a1.long(median).query.get.map { res =>
+          res(0)._1 ==> long1
+          res(0)._2 ==~ long1
+
+          res(1)._1 ==> long2
+          res(1)._2 ==~ (long2 + long2).toDouble * 100 / 200.0
+
+          res(2)._1 ==> long5
+          res(2)._2 ==~ long5
+
+          res(3)._1 ==> long9
+          res(3)._2 ==~ long9
+        }
+
+        _ <- Entity.long.long(median).d1.query.get.map { res =>
+          res(0)._1 ==> long9
+          res(0)._2 ==~ long9
+
+          res(1)._1 ==> long5
+          res(1)._2 ==~ long5
+
+          res(2)._1 ==> long2
+          res(2)._2 ==~ (long2 + long2).toDouble * 100 / 200.0
+
+          res(3)._1 ==> long1
+          res(3)._2 ==~ long1
+        }
       } yield ()
     }
   }
@@ -239,6 +283,36 @@ case class AggrNum_Long_(
 
       _ <- Entity.i.a1.long(avg).>=(avg1).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.long(avg).>=(avg2).query.get.map(_ ==> List(b))
+
+
+      // Include aggregated attribute too
+      _ <- Entity.long.a1.long(avg).query.get.map { res =>
+        res(0)._1 ==> long1
+        res(0)._2 ==~ long1
+
+        res(1)._1 ==> long2
+        res(1)._2 ==~ (long2 + long2).toDouble * 100 / 200.0
+
+        res(2)._1 ==> long3
+        res(2)._2 ==~ long3
+
+        res(3)._1 ==> long4
+        res(3)._2 ==~ long4
+      }
+
+      _ <- Entity.long.long(avg).d1.query.get.map { res =>
+        res(0)._1 ==> long4
+        res(0)._2 ==~ long4
+
+        res(1)._1 ==> long3
+        res(1)._2 ==~ long3
+
+        res(2)._1 ==> long2
+        res(2)._2 ==~ (long2 + long2).toDouble * 100 / 200.0
+
+        res(3)._1 ==> long1
+        res(3)._2 ==~ long1
+      }
     } yield ()
   }
 
@@ -339,6 +413,36 @@ case class AggrNum_Long_(
           res(1)._2 ==~ variance2
         }
         _ <- Entity.i.a1.long(variance).>=(variance2).query.get.map(_.head._2 ==~ variance2)
+
+
+        // Include aggregated attribute too
+        _ <- Entity.long.a1.long(variance).query.get.map { res =>
+          res(0)._1 ==> long1
+          res(0)._2 ==~ 0
+
+          res(1)._1 ==> long2
+          res(1)._2 ==~ varianceOf(long2, long2) // always 0
+
+          res(2)._1 ==> long3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> long4
+          res(3)._2 ==~ 0
+        }
+
+        _ <- Entity.long.a2.long(variance).d1.query.get.map { res =>
+          res(0)._1 ==> long1
+          res(0)._2 ==~ varianceOf(long2, long2) // always 0
+
+          res(1)._1 ==> long2
+          res(1)._2 ==~ 0
+
+          res(2)._1 ==> long3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> long4
+          res(3)._2 ==~ 0
+        }
       } yield ()
     }
   }
@@ -440,6 +544,36 @@ case class AggrNum_Long_(
           res(1)._2 ==~ stddev2
         }
         _ <- Entity.i.a1.long(stddev).>=(stddev2).query.get.map(_.head._2 ==~ stddev2)
+
+
+        // Include aggregated attribute too
+        _ <- Entity.long.a1.long(stddev).query.get.map { res =>
+          res(0)._1 ==> long1
+          res(0)._2 ==~ 0
+
+          res(1)._1 ==> long2
+          res(1)._2 ==~ stdDevOf(long2, long2) // always 0
+
+          res(2)._1 ==> long3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> long4
+          res(3)._2 ==~ 0
+        }
+
+        _ <- Entity.long.a2.long(stddev).d1.query.get.map { res =>
+          res(0)._1 ==> long1
+          res(0)._2 ==~ stdDevOf(long2, long2) // always 0
+
+          res(1)._1 ==> long2
+          res(1)._2 ==~ 0
+
+          res(2)._1 ==> long3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> long4
+          res(3)._2 ==~ 0
+        }
       } yield ()
     }
   }

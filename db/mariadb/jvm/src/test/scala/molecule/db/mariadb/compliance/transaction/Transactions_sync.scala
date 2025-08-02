@@ -1,7 +1,7 @@
 package molecule.db.mariadb.compliance.transaction
 
 import molecule.core.setup.MUnit
-import molecule.db.compliance.test.action.Transactions_sync
+import molecule.db.compliance.test.transaction.Transactions_sync
 import molecule.db.mariadb.setup.Api_mariadb_sync
 
 

@@ -43,6 +43,18 @@ case class Aggr_Duration_(
       _ <- Entity.duration(distinct).query.get.map(_.head ==> Set(
         duration1, duration2, duration3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.duration.a1.duration(distinct).query.get.map(_ ==> List(
+        (duration1, Set(duration1)),
+        (duration2, Set(duration2)),
+        (duration3, Set(duration3)),
+      ))
+      _ <- Entity.duration(distinct).duration.a1.query.get.map(_ ==> List(
+        (Set(duration1), duration1),
+        (Set(duration2), duration2),
+        (Set(duration3), duration3),
+      ))
     } yield ()
   }
 
@@ -73,7 +85,6 @@ case class Aggr_Duration_(
       _ <- Entity.duration(min).>=(duration1).query.get.map(_ ==> List(duration1))
       _ <- Entity.duration(min).>=(duration2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.duration(min).query.get.map(_ ==> List(a))
 
@@ -94,6 +105,16 @@ case class Aggr_Duration_(
 
       _ <- Entity.i.duration(min).>=(duration1).query.get.map(_ ==> List(a))
       _ <- Entity.i.duration(min).>=(duration2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.duration.a1.duration(min).query.get.map(_ ==> List(
+        (duration1, duration1),
+        (duration2, duration2),
+      ))
+      _ <- Entity.duration(min).duration.a1.query.get.map(_ ==> List(
+        (duration1, duration1),
+        (duration2, duration2),
+      ))
     } yield ()
   }
 
@@ -124,7 +145,6 @@ case class Aggr_Duration_(
       _ <- Entity.duration(max).>=(duration2).query.get.map(_ ==> List(duration2))
       _ <- Entity.duration(max).>=(duration3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.duration(max).query.get.map(_ ==> List(b))
 
@@ -145,6 +165,16 @@ case class Aggr_Duration_(
 
       _ <- Entity.i.duration(max).>=(duration2).query.get.map(_ ==> List(b))
       _ <- Entity.i.duration(max).>=(duration3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.duration.a1.duration(max).query.get.map(_ ==> List(
+        (duration1, duration1),
+        (duration2, duration2),
+      ))
+      _ <- Entity.duration(max).duration.a1.query.get.map(_ ==> List(
+        (duration1, duration1),
+        (duration2, duration2),
+      ))
     } yield ()
   }
 
@@ -206,6 +236,41 @@ case class Aggr_Duration_(
       _ <- Entity.i.a1.duration(min(2)).duration(max(2)).query.get.map(_ ==> List(
         (1, Set(duration1, duration2), Set(duration2, duration3)),
         (2, Set(duration4, duration5), Set(duration5, duration6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.duration.a1.duration(min(2)).query.get.map(_ ==> List(
+        (duration1, Set(duration1)),
+        (duration2, Set(duration2)),
+        (duration3, Set(duration3)),
+        (duration4, Set(duration4)),
+        (duration5, Set(duration5)),
+        (duration6, Set(duration6)),
+      ))
+      _ <- Entity.duration(min(2)).duration.a1.query.get.map(_ ==> List(
+        (Set(duration1), duration1),
+        (Set(duration2), duration2),
+        (Set(duration3), duration3),
+        (Set(duration4), duration4),
+        (Set(duration5), duration5),
+        (Set(duration6), duration6),
+      ))
+
+      _ <- Entity.duration.a1.duration(max(2)).query.get.map(_ ==> List(
+        (duration1, Set(duration1)),
+        (duration2, Set(duration2)),
+        (duration3, Set(duration3)),
+        (duration4, Set(duration4)),
+        (duration5, Set(duration5)),
+        (duration6, Set(duration6)),
+      ))
+      _ <- Entity.duration(max(2)).duration.a1.query.get.map(_ ==> List(
+        (Set(duration1), duration1),
+        (Set(duration2), duration2),
+        (Set(duration3), duration3),
+        (Set(duration4), duration4),
+        (Set(duration5), duration5),
+        (Set(duration6), duration6),
       ))
     } yield ()
   }
@@ -332,7 +397,6 @@ case class Aggr_Duration_(
       _ <- Entity.duration(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.duration(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.duration(count).query.get.map(_ ==> List(a, b))
 
@@ -353,6 +417,18 @@ case class Aggr_Duration_(
 
       _ <- Entity.i.a1.duration(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.duration(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.duration.a1.duration(count).query.get.map(_ ==> List(
+        (duration1, 1),
+        (duration2, 2),
+        (duration3, 1),
+      ))
+      _ <- Entity.duration(count).duration.a1.query.get.map(_ ==> List(
+        (1, duration1),
+        (2, duration2),
+        (1, duration3),
+      ))
     } yield ()
   }
 
@@ -388,7 +464,6 @@ case class Aggr_Duration_(
       _ <- Entity.duration(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.duration(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.duration(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -409,6 +484,18 @@ case class Aggr_Duration_(
 
       _ <- Entity.i.a1.duration(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.duration(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.duration.a1.duration(countDistinct).query.get.map(_ ==> List(
+        (duration1, 1),
+        (duration2, 1),
+        (duration3, 1),
+      ))
+      _ <- Entity.duration(countDistinct).duration.a1.query.get.map(_ ==> List(
+        (1, duration1),
+        (1, duration2),
+        (1, duration3),
+      ))
     } yield ()
   }
 }

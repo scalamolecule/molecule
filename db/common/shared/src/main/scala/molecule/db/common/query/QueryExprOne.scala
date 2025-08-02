@@ -124,7 +124,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     }
     addSort(attr, col)
     attr.filterAttr.fold {
-      expr(attr.ent, attr.attr, col, attr.op, args, attr.binding, res)
+      expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res)
     } { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, filterAttr.name)
     }
@@ -133,7 +133,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   protected def tac[T: ClassTag](attr: AttrOne, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: AttrOne)
     attr.filterAttr.fold {
-      expr(attr.ent, attr.attr, col, attr.op, args, attr.binding, res)
+      expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res)
     } { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, getCol(filterAttr, filterPath))
     }
@@ -145,36 +145,35 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     col: String,
     op: Op,
     args: Seq[T],
+    hasSort: Boolean,
     binding: Boolean,
     res: ResOne[T],
-  ): Unit = {
-    op match {
-      case V            => attrV(col)
-      case Eq           => equal(col, args, res.one2sql, binding, res.bind, res.tpe)
-      case Neq          => neq(col, args, res.one2sql, binding, res.bind, res.tpe)
-      case Lt           => compare(col, args, "<", res.one2sql, binding, res.bind, res.tpe)
-      case Gt           => compare(col, args, ">", res.one2sql, binding, res.bind, res.tpe)
-      case Le           => compare(col, args, "<=", res.one2sql, binding, res.bind, res.tpe)
-      case Ge           => compare(col, args, ">=", res.one2sql, binding, res.bind, res.tpe)
-      case NoValue      => noValue(col)
-      case StartsWith   => startsWith(col, args, binding, res.bind)
-      case EndsWith     => endsWith(col, args, binding, res.bind)
-      case Contains     => contains(col, args, binding, res.bind)
-      case Matches      => matches(col, args, binding, res.bind)
-      case Remainder    => remainder(col, args)
-      case Even         => even(col)
-      case Odd          => odd(col)
-      case AttrOp.Ceil  => ceil(col)
-      case AttrOp.Floor => floor(col)
-      case And          => and(col, args.head)
-      case Or           => or(col, args.head)
-      case Not          => not(col)
+  ): Unit = op match {
+    case V            => attrV(col)
+    case Eq           => equal(col, args, res.one2sql, binding, res.bind, res.tpe)
+    case Neq          => neq(col, args, res.one2sql, binding, res.bind, res.tpe)
+    case Lt           => compare(col, args, "<", res.one2sql, binding, res.bind, res.tpe)
+    case Gt           => compare(col, args, ">", res.one2sql, binding, res.bind, res.tpe)
+    case Le           => compare(col, args, "<=", res.one2sql, binding, res.bind, res.tpe)
+    case Ge           => compare(col, args, ">=", res.one2sql, binding, res.bind, res.tpe)
+    case NoValue      => noValue(col)
+    case StartsWith   => startsWith(col, args, binding, res.bind)
+    case EndsWith     => endsWith(col, args, binding, res.bind)
+    case Contains     => contains(col, args, binding, res.bind)
+    case Matches      => matches(col, args, binding, res.bind)
+    case Remainder    => remainder(col, args)
+    case Even         => even(col)
+    case Odd          => odd(col)
+    case AttrOp.Ceil  => ceil(col)
+    case AttrOp.Floor => floor(col)
+    case And          => and(col, args.head)
+    case Or           => or(col, args.head)
+    case Not          => not(col)
 
-      case Fn(baseType, kw, n, aggrOp, aggrOpValue) =>
-        aggr(baseType, ent, attr, col, kw, n, aggrOp, aggrOpValue, res)
+    case Fn(baseType, kw, n, aggrOp, aggrOpValue) =>
+      aggr(baseType, ent, attr, col, kw, n, aggrOp, aggrOpValue, hasSort, res)
 
-      case other => unexpectedOp(other)
-    }
+    case other => unexpectedOp(other)
   }
 
   protected def expr2(
@@ -441,6 +440,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     optN: Option[Int],
     aggrOp: Option[Op],
     aggrOpValue: Option[Value],
+    hasSort: Boolean,
     res: ResOne[T]
   ): Unit = {
     checkAggrOne()
@@ -453,13 +453,13 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
       case "distinct" =>
         aggregate = true
         select += s"ARRAY_AGG(DISTINCT $col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(res.array2set)
 
       case "min" =>
         aggregate = true
         select += s"MIN($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"MIN($col)")
 
       case "mins" =>
@@ -473,13 +473,13 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
              |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
              |    )
              |  )""".stripMargin
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(res.array2set)
 
       case "max" =>
         aggregate = true
         select += s"MAX($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"MAX($col)")
 
       case "maxs" =>
@@ -493,7 +493,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
              |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
              |    )
              |  )""".stripMargin
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(res.array2set)
 
       case "sample" =>
@@ -514,53 +514,53 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
              |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
              |    )
              |  )""".stripMargin
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(res.array2set)
 
       case "count" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT", "")
-        groupByCols -= col
+        selectWithOrder(col, "COUNT", hasSort, "")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT")
-        groupByCols -= col
+        selectWithOrder(col, "COUNT", hasSort)
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
         aggregate = true
-        selectWithOrder(col, "SUM", "")
-        groupByCols -= col
+        selectWithOrder(col, "SUM", hasSort, "")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"SUM($col)")
 
       case "median" =>
         aggregate = true
-        selectWithOrder(col, "MEDIAN", "")
-        groupByCols -= col
+        selectWithOrder(col, "MEDIAN", hasSort, "")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"MEDIAN($col)")
 
       case "avg" =>
         aggregate = true
-        selectWithOrder(col, "AVG", "")
-        groupByCols -= col
+        selectWithOrder(col, "AVG", hasSort, "")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"AVG($col)")
 
       case "variance" =>
         aggregate = true
-        selectWithOrder(col, "VAR_POP", "")
-        groupByCols -= col
+        selectWithOrder(col, "VAR_POP", hasSort, "")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"VAR_POP($col)")
 
       case "stddev" =>
         aggregate = true
-        selectWithOrder(col, "STDDEV_POP", "")
-        groupByCols -= col
+        selectWithOrder(col, "STDDEV_POP", hasSort, "")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"STDDEV_POP($col)")
 
       case other => unexpectedKw(other)
@@ -588,12 +588,13 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   protected def selectWithOrder(
     col: String,
     fn: String,
+    hasSort: Boolean = false,
     distinct: String = "DISTINCT ",
     cast: String = "",
     prefix: String = "",
     suffix: String = ""
   ): Unit = {
-    if (orderBy.nonEmpty && orderBy.last._3 == col) {
+    if (hasSort) {
       // order by aggregate alias instead
       val alias = col.replace('.', '_') + "_" + fn.toLowerCase
       select += s"$prefix$fn($distinct$col$cast)$suffix $alias"
@@ -623,7 +624,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     expr: String,
     aggrOp: Option[Op],
     aggrOpValue: Option[Value],
-    res: ResOne[T] ,
+    res: ResOne[T],
     prefix: String = "",
     suffix: String = "",
   ): Unit = {

@@ -1,4 +1,4 @@
-package molecule.db.mariadb.compliance.transaction.delete
+package molecule.db.mariadb.compliance.action.delete
 
 import molecule.core.setup.MUnit
 import molecule.db

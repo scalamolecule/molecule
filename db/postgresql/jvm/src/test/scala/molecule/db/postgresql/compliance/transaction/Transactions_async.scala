@@ -1,7 +1,7 @@
 package molecule.db.postgresql.compliance.transaction
 
 import molecule.core.setup.MUnit
-import molecule.db.compliance.test.action.Transactions_async
+import molecule.db.compliance.test.transaction.Transactions_async
 import molecule.db.postgresql.setup.Api_postgresql_async
 
 

@@ -263,24 +263,6 @@ trait KeywordsStable {
    *   _ <- Match.score(median).get.map(_.head ==> 2)
    * } yield ()
    * }}}
-   * OBS: When it comes to an even number of values, Datomic has a special
-   * implementation of median that is different from the one described on the
-   * [[https://en.wikipedia.org/wiki/Median Wiki entry on the median function]].
-   * <br><br> Datomic calculates the median of even number of values as the
-   * average of the two middle numbers rounded down to nearest whole number
-   * {{{
-   * for {
-   *   _ <- Match.sKeywords.insert(1, 2, 3, 4)
-   *   _ <- Match.score(median).get.map(_.head ==> 2) // (2 + 3) / 2 = 2.5 rounded down to 2
-   * } yield ()
-   * }}}
-   * With decimal numbers this can go wrong:
-   * {{{
-   * for {
-   *   _ <- Match.sKeywords.insert(1.0, 2.5, 2.5, 3.0)
-   *   _ <- Match.score(median).get.map(_.head ==> 2) // (2.5 + 2.5) / 2 = 2.5 rounded down to 2 (This is wrong and bug report has been filed)
-   * } yield ()
-   * }}}
    *
    * @return
    * Value of Attribute type

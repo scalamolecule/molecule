@@ -43,6 +43,18 @@ case class Aggr_LocalDate_(
       _ <- Entity.localDate(distinct).query.get.map(_.head ==> Set(
         localDate1, localDate2, localDate3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.localDate.a1.localDate(distinct).query.get.map(_ ==> List(
+        (localDate1, Set(localDate1)),
+        (localDate2, Set(localDate2)),
+        (localDate3, Set(localDate3)),
+      ))
+      _ <- Entity.localDate(distinct).localDate.a1.query.get.map(_ ==> List(
+        (Set(localDate1), localDate1),
+        (Set(localDate2), localDate2),
+        (Set(localDate3), localDate3),
+      ))
     } yield ()
   }
 
@@ -73,7 +85,6 @@ case class Aggr_LocalDate_(
       _ <- Entity.localDate(min).>=(localDate1).query.get.map(_ ==> List(localDate1))
       _ <- Entity.localDate(min).>=(localDate2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.localDate(min).query.get.map(_ ==> List(a))
 
@@ -94,6 +105,16 @@ case class Aggr_LocalDate_(
 
       _ <- Entity.i.localDate(min).>=(localDate1).query.get.map(_ ==> List(a))
       _ <- Entity.i.localDate(min).>=(localDate2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.localDate.a1.localDate(min).query.get.map(_ ==> List(
+        (localDate1, localDate1),
+        (localDate2, localDate2),
+      ))
+      _ <- Entity.localDate(min).localDate.a1.query.get.map(_ ==> List(
+        (localDate1, localDate1),
+        (localDate2, localDate2),
+      ))
     } yield ()
   }
 
@@ -124,7 +145,6 @@ case class Aggr_LocalDate_(
       _ <- Entity.localDate(max).>=(localDate2).query.get.map(_ ==> List(localDate2))
       _ <- Entity.localDate(max).>=(localDate3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.localDate(max).query.get.map(_ ==> List(b))
 
@@ -145,6 +165,16 @@ case class Aggr_LocalDate_(
 
       _ <- Entity.i.localDate(max).>=(localDate2).query.get.map(_ ==> List(b))
       _ <- Entity.i.localDate(max).>=(localDate3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.localDate.a1.localDate(max).query.get.map(_ ==> List(
+        (localDate1, localDate1),
+        (localDate2, localDate2),
+      ))
+      _ <- Entity.localDate(max).localDate.a1.query.get.map(_ ==> List(
+        (localDate1, localDate1),
+        (localDate2, localDate2),
+      ))
     } yield ()
   }
 
@@ -206,6 +236,41 @@ case class Aggr_LocalDate_(
       _ <- Entity.i.a1.localDate(min(2)).localDate(max(2)).query.get.map(_ ==> List(
         (1, Set(localDate1, localDate2), Set(localDate2, localDate3)),
         (2, Set(localDate4, localDate5), Set(localDate5, localDate6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.localDate.a1.localDate(min(2)).query.get.map(_ ==> List(
+        (localDate1, Set(localDate1)),
+        (localDate2, Set(localDate2)),
+        (localDate3, Set(localDate3)),
+        (localDate4, Set(localDate4)),
+        (localDate5, Set(localDate5)),
+        (localDate6, Set(localDate6)),
+      ))
+      _ <- Entity.localDate(min(2)).localDate.a1.query.get.map(_ ==> List(
+        (Set(localDate1), localDate1),
+        (Set(localDate2), localDate2),
+        (Set(localDate3), localDate3),
+        (Set(localDate4), localDate4),
+        (Set(localDate5), localDate5),
+        (Set(localDate6), localDate6),
+      ))
+
+      _ <- Entity.localDate.a1.localDate(max(2)).query.get.map(_ ==> List(
+        (localDate1, Set(localDate1)),
+        (localDate2, Set(localDate2)),
+        (localDate3, Set(localDate3)),
+        (localDate4, Set(localDate4)),
+        (localDate5, Set(localDate5)),
+        (localDate6, Set(localDate6)),
+      ))
+      _ <- Entity.localDate(max(2)).localDate.a1.query.get.map(_ ==> List(
+        (Set(localDate1), localDate1),
+        (Set(localDate2), localDate2),
+        (Set(localDate3), localDate3),
+        (Set(localDate4), localDate4),
+        (Set(localDate5), localDate5),
+        (Set(localDate6), localDate6),
       ))
     } yield ()
   }
@@ -332,7 +397,6 @@ case class Aggr_LocalDate_(
       _ <- Entity.localDate(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.localDate(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.localDate(count).query.get.map(_ ==> List(a, b))
 
@@ -353,6 +417,18 @@ case class Aggr_LocalDate_(
 
       _ <- Entity.i.a1.localDate(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.localDate(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.localDate.a1.localDate(count).query.get.map(_ ==> List(
+        (localDate1, 1),
+        (localDate2, 2),
+        (localDate3, 1),
+      ))
+      _ <- Entity.localDate(count).localDate.a1.query.get.map(_ ==> List(
+        (1, localDate1),
+        (2, localDate2),
+        (1, localDate3),
+      ))
     } yield ()
   }
 
@@ -388,7 +464,6 @@ case class Aggr_LocalDate_(
       _ <- Entity.localDate(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.localDate(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.localDate(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -409,6 +484,18 @@ case class Aggr_LocalDate_(
 
       _ <- Entity.i.a1.localDate(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.localDate(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.localDate.a1.localDate(countDistinct).query.get.map(_ ==> List(
+        (localDate1, 1),
+        (localDate2, 1),
+        (localDate3, 1),
+      ))
+      _ <- Entity.localDate(countDistinct).localDate.a1.query.get.map(_ ==> List(
+        (1, localDate1),
+        (1, localDate2),
+        (1, localDate3),
+      ))
     } yield ()
   }
 }

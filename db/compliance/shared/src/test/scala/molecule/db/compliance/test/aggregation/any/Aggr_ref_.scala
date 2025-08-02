@@ -42,6 +42,18 @@ case class Aggr_ref_(
       _ <- Entity.ref(distinct).query.get.map(_.head ==> Set(
         ref1, ref2, ref3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.ref.a1.ref(distinct).query.get.map(_ ==> List(
+        (ref1, Set(ref1)),
+        (ref2, Set(ref2)),
+        (ref3, Set(ref3)),
+      ))
+      _ <- Entity.ref(distinct).ref.a1.query.get.map(_ ==> List(
+        (Set(ref1), ref1),
+        (Set(ref2), ref2),
+        (Set(ref3), ref3),
+      ))
     } yield ()
   }
 
@@ -72,7 +84,6 @@ case class Aggr_ref_(
       _ <- Entity.ref(min).>=(ref1).query.get.map(_ ==> List(ref1))
       _ <- Entity.ref(min).>=(ref2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.ref(min).query.get.map(_ ==> List(a))
 
@@ -93,6 +104,16 @@ case class Aggr_ref_(
 
       _ <- Entity.i.ref(min).>=(ref1).query.get.map(_ ==> List(a))
       _ <- Entity.i.ref(min).>=(ref2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.ref.a1.ref(min).query.get.map(_ ==> List(
+        (ref1, ref1),
+        (ref2, ref2),
+      ))
+      _ <- Entity.ref(min).ref.a1.query.get.map(_ ==> List(
+        (ref1, ref1),
+        (ref2, ref2),
+      ))
     } yield ()
   }
 
@@ -123,7 +144,6 @@ case class Aggr_ref_(
       _ <- Entity.ref(max).>=(ref2).query.get.map(_ ==> List(ref2))
       _ <- Entity.ref(max).>=(ref3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.ref(max).query.get.map(_ ==> List(b))
 
@@ -144,6 +164,16 @@ case class Aggr_ref_(
 
       _ <- Entity.i.ref(max).>=(ref2).query.get.map(_ ==> List(b))
       _ <- Entity.i.ref(max).>=(ref3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.ref.a1.ref(max).query.get.map(_ ==> List(
+        (ref1, ref1),
+        (ref2, ref2),
+      ))
+      _ <- Entity.ref(max).ref.a1.query.get.map(_ ==> List(
+        (ref1, ref1),
+        (ref2, ref2),
+      ))
     } yield ()
   }
 
@@ -205,6 +235,41 @@ case class Aggr_ref_(
       _ <- Entity.i.a1.ref(min(2)).ref(max(2)).query.get.map(_ ==> List(
         (1, Set(ref1, ref2), Set(ref2, ref3)),
         (2, Set(ref4, ref5), Set(ref5, ref6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.ref.a1.ref(min(2)).query.get.map(_ ==> List(
+        (ref1, Set(ref1)),
+        (ref2, Set(ref2)),
+        (ref3, Set(ref3)),
+        (ref4, Set(ref4)),
+        (ref5, Set(ref5)),
+        (ref6, Set(ref6)),
+      ))
+      _ <- Entity.ref(min(2)).ref.a1.query.get.map(_ ==> List(
+        (Set(ref1), ref1),
+        (Set(ref2), ref2),
+        (Set(ref3), ref3),
+        (Set(ref4), ref4),
+        (Set(ref5), ref5),
+        (Set(ref6), ref6),
+      ))
+
+      _ <- Entity.ref.a1.ref(max(2)).query.get.map(_ ==> List(
+        (ref1, Set(ref1)),
+        (ref2, Set(ref2)),
+        (ref3, Set(ref3)),
+        (ref4, Set(ref4)),
+        (ref5, Set(ref5)),
+        (ref6, Set(ref6)),
+      ))
+      _ <- Entity.ref(max(2)).ref.a1.query.get.map(_ ==> List(
+        (Set(ref1), ref1),
+        (Set(ref2), ref2),
+        (Set(ref3), ref3),
+        (Set(ref4), ref4),
+        (Set(ref5), ref5),
+        (Set(ref6), ref6),
       ))
     } yield ()
   }
@@ -331,7 +396,6 @@ case class Aggr_ref_(
       _ <- Entity.ref(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.ref(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.ref(count).query.get.map(_ ==> List(a, b))
 
@@ -352,6 +416,18 @@ case class Aggr_ref_(
 
       _ <- Entity.i.a1.ref(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.ref(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.ref.a1.ref(count).query.get.map(_ ==> List(
+        (ref1, 1),
+        (ref2, 2),
+        (ref3, 1),
+      ))
+      _ <- Entity.ref(count).ref.a1.query.get.map(_ ==> List(
+        (1, ref1),
+        (2, ref2),
+        (1, ref3),
+      ))
     } yield ()
   }
 
@@ -387,7 +463,6 @@ case class Aggr_ref_(
       _ <- Entity.ref(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.ref(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.ref(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -408,6 +483,18 @@ case class Aggr_ref_(
 
       _ <- Entity.i.a1.ref(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.ref(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.ref.a1.ref(countDistinct).query.get.map(_ ==> List(
+        (ref1, 1),
+        (ref2, 1),
+        (ref3, 1),
+      ))
+      _ <- Entity.ref(countDistinct).ref.a1.query.get.map(_ ==> List(
+        (1, ref1),
+        (1, ref2),
+        (1, ref3),
+      ))
     } yield ()
   }
 }

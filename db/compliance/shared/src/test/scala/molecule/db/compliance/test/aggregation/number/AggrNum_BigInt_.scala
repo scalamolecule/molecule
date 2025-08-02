@@ -82,6 +82,20 @@ case class AggrNum_BigInt_(
 
       _ <- Entity.i.a1.bigInt(sum).>=(sum1).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.bigInt(sum).>=(sum2).query.get.map(_ ==> List(b))
+
+      // Include aggregated attribute too
+      _ <- Entity.bigInt.a1.bigInt(sum).query.get.map(_ ==> List(
+        (bigInt1, bigInt1),
+        (bigInt2, bigInt2 + bigInt2),
+        (bigInt3, bigInt3),
+        (bigInt4, bigInt4),
+      ))
+      _ <- Entity.bigInt(sum).bigInt.a1.query.get.map(_ ==> List(
+        (bigInt1, bigInt1),
+        (bigInt2 + bigInt2, bigInt2),
+        (bigInt3, bigInt3),
+        (bigInt4, bigInt4),
+      ))
     } yield ()
   }
 
@@ -173,6 +187,36 @@ case class AggrNum_BigInt_(
 
         _ <- Entity.i.a1.bigInt(median).>=(median1).query.get.map(_ ==> List(a, b))
         _ <- Entity.i.a1.bigInt(median).>=(median2).query.get.map(_ ==> List(b))
+
+
+        // Include aggregated attribute too
+        _ <- Entity.bigInt.a1.bigInt(median).query.get.map { res =>
+          res(0)._1 ==> bigInt1
+          res(0)._2 ==~ bigInt1
+
+          res(1)._1 ==> bigInt2
+          res(1)._2 ==~ (bigInt2 + bigInt2).toDouble * 100 / 200.0
+
+          res(2)._1 ==> bigInt5
+          res(2)._2 ==~ bigInt5
+
+          res(3)._1 ==> bigInt9
+          res(3)._2 ==~ bigInt9
+        }
+
+        _ <- Entity.bigInt.bigInt(median).d1.query.get.map { res =>
+          res(0)._1 ==> bigInt9
+          res(0)._2 ==~ bigInt9
+
+          res(1)._1 ==> bigInt5
+          res(1)._2 ==~ bigInt5
+
+          res(2)._1 ==> bigInt2
+          res(2)._2 ==~ (bigInt2 + bigInt2).toDouble * 100 / 200.0
+
+          res(3)._1 ==> bigInt1
+          res(3)._2 ==~ bigInt1
+        }
       } yield ()
     }
   }
@@ -239,6 +283,36 @@ case class AggrNum_BigInt_(
 
       _ <- Entity.i.a1.bigInt(avg).>=(avg1).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.bigInt(avg).>=(avg2).query.get.map(_ ==> List(b))
+
+
+      // Include aggregated attribute too
+      _ <- Entity.bigInt.a1.bigInt(avg).query.get.map { res =>
+        res(0)._1 ==> bigInt1
+        res(0)._2 ==~ bigInt1
+
+        res(1)._1 ==> bigInt2
+        res(1)._2 ==~ (bigInt2 + bigInt2).toDouble * 100 / 200.0
+
+        res(2)._1 ==> bigInt3
+        res(2)._2 ==~ bigInt3
+
+        res(3)._1 ==> bigInt4
+        res(3)._2 ==~ bigInt4
+      }
+
+      _ <- Entity.bigInt.bigInt(avg).d1.query.get.map { res =>
+        res(0)._1 ==> bigInt4
+        res(0)._2 ==~ bigInt4
+
+        res(1)._1 ==> bigInt3
+        res(1)._2 ==~ bigInt3
+
+        res(2)._1 ==> bigInt2
+        res(2)._2 ==~ (bigInt2 + bigInt2).toDouble * 100 / 200.0
+
+        res(3)._1 ==> bigInt1
+        res(3)._2 ==~ bigInt1
+      }
     } yield ()
   }
 
@@ -339,6 +413,36 @@ case class AggrNum_BigInt_(
           res(1)._2 ==~ variance2
         }
         _ <- Entity.i.a1.bigInt(variance).>=(variance2).query.get.map(_.head._2 ==~ variance2)
+
+
+        // Include aggregated attribute too
+        _ <- Entity.bigInt.a1.bigInt(variance).query.get.map { res =>
+          res(0)._1 ==> bigInt1
+          res(0)._2 ==~ 0
+
+          res(1)._1 ==> bigInt2
+          res(1)._2 ==~ varianceOf(bigInt2, bigInt2) // always 0
+
+          res(2)._1 ==> bigInt3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> bigInt4
+          res(3)._2 ==~ 0
+        }
+
+        _ <- Entity.bigInt.a2.bigInt(variance).d1.query.get.map { res =>
+          res(0)._1 ==> bigInt1
+          res(0)._2 ==~ varianceOf(bigInt2, bigInt2) // always 0
+
+          res(1)._1 ==> bigInt2
+          res(1)._2 ==~ 0
+
+          res(2)._1 ==> bigInt3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> bigInt4
+          res(3)._2 ==~ 0
+        }
       } yield ()
     }
   }
@@ -440,6 +544,36 @@ case class AggrNum_BigInt_(
           res(1)._2 ==~ stddev2
         }
         _ <- Entity.i.a1.bigInt(stddev).>=(stddev2).query.get.map(_.head._2 ==~ stddev2)
+
+
+        // Include aggregated attribute too
+        _ <- Entity.bigInt.a1.bigInt(stddev).query.get.map { res =>
+          res(0)._1 ==> bigInt1
+          res(0)._2 ==~ 0
+
+          res(1)._1 ==> bigInt2
+          res(1)._2 ==~ stdDevOf(bigInt2, bigInt2) // always 0
+
+          res(2)._1 ==> bigInt3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> bigInt4
+          res(3)._2 ==~ 0
+        }
+
+        _ <- Entity.bigInt.a2.bigInt(stddev).d1.query.get.map { res =>
+          res(0)._1 ==> bigInt1
+          res(0)._2 ==~ stdDevOf(bigInt2, bigInt2) // always 0
+
+          res(1)._1 ==> bigInt2
+          res(1)._2 ==~ 0
+
+          res(2)._1 ==> bigInt3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> bigInt4
+          res(3)._2 ==~ 0
+        }
       } yield ()
     }
   }

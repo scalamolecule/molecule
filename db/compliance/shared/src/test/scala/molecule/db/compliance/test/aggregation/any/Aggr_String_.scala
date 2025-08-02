@@ -42,6 +42,18 @@ case class Aggr_String_(
       _ <- Entity.string(distinct).query.get.map(_.head ==> Set(
         string1, string2, string3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.string.a1.string(distinct).query.get.map(_ ==> List(
+        (string1, Set(string1)),
+        (string2, Set(string2)),
+        (string3, Set(string3)),
+      ))
+      _ <- Entity.string(distinct).string.a1.query.get.map(_ ==> List(
+        (Set(string1), string1),
+        (Set(string2), string2),
+        (Set(string3), string3),
+      ))
     } yield ()
   }
 
@@ -72,7 +84,6 @@ case class Aggr_String_(
       _ <- Entity.string(min).>=(string1).query.get.map(_ ==> List(string1))
       _ <- Entity.string(min).>=(string2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.string(min).query.get.map(_ ==> List(a))
 
@@ -93,6 +104,16 @@ case class Aggr_String_(
 
       _ <- Entity.i.string(min).>=(string1).query.get.map(_ ==> List(a))
       _ <- Entity.i.string(min).>=(string2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.string.a1.string(min).query.get.map(_ ==> List(
+        (string1, string1),
+        (string2, string2),
+      ))
+      _ <- Entity.string(min).string.a1.query.get.map(_ ==> List(
+        (string1, string1),
+        (string2, string2),
+      ))
     } yield ()
   }
 
@@ -123,7 +144,6 @@ case class Aggr_String_(
       _ <- Entity.string(max).>=(string2).query.get.map(_ ==> List(string2))
       _ <- Entity.string(max).>=(string3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.string(max).query.get.map(_ ==> List(b))
 
@@ -144,6 +164,16 @@ case class Aggr_String_(
 
       _ <- Entity.i.string(max).>=(string2).query.get.map(_ ==> List(b))
       _ <- Entity.i.string(max).>=(string3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.string.a1.string(max).query.get.map(_ ==> List(
+        (string1, string1),
+        (string2, string2),
+      ))
+      _ <- Entity.string(max).string.a1.query.get.map(_ ==> List(
+        (string1, string1),
+        (string2, string2),
+      ))
     } yield ()
   }
 
@@ -205,6 +235,41 @@ case class Aggr_String_(
       _ <- Entity.i.a1.string(min(2)).string(max(2)).query.get.map(_ ==> List(
         (1, Set(string1, string2), Set(string2, string3)),
         (2, Set(string4, string5), Set(string5, string6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.string.a1.string(min(2)).query.get.map(_ ==> List(
+        (string1, Set(string1)),
+        (string2, Set(string2)),
+        (string3, Set(string3)),
+        (string4, Set(string4)),
+        (string5, Set(string5)),
+        (string6, Set(string6)),
+      ))
+      _ <- Entity.string(min(2)).string.a1.query.get.map(_ ==> List(
+        (Set(string1), string1),
+        (Set(string2), string2),
+        (Set(string3), string3),
+        (Set(string4), string4),
+        (Set(string5), string5),
+        (Set(string6), string6),
+      ))
+
+      _ <- Entity.string.a1.string(max(2)).query.get.map(_ ==> List(
+        (string1, Set(string1)),
+        (string2, Set(string2)),
+        (string3, Set(string3)),
+        (string4, Set(string4)),
+        (string5, Set(string5)),
+        (string6, Set(string6)),
+      ))
+      _ <- Entity.string(max(2)).string.a1.query.get.map(_ ==> List(
+        (Set(string1), string1),
+        (Set(string2), string2),
+        (Set(string3), string3),
+        (Set(string4), string4),
+        (Set(string5), string5),
+        (Set(string6), string6),
       ))
     } yield ()
   }
@@ -331,7 +396,6 @@ case class Aggr_String_(
       _ <- Entity.string(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.string(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.string(count).query.get.map(_ ==> List(a, b))
 
@@ -352,6 +416,18 @@ case class Aggr_String_(
 
       _ <- Entity.i.a1.string(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.string(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.string.a1.string(count).query.get.map(_ ==> List(
+        (string1, 1),
+        (string2, 2),
+        (string3, 1),
+      ))
+      _ <- Entity.string(count).string.a1.query.get.map(_ ==> List(
+        (1, string1),
+        (2, string2),
+        (1, string3),
+      ))
     } yield ()
   }
 
@@ -387,7 +463,6 @@ case class Aggr_String_(
       _ <- Entity.string(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.string(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.string(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -408,6 +483,18 @@ case class Aggr_String_(
 
       _ <- Entity.i.a1.string(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.string(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.string.a1.string(countDistinct).query.get.map(_ ==> List(
+        (string1, 1),
+        (string2, 1),
+        (string3, 1),
+      ))
+      _ <- Entity.string(countDistinct).string.a1.query.get.map(_ ==> List(
+        (1, string1),
+        (1, string2),
+        (1, string3),
+      ))
     } yield ()
   }
 }

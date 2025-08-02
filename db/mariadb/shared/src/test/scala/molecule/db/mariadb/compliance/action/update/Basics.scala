@@ -1,4 +1,4 @@
-package molecule.db.mariadb.compliance.transaction.update
+package molecule.db.mariadb.compliance.action.update
 
 import molecule.core.setup.MUnit
 import molecule.db

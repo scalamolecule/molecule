@@ -42,6 +42,18 @@ case class Aggr_BigInt_(
       _ <- Entity.bigInt(distinct).query.get.map(_.head ==> Set(
         bigInt1, bigInt2, bigInt3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.bigInt.a1.bigInt(distinct).query.get.map(_ ==> List(
+        (bigInt1, Set(bigInt1)),
+        (bigInt2, Set(bigInt2)),
+        (bigInt3, Set(bigInt3)),
+      ))
+      _ <- Entity.bigInt(distinct).bigInt.a1.query.get.map(_ ==> List(
+        (Set(bigInt1), bigInt1),
+        (Set(bigInt2), bigInt2),
+        (Set(bigInt3), bigInt3),
+      ))
     } yield ()
   }
 
@@ -72,7 +84,6 @@ case class Aggr_BigInt_(
       _ <- Entity.bigInt(min).>=(bigInt1).query.get.map(_ ==> List(bigInt1))
       _ <- Entity.bigInt(min).>=(bigInt2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.bigInt(min).query.get.map(_ ==> List(a))
 
@@ -93,6 +104,16 @@ case class Aggr_BigInt_(
 
       _ <- Entity.i.bigInt(min).>=(bigInt1).query.get.map(_ ==> List(a))
       _ <- Entity.i.bigInt(min).>=(bigInt2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.bigInt.a1.bigInt(min).query.get.map(_ ==> List(
+        (bigInt1, bigInt1),
+        (bigInt2, bigInt2),
+      ))
+      _ <- Entity.bigInt(min).bigInt.a1.query.get.map(_ ==> List(
+        (bigInt1, bigInt1),
+        (bigInt2, bigInt2),
+      ))
     } yield ()
   }
 
@@ -123,7 +144,6 @@ case class Aggr_BigInt_(
       _ <- Entity.bigInt(max).>=(bigInt2).query.get.map(_ ==> List(bigInt2))
       _ <- Entity.bigInt(max).>=(bigInt3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.bigInt(max).query.get.map(_ ==> List(b))
 
@@ -144,6 +164,16 @@ case class Aggr_BigInt_(
 
       _ <- Entity.i.bigInt(max).>=(bigInt2).query.get.map(_ ==> List(b))
       _ <- Entity.i.bigInt(max).>=(bigInt3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.bigInt.a1.bigInt(max).query.get.map(_ ==> List(
+        (bigInt1, bigInt1),
+        (bigInt2, bigInt2),
+      ))
+      _ <- Entity.bigInt(max).bigInt.a1.query.get.map(_ ==> List(
+        (bigInt1, bigInt1),
+        (bigInt2, bigInt2),
+      ))
     } yield ()
   }
 
@@ -205,6 +235,41 @@ case class Aggr_BigInt_(
       _ <- Entity.i.a1.bigInt(min(2)).bigInt(max(2)).query.get.map(_ ==> List(
         (1, Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)),
         (2, Set(bigInt4, bigInt5), Set(bigInt5, bigInt6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.bigInt.a1.bigInt(min(2)).query.get.map(_ ==> List(
+        (bigInt1, Set(bigInt1)),
+        (bigInt2, Set(bigInt2)),
+        (bigInt3, Set(bigInt3)),
+        (bigInt4, Set(bigInt4)),
+        (bigInt5, Set(bigInt5)),
+        (bigInt6, Set(bigInt6)),
+      ))
+      _ <- Entity.bigInt(min(2)).bigInt.a1.query.get.map(_ ==> List(
+        (Set(bigInt1), bigInt1),
+        (Set(bigInt2), bigInt2),
+        (Set(bigInt3), bigInt3),
+        (Set(bigInt4), bigInt4),
+        (Set(bigInt5), bigInt5),
+        (Set(bigInt6), bigInt6),
+      ))
+
+      _ <- Entity.bigInt.a1.bigInt(max(2)).query.get.map(_ ==> List(
+        (bigInt1, Set(bigInt1)),
+        (bigInt2, Set(bigInt2)),
+        (bigInt3, Set(bigInt3)),
+        (bigInt4, Set(bigInt4)),
+        (bigInt5, Set(bigInt5)),
+        (bigInt6, Set(bigInt6)),
+      ))
+      _ <- Entity.bigInt(max(2)).bigInt.a1.query.get.map(_ ==> List(
+        (Set(bigInt1), bigInt1),
+        (Set(bigInt2), bigInt2),
+        (Set(bigInt3), bigInt3),
+        (Set(bigInt4), bigInt4),
+        (Set(bigInt5), bigInt5),
+        (Set(bigInt6), bigInt6),
       ))
     } yield ()
   }
@@ -331,7 +396,6 @@ case class Aggr_BigInt_(
       _ <- Entity.bigInt(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.bigInt(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.bigInt(count).query.get.map(_ ==> List(a, b))
 
@@ -352,6 +416,18 @@ case class Aggr_BigInt_(
 
       _ <- Entity.i.a1.bigInt(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.bigInt(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.bigInt.a1.bigInt(count).query.get.map(_ ==> List(
+        (bigInt1, 1),
+        (bigInt2, 2),
+        (bigInt3, 1),
+      ))
+      _ <- Entity.bigInt(count).bigInt.a1.query.get.map(_ ==> List(
+        (1, bigInt1),
+        (2, bigInt2),
+        (1, bigInt3),
+      ))
     } yield ()
   }
 
@@ -387,7 +463,6 @@ case class Aggr_BigInt_(
       _ <- Entity.bigInt(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.bigInt(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.bigInt(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -408,6 +483,18 @@ case class Aggr_BigInt_(
 
       _ <- Entity.i.a1.bigInt(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.bigInt(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.bigInt.a1.bigInt(countDistinct).query.get.map(_ ==> List(
+        (bigInt1, 1),
+        (bigInt2, 1),
+        (bigInt3, 1),
+      ))
+      _ <- Entity.bigInt(countDistinct).bigInt.a1.query.get.map(_ ==> List(
+        (1, bigInt1),
+        (1, bigInt2),
+        (1, bigInt3),
+      ))
     } yield ()
   }
 }

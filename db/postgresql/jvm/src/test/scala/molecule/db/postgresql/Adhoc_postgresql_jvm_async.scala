@@ -15,13 +15,13 @@ class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with 
 
     for {
 
-      _ <- Entity.i.long.insert((1, long1), (1, long2), (1, long3), (2, long4)).transact
-      _ <- Entity.i.float.insert((1, float1), (1, float2), (1, float3), (2, float4)).transact
-      _ <- Entity.i.double.insert((1, double1), (1, double2), (1, double3), (2, double4)).transact
-      _ <- Entity.i.bigInt.insert((1, bigInt1), (1, bigInt2), (1, bigInt3), (2, bigInt4)).transact
-      _ <- Entity.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal2), (1, bigDecimal3), (2, bigDecimal4)).transact
-      _ <- Entity.i.byte.insert((1, byte1), (1, byte2), (1, byte3), (2, byte4)).transact
-      _ <- Entity.i.short.insert((1, short1), (1, short2), (1, short3), (2, short4)).transact
+//      _ <- Entity.i.long.insert((1, long1), (1, long2), (1, long3), (2, long4)).transact
+//      _ <- Entity.i.float.insert((1, float1), (1, float2), (1, float3), (2, float4)).transact
+//      _ <- Entity.i.double.insert((1, double1), (1, double2), (1, double3), (2, double4)).transact
+//      _ <- Entity.i.bigInt.insert((1, bigInt1), (1, bigInt2), (1, bigInt3), (2, bigInt4)).transact
+//      _ <- Entity.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal2), (1, bigDecimal3), (2, bigDecimal4)).transact
+//      _ <- Entity.i.byte.insert((1, byte1), (1, byte2), (1, byte3), (2, byte4)).transact
+//      _ <- Entity.i.short.insert((1, short1), (1, short2), (1, short3), (2, short4)).transact
 
 
       //      _ <- rawQuery(
@@ -39,6 +39,62 @@ class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with 
       //           |""".stripMargin, true
       //      ).map(_ ==> 42)
 
+
+//      _ <- Entity.i.int.insert(
+//        (1, int1),
+//        (1, int2),
+//        (1, int3),
+//        (2, int4),
+//        (2, int5),
+//        (2, int6),
+//        (2, int6), // (make sure grouped values coalesce)
+//      ).transact
+//
+////      _ <- Entity.int(min(1)).query.get.map(_ ==> List(Set(int1)))
+////      _ <- Entity.int(min(2)).query.get.map(_ ==> List(Set(int1, int2)))
+////
+////      _ <- Entity.int(max(1)).query.get.map(_ ==> List(Set(int6)))
+////      _ <- Entity.int(max(2)).query.get.map(_ ==> List(Set(int5, int6)))
+////
+////      _ <- Entity.i.a1.int(min(2)).query.get.map(_ ==> List(
+////        (1, Set(int1, int2)),
+////        (2, Set(int4, int5))
+////      ))
+////
+////      _ <- Entity.i.a1.int(max(2)).query.get.map(_ ==> List(
+////        (1, Set(int2, int3)),
+////        (2, Set(int5, int6))
+////      ))
+////
+////      _ <- Entity.i.a1.int(min(2)).int(max(2)).query.get.map(_ ==> List(
+////        (1, Set(int1, int2), Set(int2, int3)),
+////        (2, Set(int4, int5), Set(int5, int6))
+////      ))
+//
+//      // Include aggregated attribute too (possible but will always be the same)
+//      _ <- Entity.int.a1.int(min(2)).query.i.get.map(_ ==> List(
+//        (int1, Set(int1)),
+//        (int2, Set(int2)),
+//        (int3, Set(int3)),
+//        (int4, Set(int4)),
+//        (int5, Set(int5)),
+//        (int6, Set(int6)),
+//      ))
+
+
+      _ <- Entity.i.int.insert(List(
+        (1, int1),
+        (2, int2),
+        (2, int2),
+        (2, int3),
+      )).transact
+
+      // Include aggregated attribute too
+      _ <- Entity.int.a1.int(count).query.i.get.map(_ ==> List(
+        (int1, 1),
+        (int2, 2),
+        (int3, 1),
+      ))
 
     } yield ()
   }

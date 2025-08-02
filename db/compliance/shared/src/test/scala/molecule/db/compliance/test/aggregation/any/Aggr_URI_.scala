@@ -43,6 +43,18 @@ case class Aggr_URI_(
       _ <- Entity.uri(distinct).query.get.map(_.head ==> Set(
         uri1, uri2, uri3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.uri.a1.uri(distinct).query.get.map(_ ==> List(
+        (uri1, Set(uri1)),
+        (uri2, Set(uri2)),
+        (uri3, Set(uri3)),
+      ))
+      _ <- Entity.uri(distinct).uri.a1.query.get.map(_ ==> List(
+        (Set(uri1), uri1),
+        (Set(uri2), uri2),
+        (Set(uri3), uri3),
+      ))
     } yield ()
   }
 
@@ -73,7 +85,6 @@ case class Aggr_URI_(
       _ <- Entity.uri(min).>=(uri1).query.get.map(_ ==> List(uri1))
       _ <- Entity.uri(min).>=(uri2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.uri(min).query.get.map(_ ==> List(a))
 
@@ -94,6 +105,16 @@ case class Aggr_URI_(
 
       _ <- Entity.i.uri(min).>=(uri1).query.get.map(_ ==> List(a))
       _ <- Entity.i.uri(min).>=(uri2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.uri.a1.uri(min).query.get.map(_ ==> List(
+        (uri1, uri1),
+        (uri2, uri2),
+      ))
+      _ <- Entity.uri(min).uri.a1.query.get.map(_ ==> List(
+        (uri1, uri1),
+        (uri2, uri2),
+      ))
     } yield ()
   }
 
@@ -124,7 +145,6 @@ case class Aggr_URI_(
       _ <- Entity.uri(max).>=(uri2).query.get.map(_ ==> List(uri2))
       _ <- Entity.uri(max).>=(uri3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.uri(max).query.get.map(_ ==> List(b))
 
@@ -145,6 +165,16 @@ case class Aggr_URI_(
 
       _ <- Entity.i.uri(max).>=(uri2).query.get.map(_ ==> List(b))
       _ <- Entity.i.uri(max).>=(uri3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.uri.a1.uri(max).query.get.map(_ ==> List(
+        (uri1, uri1),
+        (uri2, uri2),
+      ))
+      _ <- Entity.uri(max).uri.a1.query.get.map(_ ==> List(
+        (uri1, uri1),
+        (uri2, uri2),
+      ))
     } yield ()
   }
 
@@ -206,6 +236,41 @@ case class Aggr_URI_(
       _ <- Entity.i.a1.uri(min(2)).uri(max(2)).query.get.map(_ ==> List(
         (1, Set(uri1, uri2), Set(uri2, uri3)),
         (2, Set(uri4, uri5), Set(uri5, uri6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.uri.a1.uri(min(2)).query.get.map(_ ==> List(
+        (uri1, Set(uri1)),
+        (uri2, Set(uri2)),
+        (uri3, Set(uri3)),
+        (uri4, Set(uri4)),
+        (uri5, Set(uri5)),
+        (uri6, Set(uri6)),
+      ))
+      _ <- Entity.uri(min(2)).uri.a1.query.get.map(_ ==> List(
+        (Set(uri1), uri1),
+        (Set(uri2), uri2),
+        (Set(uri3), uri3),
+        (Set(uri4), uri4),
+        (Set(uri5), uri5),
+        (Set(uri6), uri6),
+      ))
+
+      _ <- Entity.uri.a1.uri(max(2)).query.get.map(_ ==> List(
+        (uri1, Set(uri1)),
+        (uri2, Set(uri2)),
+        (uri3, Set(uri3)),
+        (uri4, Set(uri4)),
+        (uri5, Set(uri5)),
+        (uri6, Set(uri6)),
+      ))
+      _ <- Entity.uri(max(2)).uri.a1.query.get.map(_ ==> List(
+        (Set(uri1), uri1),
+        (Set(uri2), uri2),
+        (Set(uri3), uri3),
+        (Set(uri4), uri4),
+        (Set(uri5), uri5),
+        (Set(uri6), uri6),
       ))
     } yield ()
   }
@@ -332,7 +397,6 @@ case class Aggr_URI_(
       _ <- Entity.uri(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.uri(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.uri(count).query.get.map(_ ==> List(a, b))
 
@@ -353,6 +417,18 @@ case class Aggr_URI_(
 
       _ <- Entity.i.a1.uri(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.uri(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.uri.a1.uri(count).query.get.map(_ ==> List(
+        (uri1, 1),
+        (uri2, 2),
+        (uri3, 1),
+      ))
+      _ <- Entity.uri(count).uri.a1.query.get.map(_ ==> List(
+        (1, uri1),
+        (2, uri2),
+        (1, uri3),
+      ))
     } yield ()
   }
 
@@ -388,7 +464,6 @@ case class Aggr_URI_(
       _ <- Entity.uri(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.uri(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.uri(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -409,6 +484,18 @@ case class Aggr_URI_(
 
       _ <- Entity.i.a1.uri(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.uri(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.uri.a1.uri(countDistinct).query.get.map(_ ==> List(
+        (uri1, 1),
+        (uri2, 1),
+        (uri3, 1),
+      ))
+      _ <- Entity.uri(countDistinct).uri.a1.query.get.map(_ ==> List(
+        (1, uri1),
+        (1, uri2),
+        (1, uri3),
+      ))
     } yield ()
   }
 }

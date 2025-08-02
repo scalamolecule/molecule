@@ -82,6 +82,20 @@ case class AggrNum_Double_(
 
       _ <- Entity.i.a1.double(sum).>=(sum1).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.double(sum).>=(sum2).query.get.map(_ ==> List(b))
+
+      // Include aggregated attribute too
+      _ <- Entity.double.a1.double(sum).query.get.map(_ ==> List(
+        (double1, double1),
+        (double2, double2 + double2),
+        (double3, double3),
+        (double4, double4),
+      ))
+      _ <- Entity.double(sum).double.a1.query.get.map(_ ==> List(
+        (double1, double1),
+        (double2 + double2, double2),
+        (double3, double3),
+        (double4, double4),
+      ))
     } yield ()
   }
 
@@ -173,6 +187,36 @@ case class AggrNum_Double_(
 
         _ <- Entity.i.a1.double(median).>=(median1).query.get.map(_ ==> List(a, b))
         _ <- Entity.i.a1.double(median).>=(median2).query.get.map(_ ==> List(b))
+
+
+        // Include aggregated attribute too
+        _ <- Entity.double.a1.double(median).query.get.map { res =>
+          res(0)._1 ==> double1
+          res(0)._2 ==~ double1
+
+          res(1)._1 ==> double2
+          res(1)._2 ==~ (double2 + double2).toDouble * 100 / 200.0
+
+          res(2)._1 ==> double5
+          res(2)._2 ==~ double5
+
+          res(3)._1 ==> double9
+          res(3)._2 ==~ double9
+        }
+
+        _ <- Entity.double.double(median).d1.query.get.map { res =>
+          res(0)._1 ==> double9
+          res(0)._2 ==~ double9
+
+          res(1)._1 ==> double5
+          res(1)._2 ==~ double5
+
+          res(2)._1 ==> double2
+          res(2)._2 ==~ (double2 + double2).toDouble * 100 / 200.0
+
+          res(3)._1 ==> double1
+          res(3)._2 ==~ double1
+        }
       } yield ()
     }
   }
@@ -239,6 +283,36 @@ case class AggrNum_Double_(
 
       _ <- Entity.i.a1.double(avg).>=(avg1).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.double(avg).>=(avg2).query.get.map(_ ==> List(b))
+
+
+      // Include aggregated attribute too
+      _ <- Entity.double.a1.double(avg).query.get.map { res =>
+        res(0)._1 ==> double1
+        res(0)._2 ==~ double1
+
+        res(1)._1 ==> double2
+        res(1)._2 ==~ (double2 + double2).toDouble * 100 / 200.0
+
+        res(2)._1 ==> double3
+        res(2)._2 ==~ double3
+
+        res(3)._1 ==> double4
+        res(3)._2 ==~ double4
+      }
+
+      _ <- Entity.double.double(avg).d1.query.get.map { res =>
+        res(0)._1 ==> double4
+        res(0)._2 ==~ double4
+
+        res(1)._1 ==> double3
+        res(1)._2 ==~ double3
+
+        res(2)._1 ==> double2
+        res(2)._2 ==~ (double2 + double2).toDouble * 100 / 200.0
+
+        res(3)._1 ==> double1
+        res(3)._2 ==~ double1
+      }
     } yield ()
   }
 
@@ -339,6 +413,36 @@ case class AggrNum_Double_(
           res(1)._2 ==~ variance2
         }
         _ <- Entity.i.a1.double(variance).>=(variance2).query.get.map(_.head._2 ==~ variance2)
+
+
+        // Include aggregated attribute too
+        _ <- Entity.double.a1.double(variance).query.get.map { res =>
+          res(0)._1 ==> double1
+          res(0)._2 ==~ 0
+
+          res(1)._1 ==> double2
+          res(1)._2 ==~ varianceOf(double2, double2) // always 0
+
+          res(2)._1 ==> double3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> double4
+          res(3)._2 ==~ 0
+        }
+
+        _ <- Entity.double.a2.double(variance).d1.query.get.map { res =>
+          res(0)._1 ==> double1
+          res(0)._2 ==~ varianceOf(double2, double2) // always 0
+
+          res(1)._1 ==> double2
+          res(1)._2 ==~ 0
+
+          res(2)._1 ==> double3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> double4
+          res(3)._2 ==~ 0
+        }
       } yield ()
     }
   }
@@ -440,6 +544,36 @@ case class AggrNum_Double_(
           res(1)._2 ==~ stddev2
         }
         _ <- Entity.i.a1.double(stddev).>=(stddev2).query.get.map(_.head._2 ==~ stddev2)
+
+
+        // Include aggregated attribute too
+        _ <- Entity.double.a1.double(stddev).query.get.map { res =>
+          res(0)._1 ==> double1
+          res(0)._2 ==~ 0
+
+          res(1)._1 ==> double2
+          res(1)._2 ==~ stdDevOf(double2, double2) // always 0
+
+          res(2)._1 ==> double3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> double4
+          res(3)._2 ==~ 0
+        }
+
+        _ <- Entity.double.a2.double(stddev).d1.query.get.map { res =>
+          res(0)._1 ==> double1
+          res(0)._2 ==~ stdDevOf(double2, double2) // always 0
+
+          res(1)._1 ==> double2
+          res(1)._2 ==~ 0
+
+          res(2)._1 ==> double3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> double4
+          res(3)._2 ==~ 0
+        }
       } yield ()
     }
   }

@@ -108,6 +108,7 @@ trait QueryExprOne_sqlite
     optN: Option[Int],
     aggrOp: Option[Op],
     aggrOpValue: Option[Value],
+    hasSort: Boolean,
     res: ResOne[T]
   ): Unit = {
     checkAggrOne()
@@ -128,7 +129,7 @@ trait QueryExprOne_sqlite
       case "distinct" =>
         aggregate = true
         select += s"json_group_array(DISTINCT $col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
@@ -136,7 +137,7 @@ trait QueryExprOne_sqlite
       case "min" =>
         aggregate = true
         select += s"MIN($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"MIN($col)")
 
       case "mins" =>
@@ -144,7 +145,7 @@ trait QueryExprOne_sqlite
         // OBS: select2 has to set be before setting select += ...
         select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "ASC"))
         select += "<replace>" // add to maintain correct indexing
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
@@ -152,7 +153,7 @@ trait QueryExprOne_sqlite
       case "max" =>
         aggregate = true
         select += s"MAX($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"MAX($col)")
 
       case "maxs" =>
@@ -160,7 +161,7 @@ trait QueryExprOne_sqlite
         // OBS: select2 has to set be before setting select += ...
         select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "DESC"))
         select += "<replace>" // add to maintain correct indexing
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
@@ -175,7 +176,7 @@ trait QueryExprOne_sqlite
         // OBS: select2 has to set be before setting select += ...
         select2 = select2 + (select.length -> samplesSelect(ent, attr, n))
         select += "<replace>" // add to maintain correct indexing
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace((row: RS, paramIndex: Int) =>
           res.json2array(row.getString(paramIndex)).toSet
         )
@@ -183,40 +184,40 @@ trait QueryExprOne_sqlite
       case "count" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT", "")
-        groupByCols -= col
+        selectWithOrder(col, "COUNT", hasSort, "")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT($col)")
         castStrategy.replace(toInt)
 
       case "countDistinct" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT")
-        groupByCols -= col
+        selectWithOrder(col, "COUNT", hasSort)
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
 
       case "sum" =>
         aggregate = true
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         res.tpe match {
           case "BigInt" =>
-            selectWithOrder(col, "SUM", "")
+            selectWithOrder(col, "SUM", hasSort, "")
             addHaving(baseType, fn, s"SUM($col)", aggrOp, aggrOpValue, res, "CAST(", " AS BIGINT)")
 
           case "BigDecimal" | "Double" =>
-            selectWithOrder(col, "SUM", "", "", "ROUND(", ", 10)")
+            selectWithOrder(col, "SUM", hasSort, "", "", "ROUND(", ", 10)")
             addHaving(baseType, fn, s"ROUND(SUM($col), 10)", aggrOp, aggrOpValue, res, "CAST(", " AS REAL)")
 
           case _ =>
-            selectWithOrder(col, "SUM", "")
+            selectWithOrder(col, "SUM", hasSort, "")
             havingOp(s"SUM($col)")
         }
 
 
       case "median" =>
         //        select += s"AVG(_$col)"
-        //        groupByCols -= col
+        //        if (!select.contains(col)) groupByCols -= col
         //        aggregate = true
         // works but incurs a lot of extra complexity when combined with other attributes
         //        val subSelect =
@@ -241,7 +242,7 @@ trait QueryExprOne_sqlite
         aggregate = true
         // Falling back on calculating the median for each returned json array of values
         select += s"json_group_array($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(
           (row: RS, paramIndex: Int) =>
             getMedian(jsonArray2doubles(row.getString(paramIndex)))
@@ -249,8 +250,8 @@ trait QueryExprOne_sqlite
 
       case "avg" =>
         aggregate = true
-        selectWithOrder(col, "AVG", "", "", "ROUND(", ", 10)")
-        groupByCols -= col
+        selectWithOrder(col, "AVG", hasSort, "", "", "ROUND(", ", 10)")
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"ROUND(AVG($col), 10)")
 
 
@@ -264,7 +265,7 @@ trait QueryExprOne_sqlite
         aggregate = true
         // Falling back on calculating the median for each returned json array of values
         select += s"json_group_array($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"VAR_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) =>
@@ -280,7 +281,7 @@ trait QueryExprOne_sqlite
         }
         aggregate = true
         select += s"json_group_array($col)"
-        groupByCols -= col
+        if (!select.contains(col)) groupByCols -= col
         havingOp(s"STDDEV_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) =>

@@ -301,11 +301,11 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // import for the database(s) that you need
-      "org.scalamolecule" %% "molecule-db-h2" % "0.25.0",
-      "org.scalamolecule" %% "molecule-db-mariadb" % "0.25.0",
-      "org.scalamolecule" %% "molecule-db-mysql" % "0.25.0",
-      "org.scalamolecule" %% "molecule-db-postgresql" % "0.25.0",
-      "org.scalamolecule" %% "molecule-db-sqlite" % "0.25.0",
+      "org.scalamolecule" %% "molecule-db-h2" % "0.25.1",
+      "org.scalamolecule" %% "molecule-db-mariadb" % "0.25.1",
+      "org.scalamolecule" %% "molecule-db-mysql" % "0.25.1",
+      "org.scalamolecule" %% "molecule-db-postgresql" % "0.25.1",
+      "org.scalamolecule" %% "molecule-db-sqlite" % "0.25.1",
     )
   )
 ```

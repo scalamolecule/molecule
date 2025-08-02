@@ -43,6 +43,18 @@ case class Aggr_ZonedDateTime_(
       _ <- Entity.zonedDateTime(distinct).query.get.map(_.head ==> Set(
         zonedDateTime1, zonedDateTime2, zonedDateTime3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.zonedDateTime.a1.zonedDateTime(distinct).query.get.map(_ ==> List(
+        (zonedDateTime1, Set(zonedDateTime1)),
+        (zonedDateTime2, Set(zonedDateTime2)),
+        (zonedDateTime3, Set(zonedDateTime3)),
+      ))
+      _ <- Entity.zonedDateTime(distinct).zonedDateTime.a1.query.get.map(_ ==> List(
+        (Set(zonedDateTime1), zonedDateTime1),
+        (Set(zonedDateTime2), zonedDateTime2),
+        (Set(zonedDateTime3), zonedDateTime3),
+      ))
     } yield ()
   }
 
@@ -73,7 +85,6 @@ case class Aggr_ZonedDateTime_(
       _ <- Entity.zonedDateTime(min).>=(zonedDateTime1).query.get.map(_ ==> List(zonedDateTime1))
       _ <- Entity.zonedDateTime(min).>=(zonedDateTime2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.zonedDateTime(min).query.get.map(_ ==> List(a))
 
@@ -94,6 +105,16 @@ case class Aggr_ZonedDateTime_(
 
       _ <- Entity.i.zonedDateTime(min).>=(zonedDateTime1).query.get.map(_ ==> List(a))
       _ <- Entity.i.zonedDateTime(min).>=(zonedDateTime2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.zonedDateTime.a1.zonedDateTime(min).query.get.map(_ ==> List(
+        (zonedDateTime1, zonedDateTime1),
+        (zonedDateTime2, zonedDateTime2),
+      ))
+      _ <- Entity.zonedDateTime(min).zonedDateTime.a1.query.get.map(_ ==> List(
+        (zonedDateTime1, zonedDateTime1),
+        (zonedDateTime2, zonedDateTime2),
+      ))
     } yield ()
   }
 
@@ -124,7 +145,6 @@ case class Aggr_ZonedDateTime_(
       _ <- Entity.zonedDateTime(max).>=(zonedDateTime2).query.get.map(_ ==> List(zonedDateTime2))
       _ <- Entity.zonedDateTime(max).>=(zonedDateTime3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.zonedDateTime(max).query.get.map(_ ==> List(b))
 
@@ -145,6 +165,16 @@ case class Aggr_ZonedDateTime_(
 
       _ <- Entity.i.zonedDateTime(max).>=(zonedDateTime2).query.get.map(_ ==> List(b))
       _ <- Entity.i.zonedDateTime(max).>=(zonedDateTime3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.zonedDateTime.a1.zonedDateTime(max).query.get.map(_ ==> List(
+        (zonedDateTime1, zonedDateTime1),
+        (zonedDateTime2, zonedDateTime2),
+      ))
+      _ <- Entity.zonedDateTime(max).zonedDateTime.a1.query.get.map(_ ==> List(
+        (zonedDateTime1, zonedDateTime1),
+        (zonedDateTime2, zonedDateTime2),
+      ))
     } yield ()
   }
 
@@ -206,6 +236,41 @@ case class Aggr_ZonedDateTime_(
       _ <- Entity.i.a1.zonedDateTime(min(2)).zonedDateTime(max(2)).query.get.map(_ ==> List(
         (1, Set(zonedDateTime1, zonedDateTime2), Set(zonedDateTime2, zonedDateTime3)),
         (2, Set(zonedDateTime4, zonedDateTime5), Set(zonedDateTime5, zonedDateTime6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.zonedDateTime.a1.zonedDateTime(min(2)).query.get.map(_ ==> List(
+        (zonedDateTime1, Set(zonedDateTime1)),
+        (zonedDateTime2, Set(zonedDateTime2)),
+        (zonedDateTime3, Set(zonedDateTime3)),
+        (zonedDateTime4, Set(zonedDateTime4)),
+        (zonedDateTime5, Set(zonedDateTime5)),
+        (zonedDateTime6, Set(zonedDateTime6)),
+      ))
+      _ <- Entity.zonedDateTime(min(2)).zonedDateTime.a1.query.get.map(_ ==> List(
+        (Set(zonedDateTime1), zonedDateTime1),
+        (Set(zonedDateTime2), zonedDateTime2),
+        (Set(zonedDateTime3), zonedDateTime3),
+        (Set(zonedDateTime4), zonedDateTime4),
+        (Set(zonedDateTime5), zonedDateTime5),
+        (Set(zonedDateTime6), zonedDateTime6),
+      ))
+
+      _ <- Entity.zonedDateTime.a1.zonedDateTime(max(2)).query.get.map(_ ==> List(
+        (zonedDateTime1, Set(zonedDateTime1)),
+        (zonedDateTime2, Set(zonedDateTime2)),
+        (zonedDateTime3, Set(zonedDateTime3)),
+        (zonedDateTime4, Set(zonedDateTime4)),
+        (zonedDateTime5, Set(zonedDateTime5)),
+        (zonedDateTime6, Set(zonedDateTime6)),
+      ))
+      _ <- Entity.zonedDateTime(max(2)).zonedDateTime.a1.query.get.map(_ ==> List(
+        (Set(zonedDateTime1), zonedDateTime1),
+        (Set(zonedDateTime2), zonedDateTime2),
+        (Set(zonedDateTime3), zonedDateTime3),
+        (Set(zonedDateTime4), zonedDateTime4),
+        (Set(zonedDateTime5), zonedDateTime5),
+        (Set(zonedDateTime6), zonedDateTime6),
       ))
     } yield ()
   }
@@ -332,7 +397,6 @@ case class Aggr_ZonedDateTime_(
       _ <- Entity.zonedDateTime(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.zonedDateTime(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.zonedDateTime(count).query.get.map(_ ==> List(a, b))
 
@@ -353,6 +417,18 @@ case class Aggr_ZonedDateTime_(
 
       _ <- Entity.i.a1.zonedDateTime(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.zonedDateTime(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.zonedDateTime.a1.zonedDateTime(count).query.get.map(_ ==> List(
+        (zonedDateTime1, 1),
+        (zonedDateTime2, 2),
+        (zonedDateTime3, 1),
+      ))
+      _ <- Entity.zonedDateTime(count).zonedDateTime.a1.query.get.map(_ ==> List(
+        (1, zonedDateTime1),
+        (2, zonedDateTime2),
+        (1, zonedDateTime3),
+      ))
     } yield ()
   }
 
@@ -388,7 +464,6 @@ case class Aggr_ZonedDateTime_(
       _ <- Entity.zonedDateTime(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.zonedDateTime(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.zonedDateTime(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -409,6 +484,18 @@ case class Aggr_ZonedDateTime_(
 
       _ <- Entity.i.a1.zonedDateTime(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.zonedDateTime(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.zonedDateTime.a1.zonedDateTime(countDistinct).query.get.map(_ ==> List(
+        (zonedDateTime1, 1),
+        (zonedDateTime2, 1),
+        (zonedDateTime3, 1),
+      ))
+      _ <- Entity.zonedDateTime(countDistinct).zonedDateTime.a1.query.get.map(_ ==> List(
+        (1, zonedDateTime1),
+        (1, zonedDateTime2),
+        (1, zonedDateTime3),
+      ))
     } yield ()
   }
 }

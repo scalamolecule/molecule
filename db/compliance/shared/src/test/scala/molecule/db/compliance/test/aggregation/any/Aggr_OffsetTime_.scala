@@ -43,6 +43,18 @@ case class Aggr_OffsetTime_(
       _ <- Entity.offsetTime(distinct).query.get.map(_.head ==> Set(
         offsetTime1, offsetTime2, offsetTime3
       ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.offsetTime.a1.offsetTime(distinct).query.get.map(_ ==> List(
+        (offsetTime1, Set(offsetTime1)),
+        (offsetTime2, Set(offsetTime2)),
+        (offsetTime3, Set(offsetTime3)),
+      ))
+      _ <- Entity.offsetTime(distinct).offsetTime.a1.query.get.map(_ ==> List(
+        (Set(offsetTime1), offsetTime1),
+        (Set(offsetTime2), offsetTime2),
+        (Set(offsetTime3), offsetTime3),
+      ))
     } yield ()
   }
 
@@ -73,7 +85,6 @@ case class Aggr_OffsetTime_(
       _ <- Entity.offsetTime(min).>=(offsetTime1).query.get.map(_ ==> List(offsetTime1))
       _ <- Entity.offsetTime(min).>=(offsetTime2).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.offsetTime(min).query.get.map(_ ==> List(a))
 
@@ -94,6 +105,16 @@ case class Aggr_OffsetTime_(
 
       _ <- Entity.i.offsetTime(min).>=(offsetTime1).query.get.map(_ ==> List(a))
       _ <- Entity.i.offsetTime(min).>=(offsetTime2).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.offsetTime.a1.offsetTime(min).query.get.map(_ ==> List(
+        (offsetTime1, offsetTime1),
+        (offsetTime2, offsetTime2),
+      ))
+      _ <- Entity.offsetTime(min).offsetTime.a1.query.get.map(_ ==> List(
+        (offsetTime1, offsetTime1),
+        (offsetTime2, offsetTime2),
+      ))
     } yield ()
   }
 
@@ -124,7 +145,6 @@ case class Aggr_OffsetTime_(
       _ <- Entity.offsetTime(max).>=(offsetTime2).query.get.map(_ ==> List(offsetTime2))
       _ <- Entity.offsetTime(max).>=(offsetTime3).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.offsetTime(max).query.get.map(_ ==> List(b))
 
@@ -145,6 +165,16 @@ case class Aggr_OffsetTime_(
 
       _ <- Entity.i.offsetTime(max).>=(offsetTime2).query.get.map(_ ==> List(b))
       _ <- Entity.i.offsetTime(max).>=(offsetTime3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.offsetTime.a1.offsetTime(max).query.get.map(_ ==> List(
+        (offsetTime1, offsetTime1),
+        (offsetTime2, offsetTime2),
+      ))
+      _ <- Entity.offsetTime(max).offsetTime.a1.query.get.map(_ ==> List(
+        (offsetTime1, offsetTime1),
+        (offsetTime2, offsetTime2),
+      ))
     } yield ()
   }
 
@@ -206,6 +236,41 @@ case class Aggr_OffsetTime_(
       _ <- Entity.i.a1.offsetTime(min(2)).offsetTime(max(2)).query.get.map(_ ==> List(
         (1, Set(offsetTime1, offsetTime2), Set(offsetTime2, offsetTime3)),
         (2, Set(offsetTime4, offsetTime5), Set(offsetTime5, offsetTime6))
+      ))
+
+      // Include aggregated attribute too (possible but will always be the same)
+      _ <- Entity.offsetTime.a1.offsetTime(min(2)).query.get.map(_ ==> List(
+        (offsetTime1, Set(offsetTime1)),
+        (offsetTime2, Set(offsetTime2)),
+        (offsetTime3, Set(offsetTime3)),
+        (offsetTime4, Set(offsetTime4)),
+        (offsetTime5, Set(offsetTime5)),
+        (offsetTime6, Set(offsetTime6)),
+      ))
+      _ <- Entity.offsetTime(min(2)).offsetTime.a1.query.get.map(_ ==> List(
+        (Set(offsetTime1), offsetTime1),
+        (Set(offsetTime2), offsetTime2),
+        (Set(offsetTime3), offsetTime3),
+        (Set(offsetTime4), offsetTime4),
+        (Set(offsetTime5), offsetTime5),
+        (Set(offsetTime6), offsetTime6),
+      ))
+
+      _ <- Entity.offsetTime.a1.offsetTime(max(2)).query.get.map(_ ==> List(
+        (offsetTime1, Set(offsetTime1)),
+        (offsetTime2, Set(offsetTime2)),
+        (offsetTime3, Set(offsetTime3)),
+        (offsetTime4, Set(offsetTime4)),
+        (offsetTime5, Set(offsetTime5)),
+        (offsetTime6, Set(offsetTime6)),
+      ))
+      _ <- Entity.offsetTime(max(2)).offsetTime.a1.query.get.map(_ ==> List(
+        (Set(offsetTime1), offsetTime1),
+        (Set(offsetTime2), offsetTime2),
+        (Set(offsetTime3), offsetTime3),
+        (Set(offsetTime4), offsetTime4),
+        (Set(offsetTime5), offsetTime5),
+        (Set(offsetTime6), offsetTime6),
       ))
     } yield ()
   }
@@ -332,7 +397,6 @@ case class Aggr_OffsetTime_(
       _ <- Entity.offsetTime(count).>=(4).query.get.map(_ ==> List(4))
       _ <- Entity.offsetTime(count).>=(5).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.offsetTime(count).query.get.map(_ ==> List(a, b))
 
@@ -353,6 +417,18 @@ case class Aggr_OffsetTime_(
 
       _ <- Entity.i.a1.offsetTime(count).>=(3).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.offsetTime(count).>=(4).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.offsetTime.a1.offsetTime(count).query.get.map(_ ==> List(
+        (offsetTime1, 1),
+        (offsetTime2, 2),
+        (offsetTime3, 1),
+      ))
+      _ <- Entity.offsetTime(count).offsetTime.a1.query.get.map(_ ==> List(
+        (1, offsetTime1),
+        (2, offsetTime2),
+        (1, offsetTime3),
+      ))
     } yield ()
   }
 
@@ -388,7 +464,6 @@ case class Aggr_OffsetTime_(
       _ <- Entity.offsetTime(countDistinct).>=(3).query.get.map(_ ==> List(3))
       _ <- Entity.offsetTime(countDistinct).>=(4).query.get.map(_ ==> List())
 
-
       // n attributes
       _ <- Entity.i.a1.offsetTime(countDistinct).query.get.map(_ ==> List(a, b))
 
@@ -409,6 +484,18 @@ case class Aggr_OffsetTime_(
 
       _ <- Entity.i.a1.offsetTime(countDistinct).>=(2).query.get.map(_ ==> List(b))
       _ <- Entity.i.a1.offsetTime(countDistinct).>=(3).query.get.map(_ ==> List())
+
+      // Include aggregated attribute too
+      _ <- Entity.offsetTime.a1.offsetTime(countDistinct).query.get.map(_ ==> List(
+        (offsetTime1, 1),
+        (offsetTime2, 1),
+        (offsetTime3, 1),
+      ))
+      _ <- Entity.offsetTime(countDistinct).offsetTime.a1.query.get.map(_ ==> List(
+        (1, offsetTime1),
+        (1, offsetTime2),
+        (1, offsetTime3),
+      ))
     } yield ()
   }
 }

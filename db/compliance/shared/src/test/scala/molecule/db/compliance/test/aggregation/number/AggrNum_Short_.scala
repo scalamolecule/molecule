@@ -82,6 +82,20 @@ case class AggrNum_Short_(
 
       _ <- Entity.i.a1.short(sum).>=(sum1).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.short(sum).>=(sum2).query.get.map(_ ==> List(b))
+
+      // Include aggregated attribute too
+      _ <- Entity.short.a1.short(sum).query.get.map(_ ==> List(
+        (short1, short1),
+        (short2, short2 + short2),
+        (short3, short3),
+        (short4, short4),
+      ))
+      _ <- Entity.short(sum).short.a1.query.get.map(_ ==> List(
+        (short1, short1),
+        (short2 + short2, short2),
+        (short3, short3),
+        (short4, short4),
+      ))
     } yield ()
   }
 
@@ -173,6 +187,36 @@ case class AggrNum_Short_(
 
         _ <- Entity.i.a1.short(median).>=(median1).query.get.map(_ ==> List(a, b))
         _ <- Entity.i.a1.short(median).>=(median2).query.get.map(_ ==> List(b))
+
+
+        // Include aggregated attribute too
+        _ <- Entity.short.a1.short(median).query.get.map { res =>
+          res(0)._1 ==> short1
+          res(0)._2 ==~ short1
+
+          res(1)._1 ==> short2
+          res(1)._2 ==~ (short2 + short2).toDouble * 100 / 200.0
+
+          res(2)._1 ==> short5
+          res(2)._2 ==~ short5
+
+          res(3)._1 ==> short9
+          res(3)._2 ==~ short9
+        }
+
+        _ <- Entity.short.short(median).d1.query.get.map { res =>
+          res(0)._1 ==> short9
+          res(0)._2 ==~ short9
+
+          res(1)._1 ==> short5
+          res(1)._2 ==~ short5
+
+          res(2)._1 ==> short2
+          res(2)._2 ==~ (short2 + short2).toDouble * 100 / 200.0
+
+          res(3)._1 ==> short1
+          res(3)._2 ==~ short1
+        }
       } yield ()
     }
   }
@@ -239,6 +283,36 @@ case class AggrNum_Short_(
 
       _ <- Entity.i.a1.short(avg).>=(avg1).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.short(avg).>=(avg2).query.get.map(_ ==> List(b))
+
+
+      // Include aggregated attribute too
+      _ <- Entity.short.a1.short(avg).query.get.map { res =>
+        res(0)._1 ==> short1
+        res(0)._2 ==~ short1
+
+        res(1)._1 ==> short2
+        res(1)._2 ==~ (short2 + short2).toDouble * 100 / 200.0
+
+        res(2)._1 ==> short3
+        res(2)._2 ==~ short3
+
+        res(3)._1 ==> short4
+        res(3)._2 ==~ short4
+      }
+
+      _ <- Entity.short.short(avg).d1.query.get.map { res =>
+        res(0)._1 ==> short4
+        res(0)._2 ==~ short4
+
+        res(1)._1 ==> short3
+        res(1)._2 ==~ short3
+
+        res(2)._1 ==> short2
+        res(2)._2 ==~ (short2 + short2).toDouble * 100 / 200.0
+
+        res(3)._1 ==> short1
+        res(3)._2 ==~ short1
+      }
     } yield ()
   }
 
@@ -339,6 +413,36 @@ case class AggrNum_Short_(
           res(1)._2 ==~ variance2
         }
         _ <- Entity.i.a1.short(variance).>=(variance2).query.get.map(_.head._2 ==~ variance2)
+
+
+        // Include aggregated attribute too
+        _ <- Entity.short.a1.short(variance).query.get.map { res =>
+          res(0)._1 ==> short1
+          res(0)._2 ==~ 0
+
+          res(1)._1 ==> short2
+          res(1)._2 ==~ varianceOf(short2, short2) // always 0
+
+          res(2)._1 ==> short3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> short4
+          res(3)._2 ==~ 0
+        }
+
+        _ <- Entity.short.a2.short(variance).d1.query.get.map { res =>
+          res(0)._1 ==> short1
+          res(0)._2 ==~ varianceOf(short2, short2) // always 0
+
+          res(1)._1 ==> short2
+          res(1)._2 ==~ 0
+
+          res(2)._1 ==> short3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> short4
+          res(3)._2 ==~ 0
+        }
       } yield ()
     }
   }
@@ -440,6 +544,36 @@ case class AggrNum_Short_(
           res(1)._2 ==~ stddev2
         }
         _ <- Entity.i.a1.short(stddev).>=(stddev2).query.get.map(_.head._2 ==~ stddev2)
+
+
+        // Include aggregated attribute too
+        _ <- Entity.short.a1.short(stddev).query.get.map { res =>
+          res(0)._1 ==> short1
+          res(0)._2 ==~ 0
+
+          res(1)._1 ==> short2
+          res(1)._2 ==~ stdDevOf(short2, short2) // always 0
+
+          res(2)._1 ==> short3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> short4
+          res(3)._2 ==~ 0
+        }
+
+        _ <- Entity.short.a2.short(stddev).d1.query.get.map { res =>
+          res(0)._1 ==> short1
+          res(0)._2 ==~ stdDevOf(short2, short2) // always 0
+
+          res(1)._1 ==> short2
+          res(1)._2 ==~ 0
+
+          res(2)._1 ==> short3
+          res(2)._2 ==~ 0
+
+          res(3)._1 ==> short4
+          res(3)._2 ==~ 0
+        }
       } yield ()
     }
   }
