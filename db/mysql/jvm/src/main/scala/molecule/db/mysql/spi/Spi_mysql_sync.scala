@@ -1,22 +1,22 @@
 package molecule.db.mysql.spi
 
 import java.sql.DriverManager
+import scala.concurrent.Future
 import molecule.core.dataModel.Element
 import molecule.db.common.action.{Delete, Insert, Save, Update}
 import molecule.db.common.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import molecule.db.common.javaSql.ResultSetInterface as RS
 import molecule.db.common.marshalling.{ConnProxy, JdbcProxy}
 import molecule.db.common.spi.SpiBaseJVM_sync
+import molecule.db.common.transaction.*
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.strategy.delete.DeleteAction
 import molecule.db.common.transaction.strategy.insert.InsertAction
 import molecule.db.common.transaction.strategy.save.SaveAction
 import molecule.db.common.transaction.strategy.update.UpdateAction
-import molecule.db.common.transaction.*
 import molecule.db.common.util.Executor.*
 import molecule.db.mysql.query.Model2SqlQuery_mysql
 import molecule.db.mysql.transaction.{Insert_mysql, Save_mysql, Update_mysql}
-import scala.concurrent.Future
 
 
 object Spi_mysql_sync extends Spi_mysql_sync

@@ -1,4 +1,4 @@
-package molecule.base.error
+package molecule.core.error
 
 /** Insert error - validation errors for an insert row of data
  *

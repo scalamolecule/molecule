@@ -4,7 +4,7 @@ import boopickle.Default.*
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
-import async.*
+import molecule.db.mariadb.async.*
 import molecule.db.mariadb.setup.DbProviders_mariadb
 
 class Adhoc_mariadb_js_async extends MUnit with DbProviders_mariadb with TestUtils {

@@ -1,12 +1,12 @@
 package molecule.server.play
 
+import scala.concurrent.Future
+import scala.io.StdIn
 import molecule.db.common.marshalling.MoleculeRpc
 import org.apache.pekko.actor.{ActorSystem, Terminated}
 import play.api.Mode
 import play.core.server.*
 import sttp.tapir.server.play.PlayServerInterpreter
-import scala.concurrent.Future
-import scala.io.StdIn
 
 case class Play(rpc: MoleculeRpc) extends PlayServerEndpoints(rpc) {
 

@@ -1,10 +1,9 @@
 package molecule.db.common.api.expression
 
-import molecule.base.metaModel.CardMap
+import scala.Tuple.{:*, Init}
 import molecule.core.dataModel.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
-import scala.Tuple.{:*, Init}
 
 
 trait ExprMapOpt_1[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends CardMap { self: Molecule  =>

@@ -3,8 +3,8 @@ package molecule.core.dataModel
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.metaModel.{Cardinality, CardOne}
-import molecule.base.util.BaseHelpers.*
+import molecule.core.dataModel.{CardOne, Cardinality}
+import molecule.core.util.BaseHelpers.*
 
 
 sealed trait Element {

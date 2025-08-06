@@ -1,9 +1,6 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.25.1"
-
-val scala212 = "2.12.20"
-val scala3   = "3.7.1"
+val moleculeVersion = "0.26.0-SNAPSHOT"
 
 val catsVersion              = "3.6.0"
 val tapirVersion             = "1.11.25"
@@ -25,7 +22,7 @@ inThisBuild(
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
     version := moleculeVersion,
-    scalaVersion := scala3,
+    scalaVersion := "3.7.1",
     publishTo := localStaging.value,
 
     // Run tests for all systems sequentially to avoid data locks with dbs.
@@ -41,8 +38,6 @@ lazy val root = project
   .aggregate(
     boilerplate,
 
-    base.js,
-    base.jvm,
     core.js,
     core.jvm,
 
@@ -80,16 +75,6 @@ lazy val boilerplate = project
   .settings(publish / skip := true)
 
 
-lazy val base = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("base"))
-  .settings(compilerArgs, checkPublishing,
-    name := "molecule-base",
-    // 2.12 for sbt-molecule plugin on sbt 1.x
-    crossScalaVersions := Seq(scala212, scala3),
-  )
-
-
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("core"))
@@ -104,7 +89,6 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       "dev.zio" %%% "zio-test-sbt" % zioVersion % Test,
     ),
   )
-  .dependsOn(base)
 
 
 // Db =============================================================================================

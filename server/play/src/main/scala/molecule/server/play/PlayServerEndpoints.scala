@@ -1,9 +1,10 @@
 package molecule.server.play
 
 import java.nio.ByteBuffer
+import scala.concurrent.Future
 import boopickle.Default.*
-import molecule.base.error.ModelError
 import molecule.core.dataModel.DataModel
+import molecule.core.error.ModelError
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.serialize.PickleTpls
 import molecule.db.common.marshalling.{ConnProxy, MoleculeRpc}
@@ -15,7 +16,6 @@ import sttp.capabilities.WebSockets
 import sttp.capabilities.pekko.PekkoStreams
 import sttp.tapir.*
 import sttp.tapir.server.ServerEndpoint
-import scala.concurrent.Future
 
 abstract class PlayServerEndpoints(rpc: MoleculeRpc) extends PekkoServerEndpoints(rpc) {
 

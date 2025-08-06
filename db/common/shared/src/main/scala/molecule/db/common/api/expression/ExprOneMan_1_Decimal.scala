@@ -1,6 +1,5 @@
 package molecule.db.common.api.expression
 
-import molecule.base.metaModel.CardOne
 import molecule.core.dataModel.*
 import molecule.core.dataModel.Keywords.*
 import molecule.db.common.api.*

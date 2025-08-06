@@ -1,7 +1,7 @@
 package molecule.db.common.action
 
-import molecule.core.dataModel.DataModel
 import scala.concurrent.{ExecutionContext, Future}
+import molecule.core.dataModel.DataModel
 
 case class Insert_1[T](dataModel: DataModel) {
   final def apply(a: T, as: T*) = Insert(dataModel, (a +: as).map(a => Tuple1(a)))

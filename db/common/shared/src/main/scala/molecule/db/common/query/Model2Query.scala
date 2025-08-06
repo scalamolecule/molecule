@@ -1,11 +1,11 @@
 package molecule.db.common.query
 
-import molecule.base.error.ModelError
-import molecule.core.dataModel.*
-import molecule.db.common.util.ModelUtils
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import molecule.core.dataModel.*
+import molecule.core.error.ModelError
+import molecule.db.common.util.ModelUtils
 
 trait Model2Query extends QueryExpr with ModelUtils {
 

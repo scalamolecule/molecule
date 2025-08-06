@@ -1,7 +1,7 @@
 package molecule.db.common.query
 
-import molecule.base.error.ModelError
 import molecule.core.dataModel.*
+import molecule.core.error.ModelError
 import molecule.db.common.javaSql.PrepStmt
 
 trait QueryExprSeq extends QueryExpr { self: Model2Query & SqlQueryBase & LambdasSeq =>

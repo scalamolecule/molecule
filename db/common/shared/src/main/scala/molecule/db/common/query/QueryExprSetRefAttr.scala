@@ -1,7 +1,7 @@
 package molecule.db.common.query
 
-import molecule.base.error.ModelError
 import molecule.core.dataModel.*
+import molecule.core.error.ModelError
 
 trait QueryExprSetRefAttr extends QueryExpr with LambdasSet { self: Model2Query & SqlQueryBase =>
 

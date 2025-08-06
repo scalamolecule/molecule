@@ -3,7 +3,7 @@ package molecule.db.h2
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
-import async.*
+import molecule.db.h2.async.*
 import molecule.db.h2.setup.DbProviders_h2
 
 class Adhoc_h2_js_zio extends MUnit with DbProviders_h2 with TestUtils {

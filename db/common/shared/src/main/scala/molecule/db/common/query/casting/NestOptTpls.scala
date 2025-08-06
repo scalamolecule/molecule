@@ -1,10 +1,9 @@
 package molecule.db.common.query.casting
 
 import java.lang.Long as jLong
-import molecule.db.common.query.casting.strategy.CastTuple
+import scala.collection.mutable.ListBuffer
 import molecule.db.common.query.SqlQueryBase
 import molecule.db.common.query.casting.strategy.*
-import scala.collection.mutable.ListBuffer
 
 
 class NestOptTpls extends SqlQueryBase {

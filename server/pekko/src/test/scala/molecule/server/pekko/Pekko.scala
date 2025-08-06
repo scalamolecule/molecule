@@ -1,13 +1,13 @@
 package molecule.server.pekko
 
+import scala.concurrent.ExecutionContextExecutor
+import scala.io.StdIn
 import molecule.db.common.marshalling.MoleculeRpc
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.Http
 import org.apache.pekko.http.scaladsl.server.Directives.*
 import org.apache.pekko.http.scaladsl.server.Route
 import sttp.tapir.server.pekkohttp.PekkoHttpServerInterpreter
-import scala.concurrent.ExecutionContextExecutor
-import scala.io.StdIn
 
 case class Pekko(rpc: MoleculeRpc) extends PekkoServerEndpoints(rpc) {
 

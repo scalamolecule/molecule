@@ -1,6 +1,6 @@
 package molecule.graphql.test.api.dsl.StarWars.leaf
 
-import molecule.base.metaModel.{MetaEntity, MetaSegment}
+import molecule.core.dataModel.{MetaEntity, MetaSegment}
 
 object Scalars {
 

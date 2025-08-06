@@ -2,10 +2,10 @@ package molecule.db.sqlite.facade
 
 import java.sql.Connection
 import java.util.regex.Pattern
+import scala.util.Using.Manager
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.util.SchemaLoader
 import org.sqlite.Function
-import scala.util.Using.Manager
 
 /** SQlite connection factory
  *

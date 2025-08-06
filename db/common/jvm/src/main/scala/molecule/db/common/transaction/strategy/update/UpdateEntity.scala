@@ -1,8 +1,8 @@
 package molecule.db.common.transaction.strategy.update
 
 import java.sql.PreparedStatement as PS
-import molecule.db.common.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
+import molecule.db.common.transaction.strategy.SqlOps
 
 case class UpdateEntity(
   parent: UpdateAction,

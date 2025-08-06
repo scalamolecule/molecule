@@ -2,21 +2,20 @@ package molecule.db.common.facade
 
 import java.sql
 import java.sql.{Connection, PreparedStatement, ResultSet, SQLException}
-import cats.effect.IO
-import molecule.base.error.MoleculeError
-import molecule.core.util.MoleculeLogging
-import molecule.db.common.api.Savepoint
-import molecule.db.common.javaSql.ResultSetInterface
-import molecule.db.common.marshalling.JdbcProxy
-import molecule.db.common.spi.{Conn, TxReport}
-import molecule.db.common.util.ModelUtils
-import molecule.db.common.javaSql.ResultSetImpl
-import molecule.db.common.transaction.strategy.SqlAction
-import molecule.db.common.transaction.{CachedConnection, SavepointImpl, SqlDataType_JVM}
-import zio.ZIO
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
+import cats.effect.IO
+import molecule.core.error.MoleculeError
+import molecule.core.util.MoleculeLogging
+import molecule.db.common.api.Savepoint
+import molecule.db.common.javaSql.{ResultSetImpl, ResultSetInterface}
+import molecule.db.common.marshalling.JdbcProxy
+import molecule.db.common.spi.{Conn, TxReport}
+import molecule.db.common.transaction.strategy.SqlAction
+import molecule.db.common.transaction.{CachedConnection, SavepointImpl, SqlDataType_JVM}
+import molecule.db.common.util.ModelUtils
+import zio.ZIO
 
 case class JdbcConn_JVM(
   override val proxy: JdbcProxy,

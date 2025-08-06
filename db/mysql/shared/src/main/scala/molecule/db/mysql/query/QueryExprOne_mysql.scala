@@ -1,11 +1,11 @@
 package molecule.db.mysql.query
 
-import molecule.base.error.ModelError
-import molecule.core.dataModel.{Op, Value}
-import molecule.db.common.javaSql.PrepStmt
-import molecule.db.common.query.{Model2Query, QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 import scala.util.Random
+import molecule.core.dataModel.{Op, Value}
+import molecule.core.error.ModelError
+import molecule.db.common.javaSql.PrepStmt
+import molecule.db.common.query.{Model2Query, QueryExprOne, SqlQueryBase}
 
 trait QueryExprOne_mysql
   extends QueryExprOne

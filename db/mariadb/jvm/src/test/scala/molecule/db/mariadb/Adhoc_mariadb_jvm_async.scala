@@ -3,7 +3,7 @@ package molecule.db.mariadb
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.Entity
-import async.*
+import molecule.db.mariadb.async.*
 import molecule.db.mariadb.setup.DbProviders_mariadb
 import org.scalactic.Equality
 

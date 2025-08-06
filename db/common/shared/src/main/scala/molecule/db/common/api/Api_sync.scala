@@ -1,11 +1,11 @@
 package molecule.db.common.api
 
+import scala.util.control.NonFatal
 import geny.Generator
-import molecule.base.error.InsertError
 import molecule.core.dataModel.Keywords
+import molecule.core.error.InsertError
 import molecule.db.common.action.*
 import molecule.db.common.spi.*
-import scala.util.control.NonFatal
 
 trait Api_sync extends Keywords { spi: Spi_sync =>
 

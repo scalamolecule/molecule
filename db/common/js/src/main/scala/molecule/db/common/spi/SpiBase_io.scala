@@ -2,8 +2,8 @@ package molecule.db.common.spi
 
 import boopickle.Default.*
 import cats.effect.IO
-import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.core.dataModel.DataModel
+import molecule.core.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.db.common.action.*
 import molecule.db.common.facade.JdbcConn_JS
 import molecule.db.common.marshalling.serialize.PickleTpls

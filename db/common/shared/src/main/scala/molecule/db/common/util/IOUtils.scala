@@ -1,12 +1,12 @@
 package molecule.db.common.util
 
 import scala.annotation.targetName
-import cats.effect.IO
-import molecule.base.error.{ExecutionError, MoleculeError}
-import molecule.core.util.MoleculeLogging
-import molecule.db.common.spi.TxReport
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Await, ExecutionContext, Future}
+import cats.effect.IO
+import molecule.core.error.{ExecutionError, MoleculeError}
+import molecule.core.util.MoleculeLogging
+import molecule.db.common.spi.TxReport
 
 trait IOUtils extends ModelUtils with MoleculeLogging {
 

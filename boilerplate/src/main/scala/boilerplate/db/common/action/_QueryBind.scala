@@ -12,7 +12,7 @@ object _QueryBind extends DbCommonBase("QueryBind", "/action") {
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.base.error.ModelError
+       |import molecule.core.error.ModelError
        |import molecule.core.dataModel.*
        |
        |

@@ -1,5 +1,6 @@
 package molecule.db.mysql.setup
 
+import scala.util.Random
 import boopickle.Default.*
 import molecule.db.common.api.MetaDb_mysql
 import molecule.db.common.facade.JdbcConn_JS
@@ -12,7 +13,6 @@ import molecule.db.compliance.domains.dsl.Types.metadb.Types_mysql
 import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_mysql
 import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_mysql
 import zio.{ZIO, ZLayer}
-import scala.util.Random
 
 object DbConnection_mysql {
 

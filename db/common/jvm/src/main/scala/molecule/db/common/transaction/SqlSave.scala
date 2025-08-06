@@ -2,8 +2,7 @@ package molecule.db.common.transaction
 
 import java.sql.PreparedStatement as PS
 import boopickle.Default.*
-import molecule.base.metaModel.{CardOne, Cardinality}
-import molecule.core.dataModel.Element
+import molecule.core.dataModel.{CardOne, Cardinality, Element}
 import molecule.db.common.transaction.ops.SaveOps
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.strategy.save.{SaveAction, SaveRoot}

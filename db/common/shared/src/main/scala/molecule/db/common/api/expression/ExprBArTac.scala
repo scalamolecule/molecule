@@ -1,10 +1,9 @@
 package molecule.db.common.api.expression
 
-import molecule.base.metaModel.CardSeq
+import scala.annotation.compileTimeOnly
 import molecule.core.dataModel.*
 import molecule.db.common.api.{Molecule, Molecule_0}
 import molecule.db.common.ops.ModelTransformations_.*
-import scala.annotation.compileTimeOnly
 
 
 trait ExprBArTac[T, Entity](entity: DataModel => Entity) extends CardSeq { self: Molecule =>

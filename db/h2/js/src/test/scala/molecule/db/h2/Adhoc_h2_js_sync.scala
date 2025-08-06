@@ -1,10 +1,10 @@
 package molecule.db.h2
 
-import molecule.base.error.ModelError
+import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.Entity
 import molecule.db.h2.setup.DbProviders_h2
-import sync.*
+import molecule.db.h2.sync.*
 
 
 class Adhoc_h2_js_sync extends MUnit with DbProviders_h2 with TestUtils {

@@ -11,7 +11,7 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.base.error.ModelError
+       |import molecule.core.error.ModelError
        |import molecule.core.dataModel.*
        |import molecule.core.dataModel.Keywords.*
        |import molecule.db.common.api.Molecule

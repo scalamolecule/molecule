@@ -1,9 +1,10 @@
 package molecule.db.common.spi
 
 import java.nio.ByteBuffer
+import scala.concurrent.{Future, ExecutionContext as EC}
 import boopickle.Default.*
-import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.core.dataModel.{DataModel, OneInt, OneString}
+import molecule.core.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.db.common.action.*
 import molecule.db.common.facade.JdbcConn_JS
 import molecule.db.common.marshalling.Boopicklers.*
@@ -12,7 +13,6 @@ import molecule.db.common.spi.{Conn, Renderer, Spi_async, TxReport}
 import molecule.db.common.util.FutureUtils
 import molecule.db.common.validation.TxModelValidation
 import molecule.db.common.validation.insert.InsertValidation
-import scala.concurrent.{Future, ExecutionContext as EC}
 
 
 trait SpiBaseJS_async extends Spi_async with Renderer with FutureUtils {

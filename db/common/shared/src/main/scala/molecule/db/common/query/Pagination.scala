@@ -3,12 +3,12 @@ package molecule.db.common.query
 import java.net.URI
 import java.time.*
 import java.util.{Base64, Date, UUID}
-import molecule.base.error.ModelError
-import molecule.base.util.BaseHelpers
-import molecule.core.dataModel.*
-import molecule.db.common.spi.Conn
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
+import molecule.core.dataModel.*
+import molecule.core.error.ModelError
+import molecule.core.util.BaseHelpers
+import molecule.db.common.spi.Conn
 
 
 trait Pagination[Tpl] extends BaseHelpers {

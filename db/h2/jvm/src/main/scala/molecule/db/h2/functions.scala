@@ -5,8 +5,8 @@ import java.math.BigDecimal as jBigDecimal
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import upickle.default.{read, write}
 import scala.reflect.ClassTag
+import upickle.default.{read, write}
 
 // H2 helper functions for updates that are likely not possible to implement with H2 SQL.
 // Create aliases in database to use functions.

@@ -1,7 +1,7 @@
 //// AUTO-GENERATED Molecule DSL boilerplate code for entity `Character`
 //package molecule.graphql.test.api.dsl.StarWars.output
 //
-//import molecule.base.metaModel.*
+//import molecule.core.dataModel.*
 //import molecule.core.dataModel as _dm
 //import molecule.core.dataModel.*
 //import molecule.graphql.client.api.*

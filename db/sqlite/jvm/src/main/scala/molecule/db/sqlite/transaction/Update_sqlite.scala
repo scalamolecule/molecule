@@ -1,8 +1,8 @@
 package molecule.db.sqlite.transaction
 
 import java.sql.PreparedStatement as PS
-import molecule.db.common.transaction.{ResolveUpdate, SqlUpdate}
 import molecule.db.common.transaction.strategy.SqlOps
+import molecule.db.common.transaction.{ResolveUpdate, SqlUpdate}
 
 trait Update_sqlite
   extends SqlUpdate { self: ResolveUpdate & SqlOps =>

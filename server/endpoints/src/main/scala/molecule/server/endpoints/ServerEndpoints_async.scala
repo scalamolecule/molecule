@@ -2,7 +2,7 @@ package molecule.server.endpoints
 
 import java.nio.ByteBuffer
 import scala.concurrent.Future
-import molecule.base.error.*
+import molecule.core.error.*
 import molecule.db.common.marshalling.MoleculeRpc
 import molecule.db.common.util.Executor.*
 import sttp.tapir.*

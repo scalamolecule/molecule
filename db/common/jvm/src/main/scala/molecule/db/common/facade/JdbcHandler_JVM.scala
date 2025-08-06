@@ -1,10 +1,10 @@
 package molecule.db.common.facade
 
 import java.sql.Connection
-import molecule.db.common.marshalling.JdbcProxy
-import molecule.db.common.util.SchemaLoader
 import scala.concurrent.blocking
 import scala.util.Using.Manager
+import molecule.db.common.marshalling.JdbcProxy
+import molecule.db.common.util.SchemaLoader
 
 object JdbcHandler_JVM extends SchemaLoader {
 

@@ -1,6 +1,5 @@
 package molecule.db.common.api.expression
 
-import molecule.base.metaModel.CardMap
 import molecule.core.dataModel.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*

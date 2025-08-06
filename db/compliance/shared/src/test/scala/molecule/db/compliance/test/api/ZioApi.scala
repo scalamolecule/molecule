@@ -1,16 +1,16 @@
 package molecule.db.compliance.test.api
 
-import molecule.base.error.{ExecutionError, InsertErrors, ValidationErrors}
+import scala.annotation.nowarn
+import molecule.core.error.{ExecutionError, InsertErrors, ValidationErrors}
 import molecule.core.setup.TestUtils
+import molecule.db.common.api.Api_zio
+import molecule.db.common.spi.Spi_zio
 import molecule.db.compliance.domains.dsl.Refs.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.DbProviders_zio
-import molecule.db.common.api.Api_zio
-import molecule.db.common.spi.Spi_zio
 import zio.*
 import zio.test.*
 import zio.test.TestAspect.*
-import scala.annotation.nowarn
 
 @nowarn
 case class ZioApi(api: Api_zio & Spi_zio & DbProviders_zio)

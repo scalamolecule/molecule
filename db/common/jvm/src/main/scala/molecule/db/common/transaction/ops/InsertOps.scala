@@ -1,7 +1,6 @@
 package molecule.db.common.transaction.ops
 
-import molecule.base.metaModel.Cardinality
-import molecule.core.dataModel.{Attr, Element}
+import molecule.core.dataModel.{Attr, Cardinality, Element}
 
 trait InsertOps extends BaseOps {
 

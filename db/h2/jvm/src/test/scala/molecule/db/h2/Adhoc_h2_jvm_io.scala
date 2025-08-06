@@ -2,7 +2,7 @@ package molecule.db.h2
 
 import molecule.core.setup.{MUnit_io, TestUtils}
 import molecule.db.compliance.domains.dsl.Types.Entity
-import io.*
+import molecule.db.h2.io.*
 import molecule.db.h2.setup.DbProviders_h2
 
 

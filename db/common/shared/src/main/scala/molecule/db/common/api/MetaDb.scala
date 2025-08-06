@@ -1,6 +1,6 @@
 package molecule.db.common.api
 
-import molecule.base.metaModel.Cardinality
+import molecule.core.dataModel.Cardinality
 
 /** Metadata about the database */
 trait MetaDb {

@@ -1,13 +1,13 @@
 package molecule.db.common.spi
 
+import scala.concurrent.{ExecutionContext, Future}
 import cats.effect.IO
-import molecule.base.error.{ExecutionError, MoleculeError}
 import molecule.core.dataModel.DataModel
+import molecule.core.error.{ExecutionError, MoleculeError}
 import molecule.db.common.api.Savepoint
 import molecule.db.common.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.db.common.util.ModelUtils
 import zio.ZIO
-import scala.concurrent.{ExecutionContext, Future}
 
 abstract class Conn(val proxy: ConnProxy)
   extends ModelUtils { self: DataType =>

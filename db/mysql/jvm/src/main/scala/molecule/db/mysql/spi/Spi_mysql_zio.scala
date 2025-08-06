@@ -1,6 +1,6 @@
 package molecule.db.mysql.spi
 
-import molecule.base.error.{InsertError, InsertErrors, MoleculeError, ValidationErrors}
+import molecule.core.error.{InsertError, InsertErrors, MoleculeError, ValidationErrors}
 import molecule.db.common.action.*
 import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.spi.{Conn, Spi_zio, StreamingJdbc, TxReport}

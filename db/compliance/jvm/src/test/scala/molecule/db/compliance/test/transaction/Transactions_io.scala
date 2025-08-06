@@ -1,10 +1,10 @@
 package molecule.db.compliance.test.transaction
 
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.{Api_io, Api_io_transact}
 import molecule.db.common.spi.Spi_io
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 
 
 case class Transactions_io(

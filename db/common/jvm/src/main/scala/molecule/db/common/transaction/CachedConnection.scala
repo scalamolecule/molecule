@@ -1,10 +1,10 @@
 package molecule.db.common.transaction
 
 import java.util.UUID
-import molecule.db.common.facade.JdbcConn_JVM
-import molecule.db.common.marshalling.ConnProxy
 import scala.collection.mutable
 import scala.concurrent.Future
+import molecule.db.common.facade.JdbcConn_JVM
+import molecule.db.common.marshalling.ConnProxy
 
 trait CachedConnection {
 

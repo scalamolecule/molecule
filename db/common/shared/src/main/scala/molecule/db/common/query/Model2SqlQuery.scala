@@ -1,10 +1,10 @@
 package molecule.db.common.query
 
+import scala.collection.mutable.ListBuffer
 import molecule.core.dataModel.Element
 import molecule.core.util.MoleculeLogging
 import molecule.db.common.marshalling.ConnProxy
 import molecule.db.common.util.ModelUtils
-import scala.collection.mutable.ListBuffer
 
 
 abstract class Model2SqlQuery(elements0: List[Element])

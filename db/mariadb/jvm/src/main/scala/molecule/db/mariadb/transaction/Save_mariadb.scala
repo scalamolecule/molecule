@@ -2,9 +2,9 @@ package molecule.db.mariadb.transaction
 
 import java.sql.PreparedStatement as PS
 import java.util.Date
-import molecule.base.util.BaseHelpers
-import molecule.db.common.transaction.{ResolveSave, SqlSave}
+import molecule.core.util.BaseHelpers
 import molecule.db.common.transaction.strategy.SqlOps
+import molecule.db.common.transaction.{ResolveSave, SqlSave}
 
 trait Save_mariadb
   extends SqlSave

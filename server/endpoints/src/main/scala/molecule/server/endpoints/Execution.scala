@@ -3,8 +3,8 @@ package molecule.server.endpoints
 import java.nio.ByteBuffer
 import scala.concurrent.Future
 import boopickle.Default.*
-import molecule.base.error.MoleculeError
 import molecule.core.dataModel.{DataModel, Value}
+import molecule.core.error.MoleculeError
 import molecule.core.util.MoleculeLogging
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.serialize.PickleTpls

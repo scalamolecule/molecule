@@ -1,8 +1,7 @@
 package molecule.db.common.transaction
 
 import java.sql.PreparedStatement as PS
-import molecule.base.metaModel.{CardOne, Cardinality}
-import molecule.core.dataModel.{Attr, Element}
+import molecule.core.dataModel.{Attr, CardOne, Cardinality, Element}
 import molecule.db.common.transaction.ops.InsertOps
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.strategy.insert.{InsertAction, InsertRoot}

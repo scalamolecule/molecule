@@ -1,10 +1,10 @@
 package molecule.db.common.marshalling
 
 import java.nio.ByteBuffer
-import molecule.base.error.MoleculeError
-import molecule.core.dataModel.*
-import molecule.db.common.spi.TxReport
 import scala.concurrent.Future
+import molecule.core.dataModel.*
+import molecule.core.error.MoleculeError
+import molecule.db.common.spi.TxReport
 
 
 /**

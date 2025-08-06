@@ -1,10 +1,10 @@
 package molecule.db.h2.spi
 
+import scala.concurrent.{Future, ExecutionContext as EC}
 import boopickle.Default.*
 import molecule.core.dataModel.DataModel
 import molecule.db.common.spi.SpiBaseJS_async
 import molecule.db.h2.query.Model2SqlQuery_h2
-import scala.concurrent.{Future, ExecutionContext as EC}
 
 
 object Spi_h2_async extends Spi_h2_async

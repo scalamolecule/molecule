@@ -1,7 +1,7 @@
 package molecule.db.common.api
 
-import molecule.base.error.{InsertError, MoleculeError}
 import molecule.core.dataModel.Keywords
+import molecule.core.error.{InsertError, MoleculeError}
 import molecule.db.common.action.*
 import molecule.db.common.spi.*
 import zio.ZIO

@@ -1,5 +1,6 @@
 package molecule.db.mariadb.setup
 
+import scala.util.Random
 import boopickle.Default.*
 import molecule.db.common.api.{MetaDb, MetaDb_mariadb}
 import molecule.db.common.facade.JdbcConn_JS
@@ -12,7 +13,6 @@ import molecule.db.compliance.domains.dsl.Types.metadb.Types_mariadb
 import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_mariadb
 import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_mariadb
 import zio.{ZIO, ZLayer}
-import scala.util.Random
 
 object DbConnection_mariadb {
 

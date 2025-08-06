@@ -1,7 +1,7 @@
 package molecule.db.common.action
 
-import molecule.base.error.ModelError
 import molecule.core.dataModel.*
+import molecule.core.error.ModelError
 
 case class Query[Tpl](
   dataModel: DataModel,

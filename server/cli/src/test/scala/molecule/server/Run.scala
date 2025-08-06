@@ -1,15 +1,19 @@
 package molecule.server
 
+import scala.annotation.tailrec
+import scala.concurrent.Await
+import scala.concurrent.duration.*
+import scala.io.StdIn
 import boopickle.Default.*
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
+import molecule.db.common.marshalling.Boopicklers.*
+import molecule.db.common.marshalling.MoleculeRpc
 import molecule.db.compliance.domains.dsl.Refs.metadb.*
 import molecule.db.compliance.domains.dsl.Segments.metadb.*
 import molecule.db.compliance.domains.dsl.Types.metadb.*
 import molecule.db.compliance.domains.dsl.Uniques.metadb.*
 import molecule.db.compliance.domains.dsl.Validation.metadb.*
-import molecule.db.common.marshalling.Boopicklers.*
-import molecule.db.common.marshalling.MoleculeRpc
 import molecule.db.h2.marshalling.Rpc_h2
 import molecule.db.mariadb.marshalling.Rpc_mariadb
 import molecule.db.mysql.marshalling.Rpc_mysql
@@ -21,10 +25,6 @@ import molecule.server.pekko.Pekko
 import molecule.server.play.Play
 import molecule.server.ziohttp.ZioHttp
 import zio.{Runtime, Unsafe}
-import scala.annotation.tailrec
-import scala.concurrent.Await
-import scala.concurrent.duration.*
-import scala.io.StdIn
 
 /**
  * Test Molecule SPI test suite for various databases and servers in two steps:

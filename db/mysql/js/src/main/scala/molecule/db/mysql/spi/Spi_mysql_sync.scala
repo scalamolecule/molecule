@@ -1,6 +1,6 @@
 package molecule.db.mysql.spi
 
-import molecule.base.error.ModelError
+import molecule.core.error.ModelError
 import molecule.db.common.spi.Spi_sync
 
 

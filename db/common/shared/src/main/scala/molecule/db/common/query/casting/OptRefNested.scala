@@ -1,6 +1,5 @@
 package molecule.db.common.query.casting
 
-import molecule.db.common.query.casting.strategy.CastTuple
 import molecule.db.common.query.SqlQueryBase
 import molecule.db.common.query.casting.strategy.*
 

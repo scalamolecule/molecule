@@ -1,4 +1,4 @@
-package molecule.base.metaModel
+package molecule.core.dataModel
 
 sealed trait Cardinality {
   def _marker: String

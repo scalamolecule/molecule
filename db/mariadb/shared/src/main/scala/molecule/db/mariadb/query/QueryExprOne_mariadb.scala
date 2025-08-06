@@ -1,11 +1,11 @@
 package molecule.db.mariadb.query
 
-import molecule.base.error.ModelError
-import molecule.core.dataModel.*
-import molecule.db.common.javaSql.PrepStmt
-import molecule.db.common.query.{LambdasOne, Model2Query, QueryExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
 import scala.util.Random
+import molecule.core.dataModel.*
+import molecule.core.error.ModelError
+import molecule.db.common.javaSql.PrepStmt
+import molecule.db.common.query.{LambdasOne, Model2Query, QueryExprOne, SqlQueryBase}
 
 trait QueryExprOne_mariadb
   extends QueryExprOne

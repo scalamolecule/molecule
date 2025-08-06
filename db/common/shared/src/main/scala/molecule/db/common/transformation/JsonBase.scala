@@ -1,7 +1,7 @@
 package molecule.db.common.transformation
 
 import boopickle.Default.*
-import molecule.base.error.ModelError
+import molecule.core.error.ModelError
 import molecule.db.common.util.ModelUtils
 
 trait JsonBase extends ModelUtils {

@@ -3,12 +3,11 @@ package molecule.db.common.query
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import boopickle.Default.*
-import molecule.base.util.BaseHelpers
-import molecule.core.util.AggrUtils
-import molecule.db.common.transformation.JsonBase
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
+import boopickle.Default.*
+import molecule.core.util.{AggrUtils, BaseHelpers}
+import molecule.db.common.transformation.JsonBase
 
 
 trait LambdasBase extends BaseHelpers with AggrUtils with JsonBase { self: SqlQueryBase =>

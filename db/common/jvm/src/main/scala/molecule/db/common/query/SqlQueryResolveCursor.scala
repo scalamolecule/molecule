@@ -1,8 +1,8 @@
 package molecule.db.common.query
 
 import java.util.Base64
-import molecule.base.error.ModelError
 import molecule.core.dataModel.DataModel
+import molecule.core.error.ModelError
 import molecule.core.util.MoleculeLogging
 import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.ops.ModelTransformations_

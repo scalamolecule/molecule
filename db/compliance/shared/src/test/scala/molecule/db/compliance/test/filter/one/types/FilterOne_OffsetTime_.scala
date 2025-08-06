@@ -3,11 +3,11 @@ package molecule.db.compliance.test.filter.one.types
 
 import java.time.OffsetTime
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 
 case class FilterOne_OffsetTime_(
   suite: MUnit,

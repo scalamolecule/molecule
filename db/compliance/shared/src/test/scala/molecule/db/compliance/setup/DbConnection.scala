@@ -1,7 +1,7 @@
 package molecule.db.compliance.setup
 
 import java.nio.file.{Files, Path}
-import molecule.base.util.BaseHelpers
+import molecule.core.util.BaseHelpers
 
 trait DbConnection extends BaseHelpers {
 

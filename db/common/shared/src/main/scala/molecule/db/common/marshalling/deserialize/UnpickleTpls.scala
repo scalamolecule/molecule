@@ -4,16 +4,16 @@ import java.net.URI
 import java.nio.ByteBuffer
 import java.time.*
 import java.util.{Date, UUID}
+import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 import boopickle.*
 import boopickle.BasicPicklers.*
 import boopickle.Default.*
-import molecule.base.error.{ModelError, MoleculeError}
-import molecule.db.common.marshalling.Boopicklers.*
 import molecule.core.dataModel.*
+import molecule.core.error.{ModelError, MoleculeError}
 import molecule.core.util.MoleculeLogging
+import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.util.ModelUtils
-import scala.annotation.tailrec
-import scala.collection.mutable.ListBuffer
 
 case class UnpickleTpls[Tpl](
   dataModel: DataModel,

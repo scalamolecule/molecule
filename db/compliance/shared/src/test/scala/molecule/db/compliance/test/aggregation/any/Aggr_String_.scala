@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.compliance.test.aggregation.any
 
-import molecule.base.error.ModelError
+import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async

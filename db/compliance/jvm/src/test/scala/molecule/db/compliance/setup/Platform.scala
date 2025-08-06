@@ -1,7 +1,7 @@
 package molecule.db.compliance.setup
 
-import molecule.db.common.util.Executor.*
 import scala.concurrent.Future
+import molecule.db.common.util.Executor.*
 
 
 trait Platform {

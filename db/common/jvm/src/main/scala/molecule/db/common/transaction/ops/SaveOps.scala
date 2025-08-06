@@ -1,6 +1,6 @@
 package molecule.db.common.transaction.ops
 
-import molecule.base.metaModel.Cardinality
+import molecule.core.dataModel.Cardinality
 import molecule.db.common.transaction.Action2Data
 
 trait SaveOps extends Action2Data with BaseOps {

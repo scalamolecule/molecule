@@ -1,7 +1,7 @@
 package molecule
 
 import java.net.URI
-import java.time._
+import java.time.*
 import java.util.{Date, UUID}
 
 /**
@@ -366,7 +366,7 @@ abstract class DomainStructure {
      *
      * @tparam Ref Ref entity type
      */
-    def apply[Ref](implicit x: DummyImplicit): refOptions[Self] = ???
+    def apply[Ref](implicit x: DummyImplicit): refOptions[Self] & Ref = ???
 
 
     /**
@@ -375,7 +375,7 @@ abstract class DomainStructure {
      * @tparam Ref
      * @return
      */
-    def apply[Ref](description: String): refOptions[Self] = ???
+    def apply[Ref](description: String): refOptions[Self] & Ref = ???
     def descr(description: String): Self = ???
 
     /** Owner option.
@@ -385,7 +385,8 @@ abstract class DomainStructure {
      * - If this entity is deleted, its references are deleted too
      * (and recursively if sub entities have owned entities!)
      */
-    lazy val owner: Self = ???
+    lazy val owner  : Self = ???
+    lazy val owner_ : Self = ???
 
     lazy val mandatory: Self = ???
 

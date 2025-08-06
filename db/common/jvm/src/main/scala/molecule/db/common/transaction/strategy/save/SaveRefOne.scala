@@ -1,8 +1,8 @@
 package molecule.db.common.transaction.strategy.save
 
 import java.sql.PreparedStatement as PS
-import molecule.db.common.transaction.strategy.SqlOps
 import scala.collection.mutable.ListBuffer
+import molecule.db.common.transaction.strategy.SqlOps
 
 case class SaveRefOne(
   parent: SaveAction,

@@ -1,6 +1,6 @@
 //package molecule.graphql.test.api.dsl.StarWars
 //
-//import molecule.base.metaModel.*
+//import molecule.core.dataModel.*
 //import molecule.core.dataModel.{AttrOneTacString, DataModel, Eq}
 //import molecule.graphql.test.api.dsl.StarWars.input.InputReview
 //import molecule.graphql.test.api.dsl.StarWars.leaf.Enums.Episode

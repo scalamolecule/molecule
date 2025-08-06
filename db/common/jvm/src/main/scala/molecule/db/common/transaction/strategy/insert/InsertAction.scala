@@ -1,8 +1,8 @@
 package molecule.db.common.transaction.strategy.insert
 
 import java.sql.PreparedStatement as PS
-import molecule.db.common.transaction.strategy.{SqlAction, SqlOps}
 import scala.collection.mutable.ListBuffer
+import molecule.db.common.transaction.strategy.{SqlAction, SqlOps}
 
 abstract class InsertAction(
   parent: InsertAction,

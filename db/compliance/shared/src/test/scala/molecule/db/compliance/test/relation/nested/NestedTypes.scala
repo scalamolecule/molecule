@@ -1,12 +1,12 @@
 package molecule.db.compliance.test.relation.nested
 
+import scala.concurrent.Future
 import molecule.core.setup.{MUnit_arrays, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
-import scala.concurrent.Future
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 
 case class NestedTypes(
   suite: MUnit_arrays,

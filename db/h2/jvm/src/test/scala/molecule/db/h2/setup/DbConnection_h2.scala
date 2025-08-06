@@ -1,6 +1,8 @@
 package molecule.db.h2.setup
 
 import java.sql.DriverManager
+import scala.util.Random
+import scala.util.Using.Manager
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import molecule.db.common.api.MetaDb_h2
 import molecule.db.common.facade.JdbcHandler_JVM
@@ -9,8 +11,6 @@ import molecule.db.common.spi.Conn
 import molecule.db.compliance.setup.DbConnection
 import org.h2.jdbcx.JdbcDataSource
 import zio.{ZIO, ZLayer}
-import scala.util.Random
-import scala.util.Using.Manager
 
 
 trait DbConnection_h2 extends DbConnection {

@@ -1,10 +1,10 @@
 package molecule.server.netty
 
+import scala.io.StdIn
 import cats.effect.*
 import cats.effect.kernel.Resource
 import molecule.db.common.marshalling.MoleculeRpc
 import sttp.tapir.server.netty.cats.NettyCatsServer
-import scala.io.StdIn
 
 case class Netty(rpc: MoleculeRpc) extends NettyServerEndpoints(rpc) {
 

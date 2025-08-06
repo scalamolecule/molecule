@@ -1,6 +1,6 @@
 package molecule.db.compliance.test.aggregation.number
 
-import molecule.base.error.ModelError
+import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async

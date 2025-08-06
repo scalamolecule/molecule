@@ -1,8 +1,8 @@
 package molecule.db.postgresql.transaction
 
 import java.sql.PreparedStatement as PS
-import molecule.db.common.transaction.{ResolveSave, SqlSave}
 import molecule.db.common.transaction.strategy.SqlOps
+import molecule.db.common.transaction.{ResolveSave, SqlSave}
 
 trait Save_postgresql
   extends SqlSave { self: ResolveSave & SqlOps =>

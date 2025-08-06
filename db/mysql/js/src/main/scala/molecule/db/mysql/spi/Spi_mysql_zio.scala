@@ -1,11 +1,11 @@
 package molecule.db.mysql.spi
 
-import molecule.base.error.{InsertError, MoleculeError}
+import scala.concurrent.{Future, ExecutionContext as EC}
+import molecule.core.error.{InsertError, MoleculeError}
 import molecule.db.common.action.*
 import molecule.db.common.facade.JdbcConn_JS
 import molecule.db.common.spi.{Conn, Spi_zio, TxReport}
 import zio.*
-import scala.concurrent.{Future, ExecutionContext as EC}
 
 trait Spi_mysql_zio extends Spi_zio with SpiBase_mysql_zio {
 

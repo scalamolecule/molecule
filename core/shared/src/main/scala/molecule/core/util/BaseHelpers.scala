@@ -1,8 +1,8 @@
-package molecule.base.util
+package molecule.core.util
 
 import java.net.URI
 import java.nio.ByteBuffer
-import java.time._
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.{Date, UUID}
 

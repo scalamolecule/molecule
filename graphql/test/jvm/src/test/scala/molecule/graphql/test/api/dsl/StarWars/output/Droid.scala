@@ -7,7 +7,7 @@
 //*/
 //package molecule.graphql.test.api.dsl.StarWars.output
 //
-//import molecule.base.metaModel.{CardOne, CardSet}
+//import molecule.core.dataModel.{CardOne, CardSet}
 //import molecule.core.dataModel as _dm
 //import molecule.core.dataModel.*
 //

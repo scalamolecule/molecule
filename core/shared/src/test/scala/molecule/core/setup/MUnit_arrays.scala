@@ -1,7 +1,7 @@
 package molecule.core.setup
 
-import munit.FunSuite
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import munit.FunSuite
 
 trait MUnit_arrays extends FunSuite {
 

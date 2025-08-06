@@ -1,9 +1,9 @@
 package molecule.db.common.transaction
 
-import molecule.base.error.{ExecutionError, ModelError}
-import molecule.core.dataModel.*
-import molecule.db.common.transaction.ops.SaveOps
 import scala.annotation.tailrec
+import molecule.core.dataModel.*
+import molecule.core.error.{ExecutionError, ModelError}
+import molecule.db.common.transaction.ops.SaveOps
 
 trait ResolveSave { self: SaveOps =>
 

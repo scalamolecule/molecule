@@ -1,7 +1,7 @@
 package molecule.db.postgresql.spi
 
 import cats.effect.IO
-import molecule.base.error.InsertError
+import molecule.core.error.InsertError
 import molecule.db.common.action.*
 import molecule.db.common.spi.{Conn, Spi_io, StreamingJdbc, TxReport}
 import molecule.db.common.util.ModelUtils

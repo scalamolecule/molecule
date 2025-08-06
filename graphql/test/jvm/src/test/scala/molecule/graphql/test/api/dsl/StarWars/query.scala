@@ -1,6 +1,6 @@
 //package molecule.graphql.test.api.dsl.StarWars
 //
-//import molecule.base.metaModel.*
+//import molecule.core.dataModel.*
 //import molecule.core.dataModel.*
 //import molecule.core.dataModel.Keywords.qm
 //import molecule.graphql.test.api.dsl.StarWars.output.*

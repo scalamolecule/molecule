@@ -1,5 +1,6 @@
 package molecule.db.h2.setup
 
+import scala.util.Random
 import boopickle.Default.*
 import molecule.db.common.api.*
 import molecule.db.common.facade.JdbcConn_JS
@@ -13,7 +14,6 @@ import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_h2
 import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_h2
 import molecule.db.compliance.setup.DbConnection
 import zio.{ZIO, ZLayer}
-import scala.util.Random
 
 trait DbConnection_h2 extends DbConnection {
 

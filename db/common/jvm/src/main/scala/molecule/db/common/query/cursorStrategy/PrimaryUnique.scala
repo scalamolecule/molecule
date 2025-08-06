@@ -1,14 +1,13 @@
 package molecule.db.common.query.cursorStrategy
 
-import molecule.base.error.ModelError
 import molecule.core.dataModel.*
+import molecule.core.error.ModelError
 import molecule.core.util.MoleculeLogging
 import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.ops.ModelTransformations_
-import molecule.db.common.query.{Pagination, SqlQueryResolve}
 import molecule.db.common.query.casting.strategy.{CastNested, CastOptRefs, CastTuple}
+import molecule.db.common.query.{Model2SqlQuery, Pagination, SqlQueryBase, SqlQueryResolve}
 import molecule.db.common.util.FutureUtils
-import molecule.db.common.query.{Model2SqlQuery, SqlQueryBase}
 
 /**
  * Molecule has a unique attribute that is sorted first.

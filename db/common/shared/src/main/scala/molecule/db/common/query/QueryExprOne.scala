@@ -1,10 +1,10 @@
 package molecule.db.common.query
 
-import molecule.base.error.ModelError
+import scala.reflect.ClassTag
 import molecule.core.dataModel.*
 import molecule.core.dataModel.AttrOp.*
+import molecule.core.error.ModelError
 import molecule.db.common.javaSql.PrepStmt
-import scala.reflect.ClassTag
 
 /** Base class for cardinality-one attribute expressions
  *

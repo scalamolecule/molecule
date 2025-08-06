@@ -10,7 +10,7 @@ object _InsertValidationResolvers extends DbCommonBase("InsertValidationResolver
     s"""// GENERATED CODE ********************************
        |package molecule.db.common.validation.insert
        |
-       |import molecule.base.error.InsertError
+       |import molecule.core.error.InsertError
        |import molecule.core.dataModel.*
        |import molecule.db.common.api.MetaDb
        |

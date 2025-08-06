@@ -1,9 +1,9 @@
 package molecule.db.postgresql.spi
 
+import scala.concurrent.{Future, ExecutionContext as EC}
 import molecule.core.dataModel.DataModel
 import molecule.db.common.spi.SpiBaseJS_async
 import molecule.db.postgresql.query.Model2SqlQuery_postgresql
-import scala.concurrent.{Future, ExecutionContext as EC}
 
 
 object Spi_postgresql_async extends Spi_postgresql_async

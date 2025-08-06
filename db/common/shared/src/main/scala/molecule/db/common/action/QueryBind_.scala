@@ -4,8 +4,8 @@ package molecule.db.common.action
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.error.ModelError
 import molecule.core.dataModel.*
+import molecule.core.error.ModelError
 
 
 trait QueryBind_[Tpl, QueryType[_] <: Action] {

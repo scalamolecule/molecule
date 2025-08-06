@@ -1,10 +1,10 @@
 package molecule.db.common.transaction.strategy
 
 import java.sql.PreparedStatement as PS
-import molecule.base.util.BaseHelpers
-import molecule.core.dataModel.Element
-import molecule.db.common.query.Model2SqlQuery
 import scala.collection.mutable.ListBuffer
+import molecule.core.dataModel.Element
+import molecule.core.util.BaseHelpers
+import molecule.db.common.query.Model2SqlQuery
 
 trait SqlOps extends BaseHelpers {
 

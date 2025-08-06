@@ -1,10 +1,10 @@
 package molecule.db.common.validation
 
-import molecule.base.error.{ExecutionError, ModelError}
+import scala.annotation.tailrec
 import molecule.core.dataModel.*
+import molecule.core.error.{ExecutionError, ModelError}
 import molecule.db.common.api.MetaDb
 import molecule.db.common.ops.ModelTransformations_
-import scala.annotation.tailrec
 
 
 case class TxModelValidation(

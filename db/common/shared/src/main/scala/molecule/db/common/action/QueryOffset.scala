@@ -1,7 +1,7 @@
 package molecule.db.common.action
 
-import molecule.base.error.ModelError
 import molecule.core.dataModel.{DataModel, Value}
+import molecule.core.error.ModelError
 
 case class QueryOffset[Tpl](
   private[molecule] val dataModel: DataModel,

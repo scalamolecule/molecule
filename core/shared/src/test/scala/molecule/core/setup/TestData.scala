@@ -3,7 +3,7 @@ package molecule.core.setup
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.util.DateHandling
+import molecule.core.util.DateHandling
 
 trait TestData extends DateHandling {
 

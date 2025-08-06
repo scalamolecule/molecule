@@ -1,13 +1,13 @@
 package molecule.db.compliance.test.filter.map
 
-import molecule.base.error.ModelError
+import scala.concurrent.Future
+import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
-import scala.concurrent.Future
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.DbProviders
 
 case class MapSemantics(
   suite: MUnit,

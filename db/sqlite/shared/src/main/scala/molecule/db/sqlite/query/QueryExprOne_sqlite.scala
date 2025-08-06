@@ -1,10 +1,10 @@
 package molecule.db.sqlite.query
 
-import molecule.base.error.ModelError
+import scala.reflect.ClassTag
 import molecule.core.dataModel.{Op, Value}
+import molecule.core.error.ModelError
 import molecule.db.common.javaSql.PrepStmt
 import molecule.db.common.query.{Model2Query, QueryExprOne, SqlQueryBase}
-import scala.reflect.ClassTag
 
 trait QueryExprOne_sqlite
   extends QueryExprOne

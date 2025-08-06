@@ -1,11 +1,11 @@
 package molecule.db.sqlite.spi
 
+import scala.concurrent.{Future, ExecutionContext as EC}
 import cats.effect.IO
-import molecule.base.error.InsertError
+import molecule.core.error.InsertError
 import molecule.db.common.action.*
 import molecule.db.common.spi.{Conn, Spi_async, StreamingJdbc, TxReport}
 import molecule.db.common.util.ModelUtils
-import scala.concurrent.{Future, ExecutionContext as EC}
 
 trait Spi_sqlite_async extends Spi_async with StreamingJdbc with ModelUtils {
 

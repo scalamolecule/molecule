@@ -1,13 +1,12 @@
 package molecule.db.common.query
 
-import molecule.base.util.BaseHelpers
+import scala.collection.mutable
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import molecule.core.dataModel.*
-import molecule.core.util.JavaConversions
+import molecule.core.util.{BaseHelpers, JavaConversions}
 import molecule.db.common.api.MetaDb
 import molecule.db.common.javaSql.{PrepStmt, ResultSetInterface}
 import molecule.db.common.query.casting.strategy.{CastStrategy, CastTuple}
-import scala.collection.mutable
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 trait SqlQueryBase extends BaseHelpers with JavaConversions {
 

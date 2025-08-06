@@ -1,4 +1,6 @@
-package molecule.base.error
+package molecule.core.error
+
+import molecule.core.error.MoleculeError
 
 sealed trait MoleculeError extends Throwable with Product with Serializable {
   def msg: String

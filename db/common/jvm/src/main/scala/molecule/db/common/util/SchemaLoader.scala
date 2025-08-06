@@ -1,8 +1,8 @@
 package molecule.db.common.util
 
-import molecule.db.common.marshalling.ConnProxy
 import scala.io.Source
 import scala.util.Using
+import molecule.db.common.marshalling.ConnProxy
 
 trait SchemaLoader {
   def getSchema(schemaResourcePath: String): String = {

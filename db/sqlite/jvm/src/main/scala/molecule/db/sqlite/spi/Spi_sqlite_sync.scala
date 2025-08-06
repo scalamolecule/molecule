@@ -1,24 +1,24 @@
 package molecule.db.sqlite.spi
 
 import java.sql.{DriverManager, Statement, PreparedStatement as PS}
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.Future
 import molecule.core.dataModel.Element
 import molecule.db.common.action.{Delete, Insert, Save, Update}
 import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.javaSql.ResultSetInterface as RS
 import molecule.db.common.marshalling.{ConnProxy, JdbcProxy}
 import molecule.db.common.spi.{Conn, SpiBaseJVM_sync, TxReport}
+import molecule.db.common.transaction.*
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.strategy.delete.DeleteAction
 import molecule.db.common.transaction.strategy.insert.InsertAction
 import molecule.db.common.transaction.strategy.save.SaveAction
 import molecule.db.common.transaction.strategy.update.UpdateAction
-import molecule.db.common.transaction.*
 import molecule.db.common.util.Executor.*
 import molecule.db.sqlite.facade.JdbcHandlerSQlite_JVM
 import molecule.db.sqlite.query.Model2SqlQuery_sqlite
 import molecule.db.sqlite.transaction.{Insert_sqlite, Save_sqlite, Update_sqlite}
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
 
 object Spi_sqlite_sync extends Spi_sqlite_sync
 

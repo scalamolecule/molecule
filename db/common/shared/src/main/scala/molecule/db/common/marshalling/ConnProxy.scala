@@ -1,7 +1,7 @@
 package molecule.db.common.marshalling
 
 import java.util.UUID
-import molecule.base.util.BaseHelpers
+import molecule.core.util.BaseHelpers
 import molecule.db.common.api.MetaDb
 
 sealed trait ConnProxy {

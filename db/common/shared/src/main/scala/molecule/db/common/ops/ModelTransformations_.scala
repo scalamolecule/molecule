@@ -4,11 +4,11 @@ package molecule.db.common.ops
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.error.ModelError
+import scala.annotation.tailrec
 import molecule.core.dataModel.*
 import molecule.core.dataModel.Keywords.*
+import molecule.core.error.ModelError
 import molecule.db.common.api.Molecule
-import scala.annotation.tailrec
 
 object ModelTransformations_ extends ModelTransformations_
 

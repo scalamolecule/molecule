@@ -1,6 +1,6 @@
 package molecule.graphql.test.api.dsl.StarWars.input
 
-import molecule.base.metaModel.{CardOne, MetaAttribute, MetaEntity, MetaSegment}
+import molecule.core.dataModel.{CardOne, MetaAttribute, MetaEntity, MetaSegment}
 
 /** hej
  *

@@ -1,6 +1,6 @@
 package molecule.graphql.test.api.dsl.StarWars.leaf
 
-import molecule.base.metaModel.*
+import molecule.core.dataModel.*
 
 object Enums {
 

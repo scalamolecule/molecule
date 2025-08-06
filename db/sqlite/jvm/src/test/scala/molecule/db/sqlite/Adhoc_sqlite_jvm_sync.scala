@@ -2,7 +2,7 @@ package molecule.db.sqlite
 
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.sqlite.setup.DbProviders_sqlite
-import sync.*
+import molecule.db.sqlite.sync.*
 
 
 class Adhoc_sqlite_jvm_sync extends MUnit with DbProviders_sqlite with TestUtils {

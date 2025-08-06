@@ -1,10 +1,10 @@
 package molecule.db.common.transaction
 
-import molecule.base.error.ModelError
+import scala.annotation.tailrec
 import molecule.core.dataModel.*
+import molecule.core.error.ModelError
 import molecule.db.common.transaction.ops.InsertOps
 import molecule.db.common.validation.insert.InsertValidators_
-import scala.annotation.tailrec
 
 trait ResolveInsert
   extends InsertResolvers

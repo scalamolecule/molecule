@@ -3,8 +3,8 @@ package molecule.db.common.spi
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.base.error.ModelError
 import molecule.core.dataModel.*
+import molecule.core.error.ModelError
 import molecule.db.common.javaSql.ResultSetInterface as RS
 import molecule.db.common.util.ModelUtils
 

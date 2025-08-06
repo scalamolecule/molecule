@@ -4,7 +4,7 @@ import boopickle.Default.*
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
-import async.*
+import molecule.db.mysql.async.*
 import molecule.db.mysql.setup.DbProviders_mysql
 
 class Adhoc_mysql_js_async extends MUnit with DbProviders_mysql with TestUtils {

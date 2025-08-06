@@ -3,7 +3,7 @@ package molecule.db.common.marshalling
 import java.nio.ByteBuffer
 import boopickle.CompositePickler
 import boopickle.Default.*
-import molecule.base.error.{InsertError, MoleculeError}
+import molecule.core.error.{InsertError, MoleculeError}
 import molecule.db.common.marshalling.Boopicklers.*
 import sttp.tapir.*
 import sttp.tapir.EndpointIO.Info

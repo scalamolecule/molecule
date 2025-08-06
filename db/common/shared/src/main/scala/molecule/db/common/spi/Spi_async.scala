@@ -1,9 +1,9 @@
 package molecule.db.common.spi
 
-import cats.effect.IO
-import molecule.base.error.{ExecutionError, InsertError}
-import molecule.db.common.action.*
 import scala.concurrent.{Future, ExecutionContext as EC}
+import cats.effect.IO
+import molecule.core.error.{ExecutionError, InsertError}
+import molecule.db.common.action.*
 
 trait Spi_async {
 

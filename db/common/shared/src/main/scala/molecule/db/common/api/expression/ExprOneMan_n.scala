@@ -1,11 +1,10 @@
 package molecule.db.common.api.expression
 
-import molecule.base.metaModel.CardOne
+import scala.Tuple.{:*, Init}
 import molecule.core.dataModel.*
 import molecule.core.dataModel.Keywords.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
-import scala.Tuple.{:*, Init}
 
 
 trait ExprOneMan_n[T, Tpl <: Tuple, Entity[_ <: Tuple]](

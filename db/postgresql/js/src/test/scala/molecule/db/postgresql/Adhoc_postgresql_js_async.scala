@@ -4,7 +4,7 @@ import boopickle.Default.*
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
-import async.*
+import molecule.db.postgresql.async.*
 import molecule.db.postgresql.setup.DbProviders_postgresql
 
 class Adhoc_postgresql_js_async extends MUnit with DbProviders_postgresql with TestUtils {

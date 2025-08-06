@@ -1,14 +1,14 @@
 package molecule.db.compliance.test.api
 
-import cats.effect.IO
-import molecule.base.error.{InsertErrors, ValidationErrors}
-import molecule.core.setup.{MUnit_io, TestUtils}
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders, Platform}
-import molecule.db.common.api.Api_io
-import molecule.db.common.spi.Spi_io
 import scala.annotation.nowarn
 import scala.concurrent.duration.DurationInt
+import cats.effect.IO
+import molecule.core.error.{InsertErrors, ValidationErrors}
+import molecule.core.setup.{MUnit_io, TestUtils}
+import molecule.db.common.api.Api_io
+import molecule.db.common.spi.Spi_io
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.{DbProviders, Platform}
 
 
 case class IOApi(

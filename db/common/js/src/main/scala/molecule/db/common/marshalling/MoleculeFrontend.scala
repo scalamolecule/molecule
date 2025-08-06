@@ -1,9 +1,13 @@
 package molecule.db.common.marshalling
 
 import java.nio.ByteBuffer
+import scala.concurrent.Future
+import scala.scalajs.js
+import scala.scalajs.js.typedarray.TypedArrayBufferOps.*
+import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
 import boopickle.Default.*
-import molecule.base.error.{ExecutionError, MoleculeError}
 import molecule.core.dataModel.*
+import molecule.core.error.{ExecutionError, MoleculeError}
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.deserialize.UnpickleTpls
 import molecule.db.common.spi.TxReport
@@ -15,10 +19,6 @@ import sttp.client4.UriContext
 import sttp.client4.fetch.FetchBackend
 import sttp.tapir.PublicEndpoint
 import sttp.tapir.client.sttp4.SttpClientInterpreter
-import scala.concurrent.Future
-import scala.scalajs.js
-import scala.scalajs.js.typedarray.TypedArrayBufferOps.*
-import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
 
 case class MoleculeFrontend(host: String, port: Int, protocol: String)
   extends MoleculeRpc
@@ -61,7 +61,7 @@ case class MoleculeFrontend(host: String, port: Int, protocol: String)
       case e: dom.Event =>
         logger.error(s"WebSocket error (non-ErrorEvent): " + e.asInstanceOf[js.Any])
 
-      // not uncommented since it can try to close an already closed connection
+      // Keep commented out since it can try to close an already closed connection
       // socket.close(1000, e.toString)
     }
     socket.onclose = {

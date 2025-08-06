@@ -2,13 +2,13 @@ package molecule.db.compliance.test.validation.update
 
 import java.net.URI
 import java.util.UUID
-import molecule.base.error.ValidationErrors
+import molecule.core.error.ValidationErrors
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Validation.*
-import molecule.db.compliance.setup.DbProviders
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
+import molecule.db.compliance.domains.dsl.Validation.*
+import molecule.db.compliance.setup.DbProviders
 
 
 case class TypesSeq(

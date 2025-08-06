@@ -1,9 +1,8 @@
 package molecule.db.common.query
 
-import molecule.base.error.ModelError
-import molecule.base.metaModel.{CardOne, CardSet}
-import molecule.core.dataModel.*
 import scala.collection.mutable.ListBuffer
+import molecule.core.dataModel.*
+import molecule.core.error.ModelError
 
 
 trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>

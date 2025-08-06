@@ -1,12 +1,12 @@
 package molecule.db.h2
 
+import scala.annotation.nowarn
 import molecule.db.compliance.domains.dsl.Types.Entity
-import Zio.*
+import molecule.db.h2.Zio.*
 import molecule.db.h2.setup.DbProviders_h2_zio
 import zio.*
 import zio.test.*
 import zio.test.TestAspect.*
-import scala.annotation.nowarn
 
 
 object Adhoc_h2_jvm_zio extends ZIOSpecDefault with DbProviders_h2_zio {

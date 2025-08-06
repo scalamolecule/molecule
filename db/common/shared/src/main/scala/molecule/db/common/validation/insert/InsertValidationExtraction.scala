@@ -1,7 +1,7 @@
 package molecule.db.common.validation.insert
 
-import molecule.base.error.{InsertError, ModelError}
 import molecule.core.dataModel.*
+import molecule.core.error.{InsertError, ModelError}
 import molecule.db.common.api.MetaDb
 import molecule.db.common.util.ModelUtils
 

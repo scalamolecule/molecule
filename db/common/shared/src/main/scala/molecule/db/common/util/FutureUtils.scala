@@ -1,9 +1,9 @@
 package molecule.db.common.util
 
-import molecule.base.error.{ExecutionError, MoleculeError}
-import molecule.core.util.MoleculeLogging
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Await, ExecutionContext, Future}
+import molecule.core.error.{ExecutionError, MoleculeError}
+import molecule.core.util.MoleculeLogging
 
 trait FutureUtils extends ModelUtils with MoleculeLogging {
 

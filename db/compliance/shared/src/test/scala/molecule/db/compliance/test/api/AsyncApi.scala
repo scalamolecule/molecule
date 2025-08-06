@@ -1,15 +1,15 @@
 package molecule.db.compliance.test.api
 
+import scala.annotation.nowarn
 import cats.effect.unsafe.implicits.global as ioRuntime
-import molecule.base.error.{InsertErrors, ValidationErrors}
+import molecule.core.error.{InsertErrors, ValidationErrors}
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.compliance.domains.dsl.Refs.*
-import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.compliance.setup.{DbProviders, Platform}
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
-import scala.annotation.nowarn
+import molecule.db.compliance.domains.dsl.Refs.*
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.setup.{DbProviders, Platform}
 
 @nowarn
 case class AsyncApi(
