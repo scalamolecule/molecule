@@ -6,7 +6,7 @@ import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprMapMan_n[T, Tpl <: Tuple, Entity[_ <: Tuple]](entity: [tpl <: Tuple] => DataModel => Entity[tpl]) extends CardMap { self: Molecule  =>
+trait ExprMapMan_n[T, Tpl <: Tuple, Entity[_ <: Tuple]](entity: [tpl <: Tuple] => DataModel => Entity[tpl]) extends MapValue { self: Molecule  =>
   def apply (                                       ): Entity[Tpl           ] = entity[Tpl           ](addMap  (dataModel, NoValue, Map.empty[String, T] ))
   def apply (map  : Map[String, T]                  ): Entity[Tpl           ] = entity[Tpl           ](addMap  (dataModel, Eq     , map                  ))
   def apply (key  : String                          ): Entity[Init[Tpl] :* T] = entity[Init[Tpl] :* T](addMapKs(dataModel, Eq     , Seq(key)             ))

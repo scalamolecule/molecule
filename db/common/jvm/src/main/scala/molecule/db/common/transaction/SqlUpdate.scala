@@ -6,14 +6,10 @@ import boopickle.Default.*
 import molecule.core.dataModel.*
 import molecule.core.error.ModelError
 import molecule.db.common.spi.SpiHelpers
-import molecule.db.common.transaction.ops.UpdateOps
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.strategy.update.{UpdateAction, UpdateRoot}
 
-trait SqlUpdate
-  extends UpdateOps
-    with SqlBaseOps
-    with SpiHelpers { self: ResolveUpdate & SqlOps =>
+trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate & SqlOps =>
 
   protected var root        : UpdateRoot   = null
   protected var updateAction: UpdateAction = null
@@ -71,7 +67,7 @@ trait SqlUpdate
     }
   }
 
-  override def handleIds(ent: String, ids0: Seq[Long]): Unit = {
+  def handleIds(ent: String, ids0: Seq[Long]): Unit = {
     if (query.ids.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in update.")
     }
@@ -82,7 +78,7 @@ trait SqlUpdate
     updateAction.ids = query.ids
   }
 
-  override def handleFilterAttr[T <: Attr & Tacit](filterAttr: T): Unit = {
+  def handleFilterAttr[T <: Attr & Tacit](filterAttr: T): Unit = {
     filterAttr.asInstanceOf[Attr] match {
       case a: AttrSeqTac if a.op == Eq => noCollectionFilterEq(a.name)
       case a: AttrSetTac if a.op == Eq => noCollectionFilterEq(a.name)
@@ -109,7 +105,7 @@ trait SqlUpdate
     s"SUBSTRING($attr, $s, $length)"
   }
 
-  override protected def updateOne[T](
+  protected def updateOne[T](
     ent: String,
     attr: String,
     op: Op,
@@ -193,11 +189,11 @@ trait SqlUpdate
   }
 
 
-  override def handleRef(r: Ref): Unit = {
+  def handleRef(r: Ref): Unit = {
     isRefUpdate = true
-    val Ref(ent, refAttr, ref, card, _, _) = r
-    updateAction = card match {
-      case CardOne =>
+    val Ref(ent, refAttr, ref, value, _, _, _) = r
+    updateAction = value match {
+      case ManyToOne =>
         query.idCols += s"$ref.id"
         query.joins += s"$join $ref ON $ent.$refAttr = $ref.id"
         // Switch strategy
@@ -217,7 +213,7 @@ trait SqlUpdate
     }
   }
 
-  override protected def updateSetEq[T](
+  protected def updateSetEq[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -230,7 +226,7 @@ trait SqlUpdate
     updateIterableEq(ent, attr, optRef, set, exts, set2array)
   }
 
-  override protected def updateSetAdd[T](
+  protected def updateSetAdd[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -243,7 +239,7 @@ trait SqlUpdate
     updateIterableAdd(ent, attr, optRef, set, exts, set2array)
   }
 
-  override protected def updateSetRemove[T](
+  protected def updateSetRemove[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -256,7 +252,7 @@ trait SqlUpdate
     updateIterableRemove(ent, attr, optRef, set, exts, set2array)
   }
 
-  override protected def updateSeqEq[T](
+  protected def updateSeqEq[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -269,7 +265,7 @@ trait SqlUpdate
     updateIterableEq(ent, attr, optRef, seq, exts, seq2array)
   }
 
-  override protected def updateSeqAdd[T](
+  protected def updateSeqAdd[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -282,7 +278,7 @@ trait SqlUpdate
     updateIterableAdd(ent, attr, optRef, seq, exts, seq2array)
   }
 
-  override protected def updateSeqRemove[T](
+  protected def updateSeqRemove[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -295,7 +291,7 @@ trait SqlUpdate
     updateIterableRemove(ent, attr, optRef, seq, exts, seq2array)
   }
 
-  override protected def updateByteArray(
+  protected def updateByteArray(
     ent: String,
     attr: String,
     byteArray: Array[Byte],
@@ -308,7 +304,7 @@ trait SqlUpdate
     }
   }
 
-  override protected def updateMapEq[T](
+  protected def updateMapEq[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -328,7 +324,7 @@ trait SqlUpdate
     }
   }
 
-  override protected def updateMapAdd[T](
+  protected def updateMapAdd[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -349,7 +345,7 @@ trait SqlUpdate
   }
 
 
-  override protected def updateMapRemove(
+  protected def updateMapRemove(
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -368,7 +364,7 @@ trait SqlUpdate
     }
   }
 
-  override def handleBackRef(backRef: BackRef): Unit = {
+  def handleBackRef(backRef: BackRef): Unit = {
     // Switch strategy to previous action
     updateAction = updateAction.backRef
   }

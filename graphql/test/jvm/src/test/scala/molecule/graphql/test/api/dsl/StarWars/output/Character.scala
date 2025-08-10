@@ -27,14 +27,14 @@
 //
 //
 //private[dsl] class Character_0[t](override val dataModel: DataModel) extends Character_0_refs[t](dataModel) with Character_base {
-//  lazy val id          = new Character_1[String             , String](dataModel.add(id_man       )) with CardOne
-//  lazy val name        = new Character_1[String             , String](dataModel.add(name_man     )) with CardOne
-//  lazy val friends     = new Character_1[Set[Long]          , Long  ](dataModel.add(friends_man  )) with CardSet
-//  lazy val appearsIn   = new Character_1[Set[String]        , String](dataModel.add(appearsIn_man)) with CardSet
+//  lazy val id          = new Character_1[String             , String](dataModel.add(id_man       )) with OneValue
+//  lazy val name        = new Character_1[String             , String](dataModel.add(name_man     )) with OneValue
+//  lazy val friends     = new Character_1[Set[Long]          , Long  ](dataModel.add(friends_man  )) with SetValue
+//  lazy val appearsIn   = new Character_1[Set[String]        , String](dataModel.add(appearsIn_man)) with SetValue
 //
-//  lazy val name_?      = new Character_1[Option[String]     , String](dataModel.add(name_opt     )) with CardOne
-//  lazy val friends_?   = new Character_1[Option[Set[Long]]  , Long  ](dataModel.add(friends_opt  )) with CardSet
-//  lazy val appearsIn_? = new Character_1[Option[Set[String]], String](dataModel.add(appearsIn_opt)) with CardSet
+//  lazy val name_?      = new Character_1[Option[String]     , String](dataModel.add(name_opt     )) with OneValue
+//  lazy val friends_?   = new Character_1[Option[Set[Long]]  , Long  ](dataModel.add(friends_opt  )) with SetValue
+//  lazy val appearsIn_? = new Character_1[Option[Set[String]], String](dataModel.add(appearsIn_opt)) with SetValue
 //}
 //
 //private[dsl] class Character_0_refs[t](override val dataModel: DataModel) extends Molecule_00 {
@@ -54,7 +54,7 @@
 //      ))
 //  }
 //
-//  object Friends extends Character_0[t](dataModel.add(_dm.Ref("Character", "friends", "Character", CardSet, false, List(0, 2, 0)))) with NestedInit
+//  object Friends extends Character_0[t](dataModel.add(_dm.Ref("Character", "friends", "Character", SetValue, false, List(0, 2, 0)))) with NestedInit
 //
 //  object _Droid     extends Droid_0    [t](dataModel.add(_dm.BackRef("Droid", "Character", List(1, 0))))
 //  object _Human     extends Human_0    [t](dataModel.add(_dm.BackRef("Human", "Character", List(2, 0))))
@@ -62,13 +62,13 @@
 //
 //
 //private[dsl] class Character_1[A, t](override val dataModel: DataModel) extends Character_1_refs[A, t](dataModel) with Character_base {
-//  lazy val id          = new Character_2[A, Long               , Long  ](dataModel.add(id_man       )) with CardOne
-//  lazy val name        = new Character_2[A, String             , String](dataModel.add(name_man     )) with CardOne
-//  lazy val friends     = new Character_2[A, Set[Long]          , Long  ](dataModel.add(friends_man  )) with CardSet
-//  lazy val appearsIn   = new Character_2[A, Set[String]        , String](dataModel.add(appearsIn_man)) with CardSet
-//  lazy val name_?      = new Character_2[A, Option[String]     , String](dataModel.add(name_opt     )) with CardOne
-//  lazy val friends_?   = new Character_2[A, Option[Set[Long]]  , Long  ](dataModel.add(friends_opt  )) with CardSet
-//  lazy val appearsIn_? = new Character_2[A, Option[Set[String]], String](dataModel.add(appearsIn_opt)) with CardSet
+//  lazy val id          = new Character_2[A, Long               , Long  ](dataModel.add(id_man       )) with OneValue
+//  lazy val name        = new Character_2[A, String             , String](dataModel.add(name_man     )) with OneValue
+//  lazy val friends     = new Character_2[A, Set[Long]          , Long  ](dataModel.add(friends_man  )) with SetValue
+//  lazy val appearsIn   = new Character_2[A, Set[String]        , String](dataModel.add(appearsIn_man)) with SetValue
+//  lazy val name_?      = new Character_2[A, Option[String]     , String](dataModel.add(name_opt     )) with OneValue
+//  lazy val friends_?   = new Character_2[A, Option[Set[Long]]  , Long  ](dataModel.add(friends_opt  )) with SetValue
+//  lazy val appearsIn_? = new Character_2[A, Option[Set[String]], String](dataModel.add(appearsIn_opt)) with SetValue
 //}
 //
 //private[dsl] class Character_1_refs[A, t](override val dataModel: DataModel) extends Molecule_01[A] {
@@ -88,7 +88,7 @@
 //      ))
 //  }
 //
-//  object Friends extends Character_1[A, t](dataModel.add(_dm.Ref("Character", "friends", "Character", CardSet, false, List(0, 2, 0)))) with NestedInit
+//  object Friends extends Character_1[A, t](dataModel.add(_dm.Ref("Character", "friends", "Character", SetValue, false, List(0, 2, 0)))) with NestedInit
 //
 //  object _Droid     extends Droid_1    [A, t](dataModel.add(_dm.BackRef("Droid", "Character", List(1, 0))))
 //  object _Human     extends Human_1    [A, t](dataModel.add(_dm.BackRef("Human", "Character", List(2, 0))))
@@ -96,13 +96,13 @@
 //
 //
 //private[dsl] class Character_2[A, B, t](override val dataModel: DataModel) extends Character_2_refs[A, B, t](dataModel) with Character_base {
-//  lazy val id          = new Character_3[A, B, Long               , Long  ](dataModel.add(id_man       )) with CardOne
-//  lazy val name        = new Character_3[A, B, String             , String](dataModel.add(name_man     )) with CardOne
-//  lazy val friends     = new Character_3[A, B, Set[Long]          , Long  ](dataModel.add(friends_man  )) with CardSet
-//  lazy val appearsIn   = new Character_3[A, B, Set[String]        , String](dataModel.add(appearsIn_man)) with CardSet
-//  lazy val name_?      = new Character_3[A, B, Option[String]     , String](dataModel.add(name_opt     )) with CardOne
-//  lazy val friends_?   = new Character_3[A, B, Option[Set[Long]]  , Long  ](dataModel.add(friends_opt  )) with CardSet
-//  lazy val appearsIn_? = new Character_3[A, B, Option[Set[String]], String](dataModel.add(appearsIn_opt)) with CardSet
+//  lazy val id          = new Character_3[A, B, Long               , Long  ](dataModel.add(id_man       )) with OneValue
+//  lazy val name        = new Character_3[A, B, String             , String](dataModel.add(name_man     )) with OneValue
+//  lazy val friends     = new Character_3[A, B, Set[Long]          , Long  ](dataModel.add(friends_man  )) with SetValue
+//  lazy val appearsIn   = new Character_3[A, B, Set[String]        , String](dataModel.add(appearsIn_man)) with SetValue
+//  lazy val name_?      = new Character_3[A, B, Option[String]     , String](dataModel.add(name_opt     )) with OneValue
+//  lazy val friends_?   = new Character_3[A, B, Option[Set[Long]]  , Long  ](dataModel.add(friends_opt  )) with SetValue
+//  lazy val appearsIn_? = new Character_3[A, B, Option[Set[String]], String](dataModel.add(appearsIn_opt)) with SetValue
 //}
 //
 //private[dsl] class Character_2_refs[A, B, t](override val dataModel: DataModel) extends Molecule_02[A, B] {
@@ -122,7 +122,7 @@
 //      ))
 //  }
 //
-//  object Friends extends Character_2[A, B, t](dataModel.add(_dm.Ref("Character", "friends", "Character", CardSet, false, List(0, 2, 0)))) with NestedInit
+//  object Friends extends Character_2[A, B, t](dataModel.add(_dm.Ref("Character", "friends", "Character", SetValue, false, List(0, 2, 0)))) with NestedInit
 //
 //  object _Droid     extends Droid_2    [A, B, t](dataModel.add(_dm.BackRef("Droid", "Character", List(1, 0))))
 //  object _Human     extends Human_2    [A, B, t](dataModel.add(_dm.BackRef("Human", "Character", List(2, 0))))

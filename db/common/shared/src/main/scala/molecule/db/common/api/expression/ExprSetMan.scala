@@ -5,7 +5,7 @@ import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprSetMan[T, Entity](entity: DataModel => Entity) extends CardSet { self: Molecule =>
+trait ExprSetMan[T, Entity](entity: DataModel => Entity) extends SetValue { self: Molecule =>
   def apply (                 ) = entity(addSet(dataModel, NoValue, Set.empty[T]   ))
   def apply (set : Set[T]     ) = entity(addSet(dataModel, Eq     , set            ))
   def has   (v   : T, vs: T*  ) = entity(addSet(dataModel, Has    , Set(v) ++ vs   ))
@@ -17,11 +17,11 @@ trait ExprSetMan[T, Entity](entity: DataModel => Entity) extends CardSet { self:
   def remove(v   : T, vs: T*  ) = entity(addSet(dataModel, Remove , Set(v) ++ vs   ))
   def remove(vs  : Iterable[T]) = entity(addSet(dataModel, Remove , vs.toSet       ))
 
-  def has  (a: Molecule_0 & CardOne) = entity(filterAttr(dataModel, Has  , a))
-  def hasNo(a: Molecule_0 & CardOne) = entity(filterAttr(dataModel, HasNo, a))
+  def has  (a: Molecule_0 & OneValue) = entity(filterAttr(dataModel, Has  , a))
+  def hasNo(a: Molecule_0 & OneValue) = entity(filterAttr(dataModel, HasNo, a))
 }
 
-trait ExprSetMan_Enum[T, Entity](entity: DataModel => Entity) extends CardSet { self: Molecule =>
+trait ExprSetMan_Enum[T, Entity](entity: DataModel => Entity) extends SetValue { self: Molecule =>
   def apply (                 ) = entity(addSet(dataModel, NoValue, Set.empty[T]                                  ))
   def apply (set : Set[T]     ) = entity(addSet(dataModel, Eq     , set           .map(_.toString.asInstanceOf[T])))
   def has   (v   : T, vs: T*  ) = entity(addSet(dataModel, Has    , (Set(v) ++ vs).map(_.toString.asInstanceOf[T])))

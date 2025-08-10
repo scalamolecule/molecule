@@ -17,8 +17,8 @@
 //      MetaEntity(
 //        "createReview",
 //        List(
-//          MetaAttribute("episode", CardOne, "Episode", options = List("mandatory")),
-//          MetaAttribute("review", CardOne, "InputReview", options = List("mandatory"))
+//          MetaAttribute("episode", OneValue, "Episode", options = List("mandatory")),
+//          MetaAttribute("review", OneValue, "InputReview", options = List("mandatory"))
 //        ),
 //        List("Review")
 //      )

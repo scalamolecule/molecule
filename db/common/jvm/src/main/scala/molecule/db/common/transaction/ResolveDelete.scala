@@ -3,9 +3,8 @@ package molecule.db.common.transaction
 import scala.annotation.tailrec
 import molecule.core.dataModel.*
 import molecule.core.error.ModelError
-import molecule.db.common.transaction.ops.DeleteOps
 
-trait ResolveDelete { self: DeleteOps =>
+trait ResolveDelete { self: SqlDelete =>
 
   @tailrec
   final def resolve(elements: List[Element], topLevel: Boolean): Unit = {
@@ -28,7 +27,7 @@ trait ResolveDelete { self: DeleteOps =>
             resolve(tail, topLevel)
 
           case _ => throw ModelError(
-            s"Can only filter delete by values applied to tacit card-one attributes (${a.name})."
+            s"Can only filter delete by values applied to tacit value-one attributes (${a.name})."
           )
         }
 

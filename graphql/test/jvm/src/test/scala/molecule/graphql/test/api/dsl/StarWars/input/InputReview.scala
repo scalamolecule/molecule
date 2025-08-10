@@ -1,6 +1,6 @@
 package molecule.graphql.test.api.dsl.StarWars.input
 
-import molecule.core.dataModel.{CardOne, MetaAttribute, MetaEntity, MetaSegment}
+import molecule.core.dataModel.*
 
 /** hej
  *
@@ -15,8 +15,8 @@ case class InputReview(stars: Int, commentary: Option[String] = None) {
       MetaEntity(
         "InputReview",
         List(
-          MetaAttribute("stars", CardOne, "Int", options = List("mandatory")),
-          MetaAttribute("commentary", CardOne, "String")
+          MetaAttribute("stars", OneValue, "Int", options = List("mandatory")),
+          MetaAttribute("commentary", OneValue, "String")
         )
       )
     )

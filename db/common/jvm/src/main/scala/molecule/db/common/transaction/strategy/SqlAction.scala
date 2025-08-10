@@ -41,6 +41,20 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ent: String) {
     sibling
   }
 
+//  def addParent[T <: SqlAction](parent2: T, addRowSetter: Boolean = false): T = {
+////    parent.parent = parent
+//
+//
+////    parent.children += sibling
+////    if (addRowSetter) {
+////      sibling.rowSetters += ListBuffer.empty[PS => Unit]
+////    }
+////    sibling
+//    parent
+//  }
+
+//  def getGrandParent = parent.parent
+
   def replaceSibling[T <: SqlAction](sibling: T, addRowSetter: Boolean = false): T = {
     parent.children.clear()
     parent.children += sibling

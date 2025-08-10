@@ -6,7 +6,7 @@ import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprOneMan_1_Boolean[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends CardOne { self: Molecule  =>
+trait ExprOneMan_1_Boolean[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends OneValue { self: Molecule  =>
   def apply(             ): Entity[T] = entity[T](addOne(dataModel, NoValue, Nil         ))
   def apply(v : T, vs: T*): Entity[T] = entity[T](addOne(dataModel, Eq     , Seq(v) ++ vs))
   def apply(vs: Seq[T]   ): Entity[T] = entity[T](addOne(dataModel, Eq     , vs          ))
@@ -16,8 +16,8 @@ trait ExprOneMan_1_Boolean[T, Entity[_]](entity: [t] => DataModel => Entity[t]) 
   def apply(v: qm): Entity[T] = entity[T](addOne(dataModel, Eq , Nil, true))
   def not  (v: qm): Entity[T] = entity[T](addOne(dataModel, Neq, Nil, true))
 
-  def apply(a: Molecule_0 & CardOne): Entity[T] = entity[T](filterAttr(dataModel, Eq , a))
-  def not  (a: Molecule_0 & CardOne): Entity[T] = entity[T](filterAttr(dataModel, Neq, a))
+  def apply(a: Molecule_0 & OneValue): Entity[T] = entity[T](filterAttr(dataModel, Eq , a))
+  def not  (a: Molecule_0 & OneValue): Entity[T] = entity[T](filterAttr(dataModel, Neq, a))
 
   def apply(kw: distinct): Entity[Set[T]] = entity[Set[T]](asIs (dataModel, kw))
 
@@ -27,13 +27,13 @@ trait ExprOneMan_1_Boolean[T, Entity[_]](entity: [t] => DataModel => Entity[t]) 
 }
 
 
-trait ExprOneMan_1_Boolean_Aggr[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends CardOne { self: Molecule  =>
+trait ExprOneMan_1_Boolean_Aggr[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends OneValue { self: Molecule  =>
   def apply(kw: count)        : Entity[Int] = entity[Int](toInt(dataModel, kw))
   def apply(kw: countDistinct): Entity[Int] = entity[Int](toInt(dataModel, kw))
 }
 
 
-trait ExprOneMan_1_Boolean_AggrOps[T, Entity <: Molecule](entity: DataModel => Entity) extends CardOne { self: Molecule  =>
+trait ExprOneMan_1_Boolean_AggrOps[T, Entity <: Molecule](entity: DataModel => Entity) extends OneValue { self: Molecule  =>
   def apply(v    : T): Entity = entity(addAggrOp(dataModel, Eq , Some(v)    ))
   def not  (v    : T): Entity = entity(addAggrOp(dataModel, Neq, Some(v)    ))
   def <    (upper: T): Entity = entity(addAggrOp(dataModel, Lt , Some(upper)))

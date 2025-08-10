@@ -3,12 +3,9 @@ package molecule.db.common.transaction
 import scala.annotation.tailrec
 import molecule.core.dataModel.*
 import molecule.core.error.ModelError
-import molecule.db.common.transaction.ops.InsertOps
 import molecule.db.common.validation.insert.InsertValidators_
 
-trait ResolveInsert
-  extends InsertResolvers
-    with InsertValidators_ { self: InsertOps =>
+trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlInsert =>
 
   @tailrec
   final override def resolve(
@@ -72,8 +69,8 @@ trait ResolveInsert
             }
           }
 
-        case Ref(ent, refAttr, ref, card, _, _) =>
-          val refResolver = addRef(ent, refAttr, ref, card)
+        case Ref(ent, refAttr, ref, relationship, _, _, _) =>
+          val refResolver = addRef(ent, refAttr, ref, relationship)
           resolve(tail, resolvers :+ refResolver, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRef, _, _) =>
@@ -81,7 +78,7 @@ trait ResolveInsert
           val backRefResolver = addBackRef(backRef)
           resolve(tail, resolvers :+ backRefResolver, tplIndex, Nil)
 
-        case OptRef(Ref(ent, refAttr, ref, _, _, _), optRefElements) =>
+        case OptRef(Ref(ent, refAttr, ref, _, _, _, _), optRefElements) =>
           val optRefResolver = addOptRef(tplIndex, ent, refAttr, ref, optRefElements)
           resolve(tail, resolvers :+ optRefResolver, tplIndex + 1, Nil)
 
@@ -89,13 +86,13 @@ trait ResolveInsert
           val optEntityResolver = addOptEntity(attrs)
           resolve(tail, resolvers :+ optEntityResolver, tplIndex + 1, Nil)
 
-        case Nested(Ref(ent, refAttr, ref, _, _, _), nestedElements) =>
-          val nestedResolver = addNested(true, tplIndex, ent, refAttr, ref, nestedElements)
+        case Nested(Ref(ent, refAttr, ref, relationship, _, _, _), nestedElements) =>
+          val nestedResolver = addNested(true, tplIndex, ent, refAttr, ref, relationship, nestedElements)
           resolve(tail, resolvers :+ nestedResolver, tplIndex, Nil)
 
-        case OptNested(Ref(ent, refAttr, ref, _, _, _), nestedElements) =>
+        case OptNested(Ref(ent, refAttr, ref, relationship, _, _, _), nestedElements) =>
           // (same behaviour as mandatory nested - the list can have data or not)
-          val optNestedResolver = addNested(false, tplIndex, ent, refAttr, ref, nestedElements)
+          val optNestedResolver = addNested(false, tplIndex, ent, refAttr, ref, relationship, nestedElements)
           resolve(tail, resolvers :+ optNestedResolver, tplIndex, Nil)
       }
       case Nil             => resolvers

@@ -7,7 +7,7 @@ case class InsertRefOne(
   parent: InsertAction,
   sqlOps: SqlOps,
   ent: String,
-  refAttr: String,
+    refAttr: String,
   ref: String,
   refAttrIndex: Int,
   rowCount: Int

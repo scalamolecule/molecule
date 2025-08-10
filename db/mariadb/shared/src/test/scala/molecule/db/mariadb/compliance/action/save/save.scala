@@ -5,17 +5,17 @@ import molecule.db
 import molecule.db.compliance.test.action.save.*
 import molecule.db.mariadb.setup.Api_mariadb_async
 
-class SaveCardOneTest extends MUnit {
-  SaveCardOne(this, Api_mariadb_async)
+class SaveOneValueTest extends MUnit {
+  SaveOneValue(this, Api_mariadb_async)
 }
-class SaveCardSeqTest extends MUnit_arrays {
-  SaveCardSeq(this, Api_mariadb_async)
+class SaveSeqValueTest extends MUnit_arrays {
+  SaveSeqValue(this, Api_mariadb_async)
 }
-class SaveCardSetTest extends MUnit {
-  SaveCardSet(this, Api_mariadb_async)
+class SaveSetValueTest extends MUnit {
+  SaveSetValue(this, Api_mariadb_async)
 }
-class SaveCardMapTest extends MUnit {
-  SaveCardMap(this, Api_mariadb_async)
+class SaveMapValueTest extends MUnit {
+  SaveMapValue(this, Api_mariadb_async)
 }
 class SaveRefsTest extends MUnit {
   SaveRefs(this, Api_mariadb_async)

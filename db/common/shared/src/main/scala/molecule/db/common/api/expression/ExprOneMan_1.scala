@@ -6,7 +6,7 @@ import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprOneMan_1[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends CardOne { self: Molecule =>
+trait ExprOneMan_1[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends OneValue { self: Molecule =>
   def apply(                ): Entity[T] = entity[T](addOne(dataModel, NoValue, Nil         ))
   def apply(v    : T, vs: T*): Entity[T] = entity[T](addOne(dataModel, Eq     , Seq(v) ++ vs))
   def apply(vs   : Seq[T]   ): Entity[T] = entity[T](addOne(dataModel, Eq     , vs          ))
@@ -24,12 +24,12 @@ trait ExprOneMan_1[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends 
   def >    (lower: qm): Entity[T] = entity[T](addOne(dataModel, Gt , Nil, true))
   def >=   (lower: qm): Entity[T] = entity[T](addOne(dataModel, Ge , Nil, true))
 
-  def apply(a: Molecule_0 & CardOne): Entity[T] = entity[T](filterAttr(dataModel, Eq , a))
-  def not  (a: Molecule_0 & CardOne): Entity[T] = entity[T](filterAttr(dataModel, Neq, a))
-  def <    (a: Molecule_0 & CardOne): Entity[T] = entity[T](filterAttr(dataModel, Lt , a))
-  def <=   (a: Molecule_0 & CardOne): Entity[T] = entity[T](filterAttr(dataModel, Le , a))
-  def >    (a: Molecule_0 & CardOne): Entity[T] = entity[T](filterAttr(dataModel, Gt , a))
-  def >=   (a: Molecule_0 & CardOne): Entity[T] = entity[T](filterAttr(dataModel, Ge , a))
+  def apply(a: Molecule_0 & OneValue): Entity[T] = entity[T](filterAttr(dataModel, Eq , a))
+  def not  (a: Molecule_0 & OneValue): Entity[T] = entity[T](filterAttr(dataModel, Neq, a))
+  def <    (a: Molecule_0 & OneValue): Entity[T] = entity[T](filterAttr(dataModel, Lt , a))
+  def <=   (a: Molecule_0 & OneValue): Entity[T] = entity[T](filterAttr(dataModel, Le , a))
+  def >    (a: Molecule_0 & OneValue): Entity[T] = entity[T](filterAttr(dataModel, Gt , a))
+  def >=   (a: Molecule_0 & OneValue): Entity[T] = entity[T](filterAttr(dataModel, Ge , a))
 
   def apply(kw: mins)    : Entity[Set[T]] = entity[Set[T]](asIs (dataModel, kw, Some(kw.n)))
   def apply(kw: maxs)    : Entity[Set[T]] = entity[Set[T]](asIs (dataModel, kw, Some(kw.n)))
@@ -38,7 +38,7 @@ trait ExprOneMan_1[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends 
 }
 
 
-trait ExprOneMan_1_Aggr[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends CardOne { self: Molecule =>
+trait ExprOneMan_1_Aggr[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends OneValue { self: Molecule =>
   def apply(kw: count)        : Entity[Int] = entity[Int](toInt(dataModel, kw))
   def apply(kw: countDistinct): Entity[Int] = entity[Int](toInt(dataModel, kw))
   def apply(kw: min)          : Entity[T  ] = entity[T  ](asIs (dataModel, kw))
@@ -47,7 +47,7 @@ trait ExprOneMan_1_Aggr[T, Entity[_]](entity: [t] => DataModel => Entity[t]) ext
 }
 
 
-trait ExprOneMan_1_AggrOps[T, Entity <: Molecule](entity: DataModel => Entity) extends CardOne { self: Molecule =>
+trait ExprOneMan_1_AggrOps[T, Entity <: Molecule](entity: DataModel => Entity) extends OneValue { self: Molecule =>
   def apply(v    : T): Entity = entity(addAggrOp(dataModel, Eq , Some(v)    ))
   def not  (v    : T): Entity = entity(addAggrOp(dataModel, Neq, Some(v)    ))
   def <    (upper: T): Entity = entity(addAggrOp(dataModel, Lt , Some(upper)))

@@ -13,80 +13,40 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
 
   import molecule.db.compliance.domains.dsl.Types.*
 
-//  "types" - types {
-//    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
-//    //    for {
-//    //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-//    //      _ <- Entity.int(3).save.transact
-//    //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-//    //      _ <- Entity(a).int(10).update.transact
-//    //      _ <- Entity(b).delete.transact
-//    //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-//
-//
-//
-//    for {
-//      //      _ <- Entity.i.int.insert(List(
-//      //        (1, int1),
-//      //        (1, int2),
-//      //        (2, int2),
-//      //        (2, int3),
-//      //        (2, int4),
-//      //      )).transact
-//      //
-//      //      _ <- Entity.int.a1.int(sum).query.get.map(_ ==> List(
-//      //        (int1, int1),
-//      //        (int2, int2 + int2),
-//      //        (int3, int3),
-//      //        (int4, int4),
-//      //      ))
-//      //      _ <- Entity.int(sum).int.a1.query.get.map(_ ==> List(
-//      //        (int1, int1),
-//      //        (int2 + int2, int2),
-//      //        (int3, int3),
-//      //        (int4, int4),
-//      //      ))
-//
-//      _ <- Entity.int.insert(1, 2, 2, 3).transact
-//      _ <- Entity.int.a1.int(count).query.get.map(_ ==> List(
-//        (1, 1),
-//        (2, 2),
-//        (3, 1),
-//      ))
-//
-//
-//      //      _ <- Entity.int.a1.int(median).query.get.map(_.collect {
-//      //        //        case (`int1`, res) => println("1  " + int1)
-//      //        case (`int2`, res) => println("2  " + ((int2 + int2).toDouble * 100 / 200.0))
-//      //        //        case (`int5`, res) => println("5  " + int5)
-//      //        //        case (`int9`, res) => println("9  " + int9); 1 ==> 2
-//      //        //        case (`two`, res) => println("9  " + int9); 1 ==> 2
-//      //        //        case _             => ()
-//      //      })
-//
-//
-//    } yield ()
-//  }
-
-
-  "refs" - refs {
-    import molecule.db.compliance.domains.dsl.Refs.*
-
+  "types" - types {
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
-      _ <- A.s.Bb.*(B.i).insert(
-        ("a", List(1, 2)),
-        ("b", List(3, 4)),
-        ("b", Nil),
-      ).i.transact
-
-      // Mandatory nested data
-      _ <- A.s.Bb.*(B.i.a1).query.get.map(_ ==> List(
-        ("a", List(1, 2)),
-      ))
+      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      _ <- Entity.int(3).save.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- Entity(a).int(10).update.transact
+      _ <- Entity(b).delete.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
 
     } yield ()
   }
+
+
+//    "refs" - refs {
+//      import molecule.db.compliance.domains.dsl.Refs.*
+//
+//      for {
+//        _ <- G.i(1).H.i(2).save.transact
+//
+////        _ <- G.i.query.get.map(_ ==> List(1))
+////        _ <- G.i.h.query.get.map(_ ==> List((1, 1)))
+////        _ <- H.i.query.get.map(_ ==> List(2))
+//
+//        _ <- G.i.H.i.query.get.map(_ ==> List((1, 2)))
+//
+////        _ <- G.i(1).H.i(2).C.i(3).save.transact
+////        _ <- G.i.H.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+//
+//
+//      } yield ()
+//    }
+
 
 
   //    "unique" - unique {

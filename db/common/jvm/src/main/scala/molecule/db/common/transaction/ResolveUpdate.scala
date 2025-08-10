@@ -3,16 +3,14 @@ package molecule.db.common.transaction
 import scala.annotation.tailrec
 import molecule.core.dataModel.*
 import molecule.core.error.ModelError
-import molecule.db.common.transaction.ops.UpdateOps
 import molecule.db.common.util.ModelUtils
 
-trait ResolveUpdate
-  extends ModelUtils { self: UpdateOps =>
+trait ResolveUpdate extends ModelUtils { self: SqlUpdate =>
 
   val isUpsert: Boolean
 
   private def unexpectedOp(a: Attr) = throw ModelError(
-    s"Unexpected update operation for card-many attribute (${a.name})." + a
+    s"Unexpected update operation for value-many attribute (${a.name})." + a
   )
 
   @tailrec

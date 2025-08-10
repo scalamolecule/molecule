@@ -15,7 +15,7 @@
 //      MetaEntity(
 //        "hero",
 //        List(
-//          MetaAttribute("id", CardOne, "String", options = List("mandatory"))
+//          MetaAttribute("id", OneValue, "String", options = List("mandatory"))
 //        ),
 //        List("Character")
 //      ),
@@ -27,7 +27,7 @@
 //      MetaEntity(
 //        "character",
 //        List(
-//          MetaAttribute("id", CardOne, "String", options = List("mandatory"))
+//          MetaAttribute("id", OneValue, "String", options = List("mandatory"))
 //        ),
 //        List("Character")
 //      ),

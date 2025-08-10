@@ -533,9 +533,9 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |}""".stripMargin
   }
 
-  private def asIs(card: String): String = {
+  private def asIs(value: String): String = {
     baseTypesWithSpaces.map {
-      case (baseTpe, space) => s"case a: Attr${card}Man$baseTpe $space=> a.copy(op = Fn(kw.toString, n))"
+      case (baseTpe, space) => s"case a: Attr${value}Man$baseTpe $space=> a.copy(op = Fn(kw.toString, n))"
     }.mkString("\n        ")
   }
 
@@ -657,9 +657,9 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
     }.mkString("\n\n        ")
   }
 
-  private def addSort(card: String, mode: String): String = {
+  private def addSort(value: String, mode: String): String = {
     baseTypesWithSpaces.map { case (baseTpe, space) =>
-      s"case a: Attr$card$mode$baseTpe $space=> a.copy(sort = Some(sort))"
+      s"case a: Attr$value$mode$baseTpe $space=> a.copy(sort = Some(sort))"
     }.mkString("\n        ")
   }
 

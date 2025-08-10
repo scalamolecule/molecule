@@ -6,7 +6,7 @@ import molecule.db.common.api.{Molecule, Molecule_0}
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprBArTac[T, Entity](entity: DataModel => Entity) extends CardSeq { self: Molecule =>
+trait ExprBArTac[T, Entity](entity: DataModel => Entity) extends SeqValue { self: Molecule =>
   def apply(                   ) = entity(addBAr(dataModel, NoValue, Array.empty[Byte].asInstanceOf[Array[T]]))
   def apply(byteArray: Array[T]) = entity(addBAr(dataModel, Eq     , byteArray                               ))
   def not  (byteArray: Array[T]) = entity(addBAr(dataModel, Neq    , byteArray                               ))
@@ -14,8 +14,8 @@ trait ExprBArTac[T, Entity](entity: DataModel => Entity) extends CardSeq { self:
 
   // Avoid stack overflow from overload resolution
   @compileTimeOnly("Byte arrays not allowed as filter attributes.")
-  def apply(a: Molecule_0 & CardSeq) = entity(filterAttr(dataModel, Eq, a))
+  def apply(a: Molecule_0 & SeqValue) = entity(filterAttr(dataModel, Eq, a))
 
   @compileTimeOnly("Byte arrays not allowed as filter attributes.")
-  def not(a: Molecule_0 & CardSeq) = entity(filterAttr(dataModel, Neq, a))
+  def not(a: Molecule_0 & SeqValue) = entity(filterAttr(dataModel, Neq, a))
 }

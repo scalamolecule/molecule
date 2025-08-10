@@ -7,6 +7,7 @@ import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_h2
 import molecule.db.compliance.domains.dsl.Types.metadb.Types_h2
 import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_h2
 import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_h2
+import molecule.db.compliance.domains.relationship.dsl.Accounting.metadb.Accounting_h2
 import molecule.db.compliance.setup.{DbProviders, Platform}
 import molecule.db.h2.setup.DbConnection_h2
 
@@ -18,4 +19,6 @@ trait DbProviders_h2 extends DbProviders with DbConnection_h2 with Platform {
   override def unique(test: Conn ?=> Any): Any = run(test, Uniques_h2())
   override def validation(test: Conn ?=> Any): Any = run(test, Validation_h2())
   override def segments(test: Conn ?=> Any): Any = run(test, Segments_h2())
+
+  def accounting(test: Conn ?=> Any): Any = run(test, Accounting_h2())
 }

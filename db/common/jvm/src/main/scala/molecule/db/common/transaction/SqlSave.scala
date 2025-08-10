@@ -2,16 +2,13 @@ package molecule.db.common.transaction
 
 import java.sql.PreparedStatement as PS
 import boopickle.Default.*
-import molecule.core.dataModel.{CardOne, Cardinality, Element}
-import molecule.db.common.transaction.ops.SaveOps
+import molecule.core.dataModel.*
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.strategy.save.{SaveAction, SaveRoot}
 import molecule.db.common.util.SerializationUtils
 
-trait SqlSave
-  extends SaveOps
-    with SqlBaseOps
-    with SerializationUtils { self: ResolveSave & SqlOps =>
+
+trait SqlSave extends ValueTransformers with SerializationUtils { self: ResolveSave & SqlOps =>
 
   protected var saveAction: SaveAction = null
 
@@ -21,7 +18,7 @@ trait SqlSave
     saveAction.rootAction
   }
 
-  override protected def addOne[T](
+  protected def addOne[T](
     ent: String,
     attr: String,
     optValue: Option[T],
@@ -37,7 +34,7 @@ trait SqlSave
     }
   }
 
-  override protected def addSet[T](
+  protected def addSet[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -50,7 +47,7 @@ trait SqlSave
     addIterable(attr, optRef, optSet, exts(1), set2array)
   }
 
-  override protected def addSeq[T](
+  protected def addSeq[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -63,7 +60,7 @@ trait SqlSave
     addIterable(attr, optRef, optSeq, exts(1), seq2array)
   }
 
-  override protected def addByteArray(
+  protected def addByteArray(
     ent: String,
     attr: String,
     optArray: Option[Array[Byte]],
@@ -76,7 +73,7 @@ trait SqlSave
     }
   }
 
-  override protected def addMap[T](
+  protected def addMap[T](
     ent: String,
     attr: String,
     optMap: Option[Map[String, T]],
@@ -93,20 +90,21 @@ trait SqlSave
     }
   }
 
-  override protected def addRef(
-    ent: String, refAttr: String, ref: String, card: Cardinality
+  protected def addRef(
+    ent: String, refAttr: String, ref: String,
+    relationship: Relationship
   ): Unit = {
-    saveAction = card match {
-      case CardOne => saveAction.refOne(ent, refAttr, ref)
-      case _       => saveAction.refMany(ent, refAttr, ref)
+    saveAction = relationship match {
+      case ManyToOne => saveAction.refOne(ent, refAttr, ref)
+      case _         => saveAction.refMany(ent, refAttr, ref)
     }
   }
 
-  override protected def addBackRef(backRef: String): Unit = {
+  protected def addBackRef(backRef: String): Unit = {
     saveAction = saveAction.backRef
   }
 
-  override protected def handleRef(ref: String): Unit = ()
+  protected def handleRef(ref: String): Unit = ()
 
 
   // Helpers -------------------------------------------------------------------

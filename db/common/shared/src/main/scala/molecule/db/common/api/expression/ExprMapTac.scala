@@ -5,7 +5,7 @@ import molecule.db.common.api.Molecule
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprMapTac[T, Entity](entity: DataModel => Entity) extends CardMap { self: Molecule  =>
+trait ExprMapTac[T, Entity](entity: DataModel => Entity) extends MapValue { self: Molecule  =>
   def apply(                           ) = entity(addMap  (dataModel, NoValue, Map.empty[String, T]))
   def apply(key : String, keys: String*) = entity(addMapKs(dataModel, Eq     , Seq(key) ++ keys    ))
   def apply(keys: Seq[String]          ) = entity(addMapKs(dataModel, Eq     , keys                ))

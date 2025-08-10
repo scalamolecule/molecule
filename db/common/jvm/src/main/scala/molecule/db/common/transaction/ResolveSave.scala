@@ -3,9 +3,8 @@ package molecule.db.common.transaction
 import scala.annotation.tailrec
 import molecule.core.dataModel.*
 import molecule.core.error.{ExecutionError, ModelError}
-import molecule.db.common.transaction.ops.SaveOps
 
-trait ResolveSave { self: SaveOps =>
+trait ResolveSave { self: SqlSave =>
 
   @tailrec
   final def resolve(elements: List[Element]): Unit = {
@@ -41,8 +40,8 @@ trait ResolveSave { self: SaveOps =>
             }
           }
 
-        case Ref(ent, refAttr, ref, card, _, _) =>
-          addRef(ent, refAttr, ref, card)
+        case Ref(ent, refAttr, ref, value, _, _, _) =>
+          addRef(ent, refAttr, ref, value)
           resolve(tail)
 
         case BackRef(backRef, _, _) =>

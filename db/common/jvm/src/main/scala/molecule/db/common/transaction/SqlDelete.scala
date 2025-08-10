@@ -4,14 +4,11 @@ import scala.collection.mutable.ListBuffer
 import molecule.core.dataModel.*
 import molecule.core.error.ModelError
 import molecule.db.common.api.MetaDb
-import molecule.db.common.transaction.ops.DeleteOps
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.strategy.delete.{DeleteAction, DeleteRoot}
 import molecule.db.common.util.ModelUtils
 
-trait SqlDelete
-  extends DeleteOps
-    with ModelUtils { self: ResolveDelete & SqlOps =>
+trait SqlDelete extends ModelUtils { self: ResolveDelete & SqlOps =>
 
   protected var root        : DeleteRoot   = null
   protected var deleteAction: DeleteAction = null
@@ -54,7 +51,7 @@ trait SqlDelete
     }
   }
 
-  override def addIds(ids: Seq[Long]): Unit = {
+  def addIds(ids: Seq[Long]): Unit = {
     if (deleteAction.ids.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in delete.")
     }
@@ -62,12 +59,12 @@ trait SqlDelete
   }
 
 
-  override def addFilterElement(element: Element): Unit = {
+  def addFilterElement(element: Element): Unit = {
     needsIdQuery = true
     element match {
-      case Ref(ent, refAttr, ref, card, _, _) =>
-        card match {
-          case CardOne =>
+      case Ref(ent, refAttr, ref, value, _, _, _) =>
+        value match {
+          case ManyToOne =>
             query.joins += s"INNER JOIN $ref ON $ent.$refAttr = $ref.id"
 
           case _ =>

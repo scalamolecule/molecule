@@ -27,6 +27,51 @@ abstract class InsertAction(
     ))
   }
 
+  def refOneReverse(ent: String, refAttr: String, ref: String): InsertAction = {
+    //    val ref = addChild(InsertEntity(this, sqlOps, r, "RefMany", rowCount))
+
+    // Make joins to refs after current and refs have been inserted
+    //    addSibling(InsertRefJoin(this, ref, sqlOps, ent, refAttr, r, rowCount))
+    //
+    //    // Continue with ref entity
+    //    ref
+
+
+//    parent.setCol(refAttr)
+
+    println("parent: " + parent)
+    println("======================")
+
+    //    replaceSibling(InsertEntity(this, sqlOps, ent, rowCount))
+
+
+    val refAttrIndex = setCol(refAttr)
+
+    val newParent = InsertRefOne(
+      this, sqlOps, ent + "--------", refAttr + "xxxx", ref + "zzzzz", refAttrIndex, rowCount
+    )
+
+
+    println("newParent: " + newParent)
+    println("======================")
+
+//    newParent.addChild(parent)
+//    addChild(parent)
+//    val action = addChild(InsertRefOne(
+//      this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
+//    ))
+//    println("children:\n" + children.mkString("%%%%%%%%%%%%%%"))
+//    println("======================")
+
+    val root = parent.children.last
+    parent.children.clear()
+
+    newParent
+//    addChild(newParent)
+//    parent.parent
+//    getGrandParent
+  }
+
   def refMany(ent: String, refAttr: String, r: String): InsertAction = {
     val ref = addChild(InsertEntity(this, sqlOps, r, "RefMany", rowCount))
 

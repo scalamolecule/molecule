@@ -1,14 +1,12 @@
 package molecule.db.common.transaction
 
 import java.sql.PreparedStatement as PS
-import molecule.core.dataModel.{Attr, CardOne, Cardinality, Element}
-import molecule.db.common.transaction.ops.InsertOps
+import molecule.core.dataModel.*
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.strategy.insert.{InsertAction, InsertRoot}
 
-trait SqlInsert
-  extends InsertOps
-    with SqlBaseOps { self: ResolveInsert & InsertResolvers & SqlOps =>
+
+trait SqlInsert extends ValueTransformers { self: ResolveInsert & InsertResolvers & SqlOps =>
 
   protected var insertAction: InsertAction = null
 
@@ -28,7 +26,7 @@ trait SqlInsert
   }
 
 
-  override protected def addOne[T](
+   protected def addOne[T](
     ent: String,
     attr: String,
     tplIndex: Int,
@@ -46,7 +44,7 @@ trait SqlInsert
     }
   }
 
-  override protected def addOneOpt[T](
+  protected def addOneOpt[T](
     ent: String,
     attr: String,
     tplIndex: Int,
@@ -69,7 +67,7 @@ trait SqlInsert
     }
   }
 
-  override protected def addSet[T](
+  protected def addSet[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -82,7 +80,7 @@ trait SqlInsert
     addIterable(attr, optRef, exts(1), tplIndex, set2array)
   }
 
-  override protected def addSetOpt[T](
+  protected def addSetOpt[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -95,7 +93,7 @@ trait SqlInsert
     addOptIterable(attr, optRef, exts(1), tplIndex, set2array)
   }
 
-  override protected def addSeq[T](
+  protected def addSeq[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -108,7 +106,7 @@ trait SqlInsert
     addIterable(attr, optRef, exts(1), tplIndex, seq2array)
   }
 
-  override protected def addSeqOpt[T](
+  protected def addSeqOpt[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -121,7 +119,7 @@ trait SqlInsert
     addOptIterable(attr, optRef, exts(1), tplIndex, seq2array)
   }
 
-  override protected def addByteArray(
+  protected def addByteArray(
     ent: String,
     attr: String,
     tplIndex: Int,
@@ -144,7 +142,7 @@ trait SqlInsert
     }
   }
 
-  override protected def addMap[T](
+  protected def addMap[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -170,7 +168,7 @@ trait SqlInsert
     }
   }
 
-  override protected def addMapOpt[T](
+  protected def addMapOpt[T](
     ent: String,
     attr: String,
     optRef: Option[String],
@@ -196,25 +194,34 @@ trait SqlInsert
     }
   }
 
-  override protected def addRef(
+  protected def addRef(
     ent: String,
     refAttr: String,
     ref: String,
-    card: Cardinality
+    relationship: Relationship
   ): Product => Unit = {
-    insertAction = card match {
-      case CardOne => insertAction.refOne(ent, refAttr, ref)
-      case _       => insertAction.refMany(ent, refAttr, ref)
+    insertAction = relationship match {
+      case ManyToOne =>
+        println("A")
+        insertAction.refOne(ent, refAttr, ref)
+      case _         =>
+        println("B  " + insertAction)
+
+        insertAction = insertAction.refOneReverse(ent, refAttr, ref)
+        insertAction
+//        insertAction.refOneReverse(ent, refAttr, ref)
+
+//        insertAction.refMany(ent, refAttr, ref)
     }
     (_: Product) => ()
   }
 
-  override protected def addBackRef(backRef: String): Product => Unit = {
+  protected def addBackRef(backRef: String): Product => Unit = {
     insertAction = insertAction.backRef
     (_: Product) => ()
   }
 
-  override protected def addOptEntity(
+  protected def addOptEntity(
     attrs: List[Attr]
   ): Product => Unit = {
     insertAction = insertAction.optEntity(attrs.head.ent)
@@ -238,7 +245,7 @@ trait SqlInsert
     }
   }
 
-  override protected def addOptRef(
+  protected def addOptRef(
     tplIndex: Int,
     ent: String,
     refAttr: String,
@@ -276,12 +283,13 @@ trait SqlInsert
     }
   }
 
-  override protected def addNested(
+  protected def addNested(
     optional: Boolean,
     tplIndex: Int,
     ent: String,
     refAttr: String,
     ref: String,
+    relationship: Relationship,
     nestedElements: List[Element]
   ): Product => Unit = {
     val nestedJoins  = insertAction.nest(ent, refAttr, ref)

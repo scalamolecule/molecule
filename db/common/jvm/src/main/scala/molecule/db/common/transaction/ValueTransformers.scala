@@ -1,36 +1,38 @@
-package molecule.db.common.transaction.ops
+package molecule.db.common.transaction
 
 import java.net.URI
+import java.sql.PreparedStatement as PS
 import java.time.*
 import java.util.{Date, UUID}
 import molecule.core.util.BaseHelpers
 import molecule.db.common.transformation.JsonBase
 
-trait BaseOps extends JsonBase with BaseHelpers {
+trait ValueTransformers extends JsonBase with BaseHelpers {
 
-  protected lazy val transformID            : Long => Any           = identity
-  protected lazy val transformString        : String => Any         = identity
-  protected lazy val transformInt           : Int => Any            = identity
-  protected lazy val transformLong          : Long => Any           = identity
-  protected lazy val transformFloat         : Float => Any          = identity
-  protected lazy val transformDouble        : Double => Any         = identity
-  protected lazy val transformBoolean       : Boolean => Any        = identity
-  protected lazy val transformBigInt        : BigInt => Any         = identity
-  protected lazy val transformBigDecimal    : BigDecimal => Any     = identity
-  protected lazy val transformDate          : Date => Any           = identity
-  protected lazy val transformDuration      : Duration => Any       = identity
-  protected lazy val transformInstant       : Instant => Any        = identity
-  protected lazy val transformLocalDate     : LocalDate => Any      = identity
-  protected lazy val transformLocalTime     : LocalTime => Any      = identity
-  protected lazy val transformLocalDateTime : LocalDateTime => Any  = identity
-  protected lazy val transformOffsetTime    : OffsetTime => Any     = identity
-  protected lazy val transformOffsetDateTime: OffsetDateTime => Any = identity
-  protected lazy val transformZonedDateTime : ZonedDateTime => Any  = identity
-  protected lazy val transformUUID          : UUID => Any           = identity
-  protected lazy val transformURI           : URI => Any            = identity
-  protected lazy val transformByte          : Byte => Any           = identity
-  protected lazy val transformShort         : Short => Any          = identity
-  protected lazy val transformChar          : Char => Any           = identity
+  protected lazy val transformID             = (v: Long) => (ps: PS, n: Int) => ps.setLong(n, v)
+  protected lazy val transformString         = (v: String) => (ps: PS, n: Int) => ps.setString(n, v)
+  protected lazy val transformInt            = (v: Int) => (ps: PS, n: Int) => ps.setInt(n, v)
+  protected lazy val transformLong           = (v: Long) => (ps: PS, n: Int) => ps.setLong(n, v)
+  protected lazy val transformFloat          = (v: Float) => (ps: PS, n: Int) => ps.setFloat(n, v)
+  protected lazy val transformDouble         = (v: Double) => (ps: PS, n: Int) => ps.setDouble(n, v)
+  protected lazy val transformBoolean        = (v: Boolean) => (ps: PS, n: Int) => ps.setBoolean(n, v)
+  protected lazy val transformBigInt         = (v: BigInt) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v).bigDecimal)
+  protected lazy val transformBigDecimal     = (v: BigDecimal) => (ps: PS, n: Int) => ps.setBigDecimal(n, v.bigDecimal)
+  protected lazy val transformDate           = (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
+  protected lazy val transformDuration       = (v: Duration) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  protected lazy val transformInstant        = (v: Instant) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  protected lazy val transformLocalDate      = (v: LocalDate) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  protected lazy val transformLocalTime      = (v: LocalTime) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  protected lazy val transformLocalDateTime  = (v: LocalDateTime) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  protected lazy val transformOffsetTime     = (v: OffsetTime) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  protected lazy val transformOffsetDateTime = (v: OffsetDateTime) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  protected lazy val transformZonedDateTime  = (v: ZonedDateTime) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  protected lazy val transformUUID           = (v: UUID) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  protected lazy val transformURI            = (v: URI) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  protected lazy val transformByte           = (v: Byte) => (ps: PS, n: Int) => ps.setByte(n, v)
+  protected lazy val transformShort          = (v: Short) => (ps: PS, n: Int) => ps.setShort(n, v)
+  protected lazy val transformChar           = (v: Char) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+
 
   protected lazy val set2arrayID            : Set[Long] => Array[AnyRef]           = (set: Set[Long]) => set.asInstanceOf[Set[AnyRef]].toArray
   protected lazy val set2arrayString        : Set[String] => Array[AnyRef]         = (set: Set[String]) => set.asInstanceOf[Set[AnyRef]].toArray

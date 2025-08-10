@@ -3,7 +3,6 @@ package molecule.core.dataModel
 import java.net.URI
 import java.time.*
 import java.util.{Date, UUID}
-import molecule.core.dataModel.{CardOne, Cardinality}
 import molecule.core.util.BaseHelpers.*
 
 
@@ -52,13 +51,14 @@ case class Ref(
   ent: String,
   refAttr: String,
   ref: String = "",
-  card: Cardinality = CardOne,
+  relationship: Relationship = ManyToOne,
   owner: Boolean = false,
-  coord: List[Int] = Nil
+  coord: List[Int] = Nil,
+  reverseRefAttr: Option[String] = None,
 ) extends Element {
   override def toString: String = {
     val coords = if (coord.isEmpty) "Nil" else coord.mkString("List(", ", ", ")")
-    s"""Ref("$ent", "$refAttr", "$ref", $card, $owner, $coords)"""
+    s"""Ref("$ent", "$refAttr", "$ref", $relationship, $owner, $coords, $reverseRefAttr)"""
   }
   def name = ent + "." + refAttr
 }

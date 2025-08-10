@@ -5,7 +5,7 @@ import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprSeqTac[T, Entity](entity: DataModel => Entity) extends CardSeq { self: Molecule =>
+trait ExprSeqTac[T, Entity](entity: DataModel => Entity) extends SeqValue { self: Molecule =>
   def apply(                ) = entity(addSeq(dataModel, NoValue, Seq.empty[T]))
   def apply(seq: Seq[T]     ) = entity(addSeq(dataModel, Eq     , seq         ))
   def has  (v  : T, vs: T*  ) = entity(addSeq(dataModel, Has    , Seq(v) ++ vs))
@@ -13,11 +13,11 @@ trait ExprSeqTac[T, Entity](entity: DataModel => Entity) extends CardSeq { self:
   def hasNo(v  : T, vs: T*  ) = entity(addSeq(dataModel, HasNo  , Seq(v) ++ vs))
   def hasNo(vs : Iterable[T]) = entity(addSeq(dataModel, HasNo  , Seq()  ++ vs))
 
-  def has  (a: Molecule_0 & CardOne) = entity(filterAttr(dataModel, Has  , a))
-  def hasNo(a: Molecule_0 & CardOne) = entity(filterAttr(dataModel, HasNo, a))
+  def has  (a: Molecule_0 & OneValue) = entity(filterAttr(dataModel, Has  , a))
+  def hasNo(a: Molecule_0 & OneValue) = entity(filterAttr(dataModel, HasNo, a))
 }
 
-trait ExprSeqTac_Enum[T, Entity](entity: DataModel => Entity) extends CardSeq { self: Molecule =>
+trait ExprSeqTac_Enum[T, Entity](entity: DataModel => Entity) extends SeqValue { self: Molecule =>
   def apply(                ) = entity(addSeq(dataModel, NoValue, Seq.empty[T]                                  ))
   def apply(seq: Seq[T]     ) = entity(addSeq(dataModel, Eq     , seq           .map(_.toString.asInstanceOf[T])))
   def has  (v  : T, vs: T*  ) = entity(addSeq(dataModel, Has    , (Seq(v) ++ vs).map(_.toString.asInstanceOf[T])))

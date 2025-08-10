@@ -9,7 +9,7 @@ case class InsertRoot(
 ) extends InsertAction(null, sqlOps, ent, rowCount) {
 
   lazy val insertEnt: InsertEntity = {
-    val first = InsertEntity(this, sqlOps, ent, "Entity", rowCount)
+    val first = InsertEntity(this, sqlOps, ent, "ROOT", rowCount)
     children += first
     first
   }

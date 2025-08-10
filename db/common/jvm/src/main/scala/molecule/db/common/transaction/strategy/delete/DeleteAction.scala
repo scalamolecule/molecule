@@ -2,7 +2,7 @@ package molecule.db.common.transaction.strategy.delete
 
 import java.sql.Statement
 import scala.collection.mutable.ListBuffer
-import molecule.core.dataModel.CardOne
+import molecule.core.dataModel.OneValue
 import molecule.core.util.BaseHelpers
 import molecule.db.common.api.MetaDb
 import molecule.db.common.transaction.strategy.{SqlAction, SqlOps}
@@ -28,7 +28,7 @@ abstract class DeleteAction(
 
 
   def prepareQueryAndActions: Seq[() => DeleteEntity] = metaDb.ownedRefs.getOrElse(entity, Nil).map {
-    case (refAttr, CardOne, refEnt) =>
+    case (refAttr, OneValue, refEnt) =>
       cols += entity + "." + refAttr
       () =>
         // Make delete action if we find ref-one ids

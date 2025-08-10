@@ -11,7 +11,7 @@ import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.DbProviders
 
-case class InsertCardOne(
+case class InsertOneValue(
   suite: MUnit,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {

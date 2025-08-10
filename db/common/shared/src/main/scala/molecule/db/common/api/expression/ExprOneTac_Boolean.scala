@@ -6,7 +6,7 @@ import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprOneTac_Boolean[T, Entity](entity: DataModel => Entity) extends CardOne { self: Molecule =>
+trait ExprOneTac_Boolean[T, Entity](entity: DataModel => Entity) extends OneValue { self: Molecule =>
   def apply(             ): Entity = entity(addOne(dataModel, NoValue, Nil         ))
   def apply(v : T, vs: T*): Entity = entity(addOne(dataModel, Eq     , Seq(v) ++ vs))
   def apply(vs: Seq[T]   ): Entity = entity(addOne(dataModel, Eq     , vs          ))
@@ -16,8 +16,8 @@ trait ExprOneTac_Boolean[T, Entity](entity: DataModel => Entity) extends CardOne
   def apply(v: qm): Entity = entity(addOne(dataModel, Eq , Nil, true))
   def not  (v: qm): Entity = entity(addOne(dataModel, Neq, Nil, true))
 
-  def apply(a: Molecule_0 & CardOne): Entity = entity(filterAttr(dataModel, Eq , a))
-  def not  (a: Molecule_0 & CardOne): Entity = entity(filterAttr(dataModel, Neq, a))
+  def apply(a: Molecule_0 & OneValue): Entity = entity(filterAttr(dataModel, Eq , a))
+  def not  (a: Molecule_0 & OneValue): Entity = entity(filterAttr(dataModel, Neq, a))
 
   def &&(bool: T): Entity = entity(addOne(dataModel, AttrOp.And, Seq(bool)))
   def ||(bool: T): Entity = entity(addOne(dataModel, AttrOp.Or , Seq(bool)))

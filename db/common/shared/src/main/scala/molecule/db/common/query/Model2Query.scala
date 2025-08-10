@@ -600,7 +600,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
   protected def noMixedNestedModes: Nothing = throw ModelError(
     "Can't mix mandatory/optional nested queries."
   )
-  protected def onlyCardOneInsideOptRef(ref: Ref): Nothing = throw ModelError(
+  protected def onlyOneValueInsideOptRef(ref: Ref): Nothing = throw ModelError(
     s"Only cardinality-one refs allowed in optional ref queries (${ref.ent}.${ref.refAttr})."
   )
   protected def noCardManyInsideOptRef(): Unit = if (nestedOptRef) {

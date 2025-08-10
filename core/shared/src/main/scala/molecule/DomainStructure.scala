@@ -265,6 +265,21 @@ abstract class DomainStructure {
   trait one extends refOptions[one]
   trait many extends refOptions[many]
 
+  trait Join
+
+  object oneToOne extends oneToOne
+  trait oneToOne extends refOptions[oneToOne]
+
+  object oneToMany extends oneToMany
+  trait oneToMany extends refOptions[oneToMany]
+
+  object manyToOne extends manyToOne
+  trait manyToOne extends refOptions[manyToOne]
+
+  object manyToMany extends manyToMany
+  trait manyToMany extends refOptions[manyToMany]
+
+
 
   // Enums ..................................................
 
@@ -386,7 +401,7 @@ abstract class DomainStructure {
      * (and recursively if sub entities have owned entities!)
      */
     lazy val owner  : Self = ???
-    lazy val owner_ : Self = ???
+    lazy val owned : Self = ???
 
     lazy val mandatory: Self = ???
 

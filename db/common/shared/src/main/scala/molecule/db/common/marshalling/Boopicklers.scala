@@ -35,11 +35,11 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleZonedDateTime : Pickler[ZonedDateTime]  = transformPickler((t: String) => ZonedDateTime.parse(t))(_.toString)
   implicit val pickleURI           : Pickler[URI]            = transformPickler((t: String) => new URI(t))(_.toString)
 
-  implicit val pickleCard: CompositePickler[Cardinality] = compositePickler[Cardinality]
-  pickleCard.addConcreteType[CardOne.type]
-  pickleCard.addConcreteType[CardSet.type]
-  pickleCard.addConcreteType[CardSeq.type]
-  pickleCard.addConcreteType[CardMap.type]
+//  implicit val pickleCard: CompositePickler[Cardinality] = compositePickler[Cardinality]
+//  pickleCard.addConcreteType[OneValue.type]
+//  pickleCard.addConcreteType[SetValue.type]
+//  pickleCard.addConcreteType[SeqValue.type]
+//  pickleCard.addConcreteType[MapValue.type]
 
 //  implicit val pickleMetaArgument: Pickler[MetaArgument]  = generatePickler[MetaArgument]
 //  implicit val pickleMetaAttr    : Pickler[MetaAttribute] = generatePickler[MetaAttribute]

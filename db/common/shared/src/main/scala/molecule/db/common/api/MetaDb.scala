@@ -1,6 +1,6 @@
 package molecule.db.common.api
 
-import molecule.core.dataModel.Cardinality
+import molecule.core.dataModel.Value
 
 /** Metadata about the database */
 trait MetaDb {
@@ -14,11 +14,11 @@ trait MetaDb {
   /** entity -> List[(entity.attr, mandatory refEntity)] */
   val mandatoryRefs: Map[String, List[(String, String)]]
 
-  /** entity -> List[(refAttr, Cardinality, owned refEntity)] */
-  val ownedRefs: Map[String, List[(String, Cardinality, String)]]
+  /** entity -> List[(refAttr, Value, owned refEntity)] */
+  val ownedRefs: Map[String, List[(String, Value, String)]]
 
-  /** attr -> (Cardinality, Scala type, required attributes) */
-  val attrData: Map[String, (Cardinality, String, List[String])]
+  /** attr -> (Value, Scala type, required attributes) */
+  val attrData: Map[String, (Value, String, List[String])]
 
   /** Attributes requiring unique values */
   val uniqueAttrs: List[String]

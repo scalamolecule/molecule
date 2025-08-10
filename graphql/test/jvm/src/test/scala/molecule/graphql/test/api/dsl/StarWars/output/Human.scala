@@ -7,7 +7,7 @@
 //*/
 //package molecule.graphql.test.api.dsl.StarWars.output
 //
-//import molecule.core.dataModel.{CardOne, CardSet}
+//import molecule.core.dataModel.{OneValue, SetValue}
 //import molecule.core.dataModel as _dm
 //import molecule.core.dataModel.*
 //
@@ -44,15 +44,15 @@
 //
 ////class Human_0[t](override val dataModel: DataModel) extends Human_0_refs[t](dataModel) with Human_base with ModelOps_0[t, Human_0, Human_1] {
 //class Human_0[t](dataModel: DataModel) extends Human_0_refs[t](dataModel) with Human_base {
-//  lazy val id           = new Human_1[String             , String](dataModel.add(id_man        )) with CardOne
-//  lazy val name         = new Human_1[String             , String](dataModel.add(name_man      )) with CardOne
-//  lazy val friends      = new Human_1[Set[Long]          , Long  ](dataModel.add(friends_man   )) with CardSet
-//  lazy val appearsIn    = new Human_1[Set[String]        , String](dataModel.add(appearsIn_man )) with CardSet
-//  lazy val homePlanet   = new Human_1[String             , String](dataModel.add(homePlanet_man)) with CardOne
-//  lazy val name_?       = new Human_1[Option[String]     , String](dataModel.add(name_opt      )) with CardOne
-//  lazy val friends_?    = new Human_1[Option[Set[Long]]  , Long  ](dataModel.add(friends_opt   )) with CardSet
-//  lazy val appearsIn_?  = new Human_1[Option[Set[String]], String](dataModel.add(appearsIn_opt )) with CardSet
-//  lazy val homePlanet_? = new Human_1[Option[String]     , String](dataModel.add(homePlanet_opt)) with CardOne
+//  lazy val id           = new Human_1[String             , String](dataModel.add(id_man        )) with OneValue
+//  lazy val name         = new Human_1[String             , String](dataModel.add(name_man      )) with OneValue
+//  lazy val friends      = new Human_1[Set[Long]          , Long  ](dataModel.add(friends_man   )) with SetValue
+//  lazy val appearsIn    = new Human_1[Set[String]        , String](dataModel.add(appearsIn_man )) with SetValue
+//  lazy val homePlanet   = new Human_1[String             , String](dataModel.add(homePlanet_man)) with OneValue
+//  lazy val name_?       = new Human_1[Option[String]     , String](dataModel.add(name_opt      )) with OneValue
+//  lazy val friends_?    = new Human_1[Option[Set[Long]]  , Long  ](dataModel.add(friends_opt   )) with SetValue
+//  lazy val appearsIn_?  = new Human_1[Option[Set[String]], String](dataModel.add(appearsIn_opt )) with SetValue
+//  lazy val homePlanet_? = new Human_1[Option[String]     , String](dataModel.add(homePlanet_opt)) with OneValue
 //}
 //
 ////class Human_0_refs[t](override val dataModel: DataModel) extends Molecule_00 {
@@ -73,21 +73,21 @@
 ////      ))
 ////  }
 //
-//  object Friends extends Character_0[t](dataModel.add(_dm.Ref("Human", "friends", "Character", CardSet, false, List(2, 11, 0)))) //with NestedInit
+//  object Friends extends Character_0[t](dataModel.add(_dm.Ref("Human", "friends", "Character", SetValue, false, List(2, 11, 0)))) //with NestedInit
 //}
 //
 //
 ////class Human_1[A, t](dataModel: DataModel) extends Human_1_refs[A, t](dataModel) with Human_base with ModelOps_1[A, t, Human_1, Human_2] {
 //class Human_1[A, t](dataModel: DataModel) extends Human_1_refs[A, t](dataModel) with Human_base {
-//  lazy val id           = new Human_2[A, Long               , Long  ](dataModel.add(id_man        )) with CardOne
-//  lazy val name         = new Human_2[A, String             , String](dataModel.add(name_man      )) with CardOne
-//  lazy val friends      = new Human_2[A, Set[Long]          , Long  ](dataModel.add(friends_man   )) with CardSet
-//  lazy val appearsIn    = new Human_2[A, Set[String]        , String](dataModel.add(appearsIn_man )) with CardSet
-//  lazy val homePlanet   = new Human_2[A, String             , String](dataModel.add(homePlanet_man)) with CardOne
-//  lazy val name_?       = new Human_2[A, Option[String]     , String](dataModel.add(name_opt      )) with CardOne
-//  lazy val friends_?    = new Human_2[A, Option[Set[Long]]  , Long  ](dataModel.add(friends_opt   )) with CardSet
-//  lazy val appearsIn_?  = new Human_2[A, Option[Set[String]], String](dataModel.add(appearsIn_opt )) with CardSet
-//  lazy val homePlanet_? = new Human_2[A, Option[String]     , String](dataModel.add(homePlanet_opt)) with CardOne
+//  lazy val id           = new Human_2[A, Long               , Long  ](dataModel.add(id_man        )) with OneValue
+//  lazy val name         = new Human_2[A, String             , String](dataModel.add(name_man      )) with OneValue
+//  lazy val friends      = new Human_2[A, Set[Long]          , Long  ](dataModel.add(friends_man   )) with SetValue
+//  lazy val appearsIn    = new Human_2[A, Set[String]        , String](dataModel.add(appearsIn_man )) with SetValue
+//  lazy val homePlanet   = new Human_2[A, String             , String](dataModel.add(homePlanet_man)) with OneValue
+//  lazy val name_?       = new Human_2[A, Option[String]     , String](dataModel.add(name_opt      )) with OneValue
+//  lazy val friends_?    = new Human_2[A, Option[Set[Long]]  , Long  ](dataModel.add(friends_opt   )) with SetValue
+//  lazy val appearsIn_?  = new Human_2[A, Option[Set[String]], String](dataModel.add(appearsIn_opt )) with SetValue
+//  lazy val homePlanet_? = new Human_2[A, Option[String]     , String](dataModel.add(homePlanet_opt)) with OneValue
 //}
 //
 ////class Human_1_refs[A, t](dataModel: DataModel) extends Molecule_01[A] {
@@ -108,21 +108,21 @@
 ////      ))
 ////  }
 //
-//  object Friends extends Character_1[A, t](dataModel.add(_dm.Ref("Human", "friends", "Character", CardSet, false, List(2, 11, 0)))) //with NestedInit
+//  object Friends extends Character_1[A, t](dataModel.add(_dm.Ref("Human", "friends", "Character", SetValue, false, List(2, 11, 0)))) //with NestedInit
 //}
 //
 //
 ////class Human_2[A, B, t](dataModel: DataModel) extends Human_2_refs[A, B, t](dataModel) with Human_base with ModelOps_2[A, B, t, Human_2, Human_3] {
 //class Human_2[A, B, t](dataModel: DataModel) extends Human_2_refs[A, B, t](dataModel) with Human_base {
-//  lazy val id           = new Human_3[A, B, Long               , Long  ](dataModel.add(id_man        )) with CardOne
-//  lazy val name         = new Human_3[A, B, String             , String](dataModel.add(name_man      )) with CardOne
-//  lazy val friends      = new Human_3[A, B, Set[Long]          , Long  ](dataModel.add(friends_man   )) with CardSet
-//  lazy val appearsIn    = new Human_3[A, B, Set[String]        , String](dataModel.add(appearsIn_man )) with CardSet
-//  lazy val homePlanet   = new Human_3[A, B, String             , String](dataModel.add(homePlanet_man)) with CardOne
-//  lazy val name_?       = new Human_3[A, B, Option[String]     , String](dataModel.add(name_opt      )) with CardOne
-//  lazy val friends_?    = new Human_3[A, B, Option[Set[Long]]  , Long  ](dataModel.add(friends_opt   )) with CardSet
-//  lazy val appearsIn_?  = new Human_3[A, B, Option[Set[String]], String](dataModel.add(appearsIn_opt )) with CardSet
-//  lazy val homePlanet_? = new Human_3[A, B, Option[String]     , String](dataModel.add(homePlanet_opt)) with CardOne
+//  lazy val id           = new Human_3[A, B, Long               , Long  ](dataModel.add(id_man        )) with OneValue
+//  lazy val name         = new Human_3[A, B, String             , String](dataModel.add(name_man      )) with OneValue
+//  lazy val friends      = new Human_3[A, B, Set[Long]          , Long  ](dataModel.add(friends_man   )) with SetValue
+//  lazy val appearsIn    = new Human_3[A, B, Set[String]        , String](dataModel.add(appearsIn_man )) with SetValue
+//  lazy val homePlanet   = new Human_3[A, B, String             , String](dataModel.add(homePlanet_man)) with OneValue
+//  lazy val name_?       = new Human_3[A, B, Option[String]     , String](dataModel.add(name_opt      )) with OneValue
+//  lazy val friends_?    = new Human_3[A, B, Option[Set[Long]]  , Long  ](dataModel.add(friends_opt   )) with SetValue
+//  lazy val appearsIn_?  = new Human_3[A, B, Option[Set[String]], String](dataModel.add(appearsIn_opt )) with SetValue
+//  lazy val homePlanet_? = new Human_3[A, B, Option[String]     , String](dataModel.add(homePlanet_opt)) with OneValue
 //}
 //
 ////class Human_2_refs[A, B, t](dataModel: DataModel) extends Molecule_02[A, B] {
@@ -143,7 +143,7 @@
 ////      ))
 ////  }
 //
-//  object Friends extends Character_2[A, B, t](dataModel.add(_dm.Ref("Human", "friends", "Character", CardSet, false, List(2, 11, 0)))) //with NestedInit
+//  object Friends extends Character_2[A, B, t](dataModel.add(_dm.Ref("Human", "friends", "Character", SetValue, false, List(2, 11, 0)))) //with NestedInit
 //}
 //
 //

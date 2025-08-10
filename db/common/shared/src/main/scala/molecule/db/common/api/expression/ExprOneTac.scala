@@ -6,7 +6,7 @@ import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprOneTac[T, Entity](entity: DataModel => Entity) extends CardOne { self: Molecule =>
+trait ExprOneTac[T, Entity](entity: DataModel => Entity) extends OneValue { self: Molecule =>
   def apply(                ): Entity = entity(addOne(dataModel, NoValue, Nil         ))
   def apply(v    : T, vs: T*): Entity = entity(addOne(dataModel, Eq     , Seq(v) ++ vs))
   def apply(vs   : Seq[T]   ): Entity = entity(addOne(dataModel, Eq     , vs          ))
@@ -24,10 +24,10 @@ trait ExprOneTac[T, Entity](entity: DataModel => Entity) extends CardOne { self:
   def >    (lower: qm): Entity = entity(addOne(dataModel, Gt , Nil, true))
   def >=   (lower: qm): Entity = entity(addOne(dataModel, Ge , Nil, true))
 
-  def apply(a: Molecule_0 & CardOne): Entity = entity(filterAttr(dataModel, Eq , a))
-  def not  (a: Molecule_0 & CardOne): Entity = entity(filterAttr(dataModel, Neq, a))
-  def <    (a: Molecule_0 & CardOne): Entity = entity(filterAttr(dataModel, Lt , a))
-  def <=   (a: Molecule_0 & CardOne): Entity = entity(filterAttr(dataModel, Le , a))
-  def >    (a: Molecule_0 & CardOne): Entity = entity(filterAttr(dataModel, Gt , a))
-  def >=   (a: Molecule_0 & CardOne): Entity = entity(filterAttr(dataModel, Ge , a))
+  def apply(a: Molecule_0 & OneValue): Entity = entity(filterAttr(dataModel, Eq , a))
+  def not  (a: Molecule_0 & OneValue): Entity = entity(filterAttr(dataModel, Neq, a))
+  def <    (a: Molecule_0 & OneValue): Entity = entity(filterAttr(dataModel, Lt , a))
+  def <=   (a: Molecule_0 & OneValue): Entity = entity(filterAttr(dataModel, Le , a))
+  def >    (a: Molecule_0 & OneValue): Entity = entity(filterAttr(dataModel, Gt , a))
+  def >=   (a: Molecule_0 & OneValue): Entity = entity(filterAttr(dataModel, Ge , a))
 }

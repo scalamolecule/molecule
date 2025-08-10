@@ -5,7 +5,7 @@ import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
 
-trait ExprSeqMan[T, Entity](entity: DataModel => Entity) extends CardSeq { self: Molecule =>
+trait ExprSeqMan[T, Entity](entity: DataModel => Entity) extends SeqValue { self: Molecule =>
   def apply (                 ) = entity(addSeq(dataModel, NoValue, Seq.empty[T]))
   def apply (seq : Seq[T]     ) = entity(addSeq(dataModel, Eq     , seq         ))
   def has   (v   : T, vs: T*  ) = entity(addSeq(dataModel, Has    , Seq(v) ++ vs))
@@ -17,8 +17,8 @@ trait ExprSeqMan[T, Entity](entity: DataModel => Entity) extends CardSeq { self:
   def remove(v   : T, vs: T*  ) = entity(addSeq(dataModel, Remove , Seq(v) ++ vs))
   def remove(vs  : Iterable[T]) = entity(addSeq(dataModel, Remove , Seq()  ++ vs))
 
-  def has  (a: Molecule_0 & CardOne) = entity(filterAttr(dataModel, Has  , a))
-  def hasNo(a: Molecule_0 & CardOne) = entity(filterAttr(dataModel, HasNo, a))
+  def has  (a: Molecule_0 & OneValue) = entity(filterAttr(dataModel, Has  , a))
+  def hasNo(a: Molecule_0 & OneValue) = entity(filterAttr(dataModel, HasNo, a))
 }
 
 trait ExprSeqMan_Enum[T, Entity](entity: DataModel => Entity) { self: Molecule =>
