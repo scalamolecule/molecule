@@ -112,9 +112,15 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
         ???
 
-      case OneToMany if isOptNested || nestedOptRef =>
+      case OneToMany if isOptNested =>
+        throw ModelError(
+          s"Only cardinality-one refs allowed in optional nested queries ($ent...$refAttr)."
+        )
 
-        ???
+      case OneToMany if nestedOptRef =>
+        throw ModelError(
+          s"Only cardinality-one refs allowed in optional ref queries ($ent...$refAttr)."
+        )
 
       case OneToMany =>
         val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))

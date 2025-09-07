@@ -19,11 +19,9 @@ case class FlatOptRefNested(
 
   "Basic optional ref nested" - refs {
     for {
-      _ <- A.i.B.?(B.s.i.C.?(C.s.i)).insert(List(
-        (1, None),
-        (2, Some(("b", 2, None))),
-        (3, Some(("b", 3, Some(("c", 3))))),
-      )).transact
+      _ <- A.i(1).save.transact
+      _ <- A.i(2).B.s("b").i(2).save.transact
+      _ <- A.i(3).B.s("b").i(3).C.s("c").i(3).save.transact
 
       _ <- A.i.a1.B.?(B.s.i.C.?(C.s.i)).query.get.map(_ ==> List(
         (1, None),

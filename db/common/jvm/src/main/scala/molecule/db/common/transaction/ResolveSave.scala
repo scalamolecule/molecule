@@ -49,11 +49,11 @@ trait ResolveSave { self: SqlSave =>
           resolve(tail)
 
         case _: OptRef => throw ModelError(
-          "Optional ref not allowed in save molecule. Please use mandatory ref or insert instead."
+          "Optional ref not allowed in save molecule. Please use mandatory ref instead."
         )
 
         case _: OptEntity => throw ModelError(
-          "Optional entity not allowed in save molecule. Please use mandatory entity or insert instead."
+          "Optional entity not allowed in save molecule. Please use mandatory entity instead."
         )
 
         case _: Nested    => throw ModelError(

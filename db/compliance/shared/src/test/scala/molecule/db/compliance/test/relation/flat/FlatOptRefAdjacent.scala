@@ -18,14 +18,11 @@ case class FlatOptRefAdjacent(
 
   "Basic adjacent optional refs" - refs {
     for {
-      _ <- A.i
-        .B.?(B.i.s)
-        .C.?(C.s.i).insert(List(
-          (1, None, None),
-          (2, Some((20, "b")), None),
-          (3, None, Some(("c", 300))),
-          (4, Some((40, "b")), Some(("c", 400))),
-        )).transact
+      _ <- A.i(1).save.transact
+      _ <- A.i(2).B.i(20).s("b").save.transact
+      _ <- A.i(3).C.s("c").i(300).save.transact
+      _ <- A.i(4).B.i(40).s("b")._A.C.s("c").i(400).save.transact
+
 
       _ <- A.i.a1
         .B.?(B.i.s)
@@ -131,11 +128,9 @@ case class FlatOptRefAdjacent(
 
   "Adjacent optional refs with inner ref" - refs {
     for {
-      _ <- A.i.a1.B.?(B.s.i.C.s.i).D.?(D.s.i).insert(List(
-        (1, None, Some(("d", 1))),
-        (2, Some(("b", 2, "c", 2)), None),
-        (3, Some(("b", 3, "c", 3)), Some(("d", 3))),
-      )).transact
+      _ <- A.i(1).D.s("d").i(1).save.transact
+      _ <- A.i(2).B.s("b").i(2).C.s("c").i(2).save.transact
+      _ <- A.i(3).B.s("b").i(3).C.s("c").i(3)._B._A.D.s("d").i(3).save.transact
 
       _ <- A.i.a1.B.?(B.s.i.C.s.i).D.?(D.s.i).query.get.map(_ ==> List(
         (1, None, Some(("d", 1))),

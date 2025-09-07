@@ -198,7 +198,7 @@ case class SaveRefs(
     for {
       _ <- A.i(1).B.?(B.i(2)).save.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Optional ref not allowed in save molecule. Please use mandatory ref or insert instead."
+          err ==> "Optional ref not allowed in save molecule. Please use mandatory ref instead."
         }
     } yield ()
   }

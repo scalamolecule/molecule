@@ -16,36 +16,136 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
 
   import molecule.db.compliance.domains.dsl.Refs.*
 
-  //  "types" - types {
-  //    import molecule.db.compliance.domains.dsl.Types.*
-  //    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
-  //    for {
-  //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-  //      _ <- Entity.int(3).save.transact
-  //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-  //      _ <- Entity(a).int(10).update.transact
-  //      _ <- Entity(b).delete.transact
-  //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
-  //
-  //    } yield ()
-  //  }
+  val ent23 = Entity
+    .string
+    .int
+    .long
+    .float
+    .double
+    .boolean
+    .bigInt
+    .bigDecimal
+    .date
+    .duration
+    .instant
+    .localDate
+    .localTime
+    .localDateTime
+    .offsetTime
+    .offsetDateTime
+    .zonedDateTime
+    .uuid
+    .uri
+    .byte
+    .short
+    .char
+    .i
 
+  val tpl23_1 = (
+    string1,
+    int1,
+    long1,
+    float1,
+    double1,
+    boolean1,
+    bigInt1,
+    bigDecimal1,
+    date1,
+    duration1,
+    instant1,
+    localDate1,
+    localTime1,
+    localDateTime1,
+    offsetTime1,
+    offsetDateTime1,
+    zonedDateTime1,
+    uuid1,
+    uri1,
+    byte1,
+    short1,
+    char1,
+    int1,
+  )
 
-  "types" - refs {
-    import molecule.db.compliance.domains.dsl.Refs.*
+  "types" - types {
+    import molecule.db.compliance.domains.dsl.Types.*
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
+      //        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      //        _ <- Entity.int(3).save.transact
+      //        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      //        _ <- Entity(a).int(10).update.transact
+      //        _ <- Entity(b).delete.transact
+      //        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
-      _ <- A.i.B.?(B.s).insert(
-          (1, Some("a")),
-          (2, None),
-        ).transact
-        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Insertion of optional ref is not supported."
-        }
+      //      _ <- Entity
+      //        .string(string1)
+      //        .int(int1)
+      //        .long(long1)
+      //        .float(float1)
+      //        .double(double1)
+      //        .boolean(boolean1)
+      //        .bigInt(bigInt1)
+      //        .bigDecimal(bigDecimal1)
+      //        .date(date1)
+      //        .duration(duration1)
+      //        .instant(instant1)
+      //        .localDate(localDate1)
+      //        .localTime(localTime1)
+      //        .localDateTime(localDateTime1)
+      //        .offsetTime(offsetTime1)
+      //        .offsetDateTime(offsetDateTime1)
+      //        .zonedDateTime(zonedDateTime1)
+      //        .uuid(uuid1)
+      //        .uri(uri1)
+      //        .byte(byte1)
+      //        .short(short1)
+      //        .char(char1)
+      //        .i(int1)
+      //        .Ref.i(1)
+      //        .save.transact
 
+      e <- ent23.insert(tpl23_1).transact.map(_.id)
+      r <- Ref.i(1).save.transact.map(_.id)
+      _ <- Entity(e).ref(r).upsert.i.transact
+      _ <- Ref.i(2).save.transact
+
+      _ <- Entity.?(ent23).Ref.i.a1.query.get.map(_ ==> List(
+        (Some(tpl23_1), 1),
+        (None, 2)
+      ))
 
     } yield ()
   }
+
+
+  //  "types" - refs {
+  //    import molecule.db.compliance.domains.dsl.Refs.*
+  //    for {
+  //
+  //      _ <- A.i(1).save.transact
+  //      _ <- A.i(2).B.s("b").i(2).save.transact
+  //      _ <- A.i(3).B.s("b").i(3).C.s("c").i(3).save.transact
+  //
+  //      _ <- A.i.a1.B.?(B.s.i.C.?(C.s.i)).query.get.map(_ ==> List(
+  //        (1, None),
+  //        (2, Some(("b", 2, None))),
+  //        (3, Some(("b", 3, Some(("c", 3)))))
+  //      ))
+  //
+  //      _ <- A.i.a1.B.?(B.s.i.C.s.i).query.get.map(_ ==> List(
+  //        (1, None),
+  //        (2, None),
+  //        (3, Some(("b", 3, "c", 3)))
+  //      ))
+  //
+  //      _ <- A.i.B.s.i.C.s.i.query.get.map(_ ==> List(
+  //        (3, "b", 3, "c", 3)
+  //      ))
+  //
+  //
+  //    } yield ()
+  //  }
 
 
   //  "ids, ref" - refs {
@@ -67,7 +167,7 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
   //    for {
   //      _ <- A.i(1).B.?(B.i(2)).save.transact
   //        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-  //          err ==> "Optional ref not allowed in save molecule. Please use mandatory ref or insert instead."
+  //          err ==> "Optional ref not allowed in save molecule. Please use mandatory ref instead."
   //        }
   //    } yield ()
   //  }

@@ -308,7 +308,7 @@ case class NestedRef(
 
       _ <- A.i.Bb.*?(B.i.Cc.i).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Only cardinality-one refs allowed in optional nested queries (B.cc)."
+          err ==> "Only cardinality-one refs allowed in optional nested queries (B...Cc)."
         }
       // Ok:
       _ <- A.i.Bb.*?(B.i.C.i).query.get

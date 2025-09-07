@@ -42,62 +42,12 @@ case class FlatOptRef(
     } yield ()
   }
 
-  // same as:
-  "Basic optional ref with opt ref insert" - refs {
-    for {
-      _ <- A.i.B.?(B.i).insert(List(
-        (1, None),
-        (2, Some(20)),
-      )).transact
-
-      _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
-        (1, None),
-        (2, Some(20)),
-      ))
-
-      _ <- A.i.B.i.query.get.map(_ ==> List(
-        (2, 20),
-      ))
-    } yield ()
-  }
-
-
-  "Only optional attributes in optional ref" - refs {
-    for {
-      _ <- A.i.B.?(B.i_?).insert(List(
-        (1, None), // no relationship created
-        (2, Some(None)), // relationship to empty row created
-        (3, Some(Some(30))),
-      )).transact
-
-      // 2 relationships created
-      _ <- A.b(count).query.get.map(_.head ==> 2)
-
-      // No relationship and empty row are indistinguishable
-      // when all optional ref attributes (B.i_?) are optional
-      _ <- A.i.a1.B.?(B.i_?).query.get.map(_ ==> List(
-        (1, Some(None)), // no relationship
-        (2, Some(None)), // relationship to empty ref row
-        (3, Some(Some(30))),
-      ))
-
-      // Mandatory B.i makes result more clear
-      _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
-        (1, None),
-        (2, None),
-        (3, Some(30)),
-      ))
-    } yield ()
-  }
-
 
   "Mix man/opt attributes in opt ref" - refs {
     for {
-      _ <- A.i.B.?(B.s.i_?).insert(List(
-        (1, None),
-        (2, Some(("a", None))),
-        (3, Some(("b", Some(4)))),
-      )).transact
+      _ <- A.i(1).save.transact
+      _ <- A.i(2).B.s("a").save.transact
+      _ <- A.i(3).B.s("b").i(4).save.transact
 
 
       _ <- A.i.a1.B.?(B.s.i_?).query.get.map(_ ==> List(
@@ -189,7 +139,7 @@ case class FlatOptRef(
 
       _ <- A.i.B.?(B.s.i.Cc.s).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Only cardinality-one refs allowed in optional ref queries (B.cc)."
+          err ==> "Only cardinality-one refs allowed in optional ref queries (B...Cc)."
         }
 
       // Instead, use flat card-many ref
@@ -216,12 +166,10 @@ case class FlatOptRef(
 
   "Expression inside optional nested" - refs {
     for {
-      _ <- A.i.B.?(B.i).insert(
-        (0, None),
-        (1, Some(1)),
-        (2, Some(2)),
-        (3, Some(3)),
-      ).transact
+      _ <- A.i(0).save.transact
+      _ <- A.i(1).B.i(1).save.transact
+      _ <- A.i(2).B.i(2).save.transact
+      _ <- A.i(3).B.i(3).save.transact
 
       _ <- A.i.a1.B.?(B.i).query.get.map(_ ==> List(
         (0, None),
@@ -292,10 +240,8 @@ case class FlatOptRef(
 
   "Opt ref with Set attr" - refs {
     for {
-      _ <- A.i.B.?(B.iSet).insert(
-        (0, None),
-        (1, Some(Set(1, 2))),
-      ).transact
+      _ <- A.i(0).save.transact
+      _ <- A.i(1).B.iSet(Set(1, 2)).save.transact
 
       _ <- A.i.a1.B.?(B.iSet).query.get.map(_ ==> List(
         (0, None),
@@ -306,10 +252,8 @@ case class FlatOptRef(
 
   "Opt ref with Seq attr" - refs {
     for {
-      _ <- A.i.B.?(B.iSeq).insert(
-        (0, None),
-        (1, Some(Seq(1, 2, 1))),
-      ).transact
+      _ <- A.i(0).save.transact
+      _ <- A.i(1).B.iSeq(Seq(1, 2, 1)).save.transact
 
       _ <- A.i.a1.B.?(B.iSeq).query.get.map(_ ==> List(
         (0, None),
@@ -320,10 +264,8 @@ case class FlatOptRef(
 
   "Opt ref with Map attr" - refs {
     for {
-      _ <- A.i.B.?(B.iMap).insert(
-        (0, None),
-        (1, Some(Map("a" -> 1, "b" -> 2))),
-      ).transact
+      _ <- A.i(0).save.transact
+      _ <- A.i(1).B.iMap(Map("a" -> 1, "b" -> 2)).save.transact
 
       _ <- A.i.a1.B.?(B.iMap).query.get.map(_ ==> List(
         (0, None),
@@ -335,12 +277,11 @@ case class FlatOptRef(
 
   "Opt ref with sorting" - refs {
     for {
-      _ <- A.i.B.?(B.i).insert(List(
-        (1, None),
-        (1, Some(1)),
-        (2, Some(1)),
-        (2, Some(2)),
-      )).transact
+      _ <- A.i(1).save.transact
+      _ <- A.i(1).B.i(1).save.transact
+      _ <- A.i(2).B.i(1).save.transact
+      _ <- A.i(2).B.i(2).save.transact
+
 
       // Sort initial attr first
       _ <- A.i.a1.B.?(B.i.a2).query.get.map(_ ==> List(
@@ -470,11 +411,11 @@ case class FlatOptRef(
 
 
   "Arity 23 opt ref" - types {
+    import molecule.db.compliance.domains.dsl.Types.*
     for {
-      _ <- entOptRef23.insert(
-        (1, Some(tpl23_1)),
-        (2, None)
-      ).transact
+      r <- ref23.insert(tpl23_1).transact.map(_.id)
+      _ <- Entity.i(1).ref(r).save.transact
+      _ <- Entity.i(2).save.transact
 
       _ <- entOptRef23.query.get.map(_ ==> List(
         (1, Some(tpl23_1)),
