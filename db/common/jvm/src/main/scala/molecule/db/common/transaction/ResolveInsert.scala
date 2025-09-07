@@ -8,6 +8,7 @@ import molecule.db.common.validation.insert.InsertValidators_
 
 
 trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlInsert =>
+
   @tailrec
   final def resolve(
     elements: List[Element],
@@ -94,7 +95,7 @@ trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlIn
     reverseRefAttr: Option[String],
     tplIndex: Int,
     tail: List[Element]
-  ) = {
+  ): List[Partition] = {
     val lastPartition = partitions.last.copy(tableInserts = partitions.last.tableInserts :+ tableInsert)
     val refInsert     = TableInsert(
       tableInsert.refPath ++ List(refAttr, ref),
@@ -114,7 +115,7 @@ trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlIn
     reverseRefAttr: Option[String],
     tplIndex: Int,
     tail: List[Element]
-  ) = {
+  ): List[Partition] = {
     val refPath1      = tableInsert.refPath ++ List(refAttr, ref)
     val refInsert     = tableInsert.copy(
       foreignKeys = tableInsert.foreignKeys :+ (refAttr -> refPath1),
@@ -131,7 +132,7 @@ trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlIn
     paramIndex: Int,
     tplIndex: Int,
     tail: List[Element],
-  ) = {
+  ): List[Partition] = {
     // Add current tableInsert and continue with previous tableInsert
     val prevRefPath         = tableInsert.refPath.dropRight(2)
     val tableInserts        = partitions.last.tableInserts

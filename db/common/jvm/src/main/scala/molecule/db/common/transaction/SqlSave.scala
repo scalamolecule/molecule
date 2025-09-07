@@ -8,131 +8,94 @@ import molecule.db.common.transaction.strategy.save.{SaveAction, SaveRoot}
 import molecule.db.common.util.SerializationUtils
 
 
-trait SqlSave extends ValueTransformers with SerializationUtils { self: ResolveSave & SqlOps =>
-
-  protected var saveAction: SaveAction = null
-
-  def getSaveAction(elements: List[Element]): SaveAction = {
-    saveAction = SaveRoot(sqlOps, getInitialEntity(elements)).saveEnt
-    resolve(elements)
-    saveAction.rootAction
-  }
+trait SqlSave extends ValueTransformers with SerializationUtils { self: ResolveSave =>
 
   protected def addOne[T](
     ent: String,
     attr: String,
+    paramIndex: Int,
     optValue: Option[T],
-    transformValue: T => Any,
+    valueSetter: (PS, Int, T) => Unit,
     exts: List[String] = Nil
-  ): Unit = {
-    val paramIndex = saveAction.setCol(attr, exts(2))
+  ): (PS, Product) => Unit = {
     optValue.fold {
-      saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+      (ps: PS, _: Product) => ps.setNull(paramIndex, java.sql.Types.NULL)
     } { value =>
-      val setter = transformValue(value).asInstanceOf[(PS, Int) => Unit]
-      saveAction.addColSetter((ps: PS) => setter(ps, paramIndex))
+      (ps: PS, _: Product) => valueSetter(ps, paramIndex, value)
     }
   }
 
   protected def addSet[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     optSet: Option[Set[T]],
-    transformValue: T => Any,
+    valueSetter: (PS, Int, T) => Unit,
     exts: List[String] = Nil,
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = {
-    addIterable(attr, optRef, optSet, exts(1), set2array)
+  ): (PS, Product) => Unit = {
+    addIterable(attr, paramIndex, optSet, exts(1), set2array)
   }
 
   protected def addSeq[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     optSeq: Option[Seq[T]],
-    transformValue: T => Any,
+    valueSetter: (PS, Int, T) => Unit,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = {
-    addIterable(attr, optRef, optSeq, exts(1), seq2array)
+  ): (PS, Product) => Unit = {
+    addIterable(attr, paramIndex, optSeq, exts(1), seq2array)
   }
 
   protected def addByteArray(
     ent: String,
     attr: String,
+    paramIndex: Int,
     optArray: Option[Array[Byte]],
-  ): Unit = {
-    val paramIndex = saveAction.setCol(attr)
+  ): (PS, Product) => Unit = {
     if (optArray.nonEmpty && optArray.get.nonEmpty) {
-      saveAction.addColSetter((ps: PS) => ps.setBytes(paramIndex, optArray.get))
+      (ps: PS, _: Product) => ps.setBytes(paramIndex, optArray.get)
     } else {
-      saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+      (ps: PS, _: Product) => ps.setNull(paramIndex, java.sql.Types.NULL)
     }
   }
 
   protected def addMap[T](
     ent: String,
     attr: String,
+    paramIndex: Int,
     optMap: Option[Map[String, T]],
-    transformValue: T => Any,
+    valueSetter: (PS, Int, T) => Unit,
     value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = {
-    val paramIndex = saveAction.setCol(attr)
+  ): (PS, Product) => Unit = {
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        saveAction.addColSetter((ps: PS) =>
-          ps.setBytes(paramIndex, map2jsonByteArray(map, value2json)))
+        (ps: PS, _: Product) => ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
       case _                                    =>
-        saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        (ps: PS, _: Product) => ps.setNull(paramIndex, java.sql.Types.NULL)
     }
   }
 
-  protected def addRef(
-    ent: String, refAttr: String, ref: String,
-    relationship: Relationship,
-    reverseRefAttr: Option[String]
-  ): Unit = {
-    saveAction = relationship match {
-      case ManyToOne => saveAction.refManyToOne(ent, refAttr, ref)
-      case _         => saveAction.refOneToMany(ent, refAttr, ref, reverseRefAttr.get)
-    }
-  }
-
-  protected def addBackRef(backRef: String): Unit = {
-    saveAction = saveAction.backRef
-  }
-
-  protected def handleRef(ref: String): Unit = ()
-
-
-  // Helpers -------------------------------------------------------------------
 
   private def addIterable[T, M[_] <: Iterable[?]](
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     optIterable: Option[M[T]],
     sqlTpe: String,
     iterable2array: M[T] => Array[AnyRef],
-  ): Unit = {
-    optRef.fold {
-      val paramIndex = saveAction.setCol(attr)
-      if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
-        val iterable = optIterable.get
-        saveAction.addColSetter((ps: PS) => {
-          val conn  = ps.getConnection
-          val array = conn.createArrayOf(sqlTpe, iterable2array(iterable))
-          ps.setArray(paramIndex, array)
-        })
-      } else {
-        saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
-      }
-    } { ref =>
-      optIterable.foreach(refIds =>
-        saveAction.refIds(attr, ref, refIds.asInstanceOf[Set[Long]])
-      )
+  ): (PS, Product) => Unit = {
+    if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
+      val iterable = optIterable.get
+      (ps: PS, _: Product) =>
+        val conn  = ps.getConnection
+        val array = conn.createArrayOf(sqlTpe, iterable2array(iterable))
+        ps.setArray(paramIndex, array)
+    } else {
+      (ps: PS, _: Product) => ps.setNull(paramIndex, java.sql.Types.NULL)
     }
   }
 }

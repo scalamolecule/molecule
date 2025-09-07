@@ -26,8 +26,9 @@ trait Spi_h2_sync extends SpiBaseJVM_sync {
   override def save_getAction(
     save: Save, conn: JdbcConn_JVM
   ): SaveAction = {
-    new SqlOps_h2(conn) with ResolveSave with Spi_h2_sync with SqlSave {}
-      .getSaveAction(save.dataModel.elements)
+//    new SqlOps_h2(conn) with ResolveSave with Spi_h2_sync with SqlSave {}
+//      .getSaveAction(save.dataModel.elements)
+    ???
   }
 
 //  def insert_resolveTables(
@@ -40,8 +41,10 @@ trait Spi_h2_sync extends SpiBaseJVM_sync {
   override def insert_getAction(
     insert: Insert, conn: JdbcConn_JVM
   ): InsertAction = {
-    new SqlOps_h2(conn) with ResolveInsertOLD with SqlInsertOLD {}
-      .getInsertAction(insert.dataModel.elements, insert.tpls)
+//    new SqlOps_h2(conn) with ResolveInsertOLD with SqlInsertOLD {}
+//      .getInsertAction(insert.dataModel.elements, insert.tpls)
+
+    ???
   }
 
 //  def insert_getTableInserts(insert: Insert): List[TableInsert] = {

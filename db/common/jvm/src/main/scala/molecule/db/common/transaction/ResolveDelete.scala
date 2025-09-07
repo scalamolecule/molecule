@@ -27,7 +27,7 @@ trait ResolveDelete { self: SqlDelete =>
             resolve(tail, topLevel)
 
           case _ => throw ModelError(
-            s"Can only filter delete by values applied to tacit value-one attributes (${a.name})."
+            s"Can only filter delete by values applied to tacit card-one attributes (${a.name})."
           )
         }
 

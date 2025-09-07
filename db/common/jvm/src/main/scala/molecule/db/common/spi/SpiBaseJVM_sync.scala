@@ -149,23 +149,6 @@ trait SpiBaseJVM_sync
 
   // Save --------------------------------------------------------
 
-  override def save_transact(save: Save)(using conn0: Conn): TxReport = {
-    val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    if (save.printInspect)
-      save_inspect(save)
-    val cleanElements  = keywordsSuffixed(save.dataModel.elements, conn.proxy)
-    val cleanDataModel = save.dataModel.copy(elements = cleanElements)
-    val saveClean      = save.copy(dataModel = cleanDataModel)
-    val errors         = save_validate(save)
-    if (errors.isEmpty) {
-      val txReport = conn.transact_sync(save_getAction(saveClean, conn))
-      await(conn.callback(cleanDataModel))
-      txReport
-    } else {
-      throw ValidationErrors(errors)
-    }
-  }
-
   override def save_inspect(save: Save)(using conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("save", save.dataModel) {
@@ -186,6 +169,75 @@ trait SpiBaseJVM_sync
     } else {
       Map.empty[String, Seq[String]]
     }
+  }
+
+  override def save_transact(save: Save)(using conn0: Conn): TxReport = {
+    val conn = conn0.asInstanceOf[JdbcConn_JVM]
+    if (save.printInspect)
+      save_inspect(save) // re-use inspector for now
+
+    val cleanElements  = keywordsSuffixed(save.dataModel.elements, conn.proxy)
+    val cleanDataModel = save.dataModel.copy(elements = cleanElements)
+    val saveClean      = save.copy(dataModel = cleanDataModel)
+
+    val errors = save_validate(save)
+    if (errors.nonEmpty)
+      throw ValidationErrors(errors)
+
+    val firstEntity      = getInitialEntity(cleanElements)
+    val firstRefPath     = List(firstEntity)
+    val firstTableInsert = TableInsert(firstRefPath)
+    val sqlOps           = new ResolveSave with SqlSave {}
+    val tableInserts     = sqlOps.resolve(cleanElements, 1, Nil, firstTableInsert)
+
+    // Cache generated ids for each table insertion
+    // Table is identified by ref path so that foreign keys know from where to pick parent ids
+    val idss = mutable.Map.empty[List[String], List[Long]]
+
+    val txReport = conn.atomicTransaction { () =>
+      sortTableInserts(tableInserts).foreach { tableInsert =>
+        println(tableInsert)
+        val ps         = conn.sqlConn.prepareStatement(tableInsert.sql, Statement.RETURN_GENERATED_KEYS)
+        val dummyTuple = EmptyTuple
+
+        if (tableInsert.foreignKeys.isEmpty) {
+          tableInsert.colSetters.foreach(_(ps, dummyTuple))
+          ps.addBatch()
+        } else {
+          val firstParamIndex = tableInsert.colSetters.length + 1
+
+          // Build one setter per FK column. For each FK, use an iterator of parent IDs that
+          // aligns with the number of current rows.
+          val foreignKeySetters = tableInsert.foreignKeys.zipWithIndex.map { case ((refAttr, refPath), i) =>
+            val paramIndex = firstParamIndex + i
+            val parentIds  = idss(refPath)
+            val fkIterator = parentIds.iterator
+            (ps: PS) =>
+              val fk = fkIterator.next()
+              //              println(s"refAttr: $refAttr, refPath: $refPath, paramIndex: $paramIndex, parentIds: $parentIds")
+              ps.setLong(paramIndex, fk)
+          }
+
+          tableInsert.colSetters.foreach(_(ps, dummyTuple))
+          foreignKeySetters.foreach(_(ps))
+          ps.addBatch()
+        }
+        ps.executeBatch()
+
+        // Get generated ids
+        val resultSet = ps.getGeneratedKeys
+        val ids       = ListBuffer.empty[Long]
+        while (resultSet.next()) {
+          ids += resultSet.getLong(1)
+        }
+        ps.close()
+        idss += tableInsert.refPath -> ids.toList
+      }
+      idss(firstRefPath)
+    }
+
+    await(conn.callback(cleanDataModel))
+    txReport
   }
 
 
@@ -211,19 +263,14 @@ trait SpiBaseJVM_sync
     val firstTableInsert = TableInsert(firstRefPath)
     val firstPartition   = Partition(Nil, 0, Tpl)
     val sqlOps           = new ResolveInsert with SqlInsert {}
-
-    // Can we only know this after all entities in a partition have been resolved?
-    // Avoid cyclic dependencies?
-    val partitions = sqlOps.resolve(cleanElements, 1, 0, List(firstPartition), firstTableInsert)
-
-    // Partitioned tuple data
-    val dataPartitions: Iterator[DataPartition] = tuplePartitions(insert.tpls, partitions)
+    val partitions       = sqlOps.resolve(cleanElements, 1, 0, List(firstPartition), firstTableInsert)
+    val dataPartitions   = tuplePartitions(insert.tpls, partitions)
 
     // Cache generated ids for each table insertion
     // Table is identified by ref path so that foreign keys know from where to pick parent ids
     val idss = mutable.Map.empty[List[String], List[Long]]
 
-    partitions.foreach { case p@Partition(tableInserts, tupleIndex, dataKind) =>
+    partitions.foreach { case Partition(tableInserts, tupleIndex, dataKind) =>
       val dataPartition = dataPartitions.next()
       val tpls          = dataPartition.tuples
 
@@ -236,9 +283,9 @@ trait SpiBaseJVM_sync
             ps.addBatch()
           }
         } else {
-          val firstParamIndex        = tableInsert.colSetters.length + 1
+          val firstParamIndex       = tableInsert.colSetters.length + 1
           // RefPaths present in this partition (used to detect intra-partition dependencies)
-          val samePartitionRefPaths  = tableInserts.map(_.refPath).toSet
+          val samePartitionRefPaths = tableInserts.map(_.refPath).toSet
 
           // Build one setter per FK column. For each FK, use an iterator of parent IDs that
           // aligns with the number of current rows. If the referenced table is in the SAME
@@ -248,7 +295,7 @@ trait SpiBaseJVM_sync
           val foreignKeySetters = tableInsert.foreignKeys.zipWithIndex.map { case ((refAttr, refPath), i) =>
             val paramIndex = firstParamIndex + i
             val parentIds  = idss(refPath)
-            val fks =
+            val fks        =
               if (samePartitionRefPaths.contains(refPath)) {
                 // Intra-partition dependency: IDs already align 1:1 with current rows
                 parentIds
@@ -460,74 +507,6 @@ trait SpiBaseJVM_sync
     }
     orderedInserts.toList
   }
-
-  /* Produce tuples for each nested level starting from the top-level tuples,
-   * and compute per-parent child counts for the next level.
-   *
-   * Level 0 = the input tuples as-is.
-   * Level N+1 = all nested tuples found in the last element of each tuple from level N.
-   *
-   * Assumptions:
-   * - The last product element is either a Seq[Product] holding children or not present/not a Seq (leaf).
-   * - We do not strip the last element; tuples are kept intact.
-   * - Stops when a level has no children.
-   *
-   * This is iterative (not recursive) to minimize allocations and stack usage.
-   */
-
-  private def tuplesByLevel(topLevelTuples: Seq[Product]): Iterator[DataPartition] = new Iterator[DataPartition] {
-    private var currentLevel: Seq[Product] = topLevelTuples
-    private var exhausted   : Boolean      = false
-
-    override def hasNext: Boolean = !exhausted
-
-    override def next(): DataPartition = {
-      if (exhausted) throw new NoSuchElementException("No more levels")
-      val out = currentLevel
-
-      // Collect children from the last element of each tuple in the current level.
-      // Also gather how many children each parent has to drive FK id replication at the next level.
-      val childrenBuffer = ListBuffer.empty[Product]
-      val countsBuffer   = ListBuffer.empty[Int]
-      var i              = 0
-      val n              = currentLevel.length
-      while (i < n) {
-        val tpl       = currentLevel(i)
-        val lastIndex = tpl.productArity - 1
-        var count     = 0
-        if (lastIndex >= 0) {
-          tpl.productElement(lastIndex) match {
-            case seq: Seq[?] =>
-              //              val s = seq.asInstanceOf[Seq[Product]]
-              val s = seq.asInstanceOf[Seq[Any]]
-              count = s.size
-              //              s.foreach(childrenBuffer += _)
-              s.foreach(childrenBuffer += Tuple1(_))
-
-            case Some(seq: Seq[?]) =>
-              val s = seq.asInstanceOf[Seq[Product]]
-              count = s.size
-              s.foreach(childrenBuffer += _)
-
-            case _ =>
-              () // no children for this tuple
-          }
-        }
-        countsBuffer += count
-        i += 1
-      }
-
-      val childCounts = countsBuffer.toVector
-
-      if (childrenBuffer.isEmpty) {
-        exhausted = true
-      } else {
-        currentLevel = childrenBuffer.result()
-      }
-      DataPartition(out, childCounts)
-    }
-  }
-
 
   def insert_transact2(insert: Insert)(using conn0: Conn): TxReport = {
     val conn           = conn0.asInstanceOf[JdbcConn_JVM]
