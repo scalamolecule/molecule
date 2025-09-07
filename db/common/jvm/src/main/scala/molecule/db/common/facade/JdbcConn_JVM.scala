@@ -12,6 +12,7 @@ import molecule.db.common.api.Savepoint
 import molecule.db.common.javaSql.{ResultSetImpl, ResultSetInterface}
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.{Conn, TxReport}
+import molecule.db.common.transaction.plan.InsertEngine
 import molecule.db.common.transaction.strategy.SqlAction
 import molecule.db.common.transaction.{CachedConnection, SavepointImpl, SqlDataType_JVM}
 import molecule.db.common.util.ModelUtils
@@ -45,8 +46,7 @@ case class JdbcConn_JVM(
     atomicTransaction(() => action.execute)
   }
 
-
-  private def atomicTransaction(executions: () => List[Long]): TxReport = {
+  def atomicTransaction(executions: () => List[Long]): TxReport = {
     try {
       // Atomic transaction of all statements
       sqlConn.setAutoCommit(false)

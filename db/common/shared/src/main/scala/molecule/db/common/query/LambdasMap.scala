@@ -47,7 +47,24 @@ trait LambdasMap extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val json2mapLong          : String => Map[String, Long]           = (json: String) => upickle.default.read[Map[String, Long]](json)
   private lazy val json2mapFloat         : String => Map[String, Float]          = (json: String) => upickle.default.read[Map[String, Float]](json)
   private lazy val json2mapDouble        : String => Map[String, Double]         = (json: String) => upickle.default.read[Map[String, Double]](json)
-  private lazy val json2mapBoolean       : String => Map[String, Boolean]        = (json: String) => upickle.default.read[Map[String, Int]](json).map { case (k, v) => k -> (if (v == 1) true else false) }
+  private lazy val json2mapBoolean       : String => Map[String, Boolean]        = (json: String) => {
+    // Accept legacy numeric 0/1, native JSON booleans, and string variants
+    try {
+      upickle.default.read[Map[String, Int]](json).map { case (k, v) => k -> (v == 1) }
+    } catch {
+      case _: upickle.core.AbortException | _: upickle.core.Abort =>
+        try {
+          upickle.default.read[Map[String, Boolean]](json)
+        } catch {
+          case _: upickle.core.AbortException | _: upickle.core.Abort =>
+            val asStrings = upickle.default.read[Map[String, String]](json)
+            asStrings.map { case (k, v) =>
+              val lower = v.toLowerCase
+              k -> (lower == "1" || lower == "true" || lower == "t")
+            }
+        }
+    }
+  }
   private lazy val json2mapBigInt        : String => Map[String, BigInt]         = (json: String) => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> BigInt(v) }
   private lazy val json2mapBigDecimal    : String => Map[String, BigDecimal]     = (json: String) => upickle.default.read[Map[String, String]](json).map { case (k, v) => k -> BigDecimal(v) }
   private lazy val json2mapDate          : String => Map[String, Date]           = (json: String) => upickle.default.read[Map[String, Long]](json).map { case (k, v) => k -> new Date(v) }

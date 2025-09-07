@@ -12,26 +12,13 @@ object Refs extends DomainStructure {
     val s    = oneString
     val bool = oneBoolean
 
-    val a  = one[A]
-    val b  = one[B]
-    val b1 = one[B]
-    val b2 = one[B]
-    val c  = one[C]
-    val d  = one[D]
-
-    val aa = many[A]
-    val bb = many[B]
-    val cc = many[C]
-    val dd = many[D]
-
-    val ownA  = one[A].owner
-    val ownAa = many[A].owner
-
-    val ownB  = one[B].owner
-    val ownBb = many[B].owner
-
-    val ownC  = one[C].owner
-    val ownCc = many[C].owner
+    val a    = one[A]("Aa")
+    val b    = one[B]("Aa")
+    val b1   = one[B]("Aa1")
+    val b2   = one[B]("Aa2")
+    val c    = one[C]("Aa")
+    val d    = one[D]("Aa")
+    val ownB = one[B]("OwnAa").owner
   }
 
   trait B {
@@ -41,19 +28,13 @@ object Refs extends DomainStructure {
     val iMap = mapInt
     val s    = oneString
 
-    val a  = one[A]
-    val b  = one[B]
-    val c  = one[C]
-    val c1 = one[C]
-    val d  = one[D]
-
-    val aa = many[A]
-    val bb = many[B]
-    val cc = many[C]
-    val dd = many[D]
-
-    val ownC  = one[C].owner
-    val ownCc = many[C].owner
+    val a    = one[A]("Bb")
+    val b    = one[B]("Bb")
+    val c    = one[C]("Bb")
+    val c1   = one[C]("Bb1")
+    val d    = one[D]("Bb")
+    val ownA = one[A]("OwnBb").owner
+    val ownC = one[C]("OwnBb").owner
   }
 
   trait C {
@@ -62,46 +43,47 @@ object Refs extends DomainStructure {
     val iSet = setInt
     val iSeq = seqInt
     val iMap = mapInt
-    val a    = one[A]
-    val d    = one[D]
-    val dd   = many[D]
-
-    val ownD  = one[D].owner
-    val ownDd = many[D].owner
+    val a    = one[A]("Cc")
+    val b    = one[B]("Cc")
+    val d    = one[D]("Cc")
+    val ownB = one[B]("OwnCc").owner
   }
 
 
   trait D {
     val i  = oneInt
     val s  = oneString
-    val e  = one[E]
-    val e1 = one[E]
-    val ee = many[E]
+    val a  = one[A]("Dd")
+    val b  = one[B]("Dd")
+    val c  = one[C]("Dd")
+    val e  = one[E]("Dd")
+    val e1 = one[E]("Dd1")
   }
 
   trait E {
-    val i  = oneInt
-    val s  = oneString
-    val f  = one[F]
-    val ff = many[F]
+    val i = oneInt
+    val s = oneString
+    val d = one[D]("Ee")
+    val f = one[F]
   }
 
   trait F {
-    val i  = oneInt
-    val s  = oneString
-    val g  = one[G]
-    val gg = many[G]
+    val i = oneInt
+    val s = oneString
+    val e = one[E]("Ff")
+    val g = one[G]
   }
 
   trait G {
-    val i  = oneInt
-    val s  = oneString
-    val h  = one[H]
-    val hh = many[H]
+    val i = oneInt
+    val s = oneString
+    val f = one[F]("Gg")
+    val h = one[H]
   }
 
   trait H {
     val i = oneInt
     val s = oneString
+    val g = one[G]("Hh")
   }
 }

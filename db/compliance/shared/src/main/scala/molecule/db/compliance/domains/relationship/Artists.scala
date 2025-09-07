@@ -7,16 +7,55 @@ object Artists extends DomainStructure {
 
   trait Artist {
     val name = oneString
+
+    // .Works.price
+    // .Works.*(Work.price)
+
+
+    // Artist would most likely exist before works are added
+    // Strange to define both from this side...
+    // Artist.name.Works.*(Work.title.price).insert(
+    //   ("Bob", List(
+    //     ("Mona", 14),
+    //     ("Hope", 20))
+    //   )
+    // ).transact
+
+    // Doesn't make sense
+    // Artist.name("Bob").Paintings.title("Mona").save
   }
 
-  // 2 separate 1:N relationships
+
   trait Work {
-    val title      = oneString
-    val price      = oneInt
-    val painter    = one[Artist]("paintings")
-    val sculpturer = one[Artist]("sculptures")
+    val title  = oneString
+    val price  = oneInt
+    val artist = one[Artist] // transparently adds reverse ref "Works" (plural of this entity)
+    //    val artist = one[Artist]("Works") // explicit reverse ref "Works"
+
+
+    // .painter
+    // .Painter.name
+
+
+    // Work.title("Mona").price(14).artist(artistId).save.transact
+    //
+    // Work.title.price.artist.insert(
+    //   ("Mona", 14, artistId),
+    //   ("Hope", 20, artistId),
+    // ).transact
   }
 }
+
+
+
+
+
+
+
+
+
+
+
 
 //// one-to-many: Artist --> Work
 //

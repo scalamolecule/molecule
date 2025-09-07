@@ -40,8 +40,8 @@ trait ResolveSave { self: SqlSave =>
             }
           }
 
-        case Ref(ent, refAttr, ref, value, _, _, _) =>
-          addRef(ent, refAttr, ref, value)
+        case Ref(ent, refAttr, ref, value, _, _, reverseRefAttr) =>
+          addRef(ent, refAttr, ref, value, reverseRefAttr)
           resolve(tail)
 
         case BackRef(backRef, _, _) =>

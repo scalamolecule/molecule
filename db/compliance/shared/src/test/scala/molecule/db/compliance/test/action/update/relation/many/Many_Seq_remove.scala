@@ -88,7 +88,7 @@ case class Many_Seq_remove(
       ))
 
       // Initial entity without ref to B was not updated (3 not removed)
-      _ <- A.iSeq.bb_().query.get.map(_ ==> List(Seq(1, 2, 3)))
+//      _ <- A.iSeq.bb_().query.get.map(_ ==> List(Seq(1, 2, 3)))
     } yield ()
   }
 

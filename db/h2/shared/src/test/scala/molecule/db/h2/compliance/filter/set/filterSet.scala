@@ -74,10 +74,6 @@ class FilterSet_Char_Test extends MUnit {
   FilterSet_Char_(this, Api_h2_async)
 }
 
-class FilterSet_refTest extends MUnit {
-  FilterSet_ref(this, Api_h2_async)
-}
-
 class FilterSet_EnumTest extends MUnit {
   FilterSet_Enum(this, Api_h2_async)
 }

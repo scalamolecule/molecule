@@ -92,11 +92,12 @@ trait SqlSave extends ValueTransformers with SerializationUtils { self: ResolveS
 
   protected def addRef(
     ent: String, refAttr: String, ref: String,
-    relationship: Relationship
+    relationship: Relationship,
+    reverseRefAttr: Option[String]
   ): Unit = {
     saveAction = relationship match {
-      case ManyToOne => saveAction.refOne(ent, refAttr, ref)
-      case _         => saveAction.refMany(ent, refAttr, ref)
+      case ManyToOne => saveAction.refManyToOne(ent, refAttr, ref)
+      case _         => saveAction.refOneToMany(ent, refAttr, ref, reverseRefAttr.get)
     }
   }
 

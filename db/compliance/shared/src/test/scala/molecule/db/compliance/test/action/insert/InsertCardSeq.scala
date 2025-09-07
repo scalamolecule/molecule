@@ -75,8 +75,6 @@ case class InsertSeqValue(
       _ <- Entity.i.byteArray.query.get.map(_ ==> List((1, Array(byte1, byte2))))
       _ <- Entity.i.shortSeq.query.get.map(_ ==> List((1, List(short1, short2))))
       _ <- Entity.i.charSeq.query.get.map(_ ==> List((1, List(char1, char2))))
-
-      // (Refs have Set semantics only)
     } yield ()
   }
 

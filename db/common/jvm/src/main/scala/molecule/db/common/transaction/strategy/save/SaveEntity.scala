@@ -3,6 +3,7 @@ package molecule.db.common.transaction.strategy.save
 import java.sql.PreparedStatement as PS
 import scala.collection.mutable.ListBuffer
 import molecule.db.common.transaction.strategy.SqlOps
+import molecule.db.common.transaction.strategy.insert.InsertAction
 
 case class SaveEntity(
   parent: SaveAction,
@@ -16,8 +17,12 @@ case class SaveEntity(
   override def rootAction: SaveAction = parent.rootAction
 
   override def process(): Unit = {
-    children.foreach(_.process())
-    insert()
+    reverse.fold {
+      children.foreach(_.process())
+      insert()
+    } { case (newParent, refAttrIndex) =>
+      saveAndPrepareManyToOneRef(newParent, refAttrIndex)
+    }
   }
 
   override def curStmt: String = {

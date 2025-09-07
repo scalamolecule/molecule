@@ -26,7 +26,6 @@ object Validation extends DomainStructure {
       "^[a-zA-Z0-9]+$",
       "Username cannot contain special characters."
     )
-    val allowedAttrs    = many[AllowedAttrs]
   }
 
   trait AllowedAttrs {
@@ -35,9 +34,11 @@ object Validation extends DomainStructure {
       Seq(7, 9, 13),
       "Lucky number can only be 7, 9 or 13"
     )
+    val strings      = one[Strings]("AllowedAttrs")
+    val tpe          = one[Tpe]("Refs")
   }
 
-  trait Type {
+  trait Tpe {
     val string         = oneString.validate(_ > "b")
     val int            = oneInt.validate(_ > 2)
     val long           = oneLong.validate(_ > 2L)
@@ -84,7 +85,6 @@ object Validation extends DomainStructure {
     val byteSet           = setByte.validate(_ > 3)
     val shortSet          = setShort.validate(_ > 3)
     val charSet           = setChar.validate(_ > 'c')
-    val refs              = many[Strings]
 
     val stringSeq         = seqString.validate(_ > "c")
     val intSeq            = seqInt.validate(_ > 3)
@@ -302,15 +302,6 @@ object Validation extends DomainStructure {
     val refB = one[RefB].mandatory
   }
 
-  trait MandatoryRefsAB {
-    val i     = oneInt
-    val refsA = many[RefA].mandatory
-  }
-  trait MandatoryRefsB {
-    val i     = oneInt
-    val refsB = many[RefB].mandatory
-  }
-
   trait RefA {
     val i    = oneInt
     val refB = one[RefB].mandatory
@@ -354,10 +345,10 @@ object Validation extends DomainStructure {
 
     // Mixed ref/attr
     val int  = oneInt.require(refB)
-    val refB = one[RefB]
+    val refB = one[RefB]("Requires")
 
     // Ref-only tuples
-    val ref1 = one[RefB].require(ref2)
+    val ref1 = one[RefB]("Requires1").require(ref2)
     val ref2 = one[AllowedAttrs]
   }
 }

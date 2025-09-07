@@ -108,7 +108,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
           List(s"$ent$entExt.$refAttr = $ref$refExt.id") ++ joinPredicates
         ))
 
-      case OneToMany if isNested                    =>
+      case OneToMany if isNested =>
 
         ???
 
@@ -116,7 +116,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
         ???
 
-      case OneToMany                                =>
+      case OneToMany =>
         val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
         val revRefAttr      = reverseRefAttr.getOrElse(throw Exception("Missing reverse ref attr"))
         joins += ((s"INNER JOIN", ref, refAs,
@@ -162,12 +162,14 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     // Know where we should steal predicates from subsequent `where` additions
     whereSplit = where.length
 
-    val Ref(ent, refAttr, ref, _, _, _, _) = r
+    val Ref(ent, refAttr, ref, rel, _, _, optRevRef) = r
     handleRef(refAttr, ref)
-
+    val revRef          = optRevRef.get
     val entExt          = getOptExt(path.dropRight(2)).getOrElse("")
     val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
-    joins += ((s"LEFT JOIN", ref, refAs, List(s"$ent$entExt.$refAttr = $ref$refExt.id")))
+
+    val (lft, rgt) = if (rel == ManyToOne) (refAttr, "id") else ("id", revRef)
+    joins += ((s"LEFT JOIN", ref, refAs, List(s"$ent$entExt.$lft = $ref$refExt.$rgt")))
 
     // Cast next nested/adjacent opt ref
     castStrategy = castStrategy.optRef(nestedOptRef)
@@ -227,7 +229,8 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     noCardManyInsideOptRef()
     checkOnlyOptRef()
 
-    val Ref(ent, refAttr, ref, relationship, _, _, reverseRefAttr) = r
+    val Ref(ent, refAttr, ref, relationship, _, _, optRevRefAttr) = r
+    val revRefAttr = optRevRefAttr.get
 
     level += 1
     validateRefEntity(r, nestedElements)
@@ -235,15 +238,10 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     handleRef(refAttr, ref)
     val entExt = getOptExt(path.dropRight(2)).getOrElse("")
 
-    if (relationship == ManyToMany) {
-      addJoins(ent, entExt, refAttr, ref, joinType)
-    } else {
-      val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
-      val revRefAttr      = reverseRefAttr.getOrElse(throw Exception("Missing reverse ref attr"))
-      joins += ((s"INNER JOIN", ref, refAs,
-        List(s"$ent$entExt.id = $ref$refExt.$revRefAttr") //++ joinPredicates
-      ))
-    }
+    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
+    joins += ((s"$joinType JOIN", ref, refAs,
+      List(s"$ent$entExt.id = $ref$refExt.$revRefAttr") //++ joinPredicates
+    ))
 
     val id = s"$ent.id"
     nestedIds += id

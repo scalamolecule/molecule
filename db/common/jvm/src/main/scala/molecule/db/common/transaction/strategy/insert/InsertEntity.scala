@@ -13,18 +13,17 @@ case class InsertEntity(
   override def rootAction: InsertAction = parent.rootAction
 
   override def process(): Unit = {
-    children.foreach(_.process())
-
-    //    println(s"++++++++++++++++++++++++++++++++++++++++++++++++++++++++  $ent  ")
-    //
-    //    println("rowSetters")
-    //    println(rowSetters.map { rs => rs.toList.mkString("\n   ") }.mkString("   ", "\n   -----\n   ", ""))
-    //
-    //    println("parent.rowSetters")
-    //    println(parent.rowSetters.map { rs => rs.toList.mkString("\n   ") }.mkString("   ", "\n   -----\n   ", ""))
-
-    insert()
+    reverse.fold {
+      // No reverse handoff: process children first, then insert this entity
+      children.foreach(_.process())
+      insert()
+    } { case (manySide, refAttrIndex) =>
+      // Reverse handoff: insert this (one-side) to get ids, inject them into many-side FK,
+      // and prepare many-side to insert with FK values set.
+      insertAndPrepareManyToOneRef(manySide, refAttrIndex)
+    }
   }
+
 
   override def curStmt: String = {
     sqlOps.insertStmt(ent, cols, placeHolders)

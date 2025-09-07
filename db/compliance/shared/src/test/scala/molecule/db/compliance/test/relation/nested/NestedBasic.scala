@@ -54,23 +54,6 @@ case class NestedBasic(
     } yield ()
   }
 
-
-  "Nested owned: one" - refs {
-
-    for {
-      _ <- A.i.OwnBb.*(B.i).insert((2, List(3, 4))).transact
-      _ <- A.i.OwnBb.*(B.i.a1).query.get.map(_ ==> List((2, List(3, 4))))
-    } yield ()
-  }
-
-  "Nested owned: set" - refs {
-
-    for {
-      _ <- A.i.OwnBb.*(B.iSet).insert(List((2, List(Set(3, 4))))).transact
-      _ <- A.i.OwnBb.*(B.iSet).query.get.map(_ ==> List((2, List(Set(3, 4)))))
-    } yield ()
-  }
-
   "Expressions in nested" - refs {
     for {
       _ <- A.i.Bb.*(B.i).insert(List((1, List(1, 2, 3)))).transact

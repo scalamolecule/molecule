@@ -21,16 +21,16 @@ case class TypesSetOpt(
 
   "Types" - validation {
     for {
-      _ <- Type.stringSet_?(Some(Set("a", "b", "d"))).save.transact
+      _ <- Tpe.stringSet_?(Some(Set("a", "b", "d"))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
-                "Type.stringSet" -> Seq(
-                  s"""Type.stringSet with value `a` doesn't satisfy validation:
+                "Tpe.stringSet" -> Seq(
+                  s"""Tpe.stringSet with value `a` doesn't satisfy validation:
                      |_ > "c"
                      |""".stripMargin,
-                  s"""Type.stringSet with value `b` doesn't satisfy validation:
+                  s"""Tpe.stringSet with value `b` doesn't satisfy validation:
                      |_ > "c"
                      |""".stripMargin
                   // (value d is ok)
@@ -39,231 +39,231 @@ case class TypesSetOpt(
         }
       // Focusing only on the first (and only) error message
       // (See ValidationFormatting tests for multi-error validations)
-      _ <- Type.stringSet_?(Some(Set("a", "b", "d"))).save.transact
+      _ <- Tpe.stringSet_?(Some(Set("a", "b", "d"))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.stringSet with value `a` doesn't satisfy validation:
+              s"""Tpe.stringSet with value `a` doesn't satisfy validation:
                  |_ > "c"
                  |""".stripMargin,
-              s"""Type.stringSet with value `b` doesn't satisfy validation:
+              s"""Tpe.stringSet with value `b` doesn't satisfy validation:
                  |_ > "c"
                  |""".stripMargin
             )
         }
 
-      _ <- Type.intSet_?(Some(Set(1, 2, 4))).save.transact
+      _ <- Tpe.intSet_?(Some(Set(1, 2, 4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.sorted ==> Seq(
-              s"""Type.intSet with value `1` doesn't satisfy validation:
+              s"""Tpe.intSet with value `1` doesn't satisfy validation:
                  |_ > 3
                  |""".stripMargin,
-              s"""Type.intSet with value `2` doesn't satisfy validation:
+              s"""Tpe.intSet with value `2` doesn't satisfy validation:
                  |_ > 3
                  |""".stripMargin
             )
         }
 
-      _ <- Type.longSet_?(Some(Set(1L, 2L, 4L))).save.transact
+      _ <- Tpe.longSet_?(Some(Set(1L, 2L, 4L))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.longSet with value `1` doesn't satisfy validation:
+              s"""Tpe.longSet with value `1` doesn't satisfy validation:
                  |_ > 3L
                  |""".stripMargin,
-              s"""Type.longSet with value `2` doesn't satisfy validation:
+              s"""Tpe.longSet with value `2` doesn't satisfy validation:
                  |_ > 3L
                  |""".stripMargin
             )
         }
 
-      _ <- Type.floatSet_?(Some(Set(float1, float2, float4))).save.transact
+      _ <- Tpe.floatSet_?(Some(Set(float1, float2, float4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.floatSet with value `$float1` doesn't satisfy validation:
+              s"""Tpe.floatSet with value `$float1` doesn't satisfy validation:
                  |_ > 3.3f
                  |""".stripMargin,
-              s"""Type.floatSet with value `$float2` doesn't satisfy validation:
+              s"""Tpe.floatSet with value `$float2` doesn't satisfy validation:
                  |_ > 3.3f
                  |""".stripMargin
             )
         }
 
-      _ <- Type.doubleSet_?(Some(Set(double1, double2, double4))).save.transact
+      _ <- Tpe.doubleSet_?(Some(Set(double1, double2, double4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.doubleSet with value `$double1` doesn't satisfy validation:
+              s"""Tpe.doubleSet with value `$double1` doesn't satisfy validation:
                  |_ > 3.3
                  |""".stripMargin,
-              s"""Type.doubleSet with value `$double2` doesn't satisfy validation:
+              s"""Tpe.doubleSet with value `$double2` doesn't satisfy validation:
                  |_ > 3.3
                  |""".stripMargin
             )
         }
 
-      _ <- Type.booleanSet_?(Some(Set(true, false))).save.transact
+      _ <- Tpe.booleanSet_?(Some(Set(true, false))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.booleanSet with value `true` doesn't satisfy validation:
+              s"""Tpe.booleanSet with value `true` doesn't satisfy validation:
                  |_ == false
                  |""".stripMargin
             )
         }
 
-      _ <- Type.bigIntSet_?(Some(Set(bigInt1, bigInt2, bigInt4))).save.transact
+      _ <- Tpe.bigIntSet_?(Some(Set(bigInt1, bigInt2, bigInt4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.bigIntSet with value `$bigInt1` doesn't satisfy validation:
+              s"""Tpe.bigIntSet with value `$bigInt1` doesn't satisfy validation:
                  |_ > BigInt(3)
                  |""".stripMargin,
-              s"""Type.bigIntSet with value `$bigInt2` doesn't satisfy validation:
+              s"""Tpe.bigIntSet with value `$bigInt2` doesn't satisfy validation:
                  |_ > BigInt(3)
                  |""".stripMargin
             )
         }
 
-      _ <- Type.bigDecimalSet_?(Some(Set(bigDecimal1, bigDecimal2, bigDecimal4))).save.transact
+      _ <- Tpe.bigDecimalSet_?(Some(Set(bigDecimal1, bigDecimal2, bigDecimal4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.bigDecimalSet with value `$bigDecimal1` doesn't satisfy validation:
+              s"""Tpe.bigDecimalSet with value `$bigDecimal1` doesn't satisfy validation:
                  |_ > BigDecimal(3.3)
                  |""".stripMargin,
-              s"""Type.bigDecimalSet with value `$bigDecimal2` doesn't satisfy validation:
+              s"""Tpe.bigDecimalSet with value `$bigDecimal2` doesn't satisfy validation:
                  |_ > BigDecimal(3.3)
                  |""".stripMargin
             )
         }
 
-      _ <- Type.dateSet_?(Some(Set(date1, date2, date4))).save.transact
+      _ <- Tpe.dateSet_?(Some(Set(date1, date2, date4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.dateSet with value `$date1` doesn't satisfy validation:
+              s"""Tpe.dateSet with value `$date1` doesn't satisfy validation:
                  |_.after(new Date(1057010400000L))
                  |""".stripMargin,
-              s"""Type.dateSet with value `$date2` doesn't satisfy validation:
+              s"""Tpe.dateSet with value `$date2` doesn't satisfy validation:
                  |_.after(new Date(1057010400000L))
                  |""".stripMargin
             )
         }
 
-      _ <- Type.durationSet_?(Some(Set(duration1, duration2, duration4))).save.transact
+      _ <- Tpe.durationSet_?(Some(Set(duration1, duration2, duration4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.durationSet with value `$duration1` doesn't satisfy validation:
+              s"""Tpe.durationSet with value `$duration1` doesn't satisfy validation:
                  |_.compareTo(Duration.ofMinutes(2)) > 0
                  |""".stripMargin,
-              s"""Type.durationSet with value `$duration2` doesn't satisfy validation:
+              s"""Tpe.durationSet with value `$duration2` doesn't satisfy validation:
                  |_.compareTo(Duration.ofMinutes(2)) > 0
                  |""".stripMargin
             )
         }
 
-      _ <- Type.instantSet_?(Some(Set(instant1, instant2, instant4))).save.transact
+      _ <- Tpe.instantSet_?(Some(Set(instant1, instant2, instant4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.instantSet with value `$instant1` doesn't satisfy validation:
+              s"""Tpe.instantSet with value `$instant1` doesn't satisfy validation:
                  |_.compareTo(Instant.ofEpochSecond(2)) > 0
                  |""".stripMargin,
-              s"""Type.instantSet with value `$instant2` doesn't satisfy validation:
+              s"""Tpe.instantSet with value `$instant2` doesn't satisfy validation:
                  |_.compareTo(Instant.ofEpochSecond(2)) > 0
                  |""".stripMargin
             )
         }
 
-      _ <- Type.localDateSet_?(Some(Set(localDate1, localDate2, localDate4))).save.transact
+      _ <- Tpe.localDateSet_?(Some(Set(localDate1, localDate2, localDate4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.localDateSet with value `$localDate1` doesn't satisfy validation:
+              s"""Tpe.localDateSet with value `$localDate1` doesn't satisfy validation:
                  |_.compareTo(LocalDate.of(2002, 1, 1)) > 0
                  |""".stripMargin,
-              s"""Type.localDateSet with value `$localDate2` doesn't satisfy validation:
+              s"""Tpe.localDateSet with value `$localDate2` doesn't satisfy validation:
                  |_.compareTo(LocalDate.of(2002, 1, 1)) > 0
                  |""".stripMargin
             )
         }
 
-      _ <- Type.localTimeSet_?(Some(Set(localTime1, localTime2, localTime4))).save.transact
+      _ <- Tpe.localTimeSet_?(Some(Set(localTime1, localTime2, localTime4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.localTimeSet with value `$localTime1` doesn't satisfy validation:
+              s"""Tpe.localTimeSet with value `$localTime1` doesn't satisfy validation:
                  |_.compareTo(LocalTime.of(2, 2)) > 0
                  |""".stripMargin,
-              s"""Type.localTimeSet with value `$localTime2` doesn't satisfy validation:
+              s"""Tpe.localTimeSet with value `$localTime2` doesn't satisfy validation:
                  |_.compareTo(LocalTime.of(2, 2)) > 0
                  |""".stripMargin
             )
         }
 
-      _ <- Type.localDateTimeSet_?(Some(Set(localDateTime1, localDateTime2, localDateTime4))).save.transact
+      _ <- Tpe.localDateTimeSet_?(Some(Set(localDateTime1, localDateTime2, localDateTime4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.localDateTimeSet with value `$localDateTime1` doesn't satisfy validation:
+              s"""Tpe.localDateTimeSet with value `$localDateTime1` doesn't satisfy validation:
                  |_.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
                  |""".stripMargin,
-              s"""Type.localDateTimeSet with value `$localDateTime2` doesn't satisfy validation:
+              s"""Tpe.localDateTimeSet with value `$localDateTime2` doesn't satisfy validation:
                  |_.compareTo(LocalDateTime.of(2002, 1, 1, 1, 2)) > 0
                  |""".stripMargin
             )
         }
 
-      _ <- Type.offsetTimeSet_?(Some(Set(offsetTime1, offsetTime2, offsetTime4))).save.transact
+      _ <- Tpe.offsetTimeSet_?(Some(Set(offsetTime1, offsetTime2, offsetTime4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.offsetTimeSet with value `$offsetTime1` doesn't satisfy validation:
+              s"""Tpe.offsetTimeSet with value `$offsetTime1` doesn't satisfy validation:
                  |_.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
                  |""".stripMargin,
-              s"""Type.offsetTimeSet with value `$offsetTime2` doesn't satisfy validation:
+              s"""Tpe.offsetTimeSet with value `$offsetTime2` doesn't satisfy validation:
                  |_.compareTo(OffsetTime.of(2, 2, 2, 2, ZoneOffset.ofHours(2))) > 0
                  |""".stripMargin
             )
         }
 
-      _ <- Type.offsetDateTimeSet_?(Some(Set(offsetDateTime1, offsetDateTime2, offsetDateTime4))).save.transact
+      _ <- Tpe.offsetDateTimeSet_?(Some(Set(offsetDateTime1, offsetDateTime2, offsetDateTime4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.offsetDateTimeSet with value `$offsetDateTime1` doesn't satisfy validation:
+              s"""Tpe.offsetDateTimeSet with value `$offsetDateTime1` doesn't satisfy validation:
                  |_.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                  |""".stripMargin,
-              s"""Type.offsetDateTimeSet with value `$offsetDateTime2` doesn't satisfy validation:
+              s"""Tpe.offsetDateTimeSet with value `$offsetDateTime2` doesn't satisfy validation:
                  |_.compareTo(OffsetDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                  |""".stripMargin
             )
         }
 
-      _ <- Type.zonedDateTimeSet_?(Some(Set(zonedDateTime1, zonedDateTime2, zonedDateTime4))).save.transact
+      _ <- Tpe.zonedDateTimeSet_?(Some(Set(zonedDateTime1, zonedDateTime2, zonedDateTime4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.zonedDateTimeSet with value `$zonedDateTime1` doesn't satisfy validation:
+              s"""Tpe.zonedDateTimeSet with value `$zonedDateTime1` doesn't satisfy validation:
                  |_.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                  |""".stripMargin,
-              s"""Type.zonedDateTimeSet with value `$zonedDateTime2` doesn't satisfy validation:
+              s"""Tpe.zonedDateTimeSet with value `$zonedDateTime2` doesn't satisfy validation:
                  |_.compareTo(ZonedDateTime.of(2002, 1, 1, 1, 1, 1, 1, ZoneOffset.ofHours(2))) > 0
                  |""".stripMargin
             )
         }
 
-      _ <- Type.uuidSet(Set(
+      _ <- Tpe.uuidSet(Set(
           UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
           UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-bbbbbbbbbbbb"))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.uuidSet with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
+              s"""Tpe.uuidSet with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
                  |_.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
                  |""".stripMargin
             )
@@ -272,53 +272,53 @@ case class TypesSetOpt(
       uri0 = new URI("a")
       uri1 = new URI("ab")
       uri2 = new URI("abcd")
-      _ <- Type.uriSet_?(Some(Set(uri0, uri1, uri2))).save.transact
+      _ <- Tpe.uriSet_?(Some(Set(uri0, uri1, uri2))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.uriSet with value `a` doesn't satisfy validation:
+              s"""Tpe.uriSet with value `a` doesn't satisfy validation:
                  |_.toString.length > 3
                  |""".stripMargin,
-              s"""Type.uriSet with value `ab` doesn't satisfy validation:
+              s"""Tpe.uriSet with value `ab` doesn't satisfy validation:
                  |_.toString.length > 3
                  |""".stripMargin
             )
         }
 
-      _ <- Type.byteSet_?(Some(Set(byte1, byte2, byte4))).save.transact
+      _ <- Tpe.byteSet_?(Some(Set(byte1, byte2, byte4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.byteSet with value `$byte1` doesn't satisfy validation:
+              s"""Tpe.byteSet with value `$byte1` doesn't satisfy validation:
                  |_ > $byte3
                  |""".stripMargin,
-              s"""Type.byteSet with value `$byte2` doesn't satisfy validation:
+              s"""Tpe.byteSet with value `$byte2` doesn't satisfy validation:
                  |_ > $byte3
                  |""".stripMargin
             )
         }
 
-      _ <- Type.shortSet_?(Some(Set(short1, short2, short4))).save.transact
+      _ <- Tpe.shortSet_?(Some(Set(short1, short2, short4))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.shortSet with value `$short1` doesn't satisfy validation:
+              s"""Tpe.shortSet with value `$short1` doesn't satisfy validation:
                  |_ > $short3
                  |""".stripMargin,
-              s"""Type.shortSet with value `$short2` doesn't satisfy validation:
+              s"""Tpe.shortSet with value `$short2` doesn't satisfy validation:
                  |_ > $short3
                  |""".stripMargin
             )
         }
 
-      _ <- Type.charSet_?(Some(Set('a', 'b', 'd'))).save.transact
+      _ <- Tpe.charSet_?(Some(Set('a', 'b', 'd'))).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.charSet with value `a` doesn't satisfy validation:
+              s"""Tpe.charSet with value `a` doesn't satisfy validation:
                  |_ > 'c'
                  |""".stripMargin,
-              s"""Type.charSet with value `b` doesn't satisfy validation:
+              s"""Tpe.charSet with value `b` doesn't satisfy validation:
                  |_ > 'c'
                  |""".stripMargin
             )

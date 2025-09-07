@@ -204,9 +204,6 @@ case class OpsSet(
       id21 <- Entity.shortSet(Set(short1)).save.transact.map(_.id)
       id22 <- Entity.charSet(Set(char1)).save.transact.map(_.id)
 
-      // Refs are sets
-      id23 <- Entity.refs(Set(ref1)).save.transact.map(_.id)
-
       // Update
       _ <- Entity(id1).stringSet(Set(string2)).update.transact
       _ <- Entity(id2).intSet(Set(int2)).update.transact
@@ -230,7 +227,6 @@ case class OpsSet(
       _ <- Entity(id20).byteSet(Set(byte2)).update.transact
       _ <- Entity(id21).shortSet(Set(short2)).update.transact
       _ <- Entity(id22).charSet(Set(char2)).update.transact
-      _ <- Entity(id23).refs(Set(ref2)).update.transact
 
       _ <- Entity.stringSet.query.get.map(_.head ==> Set(string2))
       _ <- Entity.intSet.query.get.map(_.head ==> Set(int2))
@@ -254,7 +250,6 @@ case class OpsSet(
       _ <- Entity.byteSet.query.get.map(_.head ==> Set(byte2))
       _ <- Entity.shortSet.query.get.map(_.head ==> Set(short2))
       _ <- Entity.charSet.query.get.map(_.head ==> Set(char2))
-      _ <- Entity.refs.query.get.map(_.head ==> Set(ref2))
 
       // Upsert
       _ <- Entity(id1).stringSet(Set(string3)).upsert.transact
@@ -279,7 +274,6 @@ case class OpsSet(
       _ <- Entity(id20).byteSet(Set(byte3)).upsert.transact
       _ <- Entity(id21).shortSet(Set(short3)).upsert.transact
       _ <- Entity(id22).charSet(Set(char3)).upsert.transact
-      _ <- Entity(id23).refs(Set(ref3)).upsert.transact
 
       _ <- Entity.stringSet.query.get.map(_.head ==> Set(string3))
       _ <- Entity.intSet.query.get.map(_.head ==> Set(int3))
@@ -303,7 +297,6 @@ case class OpsSet(
       _ <- Entity.byteSet.query.get.map(_.head ==> Set(byte3))
       _ <- Entity.shortSet.query.get.map(_.head ==> Set(short3))
       _ <- Entity.charSet.query.get.map(_.head ==> Set(char3))
-      _ <- Entity.refs.query.get.map(_.head ==> Set(ref3))
     } yield ()
   }
 
@@ -334,7 +327,6 @@ case class OpsSet(
       id20 <- Entity.byteSet(Set(byte1)).save.transact.map(_.id)
       id21 <- Entity.shortSet(Set(short1)).save.transact.map(_.id)
       id22 <- Entity.charSet(Set(char1)).save.transact.map(_.id)
-      id23 <- Entity.refs(Set(ref1)).save.transact.map(_.id)
 
       // Update
       _ <- Entity(id1).stringSet.add(string2).update.transact
@@ -359,7 +351,6 @@ case class OpsSet(
       _ <- Entity(id20).byteSet.add(byte2).update.transact
       _ <- Entity(id21).shortSet.add(short2).update.transact
       _ <- Entity(id22).charSet.add(char2).update.transact
-      _ <- Entity(id23).refs.add(ref2).update.transact
 
       _ <- Entity.stringSet.query.get.map(_.head ==> Set(string1, string2))
       _ <- Entity.intSet.query.get.map(_.head ==> Set(int1, int2))
@@ -383,7 +374,6 @@ case class OpsSet(
       _ <- Entity.byteSet.query.get.map(_.head ==> Set(byte1, byte2))
       _ <- Entity.shortSet.query.get.map(_.head ==> Set(short1, short2))
       _ <- Entity.charSet.query.get.map(_.head ==> Set(char1, char2))
-      _ <- Entity.refs.query.get.map(_.head ==> Set(ref1, ref2))
 
       // Upsert
       _ <- Entity(id1).stringSet.add(string3).upsert.transact
@@ -408,7 +398,6 @@ case class OpsSet(
       _ <- Entity(id20).byteSet.add(byte3).upsert.transact
       _ <- Entity(id21).shortSet.add(short3).upsert.transact
       _ <- Entity(id22).charSet.add(char3).upsert.transact
-      _ <- Entity(id23).refs.add(ref3).upsert.transact
 
       _ <- Entity.stringSet.query.get.map(_.head ==> Set(string1, string2, string3))
       _ <- Entity.intSet.query.get.map(_.head ==> Set(int1, int2, int3))
@@ -432,7 +421,6 @@ case class OpsSet(
       _ <- Entity.byteSet.query.get.map(_.head ==> Set(byte1, byte2, byte3))
       _ <- Entity.shortSet.query.get.map(_.head ==> Set(short1, short2, short3))
       _ <- Entity.charSet.query.get.map(_.head ==> Set(char1, char2, char3))
-      _ <- Entity.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3))
     } yield ()
   }
 
@@ -463,7 +451,6 @@ case class OpsSet(
       id20 <- Entity.byteSet(Set(byte1, byte2, byte3)).save.transact.map(_.id)
       id21 <- Entity.shortSet(Set(short1, short2, short3)).save.transact.map(_.id)
       id22 <- Entity.charSet(Set(char1, char2, char3)).save.transact.map(_.id)
-      id23 <- Entity.refs(Set(ref1, ref2, ref3)).save.transact.map(_.id)
 
       // Update
       _ <- Entity(id1).stringSet.remove(string3).update.transact
@@ -488,7 +475,6 @@ case class OpsSet(
       _ <- Entity(id20).byteSet.remove(byte3).update.transact
       _ <- Entity(id21).shortSet.remove(short3).update.transact
       _ <- Entity(id22).charSet.remove(char3).update.transact
-      _ <- Entity(id23).refs.remove(ref3).update.transact
 
       _ <- Entity.stringSet.query.get.map(_.head ==> Set(string1, string2))
       _ <- Entity.intSet.query.get.map(_.head ==> Set(int1, int2))
@@ -512,7 +498,6 @@ case class OpsSet(
       _ <- Entity.byteSet.query.get.map(_.head ==> Set(byte1, byte2))
       _ <- Entity.shortSet.query.get.map(_.head ==> Set(short1, short2))
       _ <- Entity.charSet.query.get.map(_.head ==> Set(char1, char2))
-      _ <- Entity.refs.query.get.map(_.head ==> Set(ref1, ref2))
 
       // Add true again so we can upsert
       _ <- Entity(id6).booleanSet.add(true).update.transact
@@ -540,7 +525,6 @@ case class OpsSet(
       _ <- Entity(id20).byteSet.remove(byte2).upsert.transact
       _ <- Entity(id21).shortSet.remove(short2).upsert.transact
       _ <- Entity(id22).charSet.remove(char2).upsert.transact
-      _ <- Entity(id23).refs.remove(ref2).upsert.transact
 
       _ <- Entity.stringSet.query.get.map(_.head ==> Set(string1))
       _ <- Entity.intSet.query.get.map(_.head ==> Set(int1))
@@ -564,7 +548,6 @@ case class OpsSet(
       _ <- Entity.byteSet.query.get.map(_.head ==> Set(byte1))
       _ <- Entity.shortSet.query.get.map(_.head ==> Set(short1))
       _ <- Entity.charSet.query.get.map(_.head ==> Set(char1))
-      _ <- Entity.refs.query.get.map(_.head ==> Set(ref1))
     } yield ()
   }
 }

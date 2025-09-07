@@ -19,13 +19,13 @@ case class Semantics(
 
   "1 attribute" - validation {
     for {
-      _ <- Type.int(1).save.transact
+      _ <- Tpe.int(1).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
-                "Type.int" -> Seq(
-                  s"""Type.int with value `1` doesn't satisfy validation:
+                "Tpe.int" -> Seq(
+                  s"""Tpe.int with value `1` doesn't satisfy validation:
                      |_ > 2
                      |""".stripMargin
                 )
@@ -37,44 +37,44 @@ case class Semantics(
 
   "2 attributes" - validation {
     for {
-      _ <- Type.int(1).long(3L).save.transact
+      _ <- Tpe.int(1).long(3L).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
-                "Type.int" -> Seq(
-                  s"""Type.int with value `1` doesn't satisfy validation:
+                "Tpe.int" -> Seq(
+                  s"""Tpe.int with value `1` doesn't satisfy validation:
                      |_ > 2
                      |""".stripMargin
                 )
               )
         }
 
-      _ <- Type.int(3).long(1L).save.transact
+      _ <- Tpe.int(3).long(1L).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
-                "Type.long" -> Seq(
-                  s"""Type.long with value `1` doesn't satisfy validation:
+                "Tpe.long" -> Seq(
+                  s"""Tpe.long with value `1` doesn't satisfy validation:
                      |_ > 2L
                      |""".stripMargin
                 )
               )
         }
 
-      _ <- Type.int(1).long(1L).save.transact
+      _ <- Tpe.int(1).long(1L).save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
-                "Type.int" -> Seq(
-                  s"""Type.int with value `1` doesn't satisfy validation:
+                "Tpe.int" -> Seq(
+                  s"""Tpe.int with value `1` doesn't satisfy validation:
                      |_ > 2
                      |""".stripMargin
                 ),
-                "Type.long" -> Seq(
-                  s"""Type.long with value `1` doesn't satisfy validation:
+                "Tpe.long" -> Seq(
+                  s"""Tpe.long with value `1` doesn't satisfy validation:
                      |_ > 2L
                      |""".stripMargin
                 )

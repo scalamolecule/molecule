@@ -19,7 +19,7 @@ case class Semantics(
 
   "1 row, 1 error" - validation {
     for {
-      _ <- Type.int.insert(1).transact
+      _ <- Tpe.int.insert(1).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
@@ -28,9 +28,9 @@ case class Semantics(
                 Seq(
                   InsertError(
                     0, // tuple index
-                    "Type.int",
+                    "Tpe.int",
                     Seq(
-                      s"""Type.int with value `1` doesn't satisfy validation:
+                      s"""Tpe.int with value `1` doesn't satisfy validation:
                          |_ > 2
                          |""".stripMargin
                     ),
@@ -46,7 +46,7 @@ case class Semantics(
 
   "1 row, 2 errors" - validation {
     for {
-      _ <- Type.int.long.insert((1, 1L)).transact
+      _ <- Tpe.int.long.insert((1, 1L)).transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
@@ -55,9 +55,9 @@ case class Semantics(
                 Seq(
                   InsertError(
                     0, // tuple index, int
-                    "Type.int",
+                    "Tpe.int",
                     Seq(
-                      s"""Type.int with value `1` doesn't satisfy validation:
+                      s"""Tpe.int with value `1` doesn't satisfy validation:
                          |_ > 2
                          |""".stripMargin
                     ),
@@ -65,9 +65,9 @@ case class Semantics(
                   ),
                   InsertError(
                     1, // tuple index, long
-                    "Type.long",
+                    "Tpe.long",
                     Seq(
-                      s"""Type.long with value `1` doesn't satisfy validation:
+                      s"""Tpe.long with value `1` doesn't satisfy validation:
                          |_ > 2L
                          |""".stripMargin
                     ),
@@ -83,7 +83,7 @@ case class Semantics(
 
   "2 rows, 2 errors" - validation {
     for {
-      _ <- Type.int.long.insert(
+      _ <- Tpe.int.long.insert(
           (0, 0L),
           (1, 1L),
         ).transact
@@ -95,9 +95,9 @@ case class Semantics(
                 Seq(
                   InsertError(
                     0, // tuple index, int
-                    "Type.int",
+                    "Tpe.int",
                     Seq(
-                      s"""Type.int with value `0` doesn't satisfy validation:
+                      s"""Tpe.int with value `0` doesn't satisfy validation:
                          |_ > 2
                          |""".stripMargin
                     ),
@@ -105,9 +105,9 @@ case class Semantics(
                   ),
                   InsertError(
                     1, // tuple index, long
-                    "Type.long",
+                    "Tpe.long",
                     Seq(
-                      s"""Type.long with value `0` doesn't satisfy validation:
+                      s"""Tpe.long with value `0` doesn't satisfy validation:
                          |_ > 2L
                          |""".stripMargin
                     ),
@@ -120,9 +120,9 @@ case class Semantics(
                 Seq(
                   InsertError(
                     0, // tuple index, int
-                    "Type.int",
+                    "Tpe.int",
                     Seq(
-                      s"""Type.int with value `1` doesn't satisfy validation:
+                      s"""Tpe.int with value `1` doesn't satisfy validation:
                          |_ > 2
                          |""".stripMargin
                     ),
@@ -130,9 +130,9 @@ case class Semantics(
                   ),
                   InsertError(
                     1, // tuple index, long
-                    "Type.long",
+                    "Tpe.long",
                     Seq(
-                      s"""Type.long with value `1` doesn't satisfy validation:
+                      s"""Tpe.long with value `1` doesn't satisfy validation:
                          |_ > 2L
                          |""".stripMargin
                     ),
@@ -148,7 +148,7 @@ case class Semantics(
 
   "3 rows, mixed errors" - validation {
     for {
-      _ <- Type.int.long.insert(
+      _ <- Tpe.int.long.insert(
           (1, 4L), // bad - ok
           (3, 3L), // ok  - ok
           (0, 1L), // bad  - bad
@@ -162,9 +162,9 @@ case class Semantics(
                 Seq(
                   InsertError(
                     0, // tuple index, int
-                    "Type.int",
+                    "Tpe.int",
                     Seq(
-                      s"""Type.int with value `1` doesn't satisfy validation:
+                      s"""Tpe.int with value `1` doesn't satisfy validation:
                          |_ > 2
                          |""".stripMargin
                     ),
@@ -181,9 +181,9 @@ case class Semantics(
                 Seq(
                   InsertError(
                     0, // tuple index, int
-                    "Type.int",
+                    "Tpe.int",
                     Seq(
-                      s"""Type.int with value `0` doesn't satisfy validation:
+                      s"""Tpe.int with value `0` doesn't satisfy validation:
                          |_ > 2
                          |""".stripMargin
                     ),
@@ -191,9 +191,9 @@ case class Semantics(
                   ),
                   InsertError(
                     1, // tuple index, long
-                    "Type.long",
+                    "Tpe.long",
                     Seq(
-                      s"""Type.long with value `1` doesn't satisfy validation:
+                      s"""Tpe.long with value `1` doesn't satisfy validation:
                          |_ > 2L
                          |""".stripMargin
                     ),

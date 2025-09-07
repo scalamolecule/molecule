@@ -179,7 +179,6 @@ case class FilterSet(
       _ <- Entity.i(1).byteSet(Set(byte1)).save.transact
       _ <- Entity.i(1).shortSet(Set(short1)).save.transact
       _ <- Entity.i(1).charSet(Set(char1)).save.transact
-      _ <- Entity.i(1).refs(Set(ref1)).save.transact
 
       // Update i using asserted filter
       _ <- Entity.i(2).stringSet_.update.transact
@@ -204,7 +203,6 @@ case class FilterSet(
       _ <- Entity.i(2).byteSet_.update.transact
       _ <- Entity.i(2).shortSet_.update.transact
       _ <- Entity.i(2).charSet_.update.transact
-      _ <- Entity.i(2).refs_.update.transact
 
       // i has been updated
       _ <- Entity.i.stringSet_.query.get.map(_.head ==> 2)
@@ -229,7 +227,6 @@ case class FilterSet(
       _ <- Entity.i.byteSet_.query.get.map(_.head ==> 2)
       _ <- Entity.i.shortSet_.query.get.map(_.head ==> 2)
       _ <- Entity.i.charSet_.query.get.map(_.head ==> 2)
-      _ <- Entity.i.refs_.query.get.map(_.head ==> 2)
     } yield ()
   }
 
@@ -261,7 +258,6 @@ case class FilterSet(
       _ <- Entity.i(1).byteSet(Set(byte1)).save.transact
       _ <- Entity.i(1).shortSet(Set(short1)).save.transact
       _ <- Entity.i(1).charSet(Set(char1)).save.transact
-      _ <- Entity.i(1).refs(Set(ref1)).save.transact
 
       // Update i using has filter
       _ <- Entity.i(2).stringSet_.has(string1).update.transact
@@ -286,7 +282,6 @@ case class FilterSet(
       _ <- Entity.i(2).byteSet_.has(byte1).update.transact
       _ <- Entity.i(2).shortSet_.has(short1).update.transact
       _ <- Entity.i(2).charSet_.has(char1).update.transact
-      _ <- Entity.i(2).refs_.has(ref1).update.transact
 
       // i has been updated
       _ <- Entity.i.stringSet_.query.get.map(_.head ==> 2)
@@ -311,7 +306,6 @@ case class FilterSet(
       _ <- Entity.i.byteSet_.query.get.map(_.head ==> 2)
       _ <- Entity.i.shortSet_.query.get.map(_.head ==> 2)
       _ <- Entity.i.charSet_.query.get.map(_.head ==> 2)
-      _ <- Entity.i.refs_.query.get.map(_.head ==> 2)
     } yield ()
   }
 
@@ -343,7 +337,6 @@ case class FilterSet(
       _ <- Entity.i(1).byteSet(Set(byte1)).save.transact
       _ <- Entity.i(1).shortSet(Set(short1)).save.transact
       _ <- Entity.i(1).charSet(Set(char1)).save.transact
-      _ <- Entity.i(1).refs(Set(ref1)).save.transact
 
       // Update i using hasNo filter
       _ <- Entity.i(2).stringSet_.hasNo(string2).update.transact
@@ -368,7 +361,6 @@ case class FilterSet(
       _ <- Entity.i(2).byteSet_.hasNo(byte2).update.transact
       _ <- Entity.i(2).shortSet_.hasNo(short2).update.transact
       _ <- Entity.i(2).charSet_.hasNo(char2).update.transact
-      _ <- Entity.i(2).refs_.hasNo(ref2).update.transact
 
       // i has been updated
       _ <- Entity.i.stringSet_.query.get.map(_.head ==> 2)
@@ -393,7 +385,6 @@ case class FilterSet(
       _ <- Entity.i.byteSet_.query.get.map(_.head ==> 2)
       _ <- Entity.i.shortSet_.query.get.map(_.head ==> 2)
       _ <- Entity.i.charSet_.query.get.map(_.head ==> 2)
-      _ <- Entity.i.refs_.query.get.map(_.head ==> 2)
     } yield ()
   }
 }

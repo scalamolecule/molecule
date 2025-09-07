@@ -17,14 +17,42 @@ case class SaveRefOne(
 
   override def rootAction: SaveAction = parent.rootAction
 
+//  def refEntity = this
+
+//  override def process(): Unit = {
+//    children.foreach(_.process())
+//    insert()
+//
+//    parent.rowSetters.last += {
+//      (ps: PS) => ps.setLong(refAttrIndex, ids.head)
+//    }
+//  }
+
   override def process(): Unit = {
+    // Process any children first (rare in save, but consistent)
     children.foreach(_.process())
+
+    // Insert the referenced row (e.g. B)
     insert()
 
-    parent.rowSetters.last += {
-      (ps: PS) => ps.setLong(refAttrIndex, ids.head)
+    // Set FK on the parent side (ManyToOne A.b -> B.id)
+    parent.rowSetters.last += { (ps: PS) =>
+      ps.setLong(refAttrIndex, ids.head)
+    }
+
+    // Reverse handoff for OneToMany (B -> C): inject B.id into C.b
+    reverse.foreach { case (manySide, fkIdx) =>
+      // Ensure many-side has a row to receive setters
+      if (manySide.rowSetters.isEmpty)
+        manySide.rowSetters += ListBuffer.empty[PS => Unit]
+
+      // Add FK setter for C.b
+      manySide.rowSetters.last += { (ps: PS) =>
+        ps.setLong(fkIdx, ids.head)
+      }
     }
   }
+
 
   override def curStmt: String = {
     sqlOps.insertStmt(ref, cols, placeHolders)

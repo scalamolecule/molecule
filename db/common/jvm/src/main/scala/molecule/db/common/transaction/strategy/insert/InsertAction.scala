@@ -11,6 +11,12 @@ abstract class InsertAction(
   rowCount: Int
 ) extends SqlAction(parent, sqlOps, ent) {
 
+  var reverse: Option[(InsertAction, Int)] = None
+
+  def setReverseProcess(newParent: InsertAction, refAttrIndex: Int): Unit = {
+    reverse = Some((newParent, refAttrIndex))
+  }
+
   // Build execution graph ----------------------------------------
 
   def refIds(refAttr: String, ref: String): InsertRefIds = {
@@ -19,70 +25,94 @@ abstract class InsertAction(
     ))
   }
 
-  def refOne(ent: String, refAttr: String, ref: String): InsertAction = {
-    // Add ref attr to current entity
-    val refAttrIndex = setCol(refAttr)
-    addChild(InsertRefOne(
-      this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
-    ))
+  def refManyToOne(ent: String, refAttr: String, ref: String): InsertAction = {
+    val manySide = this
+
+    // Add ref attr to many-side
+    val refAttrIndex = manySide.setCol(refAttr)
+    val oneSide      = InsertRefOne(manySide, sqlOps, ref, refAttrIndex, rowCount)
+    manySide.addChild(oneSide)
   }
 
-  def refOneReverse(ent: String, refAttr: String, ref: String): InsertAction = {
-    //    val ref = addChild(InsertEntity(this, sqlOps, r, "RefMany", rowCount))
 
-    // Make joins to refs after current and refs have been inserted
-    //    addSibling(InsertRefJoin(this, ref, sqlOps, ent, refAttr, r, rowCount))
-    //
-    //    // Continue with ref entity
-    //    ref
+  def refOneToMany(ent: String, refAttr: String, ref: String, reverseRefAttr: String): InsertAction = {
+    val oneSide = this
 
+    // many-side where the foreign key (reverse ref attr) is to be set
+    val manySide     = InsertEntity(parent, sqlOps, ref, "RefOne", rowCount)
+    val refAttrIndex = manySide.setCol(reverseRefAttr)
 
-//    parent.setCol(refAttr)
+    // Ensure manySide has a row to receive setters for the current row
+    if (manySide.rowSetters.isEmpty)
+      manySide.rowSetters += ListBuffer.empty[PS => Unit]
 
-    println("parent: " + parent)
-    println("======================")
+    // many-side has one-side as child action to be processed before many-side can make a ref to it
+    manySide.children += oneSide
 
-    //    replaceSibling(InsertEntity(this, sqlOps, ent, rowCount))
+    // many-side is now one-sides parent
+    oneSide.setReverseProcess(manySide, refAttrIndex)
 
-
-    val refAttrIndex = setCol(refAttr)
-
-    val newParent = InsertRefOne(
-      this, sqlOps, ent + "--------", refAttr + "xxxx", ref + "zzzzz", refAttrIndex, rowCount
-    )
-
-
-    println("newParent: " + newParent)
-    println("======================")
-
-//    newParent.addChild(parent)
-//    addChild(parent)
-//    val action = addChild(InsertRefOne(
-//      this, sqlOps, ent, refAttr, ref, refAttrIndex, rowCount
-//    ))
-//    println("children:\n" + children.mkString("%%%%%%%%%%%%%%"))
-//    println("======================")
-
-    val root = parent.children.last
+    // many-side is the new parent child that we will continue from
     parent.children.clear()
+    parent.children += manySide
 
-    newParent
-//    addChild(newParent)
-//    parent.parent
-//    getGrandParent
+    // Continue with many-side
+    manySide
   }
 
-  def refMany(ent: String, refAttr: String, r: String): InsertAction = {
-    val ref = addChild(InsertEntity(this, sqlOps, r, "RefMany", rowCount))
+  def insertAndPrepareManyToOneRef(manySide: InsertAction, refAttrIndex: Int): Unit = {
+    // Process children of ref
+    children.foreach(_.process())
 
-    // Make joins to refs after current and refs have been inserted
-    addSibling(InsertRefJoin(this, ref, sqlOps, ent, refAttr, r, rowCount))
+    // Add ref rows (don't enforce empty row)
+    insert(false)
 
-    // Continue with ref entity
-    ref
+    // Add ref ids from parent (previous entity) to ref
+    val refIds = ids.iterator
+
+    manySide match {
+      case _: InsertOptRef =>
+        // make ref only when parent/prev entity has value
+        manySide.rowSetters.zip(manySide.optionalDefineds).foreach {
+          case (setter, true) =>
+            setter += ((ps: PS) => ps.setLong(refAttrIndex, refIds.next()))
+
+          case (setter, _) =>
+            setter += ((ps: PS) => ps.setNull(refAttrIndex, 0))
+        }
+
+      case _: InsertOptEntity =>
+        val entityResolvers = manySide.rowSetters.flatMap {
+          case rowSetter if rowSetter.isEmpty =>
+            refIds.next() // skip unused ref id
+            None // no optional entity created
+
+          case rowSetter =>
+            val refId = refIds.next()
+            rowSetter += ((ps: PS) => ps.setLong(refAttrIndex, refId))
+            Some(rowSetter)
+        }
+        manySide.rowSetters.clear()
+        manySide.rowSetters ++= entityResolvers
+
+      case _ =>
+        val manySideRowSetters = manySide.rowSetters.iterator
+        while (refIds.hasNext) {
+          val parentRowSetter = manySideRowSetters.next()
+          val refId           = refIds.next()
+          val refIdSetter     = (ps: PS) => ps.setLong(refAttrIndex, refId)
+          parentRowSetter += refIdSetter
+        }
+    }
   }
 
-  def backRef: InsertAction = parent
+
+  def backRef: InsertAction = {
+    // When refOneToMany has flipped topology (many-side containing one-side child),
+    // prefer the logical one-side (child) when back-reffing.
+    if (children.nonEmpty) children.head.asInstanceOf[InsertAction]
+    else parent
+  }
 
   def optRef(ent: String, refAttr: String, ref: String): InsertOptRef = {
     // Add ref attr to current entity
@@ -96,15 +126,27 @@ abstract class InsertAction(
     replaceSibling(InsertOptEntity(this, sqlOps, ent, rowCount))
   }
 
-  def nest(ent: String, refAttr: String, ref: String): InsertNestedJoins = {
-    // Nested entity
-    val nested = addChild(InsertEntity(this, sqlOps, ref, "Nested", rowCount))
+  def nestFk(ent: String, refAttr: String, ref: String, reverseRefAttr: String): InsertNestedFk = {
+    // Create the nested Many-side entity (not inserted directly by its own process)
+    val nested = InsertEntity(this, sqlOps, ref, "Nested", rowCount)
+    // Reserve the FK column on the Many side
+    val fkIdx  = nested.setCol(reverseRefAttr)
+    // Build the FK action that will inject parent ids and then insert the nested entity
+    val fkLink = InsertNestedFk(this, nested, sqlOps, ent, refAttr, ref, reverseRefAttr, fkIdx, rowCount)
 
-    // Make joins to nested after current and nested have been inserted
-    addSibling(InsertNestedJoins(
-      this, nested, sqlOps, ent, refAttr, ref, rowCount
-    ))
+    // Attach according to context:
+    // - If we're inside a Nested entity (deeper level), attach as child so it runs after this level inserts.
+    // - Otherwise (top-level entity), attach as sibling so it runs after the top-level insert.
+    this match {
+      case InsertEntity(_, _, _, "Nested", _) =>
+        addChild(fkLink)
+      case _                                  =>
+        addSibling(fkLink)
+    }
+
+    fkLink
   }
+
 
   // Traverse back and up to initial InsertAction
   def rootAction: InsertAction = ???
@@ -135,8 +177,8 @@ abstract class InsertAction(
     // Make sure arities match (not needed once implementation is stabilized)
     if (l1 != l2) {
       throw new Exception(
-        s"Unexpected different number of left/right ids for " +
-          s"joinTable ${ent}_${refAttr}_$ref: $l1/$l2"
+        s"Unexpected different number of parent/child ids: " +
+          s"$ent / $refAttr ($ref): $l1 / $l2"
       )
     }
   }

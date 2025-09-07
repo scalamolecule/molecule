@@ -126,8 +126,6 @@ case class InsertSemantics(
       // B.iSet was not inserted
       _ <- A.i.Bb.iSet_?.query.get.map(_ ==> List((1, None)))
       _ <- A.i.Bb.iSet.query.get.map(_ ==> Nil)
-
-      _ <- A.i.bb_.query.get.map(_ ==> List(1))
     } yield ()
   }
 

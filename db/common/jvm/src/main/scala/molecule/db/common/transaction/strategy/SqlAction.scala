@@ -14,6 +14,7 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ent: String) {
 
   // Housekeeping ----------------------------------------------------
 
+//  private[transaction] var parent        = parent0
   private[transaction] val children      = ListBuffer.empty[SqlAction]
   private[transaction] val cols          = ListBuffer.empty[String]
   private[transaction] val mandatoryCols = ListBuffer.empty[String]
@@ -40,20 +41,6 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ent: String) {
     }
     sibling
   }
-
-//  def addParent[T <: SqlAction](parent2: T, addRowSetter: Boolean = false): T = {
-////    parent.parent = parent
-//
-//
-////    parent.children += sibling
-////    if (addRowSetter) {
-////      sibling.rowSetters += ListBuffer.empty[PS => Unit]
-////    }
-////    sibling
-//    parent
-//  }
-
-//  def getGrandParent = parent.parent
 
   def replaceSibling[T <: SqlAction](sibling: T, addRowSetter: Boolean = false): T = {
     parent.children.clear()
@@ -84,8 +71,8 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ent: String) {
 
   // Execution --------------------------------------
 
-  def insert(enforce: Boolean = true): Unit = {
-    //    println(s"\n=========================== ENFORCE: $enforce   rowSetters.size: " + rowSetters.size)
+  def insert(enforceEmptyRow: Boolean = true): Unit = {
+    //    println(s"\n=========================== ENFORCE: $enforceEmptyRow   rowSetters.size: " + rowSetters.size)
     val stmt = curStmt
     //    println(stmt)
     val ps   = prepare(stmt)
@@ -98,8 +85,8 @@ abstract class SqlAction(parent: SqlAction, sqlOps: SqlOps, ent: String) {
         }
         ps.addBatch()
 
-      case _ if enforce =>
-        //        println("ADD EMPTY")
+      case _ if enforceEmptyRow =>
+        //        println("ADD EMPTY ROW")
         ps.addBatch() // Add empty row for joins
 
       case _ =>

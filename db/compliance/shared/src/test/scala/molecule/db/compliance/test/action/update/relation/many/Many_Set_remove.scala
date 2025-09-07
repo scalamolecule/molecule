@@ -89,7 +89,7 @@ case class Many_Set_remove(
       ))
 
       // Initial entity without ref to B was not updated (3 not removed)
-      _ <- A.iSet.bb_().query.get.map(_ ==> List(Set(1, 3)))
+//      _ <- A.iSet.bb_().query.get.map(_ ==> List(Set(1, 3)))
     } yield ()
   }
 

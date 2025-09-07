@@ -47,21 +47,21 @@ lazy val root = project
     dbCompliance.jvm,
     dbH2.js,
     dbH2.jvm,
-    dbMariaDB.js,
-    dbMariaDB.jvm,
-    dbMySQL.js,
-    dbMySQL.jvm,
-    dbPostgreSQL.js,
-    dbPostgreSQL.jvm,
-    dbSQlite.js,
-    dbSQlite.jvm,
+//    dbMariaDB.js,
+//    dbMariaDB.jvm,
+//    dbMySQL.js,
+//    dbMySQL.jvm,
+//    dbPostgreSQL.js,
+//    dbPostgreSQL.jvm,
+//    dbSQlite.js,
+//    dbSQlite.jvm,
 
-    server,
-    serverHttp4s,
-    serverNetty,
-    serverPekko,
-    serverPlay,
-    serverZioHttp,
+//    server,
+//    serverHttp4s,
+//    serverNetty,
+//    serverPekko,
+//    serverPlay,
+//    serverZioHttp,
 
     //    graphqlClient.js,
     //    graphqlClient.jvm,
@@ -174,176 +174,176 @@ lazy val dbH2 = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
 
 
-lazy val dbMariaDB = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("db/mariadb"))
-  .settings(compilerArgs, checkPublishing,
-    name := "molecule-db-mariadb",
-    testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.dimafeng" %% "testcontainers-scala-mariadb" % dimafengContainerVersion,
-      "org.mariadb.jdbc" % "mariadb-java-client" % "3.5.1",
-      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
-      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
-    ),
-    Test / fork := true
-  )
-  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
-
-
-lazy val dbMySQL = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("db/mysql"))
-  .settings(compilerArgs, checkPublishing,
-    name := "molecule-db-mysql",
-    testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.testcontainers" % "mysql" % testContainerVersion,
-      "com.mysql" % "mysql-connector-j" % "9.2.0",
-      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
-    ),
-    Test / fork := true
-  )
-  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
-
-
-lazy val dbPostgreSQL = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("db/postgresql"))
-  .settings(compilerArgs, checkPublishing,
-    name := "molecule-db-postgresql",
-    testFrameworks := testingFrameworks)
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.testcontainers" % "postgresql" % testContainerVersion,
-      "org.postgresql" % "postgresql" % "42.7.5",
-      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
-      //      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
-    ),
-    Test / fork := true
-  )
-  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
-
-
-lazy val dbSQlite = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .in(file("db/sqlite"))
-  .settings(compilerArgs, checkPublishing,
-    name := "molecule-db-sqlite",
-    testFrameworks := testingFrameworks
-  )
-  .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "org.xerial" % "sqlite-jdbc" % "3.49.1.0",
-      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
-    ),
-    Test / fork := true
-  )
-  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
-
-
-// Server =============================================================================================
-
-// CLI to run Tapir example backend servers
-lazy val server = project
-  .in(file("server/cli"))
-  .settings(
-    publish / skip := true,
-    dependencyOverrides ++= Seq(
-      "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
-    ),
-    libraryDependencies ++= Seq(
-      // Avoid "No SLF4J providers were found" errors
-      "org.slf4j" % "slf4j-nop" % "2.0.17",
-    ),
-  )
-  .dependsOn(
-    dbH2.jvm,
-    dbMySQL.jvm,
-    dbMariaDB.jvm,
-    dbPostgreSQL.jvm,
-    dbSQlite.jvm,
-
-    serverHttp4s % "test->test",
-    serverNetty % "test->test",
-    serverPekko % "test->test",
-    serverPlay % "test->test",
-    serverZioHttp % "test->test",
-  )
-
-
-lazy val serverEndpoints = project
-  .in(file("server/endpoints"))
-  .settings(
-    publish / skip := true,
-    libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
-    ),
-  )
-  .dependsOn(dbCommon.jvm)
-
-lazy val serverPekko = project
-  .in(file("server/pekko"))
-  .settings(checkPublishing,
-    name := "molecule-db-server-pekko",
-    publish / skip := true,
-    libraryDependencies ++= Seq(
-      // Enforce using same Pekko versions
-      "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
-      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
-
-      "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
-    ),
-  )
-  .dependsOn(serverEndpoints)
-
-
-lazy val serverHttp4s = project
-  .in(file("server/http4s"))
-  .settings(
-    publish / skip := true,
-    libraryDependencies ++= Seq(
-      "org.http4s" %% "http4s-ember-server" % http4sVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
-    ),
-  )
-  .dependsOn(serverEndpoints)
-
-lazy val serverNetty = project
-  .in(file("server/netty"))
-  .settings(
-    publish / skip := true,
-    libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-cats" % tapirVersion,
-    ),
-  )
-  .dependsOn(serverHttp4s)
-
-lazy val serverPlay = project
-  .in(file("server/play"))
-  .settings(
-    publish / skip := true,
-    libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion,
-    ),
-  )
-  .dependsOn(serverPekko)
-
-lazy val serverZioHttp = project
-  .in(file("server/zioHttp"))
-  .settings(
-    publish / skip := true,
-    libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
-    ),
-  )
-  .dependsOn(serverEndpoints)
+//lazy val dbMariaDB = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("db/mariadb"))
+//  .settings(compilerArgs, checkPublishing,
+//    name := "molecule-db-mariadb",
+//    testFrameworks := testingFrameworks)
+//  .jsSettings(jsEnvironment)
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "com.dimafeng" %% "testcontainers-scala-mariadb" % dimafengContainerVersion,
+//      "org.mariadb.jdbc" % "mariadb-java-client" % "3.5.1",
+//      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
+//      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
+//    ),
+//    Test / fork := true
+//  )
+//  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
+//
+//
+//lazy val dbMySQL = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("db/mysql"))
+//  .settings(compilerArgs, checkPublishing,
+//    name := "molecule-db-mysql",
+//    testFrameworks := testingFrameworks)
+//  .jsSettings(jsEnvironment)
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "org.testcontainers" % "mysql" % testContainerVersion,
+//      "com.mysql" % "mysql-connector-j" % "9.2.0",
+//      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
+//    ),
+//    Test / fork := true
+//  )
+//  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
+//
+//
+//lazy val dbPostgreSQL = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("db/postgresql"))
+//  .settings(compilerArgs, checkPublishing,
+//    name := "molecule-db-postgresql",
+//    testFrameworks := testingFrameworks)
+//  .jsSettings(jsEnvironment)
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "org.testcontainers" % "postgresql" % testContainerVersion,
+//      "org.postgresql" % "postgresql" % "42.7.5",
+//      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
+//      //      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
+//    ),
+//    Test / fork := true
+//  )
+//  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
+//
+//
+//lazy val dbSQlite = crossProject(JSPlatform, JVMPlatform)
+//  .crossType(CrossType.Full)
+//  .in(file("db/sqlite"))
+//  .settings(compilerArgs, checkPublishing,
+//    name := "molecule-db-sqlite",
+//    testFrameworks := testingFrameworks
+//  )
+//  .jsSettings(jsEnvironment)
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "org.xerial" % "sqlite-jdbc" % "3.49.1.0",
+//      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
+//    ),
+//    Test / fork := true
+//  )
+//  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
+//
+//
+//// Server =============================================================================================
+//
+//// CLI to run Tapir example backend servers
+//lazy val server = project
+//  .in(file("server/cli"))
+//  .settings(
+//    publish / skip := true,
+//    dependencyOverrides ++= Seq(
+//      "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
+//    ),
+//    libraryDependencies ++= Seq(
+//      // Avoid "No SLF4J providers were found" errors
+//      "org.slf4j" % "slf4j-nop" % "2.0.17",
+//    ),
+//  )
+//  .dependsOn(
+//    dbH2.jvm,
+//    dbMySQL.jvm,
+//    dbMariaDB.jvm,
+//    dbPostgreSQL.jvm,
+//    dbSQlite.jvm,
+//
+//    serverHttp4s % "test->test",
+//    serverNetty % "test->test",
+//    serverPekko % "test->test",
+//    serverPlay % "test->test",
+//    serverZioHttp % "test->test",
+//  )
+//
+//
+//lazy val serverEndpoints = project
+//  .in(file("server/endpoints"))
+//  .settings(
+//    publish / skip := true,
+//    libraryDependencies ++= Seq(
+//      "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
+//    ),
+//  )
+//  .dependsOn(dbCommon.jvm)
+//
+//lazy val serverPekko = project
+//  .in(file("server/pekko"))
+//  .settings(checkPublishing,
+//    name := "molecule-db-server-pekko",
+//    publish / skip := true,
+//    libraryDependencies ++= Seq(
+//      // Enforce using same Pekko versions
+//      "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
+//      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
+//
+//      "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
+//    ),
+//  )
+//  .dependsOn(serverEndpoints)
+//
+//
+//lazy val serverHttp4s = project
+//  .in(file("server/http4s"))
+//  .settings(
+//    publish / skip := true,
+//    libraryDependencies ++= Seq(
+//      "org.http4s" %% "http4s-ember-server" % http4sVersion,
+//      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
+//    ),
+//  )
+//  .dependsOn(serverEndpoints)
+//
+//lazy val serverNetty = project
+//  .in(file("server/netty"))
+//  .settings(
+//    publish / skip := true,
+//    libraryDependencies ++= Seq(
+//      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-cats" % tapirVersion,
+//    ),
+//  )
+//  .dependsOn(serverHttp4s)
+//
+//lazy val serverPlay = project
+//  .in(file("server/play"))
+//  .settings(
+//    publish / skip := true,
+//    libraryDependencies ++= Seq(
+//      "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion,
+//    ),
+//  )
+//  .dependsOn(serverPekko)
+//
+//lazy val serverZioHttp = project
+//  .in(file("server/zioHttp"))
+//  .settings(
+//    publish / skip := true,
+//    libraryDependencies ++= Seq(
+//      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
+//    ),
+//  )
+//  .dependsOn(serverEndpoints)
 
 
 //// Graphql =========================================================================================

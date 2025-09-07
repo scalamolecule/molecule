@@ -62,7 +62,7 @@ case class FlatOptRef(
   }
 
 
-  "Only optional attributes in optional ref - SQL" - refs {
+  "Only optional attributes in optional ref" - refs {
     for {
       _ <- A.i.B.?(B.i_?).insert(List(
         (1, None), // no relationship created
@@ -192,7 +192,7 @@ case class FlatOptRef(
           err ==> "Only cardinality-one refs allowed in optional ref queries (B.cc)."
         }
 
-      // Instead, please use flat card-many ref
+      // Instead, use flat card-many ref
       _ <- A.i.B.s.i.Cc.s.query.get.map(_ ==> List(
         (2, "b", 2, "x"),
         (2, "b", 2, "y"),

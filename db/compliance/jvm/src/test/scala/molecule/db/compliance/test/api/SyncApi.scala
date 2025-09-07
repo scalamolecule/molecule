@@ -63,31 +63,31 @@ case class SyncApi(
     import molecule.db.compliance.domains.dsl.Validation.*
 
     intercept[ValidationErrors](
-      Type.string("a").save.transact
+      Tpe.string("a").save.transact
     ) match {
       case ValidationErrors(errorMap) =>
         errorMap.head._2.head ==>
-          s"""Type.string with value `a` doesn't satisfy validation:
+          s"""Tpe.string with value `a` doesn't satisfy validation:
              |_ > "b"
              |""".stripMargin
     }
     intercept[InsertErrors](
-      Type.string.insert("a").transact
+      Tpe.string.insert("a").transact
     ) match {
       case InsertErrors(errors, _) =>
         errors.head._2.head.errors.head ==>
-          s"""Type.string with value `a` doesn't satisfy validation:
+          s"""Tpe.string with value `a` doesn't satisfy validation:
              |_ > "b"
              |""".stripMargin
     }
 
-    val id = Type.string("c").save.transact.ids.head
+    val id = Tpe.string("c").save.transact.ids.head
     intercept[ValidationErrors](
-      Type(id).string("a").update.transact
+      Tpe(id).string("a").update.transact
     ) match {
       case ValidationErrors(errorMap) =>
         errorMap.head._2.head ==>
-          s"""Type.string with value `a` doesn't satisfy validation:
+          s"""Tpe.string with value `a` doesn't satisfy validation:
              |_ > "b"
              |""".stripMargin
     }

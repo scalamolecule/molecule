@@ -67,30 +67,30 @@ case class IOApi(
   "Validation" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     for {
-      _ <- Type.string("a").save.transact
+      _ <- Tpe.string("a").save.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
-              s"""Type.string with value `a` doesn't satisfy validation:
+              s"""Tpe.string with value `a` doesn't satisfy validation:
                  |_ > "b"
                  |""".stripMargin
         }
 
-      _ <- Type.string.insert("a").transact
+      _ <- Tpe.string.insert("a").transact
         .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors.head ==
-              s"""Type.string with value `a` doesn't satisfy validation:
+              s"""Tpe.string with value `a` doesn't satisfy validation:
                  |_ > "b"
                  |""".stripMargin
         }
 
-      id <- Type.string("c").save.transact.map(_.id)
-      _ <- Type(id).string("a").update.transact
+      id <- Tpe.string("c").save.transact.map(_.id)
+      _ <- Tpe(id).string("a").update.transact
         .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==
-              s"""Type.string with value `a` doesn't satisfy validation:
+              s"""Tpe.string with value `a` doesn't satisfy validation:
                  |_ > "b"
                  |""".stripMargin
         }

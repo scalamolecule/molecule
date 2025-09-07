@@ -212,34 +212,7 @@ case class InsertRefs(
     } yield ()
   }
 
-  "ids, ref, card-set" - refs {
-    for {
-      // Ids of A entities returned
-      case List(a1, a2) <- A.i.Bb.i.insert(
-        (1, 2),
-        (3, 4),
-      ).transact.map(_.ids)
-
-      _ <- A(a1).i.query.get.map(_ ==> List(1))
-      _ <- A(a2).i.query.get.map(_ ==> List(3))
-
-      // Getting head of each Set ref ids (card-set)
-      case List(b1) <- A(a1).bb.query.get.map(_.map(_.head))
-      case List(b2) <- A(a2).bb.query.get.map(_.map(_.head))
-
-      _ <- B(b1).i.query.get.map(_ ==> List(2))
-      _ <- B(b2).i.query.get.map(_ ==> List(4))
-
-      _ <- A.id.i.a1.bb.query.get.map(_ ==> List(
-        (a1, 1, Set(b1)),
-        (a2, 3, Set(b2)),
-      ))
-    } yield ()
-  }
-
-
   "ids, backref" - refs {
-
     for {
       // ref - ref
       case List(a1, a2) <- A.i.B.i._A.C.i.insert(
@@ -251,44 +224,10 @@ case class InsertRefs(
         (a1, 1, 2, 3),
         (a2, 4, 5, 6),
       ))
-
-      // ref - own
-      case List(a1, a2) <- A.i.B.i._A.OwnC.i.insert(
-        (1, 2, 3),
-        (4, 5, 6),
-      ).transact.map(_.ids)
-
-      _ <- A.id.i.a1.B.i._A.OwnC.i.query.get.map(_ ==> List(
-        (a1, 1, 2, 3),
-        (a2, 4, 5, 6),
-      ))
-
-      // own - ref
-      case List(a1, a2) <- A.i.OwnB.i._A.C.i.insert(
-        (1, 2, 3),
-        (4, 5, 6),
-      ).transact.map(_.ids)
-
-      _ <- A.id.i.a1.OwnB.i._A.C.i.query.get.map(_ ==> List(
-        (a1, 1, 2, 3),
-        (a2, 4, 5, 6),
-      ))
-
-      // own - own
-      case List(a1, a2) <- A.i.OwnB.i._A.OwnC.i.insert(
-        (1, 2, 3),
-        (4, 5, 6),
-      ).transact.map(_.ids)
-
-      _ <- A.id.i.a1.OwnB.i._A.OwnC.i.query.get.map(_ ==> List(
-        (a1, 1, 2, 3),
-        (a2, 4, 5, 6),
-      ))
     } yield ()
   }
 
   "ids, nested" - refs {
-
     for {
       // 2 A entity ids returned (no Bb ref ids)
       case List(a1, a2) <- A.i.Bb.*(B.i).insert(
@@ -304,7 +243,6 @@ case class InsertRefs(
   }
 
   "ids, nested + ref" - refs {
-
     for {
       // Ids of A entities returned
       case List(a1, a2) <- A.i.Bb.*(B.i.C.i).insert(
@@ -320,7 +258,6 @@ case class InsertRefs(
   }
 
   "ids, ref + nested + ref " - refs {
-
     for {
       // Ids of A entities returned
       case List(a1, a2) <- A.i.B.i.Cc.*(C.i.D.i).insert(
@@ -336,7 +273,6 @@ case class InsertRefs(
   }
 
   "ids, self-join + nested + ref " - refs {
-
     for {
       // Ids of A entities returned
       case List(a1, a2) <- A.i.A.i.Cc.*(C.i.D.i).insert(
@@ -354,28 +290,12 @@ case class InsertRefs(
   "Optional ref (left join)" - refs {
     for {
       _ <- A.i.B.?(B.s).insert(
-        (1, Some("a")),
-        (2, None),
-      ).transact
-
-      _ <- A.i.a1.B.?(B.s).query.get.map(_ ==> List(
-        (1, Some("a")),
-        (2, None),
-      ))
-    } yield ()
-  }
-
-  "Optional ref 2 (left join)" - refs {
-    for {
-      _ <- A.i.B.?(B.i.s).insert(
-        (1, Some((10, "a"))),
-        (2, None),
-      ).transact
-
-      _ <- A.i.a1.B.?(B.i.s).query.get.map(_ ==> List(
-        (1, Some((10, "a"))),
-        (2, None),
-      ))
+          (1, Some("a")),
+          (2, None),
+        ).transact
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Insertion of optional ref is not supported."
+        }
     } yield ()
   }
 
@@ -383,28 +303,12 @@ case class InsertRefs(
   "Optional entity (right join)" - refs {
     for {
       _ <- A.?(A.i).B.s.insert(
-        (Some(1), "a"),
-        (None, "b"),
-      ).transact
-
-      _ <- A.?(A.i).B.s.a1.query.get.map(_ ==> List(
-        (Some(1), "a"),
-        (None, "b"),
-      ))
-    } yield ()
-  }
-
-  "Optional entity 2 (right join)" - refs {
-    for {
-      _ <- A.?(A.i.s).B.s.insert(
-        (Some((1, "x")), "a"),
-        (None, "b"),
-      ).transact
-
-      _ <- A.?(A.i.s).B.s.a1.query.get.map(_ ==> List(
-        (Some((1, "x")), "a"),
-        (None, "b"),
-      ))
+          (Some(1), "a"),
+          (None, "b"),
+        ).transact
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Insertion of optional entity is not supported."
+        }
     } yield ()
   }
 }

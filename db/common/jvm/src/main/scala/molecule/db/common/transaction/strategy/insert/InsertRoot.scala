@@ -9,7 +9,7 @@ case class InsertRoot(
 ) extends InsertAction(null, sqlOps, ent, rowCount) {
 
   lazy val insertEnt: InsertEntity = {
-    val first = InsertEntity(this, sqlOps, ent, "ROOT", rowCount)
+    val first = InsertEntity(this, sqlOps, ent, "Entity", rowCount)
     children += first
     first
   }
@@ -21,5 +21,5 @@ case class InsertRoot(
     children.head.ids
   }
 
-  override def toString: String = recurseRender(-1, "Insert")
+  override def toString: String = recurseRender(-1, "Insert actions ---- ")
 }

@@ -75,10 +75,6 @@ case class InsertSetValue(
       _ <- Entity.i.byteSet.query.get.map(_ ==> List((1, Set(byte1, byte2))))
       _ <- Entity.i.shortSet.query.get.map(_ ==> List((1, Set(short1, short2))))
       _ <- Entity.i.charSet.query.get.map(_ ==> List((1, Set(char1, char2))))
-
-      case List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.i.refs.insert((1, Set(r1, r2))).transact
-      _ <- Entity.i.refs.query.get.map(_ ==> List((1, Set(r1, r2))))
     } yield ()
   }
 
@@ -176,12 +172,6 @@ case class InsertSetValue(
       _ <- Entity.int_(20).i.a1.byteSet_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(byte1, byte2)))))
       _ <- Entity.int_(21).i.a1.shortSet_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(short1, short2)))))
       _ <- Entity.int_(22).i.a1.charSet_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(char1, char2)))))
-
-      case List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int.i.refs_?.insert((23, 1, Option.empty[Set[Long]])).transact
-      _ <- Entity.int.i.refs_?.insert((23, 2, Some(Set.empty[Long]))).transact
-      _ <- Entity.int.i.refs_?.insert((23, 3, Some(Set(r1, r2)))).transact
-      _ <- Entity.int_(23).i.a1.refs_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(r1, r2)))))
     } yield ()
   }
 

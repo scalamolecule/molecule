@@ -4,16 +4,38 @@ import scala.annotation.tailrec
 import molecule.core.dataModel.*
 import molecule.core.error.ModelError
 import molecule.db.common.validation.insert.InsertValidators_
+import java.sql.PreparedStatement as PS
+
+
+sealed trait DataKind
+case object HasNestedTuples extends DataKind
+case object HasNestedValues extends DataKind
+case object HasOptTuple extends DataKind
+case object HasOptValue extends DataKind
+case object Tpl extends DataKind
+
+case class Partition(
+  tableInserts: List[TableInsert],
+  tupleIndex: Int,
+  dataKind: DataKind,
+) {
+  override def toString = {
+    s"""====================================================
+       |PARTITION  $tupleIndex  $dataKind
+       |${tableInserts.map(_.toString).mkString("\n")}
+       |""".stripMargin
+  }
+}
 
 trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlInsert =>
-
   @tailrec
-  final override def resolve(
+  final def resolve(
     elements: List[Element],
-    resolvers: List[Product => Unit],
+    paramIndex: Int,
     tplIndex: Int,
-    prevRefs: List[String]
-  ): List[Product => Unit] = {
+    partitions: List[Partition],
+    tableInsert: TableInsert,
+  ): List[Partition] = {
     elements match {
       case element :: tail => element match {
         case a: Attr =>
@@ -21,318 +43,411 @@ trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlIn
             throw ModelError(s"Can't insert attributes with an applied value (${a.name}).")
           }
           a match {
-            case a: AttrOne => a match {
-              case a: AttrOneMan =>
-                val attrOneManResolver = resolveAttrOneMan(a, tplIndex)
-                resolve(tail, resolvers :+ attrOneManResolver, tplIndex + 1, prevRefs)
+            case a: AttrOneMan =>
+              val tableInsert1 = tableInsert.add(a, attrOneManSetter(a, paramIndex, tplIndex))
+              resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
-              case a: AttrOneOpt =>
-                val attrOneOptResolver = resolveAttrOneOpt(a, tplIndex)
-                resolve(tail, resolvers :+ attrOneOptResolver, tplIndex + 1, prevRefs)
+            case a: AttrOneOpt =>
+              val tableInsert1 = tableInsert.add(a, attrOneOptSetter(a, paramIndex, tplIndex))
+              resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
-              case a => noEmpty(a)
-            }
-            case a: AttrSet => a match {
-              case a: AttrSetMan =>
-                val attrsSetManResolver = resolveAttrSetMan(a, tplIndex)
-                resolve(tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
+            case a: AttrSetMan =>
+              val tableInsert1 = tableInsert.add(a, attrSetManSetter(a, paramIndex, tplIndex))
+              resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
-              case a: AttrSetOpt =>
-                val attrSetOptResolver = resolveAttrSetOpt(a, tplIndex)
-                resolve(tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
+            case a: AttrSetOpt =>
+              val tableInsert1 = tableInsert.add(a, attrSetOptSetter(a, paramIndex, tplIndex))
+              resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
-              case a => noEmpty(a)
-            }
+            case a: AttrSeqMan =>
+              val tableInsert1 = tableInsert.add(a, attrSeqManSetter(a, paramIndex, tplIndex))
+              resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
-            case a: AttrSeq => a match {
-              case a: AttrSeqMan =>
-                val attrsSetManResolver = resolveAttrSeqMan(a, tplIndex)
-                resolve(tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
+            case a: AttrSeqOpt =>
+              val tableInsert1 = tableInsert.add(a, attrSeqOptSetter(a, paramIndex, tplIndex))
+              resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
-              case a: AttrSeqOpt =>
-                val attrSetOptResolver = resolveAttrSeqOpt(a, tplIndex)
-                resolve(tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
+            case a: AttrMapMan =>
+              val tableInsert1 = tableInsert.add(a, attrMapManSetter(a, paramIndex, tplIndex))
+              resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
-              case a => noEmpty(a)
-            }
+            case a: AttrMapOpt =>
+              val tableInsert1 = tableInsert.add(a, attrMapOptSetter(a, paramIndex, tplIndex))
+              resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
-            case a: AttrMap => a match {
-              case a: AttrMapMan =>
-                val attrsSetManResolver = resolveAttrMapMan(a, tplIndex)
-                resolve(tail, resolvers :+ attrsSetManResolver, tplIndex + 1, prevRefs)
-
-              case a: AttrMapOpt =>
-                val attrSetOptResolver = resolveAttrMapOpt(a, tplIndex)
-                resolve(tail, resolvers :+ attrSetOptResolver, tplIndex + 1, prevRefs)
-
-              case a => noEmpty(a)
-            }
+            case a => noTacit(a)
           }
 
-        case Ref(ent, refAttr, ref, relationship, _, _, _) =>
-          val refResolver = addRef(ent, refAttr, ref, relationship)
-          resolve(tail, resolvers :+ refResolver, tplIndex, prevRefs :+ refAttr)
+        case Ref(ent, refAttr, ref, OneToMany, _, _, reverseRefAttr) =>
+          resolveOneToManyRef(partitions, tableInsert, refAttr, ref, reverseRefAttr, tplIndex, tail)
+
+        case Ref(ent, refAttr, ref, _ /* ManyToOne */ , _, _, reverseRefAttr) =>
+          resolveManyToOneRef(partitions, tableInsert, refAttr, ref, reverseRefAttr, tplIndex, tail)
+
 
         case BackRef(backRef, _, _) =>
-          noEntityReUseAfterBackref(tail.head, prevRefs, backRef)
-          val backRefResolver = addBackRef(backRef)
-          resolve(tail, resolvers :+ backRefResolver, tplIndex, Nil)
+          resolveBackRef(partitions, tableInsert, backRef, paramIndex, tplIndex, tail)
 
-        case OptRef(Ref(ent, refAttr, ref, _, _, _, _), optRefElements) =>
-          val optRefResolver = addOptRef(tplIndex, ent, refAttr, ref, optRefElements)
-          resolve(tail, resolvers :+ optRefResolver, tplIndex + 1, Nil)
+        case _: OptRef    => noOptional("ref")
+        case _: OptEntity => noOptional("entity")
 
-        case OptEntity(attrs) =>
-          val optEntityResolver = addOptEntity(attrs)
-          resolve(tail, resolvers :+ optEntityResolver, tplIndex + 1, Nil)
+        case Nested(Ref(ent, refAttr, ref, relationship, _, _, reverseRefAttr), nestedElements) =>
+          resolveNested(partitions, nestedElements, refAttr, ref, reverseRefAttr, tableInsert, tplIndex)
 
-        case Nested(Ref(ent, refAttr, ref, relationship, _, _, _), nestedElements) =>
-          val nestedResolver = addNested(true, tplIndex, ent, refAttr, ref, relationship, nestedElements)
-          resolve(tail, resolvers :+ nestedResolver, tplIndex, Nil)
-
-        case OptNested(Ref(ent, refAttr, ref, relationship, _, _, _), nestedElements) =>
-          // (same behaviour as mandatory nested - the list can have data or not)
-          val optNestedResolver = addNested(false, tplIndex, ent, refAttr, ref, relationship, nestedElements)
-          resolve(tail, resolvers :+ optNestedResolver, tplIndex, Nil)
+        case OptNested(Ref(ent, refAttr, ref, relationship, _, _, reverseRefAttr), nestedElements) =>
+          resolveNested(partitions, nestedElements, refAttr, ref, reverseRefAttr, tableInsert, tplIndex)
       }
-      case Nil             => resolvers
+
+      case Nil =>
+        val lastPartition = partitions.last.copy(
+          tableInserts = partitions.last.tableInserts :+ tableInsert,
+        )
+        partitions.init :+ lastPartition
     }
   }
 
-  private def noEmpty(a: Attr) = throw new Exception(
+  def resolveOneToManyRef(
+    partitions: List[Partition],
+    tableInsert: TableInsert,
+    refAttr: String,
+    ref: String,
+    reverseRefAttr: Option[String],
+    tplIndex: Int,
+    tail: List[Element]
+  ) = {
+    val lastPartition = partitions.last.copy(tableInserts = partitions.last.tableInserts :+ tableInsert)
+    val refInsert     = TableInsert(
+      tableInsert.refPath ++ List(refAttr, ref),
+      Nil,
+      List(reverseRefAttr.get -> tableInsert.refPath),
+      List("?"),
+      Nil
+    )
+    resolve(tail, 1, tplIndex, partitions.init :+ lastPartition, refInsert)
+  }
+
+  def resolveManyToOneRef(
+    partitions: List[Partition],
+    tableInsert: TableInsert,
+    refAttr: String,
+    ref: String,
+    reverseRefAttr: Option[String],
+    tplIndex: Int,
+    tail: List[Element]
+  ) = {
+    val refPath1      = tableInsert.refPath ++ List(refAttr, ref)
+    val refInsert     = tableInsert.copy(
+      foreignKeys = tableInsert.foreignKeys :+ (refAttr -> refPath1),
+      inputPlaceHolders = tableInsert.inputPlaceHolders :+ "?",
+    )
+    val lastPartition = partitions.last.copy(tableInserts = partitions.last.tableInserts :+ refInsert)
+    resolve(tail, 1, tplIndex, partitions.init :+ lastPartition, TableInsert(refPath1))
+  }
+
+  def resolveBackRef(
+    partitions: List[Partition],
+    tableInsert: TableInsert,
+    backRef: String,
+    paramIndex: Int,
+    tplIndex: Int,
+    tail: List[Element],
+  ) = {
+    // Add current tableInsert and continue with previous tableInsert
+    val prevRefPath         = tableInsert.refPath.dropRight(2)
+    val tableInserts        = partitions.last.tableInserts
+    val prevTableInsert     = tableInserts.find(_.refPath == prevRefPath).get
+    val curLevelWithoutPrev = tableInserts.filterNot(_.refPath == prevRefPath) :+ tableInsert
+    //    println(s"  BackRef: $backRef  $tplIndex  $prevRefPath ")
+    val lastPartition       = partitions.last.copy(tableInserts = curLevelWithoutPrev)
+
+    // Reset paramIndex to the next column slot for the previous table.
+    // This ensures that subsequent attribute setters target the correct parameter indices
+    // and do not collide with foreign key placeholders.
+    val nextParamIndexForPrev = prevTableInsert.columns.length + 1
+
+    resolve(tail, nextParamIndexForPrev, tplIndex, partitions.init :+ lastPartition, prevTableInsert)
+  }
+
+  def resolveNested(
+    partitions: List[Partition],
+    nestedElements: List[Element],
+    refAttr: String,
+    ref: String,
+    reverseRefAttr: Option[String],
+    tableInsert: TableInsert,
+    tplIndex: Int
+  ) = {
+    // Close current (parent) table insert into the last partition
+    // and record where the nested container lives in the parent tuple
+    val lastPartition = partitions.last.copy(
+      tableInserts = partitions.last.tableInserts :+ tableInsert,
+      tupleIndex = tplIndex,
+      dataKind = if (nestedElements.length == 1) HasNestedValues else HasNestedTuples
+    )
+
+    // Start a new nested partition, with tupleIndex pointing at the nested container in the parent tuple
+    val nextDataKind  = nestedElements.last match {
+      case Nested(_, nestedElements) if nestedElements.length == 1 => HasNestedValues
+      case Nested(_, nestedElements)                               => HasNestedTuples
+      case _                                                       => Tpl
+    }
+    val curPartitions = partitions.init :+ lastPartition :+ Partition(Nil, 0, nextDataKind)
+    val nestedInsert  = TableInsert(
+      tableInsert.refPath ++ List(refAttr, ref),
+      Nil,
+      List(reverseRefAttr.get -> tableInsert.refPath),
+      List("?"),
+      Nil
+    )
+    resolve(nestedElements, 1, 0, curPartitions, nestedInsert)
+  }
+
+
+  final override def resolve(
+    elements: List[Element],
+    resolvers: List[Product => Unit],
+    tplIndex: Int,
+    prevRefs: List[String]
+  ): List[Product => Unit] = ???
+
+
+  private def noTacit(a: Attr) = throw ModelError(
     s"Can't use tacit attributes in insert molecule (${a.name})."
+  )
+  private def noOptional(kind: String) = throw ModelError(
+    s"Insertion of optional $kind is not supported."
   )
 
 
-  private def resolveAttrOneMan(a: AttrOneMan, tplIndex: Int): Product => Unit = {
+  private def attrOneManSetter(a: AttrOneMan, paramIndex: Int, tplIndex: Int): (PS, Product) => Unit = {
     val (ent, attr) = (a.ent, a.attr)
     a match {
-      case _: AttrOneManID             => addOne(ent, attr, tplIndex, transformID, extsID)
-      case _: AttrOneManString         => addOne(ent, attr, tplIndex, transformString, extsString)
-      case _: AttrOneManInt            => addOne(ent, attr, tplIndex, transformInt, extsInt)
-      case _: AttrOneManLong           => addOne(ent, attr, tplIndex, transformLong, extsLong)
-      case _: AttrOneManFloat          => addOne(ent, attr, tplIndex, transformFloat, extsFloat)
-      case _: AttrOneManDouble         => addOne(ent, attr, tplIndex, transformDouble, extsDouble)
-      case _: AttrOneManBoolean        => addOne(ent, attr, tplIndex, transformBoolean, extsBoolean)
-      case _: AttrOneManBigInt         => addOne(ent, attr, tplIndex, transformBigInt, extsBigInt)
-      case _: AttrOneManBigDecimal     => addOne(ent, attr, tplIndex, transformBigDecimal, extsBigDecimal)
-      case _: AttrOneManDate           => addOne(ent, attr, tplIndex, transformDate, extsDate)
-      case _: AttrOneManDuration       => addOne(ent, attr, tplIndex, transformDuration, extsDuration)
-      case _: AttrOneManInstant        => addOne(ent, attr, tplIndex, transformInstant, extsInstant)
-      case _: AttrOneManLocalDate      => addOne(ent, attr, tplIndex, transformLocalDate, extsLocalDate)
-      case _: AttrOneManLocalTime      => addOne(ent, attr, tplIndex, transformLocalTime, extsLocalTime)
-      case _: AttrOneManLocalDateTime  => addOne(ent, attr, tplIndex, transformLocalDateTime, extsLocalDateTime)
-      case _: AttrOneManOffsetTime     => addOne(ent, attr, tplIndex, transformOffsetTime, extsOffsetTime)
-      case _: AttrOneManOffsetDateTime => addOne(ent, attr, tplIndex, transformOffsetDateTime, extsOffsetDateTime)
-      case _: AttrOneManZonedDateTime  => addOne(ent, attr, tplIndex, transformZonedDateTime, extsZonedDateTime)
-      case _: AttrOneManUUID           => addOne(ent, attr, tplIndex, transformUUID, extsUUID)
-      case _: AttrOneManURI            => addOne(ent, attr, tplIndex, transformURI, extsURI)
-      case _: AttrOneManByte           => addOne(ent, attr, tplIndex, transformByte, extsByte)
-      case _: AttrOneManShort          => addOne(ent, attr, tplIndex, transformShort, extsShort)
-      case _: AttrOneManChar           => addOne(ent, attr, tplIndex, transformChar, extsChar)
+      case _: AttrOneManID             => addOne(ent, attr, paramIndex, tplIndex, setterID)
+      case _: AttrOneManString         => addOne(ent, attr, paramIndex, tplIndex, setterString)
+      case _: AttrOneManInt            => addOne(ent, attr, paramIndex, tplIndex, setterInt)
+      case _: AttrOneManLong           => addOne(ent, attr, paramIndex, tplIndex, setterLong)
+      case _: AttrOneManFloat          => addOne(ent, attr, paramIndex, tplIndex, setterFloat)
+      case _: AttrOneManDouble         => addOne(ent, attr, paramIndex, tplIndex, setterDouble)
+      case _: AttrOneManBoolean        => addOne(ent, attr, paramIndex, tplIndex, setterBoolean)
+      case _: AttrOneManBigInt         => addOne(ent, attr, paramIndex, tplIndex, setterBigInt)
+      case _: AttrOneManBigDecimal     => addOne(ent, attr, paramIndex, tplIndex, setterBigDecimal)
+      case _: AttrOneManDate           => addOne(ent, attr, paramIndex, tplIndex, setterDate)
+      case _: AttrOneManDuration       => addOne(ent, attr, paramIndex, tplIndex, setterDuration)
+      case _: AttrOneManInstant        => addOne(ent, attr, paramIndex, tplIndex, setterInstant)
+      case _: AttrOneManLocalDate      => addOne(ent, attr, paramIndex, tplIndex, setterLocalDate)
+      case _: AttrOneManLocalTime      => addOne(ent, attr, paramIndex, tplIndex, setterLocalTime)
+      case _: AttrOneManLocalDateTime  => addOne(ent, attr, paramIndex, tplIndex, setterLocalDateTime)
+      case _: AttrOneManOffsetTime     => addOne(ent, attr, paramIndex, tplIndex, setterOffsetTime)
+      case _: AttrOneManOffsetDateTime => addOne(ent, attr, paramIndex, tplIndex, setterOffsetDateTime)
+      case _: AttrOneManZonedDateTime  => addOne(ent, attr, paramIndex, tplIndex, setterZonedDateTime)
+      case _: AttrOneManUUID           => addOne(ent, attr, paramIndex, tplIndex, setterUUID)
+      case _: AttrOneManURI            => addOne(ent, attr, paramIndex, tplIndex, setterURI)
+      case _: AttrOneManByte           => addOne(ent, attr, paramIndex, tplIndex, setterByte)
+      case _: AttrOneManShort          => addOne(ent, attr, paramIndex, tplIndex, setterShort)
+      case _: AttrOneManChar           => addOne(ent, attr, paramIndex, tplIndex, setterChar)
     }
   }
 
-  private def resolveAttrOneOpt(a: AttrOneOpt, tplIndex: Int): Product => Unit = {
+  private def attrOneOptSetter(a: AttrOneOpt, paramIndex: Int, tplIndex: Int): (PS, Product) => Unit = {
     val (ent, attr) = (a.ent, a.attr)
     a match {
-      case _: AttrOneOptID             => addOneOpt(ent, attr, tplIndex, transformID, extsID)
-      case _: AttrOneOptString         => addOneOpt(ent, attr, tplIndex, transformString, extsString)
-      case _: AttrOneOptInt            => addOneOpt(ent, attr, tplIndex, transformInt, extsInt)
-      case _: AttrOneOptLong           => addOneOpt(ent, attr, tplIndex, transformLong, extsLong)
-      case _: AttrOneOptFloat          => addOneOpt(ent, attr, tplIndex, transformFloat, extsFloat)
-      case _: AttrOneOptDouble         => addOneOpt(ent, attr, tplIndex, transformDouble, extsDouble)
-      case _: AttrOneOptBoolean        => addOneOpt(ent, attr, tplIndex, transformBoolean, extsBoolean)
-      case _: AttrOneOptBigInt         => addOneOpt(ent, attr, tplIndex, transformBigInt, extsBigInt)
-      case _: AttrOneOptBigDecimal     => addOneOpt(ent, attr, tplIndex, transformBigDecimal, extsBigDecimal)
-      case _: AttrOneOptDate           => addOneOpt(ent, attr, tplIndex, transformDate, extsDate)
-      case _: AttrOneOptDuration       => addOneOpt(ent, attr, tplIndex, transformDuration, extsDuration)
-      case _: AttrOneOptInstant        => addOneOpt(ent, attr, tplIndex, transformInstant, extsInstant)
-      case _: AttrOneOptLocalDate      => addOneOpt(ent, attr, tplIndex, transformLocalDate, extsLocalDate)
-      case _: AttrOneOptLocalTime      => addOneOpt(ent, attr, tplIndex, transformLocalTime, extsLocalTime)
-      case _: AttrOneOptLocalDateTime  => addOneOpt(ent, attr, tplIndex, transformLocalDateTime, extsLocalDateTime)
-      case _: AttrOneOptOffsetTime     => addOneOpt(ent, attr, tplIndex, transformOffsetTime, extsOffsetTime)
-      case _: AttrOneOptOffsetDateTime => addOneOpt(ent, attr, tplIndex, transformOffsetDateTime, extsOffsetDateTime)
-      case _: AttrOneOptZonedDateTime  => addOneOpt(ent, attr, tplIndex, transformZonedDateTime, extsZonedDateTime)
-      case _: AttrOneOptUUID           => addOneOpt(ent, attr, tplIndex, transformUUID, extsUUID)
-      case _: AttrOneOptURI            => addOneOpt(ent, attr, tplIndex, transformURI, extsURI)
-      case _: AttrOneOptByte           => addOneOpt(ent, attr, tplIndex, transformByte, extsByte)
-      case _: AttrOneOptShort          => addOneOpt(ent, attr, tplIndex, transformShort, extsShort)
-      case _: AttrOneOptChar           => addOneOpt(ent, attr, tplIndex, transformChar, extsChar)
+      case _: AttrOneOptID             => addOneOpt(ent, attr, paramIndex, tplIndex, setterID)
+      case _: AttrOneOptString         => addOneOpt(ent, attr, paramIndex, tplIndex, setterString)
+      case _: AttrOneOptInt            => addOneOpt(ent, attr, paramIndex, tplIndex, setterInt)
+      case _: AttrOneOptLong           => addOneOpt(ent, attr, paramIndex, tplIndex, setterLong)
+      case _: AttrOneOptFloat          => addOneOpt(ent, attr, paramIndex, tplIndex, setterFloat)
+      case _: AttrOneOptDouble         => addOneOpt(ent, attr, paramIndex, tplIndex, setterDouble)
+      case _: AttrOneOptBoolean        => addOneOpt(ent, attr, paramIndex, tplIndex, setterBoolean)
+      case _: AttrOneOptBigInt         => addOneOpt(ent, attr, paramIndex, tplIndex, setterBigInt)
+      case _: AttrOneOptBigDecimal     => addOneOpt(ent, attr, paramIndex, tplIndex, setterBigDecimal)
+      case _: AttrOneOptDate           => addOneOpt(ent, attr, paramIndex, tplIndex, setterDate)
+      case _: AttrOneOptDuration       => addOneOpt(ent, attr, paramIndex, tplIndex, setterDuration)
+      case _: AttrOneOptInstant        => addOneOpt(ent, attr, paramIndex, tplIndex, setterInstant)
+      case _: AttrOneOptLocalDate      => addOneOpt(ent, attr, paramIndex, tplIndex, setterLocalDate)
+      case _: AttrOneOptLocalTime      => addOneOpt(ent, attr, paramIndex, tplIndex, setterLocalTime)
+      case _: AttrOneOptLocalDateTime  => addOneOpt(ent, attr, paramIndex, tplIndex, setterLocalDateTime)
+      case _: AttrOneOptOffsetTime     => addOneOpt(ent, attr, paramIndex, tplIndex, setterOffsetTime)
+      case _: AttrOneOptOffsetDateTime => addOneOpt(ent, attr, paramIndex, tplIndex, setterOffsetDateTime)
+      case _: AttrOneOptZonedDateTime  => addOneOpt(ent, attr, paramIndex, tplIndex, setterZonedDateTime)
+      case _: AttrOneOptUUID           => addOneOpt(ent, attr, paramIndex, tplIndex, setterUUID)
+      case _: AttrOneOptURI            => addOneOpt(ent, attr, paramIndex, tplIndex, setterURI)
+      case _: AttrOneOptByte           => addOneOpt(ent, attr, paramIndex, tplIndex, setterByte)
+      case _: AttrOneOptShort          => addOneOpt(ent, attr, paramIndex, tplIndex, setterShort)
+      case _: AttrOneOptChar           => addOneOpt(ent, attr, paramIndex, tplIndex, setterChar)
     }
   }
 
-  private def resolveAttrSetMan(a: AttrSetMan, tplIndex: Int): Product => Unit = {
-    val (ent, attr, ref) = (a.ent, a.attr, a.ref)
+  private def attrSetManSetter(a: AttrSetMan, paramIndex: Int, tplIndex: Int): (PS, Product) => Unit = {
+    val (ent, attr) = (a.ent, a.attr)
     a match {
-      case _: AttrSetManID             => addSet(ent, attr, ref, tplIndex, transformID, extsID, set2arrayID, value2jsonID)
-      case _: AttrSetManString         => addSet(ent, attr, ref, tplIndex, transformString, extsString, set2arrayString, value2jsonString)
-      case _: AttrSetManInt            => addSet(ent, attr, ref, tplIndex, transformInt, extsInt, set2arrayInt, value2jsonInt)
-      case _: AttrSetManLong           => addSet(ent, attr, ref, tplIndex, transformLong, extsLong, set2arrayLong, value2jsonLong)
-      case _: AttrSetManFloat          => addSet(ent, attr, ref, tplIndex, transformFloat, extsFloat, set2arrayFloat, value2jsonFloat)
-      case _: AttrSetManDouble         => addSet(ent, attr, ref, tplIndex, transformDouble, extsDouble, set2arrayDouble, value2jsonDouble)
-      case _: AttrSetManBoolean        => addSet(ent, attr, ref, tplIndex, transformBoolean, extsBoolean, set2arrayBoolean, value2jsonBoolean)
-      case _: AttrSetManBigInt         => addSet(ent, attr, ref, tplIndex, transformBigInt, extsBigInt, set2arrayBigInt, value2jsonBigInt)
-      case _: AttrSetManBigDecimal     => addSet(ent, attr, ref, tplIndex, transformBigDecimal, extsBigDecimal, set2arrayBigDecimal, value2jsonBigDecimal)
-      case _: AttrSetManDate           => addSet(ent, attr, ref, tplIndex, transformDate, extsDate, set2arrayDate, value2jsonDate)
-      case _: AttrSetManDuration       => addSet(ent, attr, ref, tplIndex, transformDuration, extsDuration, set2arrayDuration, value2jsonDuration)
-      case _: AttrSetManInstant        => addSet(ent, attr, ref, tplIndex, transformInstant, extsInstant, set2arrayInstant, value2jsonInstant)
-      case _: AttrSetManLocalDate      => addSet(ent, attr, ref, tplIndex, transformLocalDate, extsLocalDate, set2arrayLocalDate, value2jsonLocalDate)
-      case _: AttrSetManLocalTime      => addSet(ent, attr, ref, tplIndex, transformLocalTime, extsLocalTime, set2arrayLocalTime, value2jsonLocalTime)
-      case _: AttrSetManLocalDateTime  => addSet(ent, attr, ref, tplIndex, transformLocalDateTime, extsLocalDateTime, set2arrayLocalDateTime, value2jsonLocalDateTime)
-      case _: AttrSetManOffsetTime     => addSet(ent, attr, ref, tplIndex, transformOffsetTime, extsOffsetTime, set2arrayOffsetTime, value2jsonOffsetTime)
-      case _: AttrSetManOffsetDateTime => addSet(ent, attr, ref, tplIndex, transformOffsetDateTime, extsOffsetDateTime, set2arrayOffsetDateTime, value2jsonOffsetDateTime)
-      case _: AttrSetManZonedDateTime  => addSet(ent, attr, ref, tplIndex, transformZonedDateTime, extsZonedDateTime, set2arrayZonedDateTime, value2jsonZonedDateTime)
-      case _: AttrSetManUUID           => addSet(ent, attr, ref, tplIndex, transformUUID, extsUUID, set2arrayUUID, value2jsonUUID)
-      case _: AttrSetManURI            => addSet(ent, attr, ref, tplIndex, transformURI, extsURI, set2arrayURI, value2jsonURI)
-      case _: AttrSetManByte           => addSet(ent, attr, ref, tplIndex, transformByte, extsByte, set2arrayByte, value2jsonByte)
-      case _: AttrSetManShort          => addSet(ent, attr, ref, tplIndex, transformShort, extsShort, set2arrayShort, value2jsonShort)
-      case _: AttrSetManChar           => addSet(ent, attr, ref, tplIndex, transformChar, extsChar, set2arrayChar, value2jsonChar)
+      case _: AttrSetManID             => addSet(ent, attr, paramIndex, tplIndex, transformID, extsID, set2arrayID, value2jsonID)
+      case _: AttrSetManString         => addSet(ent, attr, paramIndex, tplIndex, transformString, extsString, set2arrayString, value2jsonString)
+      case _: AttrSetManInt            => addSet(ent, attr, paramIndex, tplIndex, transformInt, extsInt, set2arrayInt, value2jsonInt)
+      case _: AttrSetManLong           => addSet(ent, attr, paramIndex, tplIndex, transformLong, extsLong, set2arrayLong, value2jsonLong)
+      case _: AttrSetManFloat          => addSet(ent, attr, paramIndex, tplIndex, transformFloat, extsFloat, set2arrayFloat, value2jsonFloat)
+      case _: AttrSetManDouble         => addSet(ent, attr, paramIndex, tplIndex, transformDouble, extsDouble, set2arrayDouble, value2jsonDouble)
+      case _: AttrSetManBoolean        => addSet(ent, attr, paramIndex, tplIndex, transformBoolean, extsBoolean, set2arrayBoolean, value2jsonBoolean)
+      case _: AttrSetManBigInt         => addSet(ent, attr, paramIndex, tplIndex, transformBigInt, extsBigInt, set2arrayBigInt, value2jsonBigInt)
+      case _: AttrSetManBigDecimal     => addSet(ent, attr, paramIndex, tplIndex, transformBigDecimal, extsBigDecimal, set2arrayBigDecimal, value2jsonBigDecimal)
+      case _: AttrSetManDate           => addSet(ent, attr, paramIndex, tplIndex, transformDate, extsDate, set2arrayDate, value2jsonDate)
+      case _: AttrSetManDuration       => addSet(ent, attr, paramIndex, tplIndex, transformDuration, extsDuration, set2arrayDuration, value2jsonDuration)
+      case _: AttrSetManInstant        => addSet(ent, attr, paramIndex, tplIndex, transformInstant, extsInstant, set2arrayInstant, value2jsonInstant)
+      case _: AttrSetManLocalDate      => addSet(ent, attr, paramIndex, tplIndex, transformLocalDate, extsLocalDate, set2arrayLocalDate, value2jsonLocalDate)
+      case _: AttrSetManLocalTime      => addSet(ent, attr, paramIndex, tplIndex, transformLocalTime, extsLocalTime, set2arrayLocalTime, value2jsonLocalTime)
+      case _: AttrSetManLocalDateTime  => addSet(ent, attr, paramIndex, tplIndex, transformLocalDateTime, extsLocalDateTime, set2arrayLocalDateTime, value2jsonLocalDateTime)
+      case _: AttrSetManOffsetTime     => addSet(ent, attr, paramIndex, tplIndex, transformOffsetTime, extsOffsetTime, set2arrayOffsetTime, value2jsonOffsetTime)
+      case _: AttrSetManOffsetDateTime => addSet(ent, attr, paramIndex, tplIndex, transformOffsetDateTime, extsOffsetDateTime, set2arrayOffsetDateTime, value2jsonOffsetDateTime)
+      case _: AttrSetManZonedDateTime  => addSet(ent, attr, paramIndex, tplIndex, transformZonedDateTime, extsZonedDateTime, set2arrayZonedDateTime, value2jsonZonedDateTime)
+      case _: AttrSetManUUID           => addSet(ent, attr, paramIndex, tplIndex, transformUUID, extsUUID, set2arrayUUID, value2jsonUUID)
+      case _: AttrSetManURI            => addSet(ent, attr, paramIndex, tplIndex, transformURI, extsURI, set2arrayURI, value2jsonURI)
+      case _: AttrSetManByte           => addSet(ent, attr, paramIndex, tplIndex, transformByte, extsByte, set2arrayByte, value2jsonByte)
+      case _: AttrSetManShort          => addSet(ent, attr, paramIndex, tplIndex, transformShort, extsShort, set2arrayShort, value2jsonShort)
+      case _: AttrSetManChar           => addSet(ent, attr, paramIndex, tplIndex, transformChar, extsChar, set2arrayChar, value2jsonChar)
     }
   }
 
-  private def resolveAttrSetOpt(a: AttrSetOpt, tplIndex: Int): Product => Unit = {
-    val (ent, attr, ref) = (a.ent, a.attr, a.ref)
+  private def attrSetOptSetter(a: AttrSetOpt, paramIndex: Int, tplIndex: Int): (PS, Product) => Unit = {
+    val (ent, attr) = (a.ent, a.attr)
     a match {
-      case _: AttrSetOptID             => addSetOpt(ent, attr, ref, tplIndex, transformID, extsID, set2arrayID, value2jsonID)
-      case _: AttrSetOptString         => addSetOpt(ent, attr, ref, tplIndex, transformString, extsString, set2arrayString, value2jsonString)
-      case _: AttrSetOptInt            => addSetOpt(ent, attr, ref, tplIndex, transformInt, extsInt, set2arrayInt, value2jsonInt)
-      case _: AttrSetOptLong           => addSetOpt(ent, attr, ref, tplIndex, transformLong, extsLong, set2arrayLong, value2jsonLong)
-      case _: AttrSetOptFloat          => addSetOpt(ent, attr, ref, tplIndex, transformFloat, extsFloat, set2arrayFloat, value2jsonFloat)
-      case _: AttrSetOptDouble         => addSetOpt(ent, attr, ref, tplIndex, transformDouble, extsDouble, set2arrayDouble, value2jsonDouble)
-      case _: AttrSetOptBoolean        => addSetOpt(ent, attr, ref, tplIndex, transformBoolean, extsBoolean, set2arrayBoolean, value2jsonBoolean)
-      case _: AttrSetOptBigInt         => addSetOpt(ent, attr, ref, tplIndex, transformBigInt, extsBigInt, set2arrayBigInt, value2jsonBigInt)
-      case _: AttrSetOptBigDecimal     => addSetOpt(ent, attr, ref, tplIndex, transformBigDecimal, extsBigDecimal, set2arrayBigDecimal, value2jsonBigDecimal)
-      case _: AttrSetOptDate           => addSetOpt(ent, attr, ref, tplIndex, transformDate, extsDate, set2arrayDate, value2jsonDate)
-      case _: AttrSetOptDuration       => addSetOpt(ent, attr, ref, tplIndex, transformDuration, extsDuration, set2arrayDuration, value2jsonDuration)
-      case _: AttrSetOptInstant        => addSetOpt(ent, attr, ref, tplIndex, transformInstant, extsInstant, set2arrayInstant, value2jsonInstant)
-      case _: AttrSetOptLocalDate      => addSetOpt(ent, attr, ref, tplIndex, transformLocalDate, extsLocalDate, set2arrayLocalDate, value2jsonLocalDate)
-      case _: AttrSetOptLocalTime      => addSetOpt(ent, attr, ref, tplIndex, transformLocalTime, extsLocalTime, set2arrayLocalTime, value2jsonLocalTime)
-      case _: AttrSetOptLocalDateTime  => addSetOpt(ent, attr, ref, tplIndex, transformLocalDateTime, extsLocalDateTime, set2arrayLocalDateTime, value2jsonLocalDateTime)
-      case _: AttrSetOptOffsetTime     => addSetOpt(ent, attr, ref, tplIndex, transformOffsetTime, extsOffsetTime, set2arrayOffsetTime, value2jsonOffsetTime)
-      case _: AttrSetOptOffsetDateTime => addSetOpt(ent, attr, ref, tplIndex, transformOffsetDateTime, extsOffsetDateTime, set2arrayOffsetDateTime, value2jsonOffsetDateTime)
-      case _: AttrSetOptZonedDateTime  => addSetOpt(ent, attr, ref, tplIndex, transformZonedDateTime, extsZonedDateTime, set2arrayZonedDateTime, value2jsonZonedDateTime)
-      case _: AttrSetOptUUID           => addSetOpt(ent, attr, ref, tplIndex, transformUUID, extsUUID, set2arrayUUID, value2jsonUUID)
-      case _: AttrSetOptURI            => addSetOpt(ent, attr, ref, tplIndex, transformURI, extsURI, set2arrayURI, value2jsonURI)
-      case _: AttrSetOptByte           => addSetOpt(ent, attr, ref, tplIndex, transformByte, extsByte, set2arrayByte, value2jsonByte)
-      case _: AttrSetOptShort          => addSetOpt(ent, attr, ref, tplIndex, transformShort, extsShort, set2arrayShort, value2jsonShort)
-      case _: AttrSetOptChar           => addSetOpt(ent, attr, ref, tplIndex, transformChar, extsChar, set2arrayChar, value2jsonChar)
+      case _: AttrSetOptID             => addSetOpt(ent, attr, paramIndex, tplIndex, transformID, extsID, set2arrayID, value2jsonID)
+      case _: AttrSetOptString         => addSetOpt(ent, attr, paramIndex, tplIndex, transformString, extsString, set2arrayString, value2jsonString)
+      case _: AttrSetOptInt            => addSetOpt(ent, attr, paramIndex, tplIndex, transformInt, extsInt, set2arrayInt, value2jsonInt)
+      case _: AttrSetOptLong           => addSetOpt(ent, attr, paramIndex, tplIndex, transformLong, extsLong, set2arrayLong, value2jsonLong)
+      case _: AttrSetOptFloat          => addSetOpt(ent, attr, paramIndex, tplIndex, transformFloat, extsFloat, set2arrayFloat, value2jsonFloat)
+      case _: AttrSetOptDouble         => addSetOpt(ent, attr, paramIndex, tplIndex, transformDouble, extsDouble, set2arrayDouble, value2jsonDouble)
+      case _: AttrSetOptBoolean        => addSetOpt(ent, attr, paramIndex, tplIndex, transformBoolean, extsBoolean, set2arrayBoolean, value2jsonBoolean)
+      case _: AttrSetOptBigInt         => addSetOpt(ent, attr, paramIndex, tplIndex, transformBigInt, extsBigInt, set2arrayBigInt, value2jsonBigInt)
+      case _: AttrSetOptBigDecimal     => addSetOpt(ent, attr, paramIndex, tplIndex, transformBigDecimal, extsBigDecimal, set2arrayBigDecimal, value2jsonBigDecimal)
+      case _: AttrSetOptDate           => addSetOpt(ent, attr, paramIndex, tplIndex, transformDate, extsDate, set2arrayDate, value2jsonDate)
+      case _: AttrSetOptDuration       => addSetOpt(ent, attr, paramIndex, tplIndex, transformDuration, extsDuration, set2arrayDuration, value2jsonDuration)
+      case _: AttrSetOptInstant        => addSetOpt(ent, attr, paramIndex, tplIndex, transformInstant, extsInstant, set2arrayInstant, value2jsonInstant)
+      case _: AttrSetOptLocalDate      => addSetOpt(ent, attr, paramIndex, tplIndex, transformLocalDate, extsLocalDate, set2arrayLocalDate, value2jsonLocalDate)
+      case _: AttrSetOptLocalTime      => addSetOpt(ent, attr, paramIndex, tplIndex, transformLocalTime, extsLocalTime, set2arrayLocalTime, value2jsonLocalTime)
+      case _: AttrSetOptLocalDateTime  => addSetOpt(ent, attr, paramIndex, tplIndex, transformLocalDateTime, extsLocalDateTime, set2arrayLocalDateTime, value2jsonLocalDateTime)
+      case _: AttrSetOptOffsetTime     => addSetOpt(ent, attr, paramIndex, tplIndex, transformOffsetTime, extsOffsetTime, set2arrayOffsetTime, value2jsonOffsetTime)
+      case _: AttrSetOptOffsetDateTime => addSetOpt(ent, attr, paramIndex, tplIndex, transformOffsetDateTime, extsOffsetDateTime, set2arrayOffsetDateTime, value2jsonOffsetDateTime)
+      case _: AttrSetOptZonedDateTime  => addSetOpt(ent, attr, paramIndex, tplIndex, transformZonedDateTime, extsZonedDateTime, set2arrayZonedDateTime, value2jsonZonedDateTime)
+      case _: AttrSetOptUUID           => addSetOpt(ent, attr, paramIndex, tplIndex, transformUUID, extsUUID, set2arrayUUID, value2jsonUUID)
+      case _: AttrSetOptURI            => addSetOpt(ent, attr, paramIndex, tplIndex, transformURI, extsURI, set2arrayURI, value2jsonURI)
+      case _: AttrSetOptByte           => addSetOpt(ent, attr, paramIndex, tplIndex, transformByte, extsByte, set2arrayByte, value2jsonByte)
+      case _: AttrSetOptShort          => addSetOpt(ent, attr, paramIndex, tplIndex, transformShort, extsShort, set2arrayShort, value2jsonShort)
+      case _: AttrSetOptChar           => addSetOpt(ent, attr, paramIndex, tplIndex, transformChar, extsChar, set2arrayChar, value2jsonChar)
     }
   }
 
-  private def resolveAttrSeqMan(a: AttrSeqMan, tplIndex: Int): Product => Unit = {
-    val (ent, attr, ref) = (a.ent, a.attr, a.ref)
+  private def attrSeqManSetter(a: AttrSeqMan, paramIndex: Int, tplIndex: Int): (PS, Product) => Unit = {
+    val (ent, attr) = (a.ent, a.attr)
     a match {
-      case _: AttrSeqManID             => addSeq(ent, attr, ref, tplIndex, transformID, extsID, seq2arrayID, value2jsonID)
-      case _: AttrSeqManString         => addSeq(ent, attr, ref, tplIndex, transformString, extsString, seq2arrayString, value2jsonString)
-      case _: AttrSeqManInt            => addSeq(ent, attr, ref, tplIndex, transformInt, extsInt, seq2arrayInt, value2jsonInt)
-      case _: AttrSeqManLong           => addSeq(ent, attr, ref, tplIndex, transformLong, extsLong, seq2arrayLong, value2jsonLong)
-      case _: AttrSeqManFloat          => addSeq(ent, attr, ref, tplIndex, transformFloat, extsFloat, seq2arrayFloat, value2jsonFloat)
-      case _: AttrSeqManDouble         => addSeq(ent, attr, ref, tplIndex, transformDouble, extsDouble, seq2arrayDouble, value2jsonDouble)
-      case _: AttrSeqManBoolean        => addSeq(ent, attr, ref, tplIndex, transformBoolean, extsBoolean, seq2arrayBoolean, value2jsonBoolean)
-      case _: AttrSeqManBigInt         => addSeq(ent, attr, ref, tplIndex, transformBigInt, extsBigInt, seq2arrayBigInt, value2jsonBigInt)
-      case _: AttrSeqManBigDecimal     => addSeq(ent, attr, ref, tplIndex, transformBigDecimal, extsBigDecimal, seq2arrayBigDecimal, value2jsonBigDecimal)
-      case _: AttrSeqManDate           => addSeq(ent, attr, ref, tplIndex, transformDate, extsDate, seq2arrayDate, value2jsonDate)
-      case _: AttrSeqManDuration       => addSeq(ent, attr, ref, tplIndex, transformDuration, extsDuration, seq2arrayDuration, value2jsonDuration)
-      case _: AttrSeqManInstant        => addSeq(ent, attr, ref, tplIndex, transformInstant, extsInstant, seq2arrayInstant, value2jsonInstant)
-      case _: AttrSeqManLocalDate      => addSeq(ent, attr, ref, tplIndex, transformLocalDate, extsLocalDate, seq2arrayLocalDate, value2jsonLocalDate)
-      case _: AttrSeqManLocalTime      => addSeq(ent, attr, ref, tplIndex, transformLocalTime, extsLocalTime, seq2arrayLocalTime, value2jsonLocalTime)
-      case _: AttrSeqManLocalDateTime  => addSeq(ent, attr, ref, tplIndex, transformLocalDateTime, extsLocalDateTime, seq2arrayLocalDateTime, value2jsonLocalDateTime)
-      case _: AttrSeqManOffsetTime     => addSeq(ent, attr, ref, tplIndex, transformOffsetTime, extsOffsetTime, seq2arrayOffsetTime, value2jsonOffsetTime)
-      case _: AttrSeqManOffsetDateTime => addSeq(ent, attr, ref, tplIndex, transformOffsetDateTime, extsOffsetDateTime, seq2arrayOffsetDateTime, value2jsonOffsetDateTime)
-      case _: AttrSeqManZonedDateTime  => addSeq(ent, attr, ref, tplIndex, transformZonedDateTime, extsZonedDateTime, seq2arrayZonedDateTime, value2jsonZonedDateTime)
-      case _: AttrSeqManUUID           => addSeq(ent, attr, ref, tplIndex, transformUUID, extsUUID, seq2arrayUUID, value2jsonUUID)
-      case _: AttrSeqManURI            => addSeq(ent, attr, ref, tplIndex, transformURI, extsURI, seq2arrayURI, value2jsonURI)
-      case a: AttrSeqManByte           => addByteArray(ent, attr, tplIndex)
-      case _: AttrSeqManShort          => addSeq(ent, attr, ref, tplIndex, transformShort, extsShort, seq2arrayShort, value2jsonShort)
-      case _: AttrSeqManChar           => addSeq(ent, attr, ref, tplIndex, transformChar, extsChar, seq2arrayChar, value2jsonChar)
+      case _: AttrSeqManID             => addSeq(ent, attr, paramIndex, tplIndex, transformID, extsID, seq2arrayID, value2jsonID)
+      case _: AttrSeqManString         => addSeq(ent, attr, paramIndex, tplIndex, transformString, extsString, seq2arrayString, value2jsonString)
+      case _: AttrSeqManInt            => addSeq(ent, attr, paramIndex, tplIndex, transformInt, extsInt, seq2arrayInt, value2jsonInt)
+      case _: AttrSeqManLong           => addSeq(ent, attr, paramIndex, tplIndex, transformLong, extsLong, seq2arrayLong, value2jsonLong)
+      case _: AttrSeqManFloat          => addSeq(ent, attr, paramIndex, tplIndex, transformFloat, extsFloat, seq2arrayFloat, value2jsonFloat)
+      case _: AttrSeqManDouble         => addSeq(ent, attr, paramIndex, tplIndex, transformDouble, extsDouble, seq2arrayDouble, value2jsonDouble)
+      case _: AttrSeqManBoolean        => addSeq(ent, attr, paramIndex, tplIndex, transformBoolean, extsBoolean, seq2arrayBoolean, value2jsonBoolean)
+      case _: AttrSeqManBigInt         => addSeq(ent, attr, paramIndex, tplIndex, transformBigInt, extsBigInt, seq2arrayBigInt, value2jsonBigInt)
+      case _: AttrSeqManBigDecimal     => addSeq(ent, attr, paramIndex, tplIndex, transformBigDecimal, extsBigDecimal, seq2arrayBigDecimal, value2jsonBigDecimal)
+      case _: AttrSeqManDate           => addSeq(ent, attr, paramIndex, tplIndex, transformDate, extsDate, seq2arrayDate, value2jsonDate)
+      case _: AttrSeqManDuration       => addSeq(ent, attr, paramIndex, tplIndex, transformDuration, extsDuration, seq2arrayDuration, value2jsonDuration)
+      case _: AttrSeqManInstant        => addSeq(ent, attr, paramIndex, tplIndex, transformInstant, extsInstant, seq2arrayInstant, value2jsonInstant)
+      case _: AttrSeqManLocalDate      => addSeq(ent, attr, paramIndex, tplIndex, transformLocalDate, extsLocalDate, seq2arrayLocalDate, value2jsonLocalDate)
+      case _: AttrSeqManLocalTime      => addSeq(ent, attr, paramIndex, tplIndex, transformLocalTime, extsLocalTime, seq2arrayLocalTime, value2jsonLocalTime)
+      case _: AttrSeqManLocalDateTime  => addSeq(ent, attr, paramIndex, tplIndex, transformLocalDateTime, extsLocalDateTime, seq2arrayLocalDateTime, value2jsonLocalDateTime)
+      case _: AttrSeqManOffsetTime     => addSeq(ent, attr, paramIndex, tplIndex, transformOffsetTime, extsOffsetTime, seq2arrayOffsetTime, value2jsonOffsetTime)
+      case _: AttrSeqManOffsetDateTime => addSeq(ent, attr, paramIndex, tplIndex, transformOffsetDateTime, extsOffsetDateTime, seq2arrayOffsetDateTime, value2jsonOffsetDateTime)
+      case _: AttrSeqManZonedDateTime  => addSeq(ent, attr, paramIndex, tplIndex, transformZonedDateTime, extsZonedDateTime, seq2arrayZonedDateTime, value2jsonZonedDateTime)
+      case _: AttrSeqManUUID           => addSeq(ent, attr, paramIndex, tplIndex, transformUUID, extsUUID, seq2arrayUUID, value2jsonUUID)
+      case _: AttrSeqManURI            => addSeq(ent, attr, paramIndex, tplIndex, transformURI, extsURI, seq2arrayURI, value2jsonURI)
+      case _: AttrSeqManByte           => addByteArray(ent, attr, paramIndex, tplIndex)
+      case _: AttrSeqManShort          => addSeq(ent, attr, paramIndex, tplIndex, transformShort, extsShort, seq2arrayShort, value2jsonShort)
+      case _: AttrSeqManChar           => addSeq(ent, attr, paramIndex, tplIndex, transformChar, extsChar, seq2arrayChar, value2jsonChar)
     }
   }
 
-  private def resolveAttrSeqOpt(a: AttrSeqOpt, tplIndex: Int): Product => Unit = {
-    val (ent, attr, ref) = (a.ent, a.attr, a.ref)
+  private def attrSeqOptSetter(a: AttrSeqOpt, paramIndex: Int, tplIndex: Int): (PS, Product) => Unit = {
+    val (ent, attr) = (a.ent, a.attr)
     a match {
-      case _: AttrSeqOptID             => addSeqOpt(ent, attr, ref, tplIndex, transformID, extsID, seq2arrayID, value2jsonID)
-      case _: AttrSeqOptString         => addSeqOpt(ent, attr, ref, tplIndex, transformString, extsString, seq2arrayString, value2jsonString)
-      case _: AttrSeqOptInt            => addSeqOpt(ent, attr, ref, tplIndex, transformInt, extsInt, seq2arrayInt, value2jsonInt)
-      case _: AttrSeqOptLong           => addSeqOpt(ent, attr, ref, tplIndex, transformLong, extsLong, seq2arrayLong, value2jsonLong)
-      case _: AttrSeqOptFloat          => addSeqOpt(ent, attr, ref, tplIndex, transformFloat, extsFloat, seq2arrayFloat, value2jsonFloat)
-      case _: AttrSeqOptDouble         => addSeqOpt(ent, attr, ref, tplIndex, transformDouble, extsDouble, seq2arrayDouble, value2jsonDouble)
-      case _: AttrSeqOptBoolean        => addSeqOpt(ent, attr, ref, tplIndex, transformBoolean, extsBoolean, seq2arrayBoolean, value2jsonBoolean)
-      case _: AttrSeqOptBigInt         => addSeqOpt(ent, attr, ref, tplIndex, transformBigInt, extsBigInt, seq2arrayBigInt, value2jsonBigInt)
-      case _: AttrSeqOptBigDecimal     => addSeqOpt(ent, attr, ref, tplIndex, transformBigDecimal, extsBigDecimal, seq2arrayBigDecimal, value2jsonBigDecimal)
-      case _: AttrSeqOptDate           => addSeqOpt(ent, attr, ref, tplIndex, transformDate, extsDate, seq2arrayDate, value2jsonDate)
-      case _: AttrSeqOptDuration       => addSeqOpt(ent, attr, ref, tplIndex, transformDuration, extsDuration, seq2arrayDuration, value2jsonDuration)
-      case _: AttrSeqOptInstant        => addSeqOpt(ent, attr, ref, tplIndex, transformInstant, extsInstant, seq2arrayInstant, value2jsonInstant)
-      case _: AttrSeqOptLocalDate      => addSeqOpt(ent, attr, ref, tplIndex, transformLocalDate, extsLocalDate, seq2arrayLocalDate, value2jsonLocalDate)
-      case _: AttrSeqOptLocalTime      => addSeqOpt(ent, attr, ref, tplIndex, transformLocalTime, extsLocalTime, seq2arrayLocalTime, value2jsonLocalTime)
-      case _: AttrSeqOptLocalDateTime  => addSeqOpt(ent, attr, ref, tplIndex, transformLocalDateTime, extsLocalDateTime, seq2arrayLocalDateTime, value2jsonLocalDateTime)
-      case _: AttrSeqOptOffsetTime     => addSeqOpt(ent, attr, ref, tplIndex, transformOffsetTime, extsOffsetTime, seq2arrayOffsetTime, value2jsonOffsetTime)
-      case _: AttrSeqOptOffsetDateTime => addSeqOpt(ent, attr, ref, tplIndex, transformOffsetDateTime, extsOffsetDateTime, seq2arrayOffsetDateTime, value2jsonOffsetDateTime)
-      case _: AttrSeqOptZonedDateTime  => addSeqOpt(ent, attr, ref, tplIndex, transformZonedDateTime, extsZonedDateTime, seq2arrayZonedDateTime, value2jsonZonedDateTime)
-      case _: AttrSeqOptUUID           => addSeqOpt(ent, attr, ref, tplIndex, transformUUID, extsUUID, seq2arrayUUID, value2jsonUUID)
-      case _: AttrSeqOptURI            => addSeqOpt(ent, attr, ref, tplIndex, transformURI, extsURI, seq2arrayURI, value2jsonURI)
-      case a: AttrSeqOptByte           => addByteArray(ent, attr, tplIndex)
-      case _: AttrSeqOptShort          => addSeqOpt(ent, attr, ref, tplIndex, transformShort, extsShort, seq2arrayShort, value2jsonShort)
-      case _: AttrSeqOptChar           => addSeqOpt(ent, attr, ref, tplIndex, transformChar, extsChar, seq2arrayChar, value2jsonChar)
+      case _: AttrSeqOptID             => addSeqOpt(ent, attr, paramIndex, tplIndex, transformID, extsID, seq2arrayID, value2jsonID)
+      case _: AttrSeqOptString         => addSeqOpt(ent, attr, paramIndex, tplIndex, transformString, extsString, seq2arrayString, value2jsonString)
+      case _: AttrSeqOptInt            => addSeqOpt(ent, attr, paramIndex, tplIndex, transformInt, extsInt, seq2arrayInt, value2jsonInt)
+      case _: AttrSeqOptLong           => addSeqOpt(ent, attr, paramIndex, tplIndex, transformLong, extsLong, seq2arrayLong, value2jsonLong)
+      case _: AttrSeqOptFloat          => addSeqOpt(ent, attr, paramIndex, tplIndex, transformFloat, extsFloat, seq2arrayFloat, value2jsonFloat)
+      case _: AttrSeqOptDouble         => addSeqOpt(ent, attr, paramIndex, tplIndex, transformDouble, extsDouble, seq2arrayDouble, value2jsonDouble)
+      case _: AttrSeqOptBoolean        => addSeqOpt(ent, attr, paramIndex, tplIndex, transformBoolean, extsBoolean, seq2arrayBoolean, value2jsonBoolean)
+      case _: AttrSeqOptBigInt         => addSeqOpt(ent, attr, paramIndex, tplIndex, transformBigInt, extsBigInt, seq2arrayBigInt, value2jsonBigInt)
+      case _: AttrSeqOptBigDecimal     => addSeqOpt(ent, attr, paramIndex, tplIndex, transformBigDecimal, extsBigDecimal, seq2arrayBigDecimal, value2jsonBigDecimal)
+      case _: AttrSeqOptDate           => addSeqOpt(ent, attr, paramIndex, tplIndex, transformDate, extsDate, seq2arrayDate, value2jsonDate)
+      case _: AttrSeqOptDuration       => addSeqOpt(ent, attr, paramIndex, tplIndex, transformDuration, extsDuration, seq2arrayDuration, value2jsonDuration)
+      case _: AttrSeqOptInstant        => addSeqOpt(ent, attr, paramIndex, tplIndex, transformInstant, extsInstant, seq2arrayInstant, value2jsonInstant)
+      case _: AttrSeqOptLocalDate      => addSeqOpt(ent, attr, paramIndex, tplIndex, transformLocalDate, extsLocalDate, seq2arrayLocalDate, value2jsonLocalDate)
+      case _: AttrSeqOptLocalTime      => addSeqOpt(ent, attr, paramIndex, tplIndex, transformLocalTime, extsLocalTime, seq2arrayLocalTime, value2jsonLocalTime)
+      case _: AttrSeqOptLocalDateTime  => addSeqOpt(ent, attr, paramIndex, tplIndex, transformLocalDateTime, extsLocalDateTime, seq2arrayLocalDateTime, value2jsonLocalDateTime)
+      case _: AttrSeqOptOffsetTime     => addSeqOpt(ent, attr, paramIndex, tplIndex, transformOffsetTime, extsOffsetTime, seq2arrayOffsetTime, value2jsonOffsetTime)
+      case _: AttrSeqOptOffsetDateTime => addSeqOpt(ent, attr, paramIndex, tplIndex, transformOffsetDateTime, extsOffsetDateTime, seq2arrayOffsetDateTime, value2jsonOffsetDateTime)
+      case _: AttrSeqOptZonedDateTime  => addSeqOpt(ent, attr, paramIndex, tplIndex, transformZonedDateTime, extsZonedDateTime, seq2arrayZonedDateTime, value2jsonZonedDateTime)
+      case _: AttrSeqOptUUID           => addSeqOpt(ent, attr, paramIndex, tplIndex, transformUUID, extsUUID, seq2arrayUUID, value2jsonUUID)
+      case _: AttrSeqOptURI            => addSeqOpt(ent, attr, paramIndex, tplIndex, transformURI, extsURI, seq2arrayURI, value2jsonURI)
+      case _: AttrSeqOptByte           => addByteArray(ent, attr, paramIndex, tplIndex)
+      case _: AttrSeqOptShort          => addSeqOpt(ent, attr, paramIndex, tplIndex, transformShort, extsShort, seq2arrayShort, value2jsonShort)
+      case _: AttrSeqOptChar           => addSeqOpt(ent, attr, paramIndex, tplIndex, transformChar, extsChar, seq2arrayChar, value2jsonChar)
     }
   }
 
-  private def resolveAttrMapMan(a: AttrMapMan, tplIndex: Int): Product => Unit = {
-    val (ent, attr, ref) = (a.ent, a.attr, a.ref)
+  private def attrMapManSetter(a: AttrMapMan, paramIndex: Int, tplIndex: Int): (PS, Product) => Unit = {
+    val (ent, attr) = (a.ent, a.attr)
     a match {
-      case _: AttrMapManID             => addMap(ent, attr, ref, tplIndex, transformID, value2jsonID)
-      case _: AttrMapManString         => addMap(ent, attr, ref, tplIndex, transformString, value2jsonString)
-      case _: AttrMapManInt            => addMap(ent, attr, ref, tplIndex, transformInt, value2jsonInt)
-      case _: AttrMapManLong           => addMap(ent, attr, ref, tplIndex, transformLong, value2jsonLong)
-      case _: AttrMapManFloat          => addMap(ent, attr, ref, tplIndex, transformFloat, value2jsonFloat)
-      case _: AttrMapManDouble         => addMap(ent, attr, ref, tplIndex, transformDouble, value2jsonDouble)
-      case _: AttrMapManBoolean        => addMap(ent, attr, ref, tplIndex, transformBoolean, value2jsonBoolean)
-      case _: AttrMapManBigInt         => addMap(ent, attr, ref, tplIndex, transformBigInt, value2jsonBigInt)
-      case _: AttrMapManBigDecimal     => addMap(ent, attr, ref, tplIndex, transformBigDecimal, value2jsonBigDecimal)
-      case _: AttrMapManDate           => addMap(ent, attr, ref, tplIndex, transformDate, value2jsonDate)
-      case _: AttrMapManDuration       => addMap(ent, attr, ref, tplIndex, transformDuration, value2jsonDuration)
-      case _: AttrMapManInstant        => addMap(ent, attr, ref, tplIndex, transformInstant, value2jsonInstant)
-      case _: AttrMapManLocalDate      => addMap(ent, attr, ref, tplIndex, transformLocalDate, value2jsonLocalDate)
-      case _: AttrMapManLocalTime      => addMap(ent, attr, ref, tplIndex, transformLocalTime, value2jsonLocalTime)
-      case _: AttrMapManLocalDateTime  => addMap(ent, attr, ref, tplIndex, transformLocalDateTime, value2jsonLocalDateTime)
-      case _: AttrMapManOffsetTime     => addMap(ent, attr, ref, tplIndex, transformOffsetTime, value2jsonOffsetTime)
-      case _: AttrMapManOffsetDateTime => addMap(ent, attr, ref, tplIndex, transformOffsetDateTime, value2jsonOffsetDateTime)
-      case _: AttrMapManZonedDateTime  => addMap(ent, attr, ref, tplIndex, transformZonedDateTime, value2jsonZonedDateTime)
-      case _: AttrMapManUUID           => addMap(ent, attr, ref, tplIndex, transformUUID, value2jsonUUID)
-      case _: AttrMapManURI            => addMap(ent, attr, ref, tplIndex, transformURI, value2jsonURI)
-      case _: AttrMapManByte           => addMap(ent, attr, ref, tplIndex, transformByte, value2jsonByte)
-      case _: AttrMapManShort          => addMap(ent, attr, ref, tplIndex, transformShort, value2jsonShort)
-      case _: AttrMapManChar           => addMap(ent, attr, ref, tplIndex, transformChar, value2jsonChar)
+      case _: AttrMapManID             => addMap(ent, attr, paramIndex, tplIndex, transformID, value2jsonID)
+      case _: AttrMapManString         => addMap(ent, attr, paramIndex, tplIndex, transformString, value2jsonString)
+      case _: AttrMapManInt            => addMap(ent, attr, paramIndex, tplIndex, transformInt, value2jsonInt)
+      case _: AttrMapManLong           => addMap(ent, attr, paramIndex, tplIndex, transformLong, value2jsonLong)
+      case _: AttrMapManFloat          => addMap(ent, attr, paramIndex, tplIndex, transformFloat, value2jsonFloat)
+      case _: AttrMapManDouble         => addMap(ent, attr, paramIndex, tplIndex, transformDouble, value2jsonDouble)
+      case _: AttrMapManBoolean        => addMap(ent, attr, paramIndex, tplIndex, transformBoolean, value2jsonBoolean)
+      case _: AttrMapManBigInt         => addMap(ent, attr, paramIndex, tplIndex, transformBigInt, value2jsonBigInt)
+      case _: AttrMapManBigDecimal     => addMap(ent, attr, paramIndex, tplIndex, transformBigDecimal, value2jsonBigDecimal)
+      case _: AttrMapManDate           => addMap(ent, attr, paramIndex, tplIndex, transformDate, value2jsonDate)
+      case _: AttrMapManDuration       => addMap(ent, attr, paramIndex, tplIndex, transformDuration, value2jsonDuration)
+      case _: AttrMapManInstant        => addMap(ent, attr, paramIndex, tplIndex, transformInstant, value2jsonInstant)
+      case _: AttrMapManLocalDate      => addMap(ent, attr, paramIndex, tplIndex, transformLocalDate, value2jsonLocalDate)
+      case _: AttrMapManLocalTime      => addMap(ent, attr, paramIndex, tplIndex, transformLocalTime, value2jsonLocalTime)
+      case _: AttrMapManLocalDateTime  => addMap(ent, attr, paramIndex, tplIndex, transformLocalDateTime, value2jsonLocalDateTime)
+      case _: AttrMapManOffsetTime     => addMap(ent, attr, paramIndex, tplIndex, transformOffsetTime, value2jsonOffsetTime)
+      case _: AttrMapManOffsetDateTime => addMap(ent, attr, paramIndex, tplIndex, transformOffsetDateTime, value2jsonOffsetDateTime)
+      case _: AttrMapManZonedDateTime  => addMap(ent, attr, paramIndex, tplIndex, transformZonedDateTime, value2jsonZonedDateTime)
+      case _: AttrMapManUUID           => addMap(ent, attr, paramIndex, tplIndex, transformUUID, value2jsonUUID)
+      case _: AttrMapManURI            => addMap(ent, attr, paramIndex, tplIndex, transformURI, value2jsonURI)
+      case _: AttrMapManByte           => addMap(ent, attr, paramIndex, tplIndex, transformByte, value2jsonByte)
+      case _: AttrMapManShort          => addMap(ent, attr, paramIndex, tplIndex, transformShort, value2jsonShort)
+      case _: AttrMapManChar           => addMap(ent, attr, paramIndex, tplIndex, transformChar, value2jsonChar)
     }
   }
 
-  private def resolveAttrMapOpt(a: AttrMapOpt, tplIndex: Int): Product => Unit = {
-    val (ent, attr, ref) = (a.ent, a.attr, a.ref)
+  private def attrMapOptSetter(a: AttrMapOpt, paramIndex: Int, tplIndex: Int): (PS, Product) => Unit = {
+    val (ent, attr) = (a.ent, a.attr)
     a match {
-      case _: AttrMapOptID             => addMapOpt(ent, attr, ref, tplIndex, transformID, value2jsonID)
-      case _: AttrMapOptString         => addMapOpt(ent, attr, ref, tplIndex, transformString, value2jsonString)
-      case _: AttrMapOptInt            => addMapOpt(ent, attr, ref, tplIndex, transformInt, value2jsonInt)
-      case _: AttrMapOptLong           => addMapOpt(ent, attr, ref, tplIndex, transformLong, value2jsonLong)
-      case _: AttrMapOptFloat          => addMapOpt(ent, attr, ref, tplIndex, transformFloat, value2jsonFloat)
-      case _: AttrMapOptDouble         => addMapOpt(ent, attr, ref, tplIndex, transformDouble, value2jsonDouble)
-      case _: AttrMapOptBoolean        => addMapOpt(ent, attr, ref, tplIndex, transformBoolean, value2jsonBoolean)
-      case _: AttrMapOptBigInt         => addMapOpt(ent, attr, ref, tplIndex, transformBigInt, value2jsonBigInt)
-      case _: AttrMapOptBigDecimal     => addMapOpt(ent, attr, ref, tplIndex, transformBigDecimal, value2jsonBigDecimal)
-      case _: AttrMapOptDate           => addMapOpt(ent, attr, ref, tplIndex, transformDate, value2jsonDate)
-      case _: AttrMapOptDuration       => addMapOpt(ent, attr, ref, tplIndex, transformDuration, value2jsonDuration)
-      case _: AttrMapOptInstant        => addMapOpt(ent, attr, ref, tplIndex, transformInstant, value2jsonInstant)
-      case _: AttrMapOptLocalDate      => addMapOpt(ent, attr, ref, tplIndex, transformLocalDate, value2jsonLocalDate)
-      case _: AttrMapOptLocalTime      => addMapOpt(ent, attr, ref, tplIndex, transformLocalTime, value2jsonLocalTime)
-      case _: AttrMapOptLocalDateTime  => addMapOpt(ent, attr, ref, tplIndex, transformLocalDateTime, value2jsonLocalDateTime)
-      case _: AttrMapOptOffsetTime     => addMapOpt(ent, attr, ref, tplIndex, transformOffsetTime, value2jsonOffsetTime)
-      case _: AttrMapOptOffsetDateTime => addMapOpt(ent, attr, ref, tplIndex, transformOffsetDateTime, value2jsonOffsetDateTime)
-      case _: AttrMapOptZonedDateTime  => addMapOpt(ent, attr, ref, tplIndex, transformZonedDateTime, value2jsonZonedDateTime)
-      case _: AttrMapOptUUID           => addMapOpt(ent, attr, ref, tplIndex, transformUUID, value2jsonUUID)
-      case _: AttrMapOptURI            => addMapOpt(ent, attr, ref, tplIndex, transformURI, value2jsonURI)
-      case _: AttrMapOptByte           => addMapOpt(ent, attr, ref, tplIndex, transformByte, value2jsonByte)
-      case _: AttrMapOptShort          => addMapOpt(ent, attr, ref, tplIndex, transformShort, value2jsonShort)
-      case _: AttrMapOptChar           => addMapOpt(ent, attr, ref, tplIndex, transformChar, value2jsonChar)
+      case _: AttrMapOptID             => addMapOpt(ent, attr, paramIndex, tplIndex, transformID, value2jsonID)
+      case _: AttrMapOptString         => addMapOpt(ent, attr, paramIndex, tplIndex, transformString, value2jsonString)
+      case _: AttrMapOptInt            => addMapOpt(ent, attr, paramIndex, tplIndex, transformInt, value2jsonInt)
+      case _: AttrMapOptLong           => addMapOpt(ent, attr, paramIndex, tplIndex, transformLong, value2jsonLong)
+      case _: AttrMapOptFloat          => addMapOpt(ent, attr, paramIndex, tplIndex, transformFloat, value2jsonFloat)
+      case _: AttrMapOptDouble         => addMapOpt(ent, attr, paramIndex, tplIndex, transformDouble, value2jsonDouble)
+      case _: AttrMapOptBoolean        => addMapOpt(ent, attr, paramIndex, tplIndex, transformBoolean, value2jsonBoolean)
+      case _: AttrMapOptBigInt         => addMapOpt(ent, attr, paramIndex, tplIndex, transformBigInt, value2jsonBigInt)
+      case _: AttrMapOptBigDecimal     => addMapOpt(ent, attr, paramIndex, tplIndex, transformBigDecimal, value2jsonBigDecimal)
+      case _: AttrMapOptDate           => addMapOpt(ent, attr, paramIndex, tplIndex, transformDate, value2jsonDate)
+      case _: AttrMapOptDuration       => addMapOpt(ent, attr, paramIndex, tplIndex, transformDuration, value2jsonDuration)
+      case _: AttrMapOptInstant        => addMapOpt(ent, attr, paramIndex, tplIndex, transformInstant, value2jsonInstant)
+      case _: AttrMapOptLocalDate      => addMapOpt(ent, attr, paramIndex, tplIndex, transformLocalDate, value2jsonLocalDate)
+      case _: AttrMapOptLocalTime      => addMapOpt(ent, attr, paramIndex, tplIndex, transformLocalTime, value2jsonLocalTime)
+      case _: AttrMapOptLocalDateTime  => addMapOpt(ent, attr, paramIndex, tplIndex, transformLocalDateTime, value2jsonLocalDateTime)
+      case _: AttrMapOptOffsetTime     => addMapOpt(ent, attr, paramIndex, tplIndex, transformOffsetTime, value2jsonOffsetTime)
+      case _: AttrMapOptOffsetDateTime => addMapOpt(ent, attr, paramIndex, tplIndex, transformOffsetDateTime, value2jsonOffsetDateTime)
+      case _: AttrMapOptZonedDateTime  => addMapOpt(ent, attr, paramIndex, tplIndex, transformZonedDateTime, value2jsonZonedDateTime)
+      case _: AttrMapOptUUID           => addMapOpt(ent, attr, paramIndex, tplIndex, transformUUID, value2jsonUUID)
+      case _: AttrMapOptURI            => addMapOpt(ent, attr, paramIndex, tplIndex, transformURI, value2jsonURI)
+      case _: AttrMapOptByte           => addMapOpt(ent, attr, paramIndex, tplIndex, transformByte, value2jsonByte)
+      case _: AttrMapOptShort          => addMapOpt(ent, attr, paramIndex, tplIndex, transformShort, value2jsonShort)
+      case _: AttrMapOptChar           => addMapOpt(ent, attr, paramIndex, tplIndex, transformChar, value2jsonChar)
     }
   }
 }

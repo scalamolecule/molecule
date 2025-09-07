@@ -7,13 +7,14 @@ import molecule.db.common.action.{Delete, Insert, Save, Update}
 import molecule.db.common.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import molecule.db.common.javaSql.ResultSetInterface as RS
 import molecule.db.common.marshalling.{ConnProxy, JdbcProxy}
-import molecule.db.common.spi.SpiBaseJVM_sync
+import molecule.db.common.spi.{SpiBaseJVM_sync, TxReport}
 import molecule.db.common.transaction.*
-import molecule.db.common.transaction.strategy.SqlOps
+import molecule.db.common.transaction.strategy.{SqlAction, SqlOps}
 import molecule.db.common.transaction.strategy.delete.DeleteAction
 import molecule.db.common.transaction.strategy.insert.InsertAction
 import molecule.db.common.transaction.strategy.save.SaveAction
 import molecule.db.common.transaction.strategy.update.UpdateAction
+import molecule.db.common.transaction.plan.InsertEngine
 import molecule.db.common.util.Executor.*
 import molecule.db.h2.query.Model2SqlQuery_h2
 
@@ -29,12 +30,29 @@ trait Spi_h2_sync extends SpiBaseJVM_sync {
       .getSaveAction(save.dataModel.elements)
   }
 
+//  def insert_resolveTables(
+//    insert: Insert, conn: JdbcConn_JVM
+//  ): List[TableInsert] = {
+//    new SqlOps_h2(conn) with ResolveInsert with SqlInsert {}
+//      .getTableInserts(insert.dataModel.elements)
+//  }
+
   override def insert_getAction(
     insert: Insert, conn: JdbcConn_JVM
   ): InsertAction = {
-    new SqlOps_h2(conn) with ResolveInsert with SqlInsert {}
+    new SqlOps_h2(conn) with ResolveInsertOLD with SqlInsertOLD {}
       .getInsertAction(insert.dataModel.elements, insert.tpls)
   }
+
+//  def insert_getTableInserts(insert: Insert): List[TableInsert] = {
+//    val elements = insert.dataModel.elements
+//    val refPath = List(getInitialEntity(elements))
+//    new ResolveInsert with SqlInsert {}
+//      .resolve(elements, 1, 0, Nil, TableInsert(refPath, 0, Nil, Nil, Nil))
+//  }
+
+  override def getInsertEngine(conn: JdbcConn_JVM): InsertEngine =
+    new InsertEngine(SqlOps_h2(conn))
 
   override def update_getAction(
     update: Update, conn0: JdbcConn_JVM

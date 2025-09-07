@@ -70,49 +70,6 @@ case class MandatoryRefs(
   }
 
 
-  "Missing card-many ref" - validation {
-    for {
-      _ <- MandatoryRefsB.i(1).save.transact
-        .map(_ ==> "Unexpected success").recover {
-          case ModelError(error) =>
-            error ==>
-              """Missing/empty mandatory references:
-                |  MandatoryRefsB.refsB pointing to entity RefB
-                |""".stripMargin
-        }
-
-      // Adding ref id satisfy mandatory requirement
-      refBid <- RefB.i(2).save.transact.map(_.id)
-      _ <- MandatoryRefsB.i(1).refsB(Set(refBid)).save.transact
-
-      // Or creating the entity and the reference in one go
-      _ <- MandatoryRefsB.i(1).RefsB.i(2).save.transact
-    } yield ()
-  }
-
-
-  "Missing card-many ref, second level" - validation {
-    for {
-      // Ref A still has unset mandatory ref to RefB
-      _ <- MandatoryRefsAB.i(1).RefsA.i(2).save.transact
-        .map(_ ==> "Unexpected success").recover {
-          case ModelError(error) =>
-            error ==>
-              """Missing/empty mandatory references:
-                |  RefA.refB pointing to entity RefB
-                |""".stripMargin
-        }
-
-      // Adding ref id satisfy mandatory requirement
-      refBid <- RefB.i(3).save.transact.map(_.id)
-      _ <- MandatoryRefAB.i(1).RefA.i(2).refB(refBid).save.transact
-
-      // Or creating the entity and the reference in one go
-      _ <- MandatoryRefAB.i(1).RefA.i(2).RefB.i(3).save.transact
-    } yield ()
-  }
-
-
   "Update, delete ref attr" - validation {
     for {
       id <- MandatoryRefB.i(1).RefB.i(2).save.transact.map(_.id)
@@ -123,28 +80,6 @@ case class MandatoryRefs(
             error ==>
               """Can't delete mandatory attributes (or remove last values of card-many attributes):
                 |  MandatoryRefB.refB
-                |""".stripMargin
-        }
-    } yield ()
-  }
-
-
-  "Update, remove last card-many value" - validation {
-    for {
-      case List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
-
-      id <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.ids)
-
-      // Mandatory refs can be removed as long as some ref ids remain
-      _ <- MandatoryRefsB(id).refsB.remove(r2).update.transact
-
-      // Last mandatory ref can't be removed. This can prevent creating orphan relationships.
-      _ <- MandatoryRefsB(id).refsB.remove(r1).update.transact
-        .map(_ ==> "Unexpected success").recover {
-          case ModelError(error) =>
-            error ==>
-              """Can't delete mandatory attributes (or remove last values of card-many attributes):
-                |  MandatoryRefsB.refsB
                 |""".stripMargin
         }
     } yield ()

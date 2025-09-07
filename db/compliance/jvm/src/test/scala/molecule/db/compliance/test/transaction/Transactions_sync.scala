@@ -53,19 +53,19 @@ case class Transactions_sync(
     import molecule.db.compliance.domains.dsl.Validation.*
     try {
       transact(
-        Type.int(1).save, // not valid
-        Type.int.insert(4, 5),
+        Tpe.int(1).save, // not valid
+        Tpe.int.insert(4, 5),
       )
     } catch {
       case ValidationErrors(errorMap) =>
         errorMap.head._2.head ==>
-          s"""Type.int with value `1` doesn't satisfy validation:
+          s"""Tpe.int with value `1` doesn't satisfy validation:
              |_ > 2
              |""".stripMargin
     }
 
     // No data inserted/saved
-    Type.int.query.get ==> List()
+    Tpe.int.query.get ==> List()
   }
 
 
@@ -73,29 +73,29 @@ case class Transactions_sync(
     import molecule.db.compliance.domains.dsl.Validation.*
     try {
       transact(
-        Type.int.insert(4, 5),
-        Type.int(2).save, // not valid
+        Tpe.int.insert(4, 5),
+        Tpe.int(2).save, // not valid
       )
     } catch {
       case ValidationErrors(errorMap) =>
         errorMap.head._2.head ==>
-          s"""Type.int with value `2` doesn't satisfy validation:
+          s"""Tpe.int with value `2` doesn't satisfy validation:
              |_ > 2
              |""".stripMargin
     }
 
     // No data inserted/saved
-    Type.int.query.get ==> List()
+    Tpe.int.query.get ==> List()
   }
 
 
   "Transact actions: validation 3" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     transact(
-      Type.int.insert(4, 5),
-      Type.int(3).save,
+      Tpe.int.insert(4, 5),
+      Tpe.int(3).save,
     )
-    Type.int.a1.query.get ==> List(3, 4, 5)
+    Tpe.int.a1.query.get ==> List(3, 4, 5)
   }
 
 

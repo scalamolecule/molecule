@@ -76,8 +76,10 @@ trait Model2Query extends QueryExpr with ModelUtils {
       case backRef: BackRef                     => queryBackRef(backRef, tail); resolve(tail)
       case OptRef(ref, refElements)             => queryOptRef(ref, refElements); resolve(tail)
       case OptEntity(refElements)               => queryOptEntity(refElements); resolve(tail)
-      case Nested(ref, nestedElements)          => queryNested(ref, nestedElements); resolve(tail)
-      case OptNested(nestedRef, nestedElements) => queryOptNested(nestedRef, nestedElements); resolve(tail)
+      case Nested(ref, nestedElements)          =>
+        queryNested(ref, nestedElements); resolve(tail)
+      case OptNested(nestedRef, nestedElements) =>
+        queryOptNested(nestedRef, nestedElements); resolve(tail)
     }
     case Nil             => ()
   }

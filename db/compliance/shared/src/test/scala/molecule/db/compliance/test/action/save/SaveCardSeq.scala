@@ -70,8 +70,6 @@ case class SaveSeqValue(
       _ <- Entity.byteArray.query.get.map(_.head ==> Array(byte1, byte2)) // Note that Bytes are saved in Arrays
       _ <- Entity.shortSeq.query.get.map(_.head ==> List(short1, short2))
       _ <- Entity.charSeq.query.get.map(_.head ==> List(char1, char2))
-
-      // (Refs have Set semantics only)
     } yield ()
   }
 

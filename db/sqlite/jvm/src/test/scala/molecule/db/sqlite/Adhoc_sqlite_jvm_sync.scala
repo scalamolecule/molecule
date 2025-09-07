@@ -50,13 +50,13 @@ class Adhoc_sqlite_jvm_sync extends MUnit with DbProviders_sqlite with TestUtils
   //
   //    try {
   //      transact(
-  //        Type.int.insert(5, 6),
-  //        Type.int(1).save,
+  //        Tpe.int.insert(5, 6),
+  //        Tpe.int(1).save,
   //      )
   //    } catch {
   //      case ValidationErrors(errorMap) =>
   //        errorMap.head._2.head ==>
-  //          s"""Type.int with value `1` doesn't satisfy validation:
+  //          s"""Tpe.int with value `1` doesn't satisfy validation:
   //             |_ > 2
   //             |""".stripMargin
   //      case NonFatal(e)                =>

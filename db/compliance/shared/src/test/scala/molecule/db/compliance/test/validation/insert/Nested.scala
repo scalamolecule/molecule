@@ -20,7 +20,7 @@ case class Nested(
   "2 levels" - validation {
     for {
       // bad, List(ok, ok)
-      _ <- Type.int.Refs.*(Strings.email).insert(
+      _ <- Tpe.int.Refs.*(Strings.email).insert(
           (1, List(
             "a@aa.com",
             "b@bb.com",
@@ -34,9 +34,9 @@ case class Nested(
                 Seq(
                   InsertError(
                     0,
-                    "Type.int",
+                    "Tpe.int",
                     Seq(
-                      s"""Type.int with value `1` doesn't satisfy validation:
+                      s"""Tpe.int with value `1` doesn't satisfy validation:
                          |_ > 2
                          |""".stripMargin
                     ),
@@ -49,7 +49,7 @@ case class Nested(
 
 
       // ok, List(bad, ok)
-      _ <- Type.int.Refs.*(Strings.email).insert(
+      _ <- Tpe.int.Refs.*(Strings.email).insert(
           (3, List(
             "a@aa",
             "b@bb.com",
@@ -63,7 +63,7 @@ case class Nested(
                 Seq(
                   InsertError(
                     0,
-                    "Type.refs",
+                    "Tpe.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -88,7 +88,7 @@ case class Nested(
 
 
       // ok, List(ok, bad)
-      _ <- Type.int.Refs.*(Strings.email).insert(
+      _ <- Tpe.int.Refs.*(Strings.email).insert(
           (3, List(
             "a@aa.com",
             "b@bb",
@@ -102,7 +102,7 @@ case class Nested(
                 Seq(
                   InsertError(
                     0,
-                    "Type.refs",
+                    "Tpe.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -127,7 +127,7 @@ case class Nested(
 
 
       // bad, List(bad, ok)
-      _ <- Type.int.Refs.*(Strings.email).insert(
+      _ <- Tpe.int.Refs.*(Strings.email).insert(
           (1, List(
             "a@aa",
             "b@bb.com",
@@ -141,9 +141,9 @@ case class Nested(
                 Seq(
                   InsertError(
                     0,
-                    "Type.int",
+                    "Tpe.int",
                     Seq(
-                      s"""Type.int with value `1` doesn't satisfy validation:
+                      s"""Tpe.int with value `1` doesn't satisfy validation:
                          |_ > 2
                          |""".stripMargin
                     ),
@@ -151,7 +151,7 @@ case class Nested(
                   ),
                   InsertError(
                     0,
-                    "Type.refs",
+                    "Tpe.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -176,7 +176,7 @@ case class Nested(
 
 
       // bad, List(ok, bad)
-      _ <- Type.int.Refs.*(Strings.email).insert(
+      _ <- Tpe.int.Refs.*(Strings.email).insert(
           (1, List(
             "a@aa",
             "b@bb.com",
@@ -190,9 +190,9 @@ case class Nested(
                 Seq(
                   InsertError(
                     0,
-                    "Type.int",
+                    "Tpe.int",
                     Seq(
-                      s"""Type.int with value `1` doesn't satisfy validation:
+                      s"""Tpe.int with value `1` doesn't satisfy validation:
                          |_ > 2
                          |""".stripMargin
                     ),
@@ -200,7 +200,7 @@ case class Nested(
                   ),
                   InsertError(
                     0,
-                    "Type.refs",
+                    "Tpe.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -225,7 +225,7 @@ case class Nested(
 
 
       // ok, List(bad, bad)
-      _ <- Type.int.Refs.*(Strings.email).insert(
+      _ <- Tpe.int.Refs.*(Strings.email).insert(
           (3, List(
             "a@aa",
             "b@bb",
@@ -239,7 +239,7 @@ case class Nested(
                 Seq(
                   InsertError(
                     0,
-                    "Type.refs",
+                    "Tpe.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -277,7 +277,7 @@ case class Nested(
 
 
       // bad, List(bad, bad)
-      _ <- Type.int.Refs.*(Strings.email).insert(
+      _ <- Tpe.int.Refs.*(Strings.email).insert(
           (1, List(
             "a@aa",
             "b@bb",
@@ -291,9 +291,9 @@ case class Nested(
                 Seq(
                   InsertError(
                     0,
-                    "Type.int",
+                    "Tpe.int",
                     Seq(
-                      s"""Type.int with value `1` doesn't satisfy validation:
+                      s"""Tpe.int with value `1` doesn't satisfy validation:
                          |_ > 2
                          |""".stripMargin
                     ),
@@ -301,7 +301,7 @@ case class Nested(
                   ),
                   InsertError(
                     0,
-                    "Type.refs",
+                    "Tpe.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -342,7 +342,7 @@ case class Nested(
 
   "3 levels" - validation {
     for {
-      _ <- Type.int.Refs.*(Strings.email.AllowedAttrs.*(AllowedAttrs.luckyNumber)).insert(
+      _ <- Tpe.int.Refs.*(Strings.email.AllowedAttrs.*(AllowedAttrs.luckyNumber)).insert(
           (1, List(
             ("a@aa.com", List(1, 7)),
             ("b@bb", List(9, 2))
@@ -356,9 +356,9 @@ case class Nested(
                 Seq(
                   InsertError(
                     0, // tuple index
-                    "Type.int",
+                    "Tpe.int",
                     Seq(
-                      s"""Type.int with value `1` doesn't satisfy validation:
+                      s"""Tpe.int with value `1` doesn't satisfy validation:
                          |_ > 2
                          |""".stripMargin
                     ),
@@ -366,7 +366,7 @@ case class Nested(
                   ),
                   InsertError(
                     0, // tuple index
-                    "Type.refs",
+                    "Tpe.refs",
                     Seq(),
                     Seq(
                       (

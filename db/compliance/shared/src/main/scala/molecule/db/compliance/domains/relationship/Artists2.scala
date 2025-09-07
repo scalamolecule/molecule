@@ -6,28 +6,73 @@ import molecule.DomainStructure
 object Artists2 extends DomainStructure {
 
   trait Artist {
-    val name       = oneString
-    val paintings  = oneToMany[Work]("painter")
-    val sculptures = oneToMany[Work]("sculpturer")
+    val name = oneString
+
+    // .Paintings.price<
+    // .Paintings.*(Work.price)
+
+    // .Sculptures.price
+    // .Sculptures.*(Work.price)
+
+//    object Sculpturers
+//    object Paintings
+
+    // Artist would most likely exist before works are added
+    // Strange to define both from this side...
+    // Artist.name.Paintings.*(Work.title.price).insert(
+    //   ("Bob", List(
+    //     ("Mona", 14),
+    //     ("Hope", 20))
+    //   )
+    // ).transact
+
+    // Doesn't make sense
+    // Artist.name("Bob").Paintings.title("Mona").save
   }
 
-  // 2 separate 1:N relationships
+
   trait Work {
     val title      = oneString
     val price      = oneInt
-    val painter    = manyToOne[Artist]("paintings")
-    val sculpturer = manyToOne[Artist]("sculptures")
+
+//    val sculpturer = one[Artist].Sculpturers
+//    val painter    = one[Artist].Paintings
+
+    val sculpturer = one[Artist]("Sculptures") // Distinguish reverse refs
+    val painter    = one[Artist]("Paintings") // Distinguish reverse refs
+
+    // .painter
+    // .Painter.name
+
+
+    // Work.title("Mona").price(14).painter(artistId).save.transact
+    //
+    // Work.title.price.painter.insert(
+    //   ("Mona", 14, artistId),
+    //   ("Hope", 20, artistId),
+    // ).transact
   }
 }
+
+
+
+
+
+
+
+
+
+
+
 
 //// one-to-many: Artist --> Work
 //
 //// flat
-//Artist.name.Paintings.title // singular Painting?
+//Artist.name.Paintings.title
 //Artist.name.Sculptures.title
 //
 //// nested
-//Artist.name.Paintings.*(Work.title) // plural Paintings
+//Artist.name.Paintings.*(Work.title)
 //Artist.name.Sculptures.*(Work.title)
 //
 //

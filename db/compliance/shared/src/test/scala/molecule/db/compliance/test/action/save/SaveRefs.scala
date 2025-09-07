@@ -178,7 +178,6 @@ case class SaveRefs(
 
   "ids, ref" - refs {
     for {
-      // Card one
       case List(a1) <- A.i(1).B.i(2).save.transact.map(_.ids)
 
       _ <- A(a1).i.query.get.map(_ ==> List(1))
@@ -190,21 +189,6 @@ case class SaveRefs(
 
       _ <- A.id.i.b.query.get.map(_ ==> List(
         (a1, 1, b1),
-      ))
-
-
-      // Card Set
-      case List(a1) <- A.i(1).Bb.i(2).save.transact.map(_.ids)
-
-      _ <- A(a1).i.query.get.map(_ ==> List(1))
-
-      // Getting head of each Set ref ids (card-set)
-      case List(b1) <- A(a1).bb.query.get.map(_.map(_.head))
-
-      _ <- B(b1).i.query.get.map(_ ==> List(2))
-
-      _ <- A.id.i.bb.query.get.map(_ ==> List(
-        (a1, 1, Set(b1)),
       ))
     } yield ()
   }

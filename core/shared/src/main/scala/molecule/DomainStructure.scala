@@ -35,8 +35,7 @@ import java.util.{Date, UUID}
  *     trait Person {
  *       val name    = oneString
  *       val age     = oneInt
- *       val address = one[Address]         // Cardinality-one relationship to Address
- *       val bought  = many[products.Item]  // Cardinality-many relationship to products.Item
+ *       val address = one[Address] // Cardinality-one relationship to Address
  *     }
  *     trait Address {
  *       val street = oneString
@@ -257,27 +256,18 @@ abstract class DomainStructure {
   trait mapChar extends Options[mapChar, Map[String, Char], Char]
 
 
-  // Refs ..................................................
+  // Relationships ..................................................
 
   object one extends one
-  object many extends many
-
   trait one extends refOptions[one]
+
+  object many extends many
   trait many extends refOptions[many]
 
+  object manyOwned extends manyOwned
+  trait manyOwned extends refOptions[manyOwned]
+
   trait Join
-
-  object oneToOne extends oneToOne
-  trait oneToOne extends refOptions[oneToOne]
-
-  object oneToMany extends oneToMany
-  trait oneToMany extends refOptions[oneToMany]
-
-  object manyToOne extends manyToOne
-  trait manyToOne extends refOptions[manyToOne]
-
-  object manyToMany extends manyToMany
-  trait manyToMany extends refOptions[manyToMany]
 
 
 

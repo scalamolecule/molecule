@@ -136,11 +136,11 @@ class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with 
   //    "validation" - validation {
   //      import molecule.db.compliance.domains.dsl.Validation._
   //      for {
-  //        _ <- Type.string.insert("a").transact
+  //        _ <- Tpe.string.insert("a").transact
   //          .map(_ ==> "Unexpected success").recover {
   //            case InsertErrors(errors, _) =>
   //              errors.head._2.head.errors.head ==>
-  //                s"""Type.string with value `a` doesn't satisfy validation:
+  //                s"""Tpe.string with value `a` doesn't satisfy validation:
   //                   |_ > "b"
   //                   |""".stripMargin
   //          }

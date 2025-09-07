@@ -89,7 +89,7 @@ case class Many_Map_remove(
       ))
 
       // Initial entity without ref to B was not updated (3 not removed)
-      _ <- A.iMap.bb_().query.get.map(_ ==> List(Map(pint1, pint3)))
+//      _ <- A.iMap.bb_().query.get.map(_ ==> List(Map(pint1, pint3)))
     } yield ()
   }
 

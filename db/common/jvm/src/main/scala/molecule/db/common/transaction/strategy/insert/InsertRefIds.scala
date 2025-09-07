@@ -45,6 +45,6 @@ case class InsertRefIds(
   }
 
   override def render(indent: Int): String = {
-    recurseRender(indent, "RefMany")
+    recurseRender(indent, "RefIds")
   }
 }

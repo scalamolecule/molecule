@@ -84,26 +84,26 @@ case class ZioApi(api: Api_zio & Spi_zio & DbProviders_zio)
 
       test("Validation") {
         import molecule.db.compliance.domains.dsl.Validation.*
-        Type.string("a").save.transact.flip.map {
+        Tpe.string("a").save.transact.flip.map {
           case ValidationErrors(errorMap) => assertTrue(
             errorMap.head._2.head ==
-              s"""Type.string with value `a` doesn't satisfy validation:
+              s"""Tpe.string with value `a` doesn't satisfy validation:
                  |_ > "b"
                  |""".stripMargin
           )
-        } && Type.string.insert("a").transact.flip.map {
+        } && Tpe.string.insert("a").transact.flip.map {
           case InsertErrors(errors, _) => assertTrue(
             errors.head._2.head.errors.head ==
-              s"""Type.string with value `a` doesn't satisfy validation:
+              s"""Tpe.string with value `a` doesn't satisfy validation:
                  |_ > "b"
                  |""".stripMargin
           )
-        } && Type.string("c").save.transact.flatMap { txReport =>
+        } && Tpe.string("c").save.transact.flatMap { txReport =>
           val id = txReport.ids.head
-          Type(id).string("a").update.transact.flip.map {
+          Tpe(id).string("a").update.transact.flip.map {
             case ValidationErrors(errorMap) => assertTrue(
               errorMap.head._2.head ==
-                s"""Type.string with value `a` doesn't satisfy validation:
+                s"""Tpe.string with value `a` doesn't satisfy validation:
                    |_ > "b"
                    |""".stripMargin
             )
