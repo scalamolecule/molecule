@@ -30,26 +30,30 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
   //    } yield ()
   //  }
 
-/*
-DataModel(
-  List(
-    AttrOneManInt("A", "i", Eq, Seq(1), None, None, Nil, Nil, None, None, false, List(0, 1)),
-    Ref("A", "b", "B", ManyToOne, false, List(0, 8, 1), Some(Aa)),
-    AttrOneManInt("B", "i", Eq, Seq(2), None, None, Nil, Nil, None, None, false, List(1, 20))
-  ),
-  Set(1, 8, 20), 0, 0, Nil
-)
- */
+
   "refs" - refs {
     import molecule.db.compliance.domains.dsl.Refs.*
     for {
 
-      id <- B.i(1).save.transact.map(_.id)
-      _ <- A.i(2).b(id).save.transact
-      _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
+      _ <- A.i.insert(1).transact
+      _ <- A.i.B.i.insert((2, 20), (3, 30)).transact
 
-//      _ <- A.i(1).B.i(2).save.transact
-//      _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
+      _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
+
+
+
+//      //      _ <- rawTransact(
+//      //        s"""DELETE FROM A
+//      //           |WHERE EXISTS (
+//      //           |  SELECT 1
+//      //           |  FROM B
+//      //           |  WHERE B.a = A.id
+//      //           |    AND A.i = 1
+//      //           |    AND B.i IS NOT NULL
+//      //           |);
+//      //           |""".stripMargin, true
+//      //      )
+
 
     } yield ()
   }

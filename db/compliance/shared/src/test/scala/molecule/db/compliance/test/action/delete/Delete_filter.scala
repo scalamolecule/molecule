@@ -195,7 +195,7 @@ case class Delete_filter(
   }
 
 
-  "Ref" - refs {
+  "ManyToOne" - refs {
     for {
       _ <- A.i.insert(1).transact
       _ <- A.i.B.i.insert((2, 20), (3, 30)).transact
@@ -228,36 +228,37 @@ case class Delete_filter(
     } yield ()
   }
 
-  "Ref owned" - refs {
 
+  "OneToMany" - refs {
     for {
       _ <- A.i.insert(1).transact
-      _ <- A.i.OwnB.i.insert((2, 20), (3, 30)).transact
+      _ <- A.i.Bb.i.insert((2, 20), (3, 30)).transact
 
       _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List((2, 20), (3, 30)))
+      _ <- A.i.a1.Bb.i.query.get.map(_ ==> List((2, 20), (3, 30)))
 
       // Nothing deleted since entity 1 doesn't have a ref
-      _ <- A.i_(1).OwnB.i_.delete.transact
+      _ <- A.i_(1).Bb.i_.delete.transact
       _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
 
       // Second entity has a ref and will be deleted
-      _ <- A.i_(2).OwnB.i_.delete.transact
+      _ <- A.i_(2).Bb.i_.delete.transact
       _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
-      _ <- A.i.OwnB.i.query.get.map(_ ==> List((3, 30)))
+      _ <- A.i.a1.Bb.i.query.get.map(_ ==> List((3, 30)))
 
-      // Owned B entity is deleted too
-      _ <- B.i.a1.query.get.map(_ ==> List(30))
+      // Note that B.int entity is a separate entity and is not deleted.
+      // Only the entity of the initial entity is deleted
+      _ <- B.i.a1.query.get.map(_ ==> List(20, 30))
 
-      // A.i entity has no ref to OwnB.i_(42) so nothing is deleted
-      _ <- A.i_.OwnB.i_(42).delete.transact
+      // A.i entity has no ref to B.i_(42) so nothing is deleted
+      _ <- A.i_.Bb.i_(42).delete.transact
       _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
-      _ <- A.i.OwnB.i.query.get.map(_ ==> List((3, 30)))
+      _ <- A.i.Bb.i.query.get.map(_ ==> List((3, 30)))
 
-      // A.i entity has a ref to OwnB.i_(30) so it will be deleted
-      _ <- A.i_.OwnB.i_(30).delete.transact
+      // A.i entity has a ref to B.i_(30) so it will be deleted
+      _ <- A.i_.Bb.i_(30).delete.transact
       _ <- A.i.query.get.map(_ ==> List(1))
-      _ <- A.i.OwnB.i.query.get.map(_ ==> List())
+      _ <- A.i.Bb.i.query.get.map(_ ==> List())
     } yield ()
   }
 
@@ -278,26 +279,8 @@ case class Delete_filter(
     } yield ()
   }
 
-  "Ref owned + expr" - refs {
-    // In other dbs, owned B is a separate entity. So we can query it independently
-    for {
-      _ <- A.i.OwnB.i.insert((1, 10), (2, 20)).transact
-      _ <- A.i.a1.query.get.map(_ ==> List(1, 2))
-      _ <- B.i.a1.query.get.map(_ ==> List(10, 20))
-      _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List((1, 10), (2, 20)))
-
-      _ <- A.i_.OwnB.i_.>(15).delete.transact
-      _ <- A.i.query.get.map(_ ==> List(1))
-
-      // Owned B entity with i == 20 is deleted too
-      _ <- B.i.a1.query.get.map(_ ==> List(10))
-      _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 10)))
-    } yield ()
-  }
-
 
   "Filter types" - types {
-
     for {
       // Initial values
       _ <- Entity.i.string.insert((1, string1), (2, string2)).transact

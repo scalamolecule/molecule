@@ -79,8 +79,6 @@ trait ResolveSave { self: SqlSave =>
           }
 
         case Ref(ent, refAttr, ref, OneToMany, _, _, reverseRefAttr) =>
-
-
           resolveOneToManyRef(tableInserts, tableInsert, refAttr, ref, reverseRefAttr, tail)
 
         case Ref(ent, refAttr, ref, _ /* ManyToOne */ , _, _, reverseRefAttr) =>

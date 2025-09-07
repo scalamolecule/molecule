@@ -30,7 +30,7 @@ trait SqlDelete extends ModelUtils { self: ResolveDelete & SqlOps =>
     query.idCols += s"$ent.id"
     root = DeleteRoot(sqlOps, sqlConn.createStatement(), ent, metaDb)
     deleteAction = root.firstEnt
-    resolve(elements, true)
+//    resolve(elements, true)
     initRoot(sqlOps)
     root
   }
@@ -68,13 +68,14 @@ trait SqlDelete extends ModelUtils { self: ResolveDelete & SqlOps =>
             query.joins += s"INNER JOIN $ref ON $ent.$refAttr = $ref.id"
 
           case _ =>
-            val joinTable = ss(ent, refAttr, ref)
-            val eid       = s"${ent}_id"
-            val rid       = s"${ref}_id"
-            query.joins ++= List(
-              s"INNER JOIN $joinTable ON $ent.id = $joinTable.$eid",
-              s"INNER JOIN $ref ON $joinTable.$rid = $ref.id",
-            )
+//            val joinTable = ss(ent, refAttr, ref)
+//            val eid       = s"${ent}_id"
+//            val rid       = s"${ref}_id"
+//            query.joins ++= List(
+//              s"INNER JOIN $joinTable ON $ent.id = $joinTable.$eid",
+//              s"INNER JOIN $ref ON $joinTable.$rid = $ref.id",
+//            )
+            query.joins += s"INNER JOIN $ref ON $ref.id = $ent.$refAttr"
         }
 
       case filterAttr =>

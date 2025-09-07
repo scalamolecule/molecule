@@ -26,7 +26,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
     renderSqlQuery(optLimit, optOffset)
   }
 
-  final protected def resolveElements(elements1: List[Element]): Unit = {
+  final def resolveElements(elements1: List[Element]): Unit = {
     from = getInitialEntity(elements1)
     prevRefs = Set(from)
     path = List(from)
@@ -80,7 +80,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
     (nestedIds ++ select1).mkString(s",\n  ")
   }
 
-  protected def mkJoins(indents: Int): String = {
+  def mkJoins(indents: Int): String = {
     if (joins.isEmpty) "" else {
       val indent = "  " * indents
       joins.map {
@@ -97,7 +97,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
     if (tempTables.isEmpty) "" else tempTables.mkString(",\n  ", ",\n  ", "")
   }
 
-  private def mkWhere: String = {
+  def mkWhere: String = {
     val allWhere = where
     if (allWhere.isEmpty) "" else {
       val max = allWhere.map(_._1.length).max

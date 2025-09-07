@@ -29,7 +29,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
 
 
   @tailrec
-  final protected def resolve(elements: List[Element]): Unit = elements match {
+  final def resolve(elements: List[Element]): Unit = elements match {
     case element :: tail => element match {
       case a: AttrOne => a.attr match {
         case "id" =>
