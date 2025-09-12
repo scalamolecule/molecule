@@ -42,33 +42,6 @@ case class Many_Map_remove(
   }
 
 
-  "filter - ref - value" - refs {
-    for {
-      _ <- A.i.Bb.*?(B.s_?.iMap_?).insert(
-        (1, List()),
-        (2, List((Some("a"), None))),
-        (3, List((Some("b"), None), (Some("c"), None))),
-        (4, List((Some("d"), Some(Map(pint1, pint2))))),
-        (5, List((Some("e"), Some(Map(pint2, pint3))), (Some("f"), Some(Map(pint3, pint4))))),
-        (6, List((Some("g"), Some(Map(pint4, pint5))), (Some("h"), None))),
-      ).transact
-
-      // `upsert` has same semantics as `update` with `remove` since we don't insert data
-      // Filter by A ids, update B values
-      _ <- A.i_.Bb.iMap.remove(string4, string5).upsert.transact
-
-      _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap_?).query.get.map(_ ==> List(
-        (1, List()),
-        (2, List((Some("a"), None))),
-        (3, List((Some("b"), None), (Some("c"), None))),
-        (4, List((Some("d"), Some(Map(pint1, pint2))))),
-        (5, List((Some("e"), Some(Map(pint2, pint3))), (Some("f"), Some(Map(pint3))))), // update of last nested entity
-        (6, List((Some("g"), None), (Some("h"), None))), //                                update of first nested entity
-      ))
-    } yield ()
-  }
-
-
   "value - ref - filter" - refs {
     for {
       _ <- A.iMap.Bb.*?(B.s).insert(

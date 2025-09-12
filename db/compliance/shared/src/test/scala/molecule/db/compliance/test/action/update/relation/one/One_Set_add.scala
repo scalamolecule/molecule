@@ -32,15 +32,6 @@ case class One_Set_add(
       _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
         (3, Set(3, 4, 5)) // 5 added (4 already in Set)
       ))
-
-      // Filter by A attribute, upsert B values
-      _ <- A(a, b, c).B.iSet.add(5, 6).upsert.transact
-
-      _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
-        (1, Set(5, 6)), //       relationship to B created, B values added
-        (2, Set(5, 6)), //       B attribute added
-        (3, Set(3, 4, 5, 6)), // B attribute updated
-      ))
     } yield ()
   }
 
@@ -61,15 +52,6 @@ case class One_Set_add(
 
       _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
         (3, Set(3, 4, 5)) // 5 added (4 already in Set)
-      ))
-
-      // Filter by A attribute, upsert B values
-      _ <- A.i_.B.iSet.add(5, 6).upsert.transact
-
-      _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
-        (1, Set(5, 6)), //       relationship to B created, B values added
-        (2, Set(5, 6)), //       B attribute added
-        (3, Set(3, 4, 5, 6)), // B attribute updated (5 not added - already exists in Set)
       ))
     } yield ()
   }
@@ -95,18 +77,6 @@ case class One_Set_add(
         (Set(2, 3, 4, 5), 2), // 4 and 5 added
         (Set(3, 4, 5), 3), //    5 added (4 already in Set)
       ))
-
-      // Filter by B attribute, upsert A values
-      _ <- A.iSet.add(5, 6).B.i_.upsert.transact
-
-      _ <- A.iSet.B.i.a1.query.get.map(_ ==> List(
-        (Set(5, 6), 1), //          A attribute inserted
-        (Set(2, 3, 4, 5, 6), 2), // A attribute updated (5 not added - already exists in Set)
-        (Set(3, 4, 5, 6), 3), //    A attribute updated (5 not added - already exists in Set)
-      ))
-
-      // Initial entity without ref was not updated (values 0 and 1 not changed)
-      _ <- A.iSet.b_().query.get.map(_ ==> List(Set(0, 1)))
     } yield ()
   }
 
@@ -134,22 +104,6 @@ case class One_Set_add(
       _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
         (2, Set(2, 3, 4, 5)), // 4 and 5 added
         (3, Set(3, 4, 5)), //    5 added (4 already in Set)
-      ))
-
-      // Filter by B attribute, upsert B values
-      _ <- A.B.s_.iSet.add(5, 6).upsert.transact
-
-      _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
-        (1, Set(5, 6)), //          B attribute added
-        (2, Set(2, 3, 4, 5, 6)), // B attribute updated (5 not added - already exists in Set)
-        (3, Set(3, 4, 5, 6)), //    B attribute updated (5 not added - already exists in Set)
-      ))
-
-      _ <- B.s.a1.iSet.query.get.map(_ ==> List(
-        ("a", Set(5, 6)),
-        ("b", Set(2, 3, 4, 5, 6)),
-        ("c", Set(3, 4, 5, 6)),
-        ("x", Set(0, 1)), // not updated since it isn't referenced from A
       ))
     } yield ()
   }

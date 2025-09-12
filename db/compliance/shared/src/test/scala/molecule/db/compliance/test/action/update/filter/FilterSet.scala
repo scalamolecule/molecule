@@ -80,7 +80,7 @@ case class FilterSet(
     for {
       _ <- Entity.iSet_(Set(1)).int(3).update.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Filtering by collection equality (Entity.iSet) not supported in updates."
+          err ==> "Matching collections (Entity.iSet) not supported in queries."
         }
     } yield ()
   }

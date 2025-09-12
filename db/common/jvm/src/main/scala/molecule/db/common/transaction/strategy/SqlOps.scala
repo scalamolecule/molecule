@@ -84,11 +84,15 @@ trait SqlOps extends BaseHelpers {
   ): String = {
     val columnSetters = cols.mkString(",\n  ")
     val updateClauses = clauses.mkString(" AND\n  ")
-    s"""UPDATE $table
-       |SET
-       |  $columnSetters
-       |WHERE
-       |  $updateClauses""".stripMargin
+    val sql           =
+      s"""UPDATE $table
+         |SET
+         |  $columnSetters
+         |WHERE
+         |  $updateClauses""".stripMargin
+
+    //    println(sql)
+    sql
   }
 
   def deleteStmt(

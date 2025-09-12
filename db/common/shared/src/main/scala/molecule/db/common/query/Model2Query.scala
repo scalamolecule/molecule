@@ -164,7 +164,12 @@ trait Model2Query extends QueryExpr with ModelUtils {
     checkSorting()
     checkBinding()
 
-    val initialEntity = getInitialNonGenericEntity(elements)
+
+    //    println("----------")
+    //    elements.foreach(println)
+
+    //    val initialEntity = getInitialNonGenericEntity(elements)
+    val initialEntity = getInitialEntity(elements)
 
     val elements1 = if (hasFilterAttr) {
       checkFilterAttrs(elements, initialEntity, addFilterAttr)

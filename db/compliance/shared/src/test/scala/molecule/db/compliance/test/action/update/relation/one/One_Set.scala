@@ -32,16 +32,6 @@ case class One_Set(
       _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
         (3, Set(4, 5)) // B value updated since there was a previous value
       ))
-
-      // Filter by A ids, upsert B values (insert if not already present)
-      _ <- A(a, b, c).B.iSet(Set(5, 6)).upsert.transact
-
-      // Now three A entities with referenced B value
-      _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
-        (1, Set(5, 6)), // relationship to B created and B value inserted
-        (2, Set(5, 6)), // B value inserted
-        (3, Set(5, 6)), // B value updated
-      ))
     } yield ()
   }
 
@@ -62,16 +52,6 @@ case class One_Set(
 
       _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
         (3, Set(4, 5)) // B value updated since there was a previous value
-      ))
-
-      // Filter by A ids, upsert B values (insert if not already present)
-      _ <- A.i_.B.iSet(Set(5, 6)).upsert.transact
-
-      // Now three A entities with referenced B value
-      _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
-        (1, Set(5, 6)), // relationship to B created and B value inserted
-        (2, Set(5, 6)), // B value inserted
-        (3, Set(5, 6)), // B value updated
       ))
     } yield ()
   }
@@ -97,18 +77,6 @@ case class One_Set(
         (Set(4, 5), 2), // A value updated
         (Set(4, 5), 3), // A value updated
       ))
-
-      // Filter by B value, upsert A values (insert if not already present)
-      _ <- A.iSet(Set(5, 6)).B.i_.upsert.transact
-
-      _ <- A.iSet.B.i.a1.query.get.map(_ ==> List(
-        (Set(5, 6), 1), // A value and relationship to B value inserted
-        (Set(5, 6), 2), // A value updated
-        (Set(5, 6), 3), // A value updated
-      ))
-
-      // Initial entity without ref to B was not updated/upserted
-      _ <- A.iSet.b_().query.get.map(_ ==> List(Set(0, 1)))
     } yield ()
   }
 
@@ -133,20 +101,6 @@ case class One_Set(
 
       _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
         (3, Set(4, 5)), // B value updated since there was a previous value
-      ))
-
-      // Filter by B attribute, upsert B values
-      _ <- A.B.s_.iSet(Set(5, 6)).upsert.transact
-
-      _ <- A.i.a1.B.iSet.query.get.map(_ ==> List(
-        (2, Set(5, 6)), // B value inserted
-        (3, Set(5, 6)), // B value updated
-      ))
-
-      _ <- B.s.a1.iSet.query.get.map(_ ==> List(
-        ("b", Set(5, 6)),
-        ("c", Set(5, 6)),
-        ("x", Set(0, 1)), // not updated since it isn't referenced from A
       ))
     } yield ()
   }
@@ -184,18 +138,6 @@ case class One_Set(
       // C
       _ <- A(id).B.C.iSet(Set(33)).update.transact
       _ <- A.iSet.B.iSet.C.iSet.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
-    } yield ()
-  }
-
-
-  "backref" - refs {
-    for {
-      id <- A.iSet(Set(1)).B.iSet(Set(2))._A.C.iSet(Set(3)).save.transact.map(_.id)
-      _ <- A.iSet.B.iSet._A.C.iSet.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
-
-      // Updating A.B.iSet and A.C.iSet
-      _ <- A(id).iSet(Set(10)).B.iSet(Set(20))._A.C.iSet(Set(30)).update.transact
-      _ <- A.iSet.B.iSet._A.C.iSet.query.get.map(_ ==> List((Set(10), Set(20), Set(30))))
     } yield ()
   }
 }

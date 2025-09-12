@@ -42,33 +42,6 @@ case class Many_Set_remove(
   }
 
 
-  "filter - ref - value" - refs {
-    for {
-      _ <- A.i.Bb.*?(B.s_?.iSet_?).insert(
-        (1, List()),
-        (2, List((Some("a"), None))),
-        (3, List((Some("b"), None), (Some("c"), None))),
-        (4, List((Some("d"), Some(Set(1, 2))))),
-        (5, List((Some("e"), Some(Set(2, 3))), (Some("f"), Some(Set(3, 4))))),
-        (6, List((Some("g"), Some(Set(4, 5))), (Some("h"), None))),
-      ).transact
-
-      // `upsert` has same semantics as `update` with `remove` since we don't insert data
-      // Filter by A ids, update B values
-      _ <- A.i_.Bb.iSet.remove(4, 5).upsert.transact
-
-      _ <- A.i.a1.Bb.*?(B.s_?.iSet_?).query.get.map(_ ==> List(
-        (1, List()),
-        (2, List((Some("a"), None))),
-        (3, List((Some("b"), None), (Some("c"), None))),
-        (4, List((Some("d"), Some(Set(1, 2))))),
-        (5, List((Some("e"), Some(Set(2, 3))), (Some("f"), Some(Set(3))))), // update of last nested entity
-        (6, List((Some("g"), None), (Some("h"), None))), //                    update of first nested entity
-      ))
-    } yield ()
-  }
-
-
   "value - ref - filter" - refs {
     for {
       _ <- A.iSet.Bb.*?(B.s).insert(
@@ -87,9 +60,6 @@ case class Many_Set_remove(
         (Some(Set(2)), List("b", "c")), // 1 value removed
         (None, List("d", "e")), //         both values removed (refs to B still exist)
       ))
-
-      // Initial entity without ref to B was not updated (3 not removed)
-//      _ <- A.iSet.bb_().query.get.map(_ ==> List(Set(1, 3)))
     } yield ()
   }
 

@@ -1,16 +1,11 @@
 package molecule.db.common.transaction
 
+import java.sql.PreparedStatement as PS
 import scala.annotation.tailrec
 import molecule.core.dataModel.*
 import molecule.core.error.ModelError
+import molecule.db.common.query.Model2SqlQuery
 import molecule.db.common.validation.insert.InsertValidators_
-import java.sql.PreparedStatement as PS
-
-//case class ForeignKey(
-//  refAttr: String,
-//  refPath: List[String],
-//  tplIndex: Int,
-//)
 
 case class TableDelete(
   table: String,
@@ -22,43 +17,33 @@ case class TableDelete(
     filterElements = filterElements :+ a,
   )
 
-//  val defaultValues = "(id) VALUES (DEFAULT)"
+  def getSql(m2q: Model2SqlQuery): String = {
+    joinTable.fold {
+      m2q.resolve(filterElements)
+      val joins = m2q.mkJoins(1)
+      val where = m2q.mkWhere
+      s"DELETE FROM $table$joins$where"
+    } { joinTable =>
+      m2q.resolve(filterElements)
+      val joins     = m2q.mkJoins(1)
+      val where     = m2q.mkWhere
+      val joinWhere = joinClause.get
+      s"""DELETE FROM $table$joins
+         |WHERE EXISTS (
+         |  SELECT 1 FROM $joinTable$joins$where AND
+         |  $joinWhere
+         |)""".stripMargin
+    }
+  }
 
-//  def getSql(m2q: Model2Query): String = {
-//    val table  = refPath.last
-////    val cols   = (columns ++ foreignKeys.map(_._1)).mkString(",\n  ")
-////    val inputs = inputPlaceHolders.mkString(", ")
-////    if (cols.nonEmpty) {
-////      s"""INSERT INTO $table (
-////         |  $cols
-////         |) VALUES ($inputs)""".stripMargin
-////    } else {
-////      s"INSERT INTO $table $defaultValues"
-////    }
-//
-////    val cols = columns.mkString(",\n  ")
-////    val updateClauses = clauses.mkString(" AND\n  ")
-////    s"""UPDATE $table
-////       |SET
-////       |  $cols
-////       |WHERE
-////       |  $updateClauses""".stripMargin
-//
-////    val deleteClauses = clauses.mkString(" AND\n  ")
-//    val deleteClauses = "zzz"
-//    s"""DELETE FROM $table
-//       |WHERE
-//       |  $deleteClauses""".stripMargin
-//  }
-
-//  override def toString =
-//    s"""--------------------------------------------------
-//       |TableDelete(
-//       |  refPath           = $refPath,
-//       |  columns           = $columns,
-//       |  foreignKeys       = $foreignKeys,
-//       |)
-//       |
-//       |$sql
-//       |--------------------------------------------------""".stripMargin
+  //  override def toString =
+  //    s"""--------------------------------------------------
+  //       |TableDelete(
+  //       |  refPath           = $refPath,
+  //       |  columns           = $columns,
+  //       |  foreignKeys       = $foreignKeys,
+  //       |)
+  //       |
+  //       |$sql
+  //       |--------------------------------------------------""".stripMargin
 }

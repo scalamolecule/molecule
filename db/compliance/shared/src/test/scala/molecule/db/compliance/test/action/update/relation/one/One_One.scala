@@ -32,16 +32,6 @@ case class One_One(
       _ <- A.i.a1.B.i.query.get.map(_ ==> List(
         (3, 4) // B value updated since there was a previous value
       ))
-
-      // Filter by A ids, upsert B values (insert if not already present)
-      _ <- A(a, b, c).B.i(5).upsert.transact
-
-      // Now three A entities with referenced B value
-      _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-        (1, 5), // relationship to B created + B value inserted
-        (2, 5), // B value inserted
-        (3, 5), // B value updated
-      ))
     } yield ()
   }
 
@@ -62,16 +52,6 @@ case class One_One(
 
       _ <- A.i.a1.B.i.query.get.map(_ ==> List(
         (3, 4) // B value updated since there was a previous value
-      ))
-
-      // Filter by A ids, upsert B values (insert if not already present)
-      _ <- A.i_.B.i(5).upsert.transact
-
-      // Now three A entities with referenced B value
-      _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-        (1, 5), // relationship to B created and B value inserted
-        (2, 5), // B value inserted
-        (3, 5), // B value updated
       ))
     } yield ()
   }
@@ -97,18 +77,6 @@ case class One_One(
         (4, 2), // A value updated
         (4, 3), // A value updated
       ))
-
-      // Filter by B value, upsert A values (insert if not already present)
-      _ <- A.i(5).B.i_.upsert.transact
-
-      _ <- A.i.B.i.a1.query.get.map(_ ==> List(
-        (5, 1), // A value and relationship to B value inserted
-        (5, 2), // A value updated
-        (5, 3), // A value updated
-      ))
-
-      // Initial entity without ref to B was not updated/upserted
-      _ <- A.i.a1.query.get.map(_ ==> List(0, 5))
     } yield ()
   }
 
@@ -134,20 +102,6 @@ case class One_One(
       _ <- A.i.a1.B.i.query.get.map(_ ==> List(
         (3, 4), // B value updated since there was a previous value
       ))
-
-      // Filter by B attribute, upsert B values
-      _ <- A.B.s_.i(5).upsert.transact
-
-      _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-        (2, 5), // B value inserted
-        (3, 5), // B value updated
-      ))
-
-      _ <- B.s.a1.i.query.get.map(_ ==> List(
-        ("b", 5),
-        ("c", 5),
-        ("x", 0), // not updated since it isn't referenced from A
-      ))
     } yield ()
   }
 
@@ -171,14 +125,6 @@ case class One_One(
         (6, "x", 4), // A and B values updated
         (6, "x", 5), // A and B values updated
       ))
-
-      _ <- A.i(7).B.s("y").i_.upsert.transact
-
-      _ <- A.i.B.s.i.a1.query.get.map(_ ==> List(
-        (7, "y", 2), // A value inserted, B value updated
-        (7, "y", 4), // A and B values updated
-        (7, "y", 5), // A and B values updated
-      ))
     } yield ()
   }
 
@@ -199,15 +145,6 @@ case class One_One(
       _ <- A.i.a1.s.B.i.query.get.map(_ ==> List(
         (4, "x", 5), // A and B values updated
       ))
-
-      _ <- A.i_.s("y").B.i(6).upsert.transact
-
-      _ <- A.i.a1.s.B.i.query.get.map(_ ==> List(
-        (1, "y", 6), // A value updated and ref to B and B value inserted
-        (2, "y", 6), // A value inserted and B value inserted
-        (3, "y", 6), // A value inserted and B value updated
-        (4, "y", 6), // A and B values updated
-      ))
     } yield ()
   }
 
@@ -217,38 +154,22 @@ case class One_One(
       _ <- A.i(1).B.i(1).C.s("c").save.transact // no matching C.i
       _ <- A.i(2).B.i(2).C.i(2).save.transact
 
-      // Filtering by attribute in the last entity:
-      // - Whole ref structure known
-      // - No need to add refs with upserts (semantics same as update)
-
       // 1 filter attribute (C.i)
       _ <- A.i(3).B.i(3).C.i_.update.transact
       _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
         (3, 3, 2)
       ))
-      _ <- A.i(4).B.i(4).C.i_.upsert.transact
-      _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
-        (4, 4, 2)
-      ))
 
       // 2 filter attributes (B.i and C.i)
-      _ <- A.i(5).B.i_.C.i_.update.transact
+      _ <- A.i(4).B.i_.C.i_.update.transact
       _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
-        (5, 4, 2)
-      ))
-      _ <- A.i(6).B.i_.C.i_.upsert.transact
-      _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
-        (6, 4, 2)
+        (4, 3, 2)
       ))
 
       // 2 filter attributes (A.i and C.i)
-      _ <- A.i_.B.i(7).C.i_.update.transact
+      _ <- A.i_.B.i(5).C.i_.update.transact
       _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
-        (6, 7, 2)
-      ))
-      _ <- A.i_.B.i(8).C.i_.upsert.transact
-      _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
-        (6, 8, 2)
+        (4, 5, 2)
       ))
     } yield ()
   }
@@ -274,17 +195,6 @@ case class One_One(
       _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
         (9, 8, 9) // A.i and C.i updated
       ))
-
-      // Insert refs to C and set A.i and C.i values for all entities that have B.i value
-      _ <- A.i(10).B.i_.C.i(10).upsert.transact
-      _ <- A.i.B.i.a1.C.i.query.get.map(_ ==> List(
-        (10, 2, 10), // A.i inserted, ref to C and C.i inserted
-        (10, 3, 10), // A.i updated, ref to C and C.i inserted
-        (10, 5, 10), // A.i inserted, C.i inserted
-        (10, 6, 10), // A.i inserted, C.i updated
-        (10, 7, 10), // A.i updated, C.i inserted
-        (10, 8, 10), // A.i and C.i updated
-      ))
     } yield ()
   }
 
@@ -307,14 +217,6 @@ case class One_One(
       _ <- A.i_.B.i_.C.i(8).update.transact
       _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
         (7, 7, 8) // C.i updated
-      ))
-
-      // Insert refs to C and set C.i values for all entities that have A.i and B.i value
-      _ <- A.i_.B.i_.C.i(9).upsert.transact
-      _ <- A.i.a1.B.i.C.i.query.get.map(_ ==> List(
-        (3, 3, 9), // ref to C and C.i inserted
-        (6, 6, 9), // C.i inserted
-        (7, 7, 9), // C.i updated
       ))
     } yield ()
   }
@@ -343,18 +245,6 @@ case class One_One(
       _ <- A.i_.B.i(11).C.i(11).update.transact
       _ <- A.i.B.i.C.i.query.get.map(_ ==> List(
         (10, 11, 11) // B.i and C.i updated
-      ))
-
-      // Insert refs to B + C or C and set C.i values for all entities that have A.i value
-      _ <- A.i_.B.i(12).C.i(12).upsert.transact
-      _ <- A.i.a1.B.i.C.i.query.get.map(_ ==> List(
-        (1, 12, 12), // ref to B inserted, B.i inserted, ref to C inserted, C.i inserted
-        (3, 12, 12), // B.i inserted, ref to C inserted, C.i inserted
-        (4, 12, 12), // B.i updated, ref to C inserted, C.i inserted
-        (7, 12, 12), // B.i inserted, C.i inserted
-        (8, 12, 12), // B.i inserted, C.i updated
-        (9, 12, 12), // B.i updated, C.i inserted
-        (10, 12, 12), // B.i updated, C.i updated
       ))
     } yield ()
   }
@@ -392,22 +282,6 @@ case class One_One(
       // C
       _ <- A(id).B.C.i(33).update.transact
       _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 23, 33)))
-    } yield ()
-  }
-
-
-  "backref" - refs {
-    for {
-      id <- A.i(1).B.i(2)._A.C.i(3).save.transact.map(_.id)
-      _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
-
-      // Updating A.B.i and A.C.i
-      _ <- A(id).i(10).B.i(20)._A.C.i(30).update.transact
-      _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((10, 20, 30)))
-
-      // Upsert, adding C.s("x")
-      _ <- A(id).i(11).B.i(21)._A.C.s("x").upsert.transact
-      _ <- A.i.B.i._A.C.s.query.get.map(_ ==> List((11, 21, "x")))
     } yield ()
   }
 

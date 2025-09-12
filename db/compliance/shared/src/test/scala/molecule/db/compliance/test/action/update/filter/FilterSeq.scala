@@ -80,7 +80,7 @@ case class FilterSeq(
     for {
       _ <- Entity.iSeq_(List(1)).int(3).update.transact
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Filtering by collection equality (Entity.iSeq) not supported in updates."
+          err ==> "Matching collections (Entity.iSeq) not supported in queries."
         }
     } yield ()
   }

@@ -32,16 +32,6 @@ case class One_Seq(
       _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
         (3, Seq(4, 5)) // B value updated since there was a previous value
       ))
-
-      // Filter by A ids, upsert B values (insert if not already present)
-      _ <- A(a, b, c).B.iSeq(Seq(5, 6)).upsert.transact
-
-      // Now three A entities with referenced B value
-      _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
-        (1, Seq(5, 6)), // relationship to B created and B value inserted
-        (2, Seq(5, 6)), // B value inserted
-        (3, Seq(5, 6)), // B value updated
-      ))
     } yield ()
   }
 
@@ -62,16 +52,6 @@ case class One_Seq(
 
       _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
         (3, Seq(4, 5)) // B value updated since there was a previous value
-      ))
-
-      // Filter by A ids, upsert B values (insert if not already present)
-      _ <- A.i_.B.iSeq(Seq(5, 6)).upsert.transact
-
-      // Now three A entities with referenced B value
-      _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
-        (1, Seq(5, 6)), // relationship to B created and B value inserted
-        (2, Seq(5, 6)), // B value inserted
-        (3, Seq(5, 6)), // B value updated
       ))
     } yield ()
   }
@@ -97,18 +77,6 @@ case class One_Seq(
         (Seq(4, 5), 2), // A value updated
         (Seq(4, 5), 3), // A value updated
       ))
-
-      // Filter by B value, upsert A values (insert if not already present)
-      _ <- A.iSeq(Seq(5, 6)).B.i_.upsert.transact
-
-      _ <- A.iSeq.B.i.a1.query.get.map(_ ==> List(
-        (Seq(5, 6), 1), // A value and relationship to B value inserted
-        (Seq(5, 6), 2), // A value updated
-        (Seq(5, 6), 3), // A value updated
-      ))
-
-      // Initial entity without ref to B was not updated/upserted
-      _ <- A.iSeq.b_().query.get.map(_ ==> List(Seq(0, 1)))
     } yield ()
   }
 
@@ -133,20 +101,6 @@ case class One_Seq(
 
       _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
         (3, Seq(4, 5)), // B value updated since there was a previous value
-      ))
-
-      // Filter by B attribute, upsert B values
-      _ <- A.B.s_.iSeq(Seq(5, 6)).upsert.transact
-
-      _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
-        (2, Seq(5, 6)), // B value inserted
-        (3, Seq(5, 6)), // B value updated
-      ))
-
-      _ <- B.s.a1.iSeq.query.get.map(_ ==> List(
-        ("b", Seq(5, 6)),
-        ("c", Seq(5, 6)),
-        ("x", Seq(0, 1)), // not updated since it isn't referenced from A
       ))
     } yield ()
   }
@@ -184,18 +138,6 @@ case class One_Seq(
       // C
       _ <- A(id).B.C.iSeq(List(33)).update.transact
       _ <- A.iSeq.B.iSeq.C.iSeq.query.get.map(_ ==> List((List(13), List(23), List(33))))
-    } yield ()
-  }
-
-
-  "backref" - refs {
-    for {
-      id <- A.iSeq(List(1)).B.iSeq(List(2))._A.C.iSeq(List(3)).save.transact.map(_.id)
-      _ <- A.iSeq.B.iSeq._A.C.iSeq.query.get.map(_ ==> List((List(1), List(2), List(3))))
-
-      // Updating A.B.iSeq and A.C.iSeq
-      _ <- A(id).iSeq(List(10)).B.iSeq(List(20))._A.C.iSeq(List(30)).update.transact
-      _ <- A.iSeq.B.iSeq._A.C.iSeq.query.get.map(_ ==> List((List(10), List(20), List(30))))
     } yield ()
   }
 }

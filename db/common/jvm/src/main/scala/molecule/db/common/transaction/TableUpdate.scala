@@ -5,60 +5,40 @@ import molecule.core.dataModel.*
 import molecule.core.error.ModelError
 import molecule.db.common.validation.insert.InsertValidators_
 import java.sql.PreparedStatement as PS
+import molecule.db.common.query.{Model2SqlQuery, SqlQueryBase}
+import scala.collection.mutable.ListBuffer
 
-//case class ForeignKey(
-//  refAttr: String,
-//  refPath: List[String],
-//  tplIndex: Int,
-//)
 
 case class TableUpdate(
   refPath: List[String],
-  columns: List[String] = Nil,
-  foreignKeys: List[(String, List[String])] = Nil,
-  inputPlaceHolders: List[String] = Nil,
-  colSetters: List[(PS, Product) => Unit] = Nil,
+  colInputs: List[String] = Nil,
+  colSetters: List[PS => Unit] = Nil,
 ) {
-  def add(a: Attr, colSetter: (PS, Product) => Unit) = copy(
-    columns = columns :+ a.attr,
-    inputPlaceHolders = inputPlaceHolders :+ "?",
-    colSetters = colSetters :+ colSetter
+  def add(inputAndSetter: (String, PS => Unit)) = copy(
+    colInputs = colInputs :+ inputAndSetter._1,
+    colSetters = colSetters :+ inputAndSetter._2
   )
 
-  val defaultValues = "(id) VALUES (DEFAULT)"
-
-  def sql = {
-    val table  = refPath.last
-//    val cols   = (columns ++ foreignKeys.map(_._1)).mkString(",\n  ")
-//    val inputs = inputPlaceHolders.mkString(", ")
-//    if (cols.nonEmpty) {
-//      s"""INSERT INTO $table (
-//         |  $cols
-//         |) VALUES ($inputs)""".stripMargin
-//    } else {
-//      s"INSERT INTO $table $defaultValues"
-//    }
-
-    val cols = columns.mkString(",\n  ")
-//    val updateClauses = clauses.mkString(" AND\n  ")
-    val updateClauses = "xxx"
-    s"""UPDATE $table
-       |SET
-       |  $cols
-       |WHERE
-       |  $updateClauses""".stripMargin
+  def sql: ListBuffer[Long] => String = {
+    val table = refPath.last
+    val cols  = colInputs.mkString(",\n  ")
+    (ids: ListBuffer[Long]) =>
+      s"""UPDATE $table SET
+         |  $cols
+         |WHERE id IN (${ids.mkString(", ")})""".stripMargin
   }
 
-  override def toString =
-    s"""--------------------------------------------------
-       |TableUpdate(
-       |  refPath           = $refPath,
-       |  columns           = $columns,
-       |  foreignKeys       = $foreignKeys,
-       |  inputPlaceHolders = $inputPlaceHolders,
-       |  colSetters        = <${colSetters.length} colSetters>
-       |)
-       |
-       |$sql
-       |--------------------------------------------------""".stripMargin
+
+  //  override def toString =
+  //    s"""--------------------------------------------------
+  //       |TableUpdate(
+  //       |  refPath           = $refPath,
+  //       |  columns           = $columns,
+  //       |  foreignKeys       = $foreignKeys,
+  //       |  inputPlaceHolders = $inputPlaceHolders,
+  //       |  colSetters        = <${colSetters.length} colSetters>
+  //       |)
+  //       |
+  //       |$sql
+  //       |--------------------------------------------------""".stripMargin
 }

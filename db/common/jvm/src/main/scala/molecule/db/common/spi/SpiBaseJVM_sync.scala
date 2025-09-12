@@ -6,7 +6,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 import geny.Generator
-import molecule.core.dataModel.{DataModel, Element}
+import molecule.core.dataModel.{AttrOneManID, DataModel, Element, Eq}
 import molecule.core.error.{InsertError, InsertErrors, ModelError, ValidationErrors}
 import molecule.core.util.BaseHelpers
 import molecule.db.common.action.*
@@ -187,8 +187,8 @@ trait SpiBaseJVM_sync
     val firstEntity      = getInitialEntity(cleanElements)
     val firstRefPath     = List(firstEntity)
     val firstTableInsert = TableInsert(firstRefPath)
-    val sqlOps           = new ResolveSave with SqlSave {}
-    val tableInserts     = sqlOps.resolve(cleanElements, 1, Nil, firstTableInsert)
+    val resolver         = new ResolveSave with SqlSave {}
+    val tableInserts     = resolver.resolve(cleanElements, 1, Nil, firstTableInsert)
 
     // Cache generated ids for each table insertion
     // Table is identified by ref path so that foreign keys know from where to pick parent ids
@@ -196,7 +196,7 @@ trait SpiBaseJVM_sync
 
     val txReport = conn.atomicTransaction { () =>
       sortTableInserts(tableInserts).foreach { tableInsert =>
-        println(tableInsert)
+        //        println(tableInsert)
         val ps         = conn.sqlConn.prepareStatement(tableInsert.sql, Statement.RETURN_GENERATED_KEYS)
         val dummyTuple = EmptyTuple
 
@@ -240,58 +240,70 @@ trait SpiBaseJVM_sync
     txReport
   }
 
-
-  override def delete_transact(delete: Delete)(using conn0: Conn): TxReport = {
+  override def update_transact(update: Update)(using conn0: Conn): TxReport = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    if (delete.printInspect)
-      delete_inspect(delete)
-    val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
-    val cleanDataModel = delete.dataModel.copy(elements = cleanElements)
-    val table          = getInitialEntity(cleanElements)
+    if (update.printInspect)
+      update_inspect(update)
+    val cleanElements  = keywordsSuffixed(update.dataModel.elements, conn.proxy)
+    val cleanDataModel = update.dataModel.copy(elements = cleanElements)
+    val updateClean    = update.copy(dataModel = cleanDataModel)
+    val errors         = update_validate(update) // validate original elements against meta model
+    if (errors.nonEmpty)
+      throw ValidationErrors(errors)
 
-    // Verified deletion model
-    val sqlOps      = new ResolveDelete {}
-    val tableDelete = sqlOps.resolve(cleanElements, true, TableDelete(table, Nil, None, None))
-
-    // Re-use query construction for the delete statement
-    val m2q = getModel2SqlQuery(Nil)
-    val sql = tableDelete.joinTable.fold {
-      m2q.resolve(tableDelete.filterElements)
-      val joins = m2q.mkJoins(1)
-      val where = m2q.mkWhere
-      s"DELETE FROM $table$joins$where"
-    } { joinTable =>
-      m2q.resolve(tableDelete.filterElements)
-      val joins      = m2q.mkJoins(1)
-      val where      = m2q.mkWhere
-      val joinClause = tableDelete.joinClause.get
-      s"""DELETE FROM $table$joins
-         |WHERE EXISTS (
-         |  SELECT 1 FROM $joinTable$joins$where AND
-         |  $joinClause
-         |)""".stripMargin
-    }
-
-//    println(sql)
-
-    val txReport = conn.atomicTransaction { () =>
-      val ps = conn.sqlConn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-      ps.addBatch()
-      ps.executeBatch
-
-      // Get generated ids
-      val resultSet = ps.getGeneratedKeys
-      val ids       = ListBuffer.empty[Long]
-      while (resultSet.next()) {
-        ids += resultSet.getLong(1)
+    val (tableUpdates, idsQuery) = update_getStmt(update, cleanElements)
+    val tableCount               = tableUpdates.length
+    val idLists                  = new Array[ListBuffer[Long]](tableCount).map(_ => ListBuffer.empty[Long])
+    val idsResultSet             = conn.sqlConn.prepareStatement(idsQuery).executeQuery()
+    var tableIndex               = 0
+    while (idsResultSet.next()) {
+      tableIndex = 0
+      while (tableIndex < tableCount) {
+        idLists(tableIndex) += idsResultSet.getLong(tableIndex + 1)
+        tableIndex += 1
       }
-
-      ps.close()
-      ids.toList
     }
+    val idss     = idLists.iterator
+    val txReport = conn.atomicTransaction { () =>
+      tableUpdates.foreach {
+        case tableUpdate if tableUpdate.colSetters.isEmpty => idss.next()
+        case tableUpdate                                   =>
+          val updateSql = tableUpdate.sql(idss.next())
 
-    await(conn.callback(cleanDataModel, true))
+          println("=================================")
+          cleanElements.foreach(println)
+          println("---------------------------------")
+          println(updateSql)
+
+          val ps = conn.sqlConn.prepareStatement(updateSql)
+          tableUpdate.colSetters.foreach(_(ps))
+          ps.executeUpdate()
+          ps.close()
+      }
+      idLists.head.toList
+    }
+    await(conn.callback(cleanDataModel))
     txReport
+  }
+
+  def update_getStmt(update: Update, cleanElements: List[Element]): (List[TableUpdate], String) = {
+    val firstEntity      = getInitialEntity(cleanElements)
+    val firstTableUpdate = TableUpdate(List(firstEntity))
+    val resolver         = new ResolveUpdate(update.isUpsert) with SqlUpdate {}
+
+    val (tableUpdates, filterElements, notNulls) = resolver.resolve(
+      cleanElements, 1, Nil, firstTableUpdate, List(AttrOneManID(firstEntity, "id")), Nil
+    )
+
+    // Prepare filter query
+    val m2q = getModel2SqlQuery(Nil)
+    m2q.resolveElements(filterElements)
+    if (!update.isUpsert)
+      m2q.where.addAll(notNulls)
+    val query = m2q.renderSqlQuery(None, None).dropRight(1) // skip ;
+    //    println(query)
+
+    (tableUpdates, query)
   }
 
 
@@ -316,8 +328,8 @@ trait SpiBaseJVM_sync
     val firstRefPath     = List(firstEntity)
     val firstTableInsert = TableInsert(firstRefPath)
     val firstPartition   = Partition(Nil, 0, Tpl)
-    val sqlOps           = new ResolveInsert with SqlInsert {}
-    val partitions       = sqlOps.resolve(cleanElements, 1, 0, List(firstPartition), firstTableInsert)
+    val resolver         = new ResolveInsert with SqlInsert {}
+    val partitions       = resolver.resolve(cleanElements, 1, 0, List(firstPartition), firstTableInsert)
     val dataPartitions   = tuplePartitions(insert.tpls, partitions)
 
     // Cache generated ids for each table insertion
@@ -360,13 +372,13 @@ trait SpiBaseJVM_sync
                 }
               }
 
-//            println(s"******* parentIds: $parentIds, childCounts: ${dataPartition.childCounts}, fks: $fks")
+            //            println(s"******* parentIds: $parentIds, childCounts: ${dataPartition.childCounts}, fks: $fks")
 
             val fkIterator = fks.iterator
             (ps: PS) =>
               val fk = fkIterator.next()
               // Debug aid: shows which parent IDs feed this FK column
-//              println(s"refAttr: $refAttr, refPath: $refPath, paramIndex: $paramIndex, foreignKeys: $parentIds, fk: $fk")
+              //              println(s"refAttr: $refAttr, refPath: $refPath, paramIndex: $paramIndex, foreignKeys: $parentIds, fk: $fk")
               ps.setLong(paramIndex, fk)
           }
 
@@ -414,12 +426,12 @@ trait SpiBaseJVM_sync
     def next(): DataPartition = {
       val partition = partitions(partitionIndex)
 
-//      println(
-//        s"""
-//           |############################################################
-//           |partitionIndex: $partitionIndex
-//           |curTuples     : $curTuples
-//           |$partition""".stripMargin)
+      //      println(
+      //        s"""
+      //           |############################################################
+      //           |partitionIndex: $partitionIndex
+      //           |curTuples     : $curTuples
+      //           |$partition""".stripMargin)
 
       partitionIndex += 1
       val counts        = new Array[Int](curTuples.length)
@@ -483,7 +495,7 @@ trait SpiBaseJVM_sync
       }
       val dataPartition = DataPartition(curTuples, childCounts)
 
-//      println(dataPartition)
+      //      println(dataPartition)
 
       curTuples = next
       childCounts = counts.toVector
@@ -659,23 +671,50 @@ trait SpiBaseJVM_sync
 
   // Update --------------------------------------------------------
 
-  override def update_transact(update: Update)(using conn0: Conn): TxReport = {
-    val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    if (update.printInspect)
-      update_inspect(update)
-    val cleanElements  = keywordsSuffixed(update.dataModel.elements, conn.proxy)
-    val cleanDataModel = update.dataModel.copy(elements = cleanElements)
-    val updateClean    = update.copy(dataModel = cleanDataModel)
-    val errors         = update_validate(update) // validate original elements against meta model
-    if (errors.isEmpty) {
-      val action   = update_getAction(updateClean, conn)
-      val txReport = conn.transact_sync(action)
-      await(conn.callback(cleanDataModel))
-      txReport
-    } else {
-      throw ValidationErrors(errors)
-    }
-  }
+  //  override def update_transact(update: Update)(using conn0: Conn): TxReport = {
+  //    val conn = conn0.asInstanceOf[JdbcConn_JVM]
+  //    if (update.printInspect)
+  //      update_inspect(update)
+  //    val cleanElements  = keywordsSuffixed(update.dataModel.elements, conn.proxy)
+  //    val cleanDataModel = update.dataModel.copy(elements = cleanElements)
+  //    val updateClean    = update.copy(dataModel = cleanDataModel)
+  //    val errors         = update_validate(update) // validate original elements against meta model
+  //    if (errors.isEmpty) {
+  //      val action = update_getAction(updateClean, conn)
+  //
+  //
+  //      val txReport = conn.atomicTransaction { () =>
+  //
+  //
+  //        ???
+  //      }
+  //
+  //
+  //      //      val txReport = conn.transact_sync(action)
+  //      await(conn.callback(cleanDataModel))
+  //      txReport
+  //    } else {
+  //      throw ValidationErrors(errors)
+  //    }
+  //  }
+
+  //  def update_transactOLD(update: Update)(using conn0: Conn): TxReport = {
+  //    val conn = conn0.asInstanceOf[JdbcConn_JVM]
+  //    if (update.printInspect)
+  //      update_inspect(update)
+  //    val cleanElements  = keywordsSuffixed(update.dataModel.elements, conn.proxy)
+  //    val cleanDataModel = update.dataModel.copy(elements = cleanElements)
+  //    val updateClean    = update.copy(dataModel = cleanDataModel)
+  //    val errors         = update_validate(update) // validate original elements against meta model
+  //    if (errors.isEmpty) {
+  //      val action   = update_getAction(updateClean, conn)
+  //      val txReport = conn.transact_sync(action)
+  //      await(conn.callback(cleanDataModel))
+  //      txReport
+  //    } else {
+  //      throw ValidationErrors(errors)
+  //    }
+  //  }
 
   override def update_inspect(update: Update)(using conn0: Conn): String = {
     val conn   = conn0.asInstanceOf[JdbcConn_JVM]
@@ -684,7 +723,9 @@ trait SpiBaseJVM_sync
       val cleanElements  = keywordsSuffixed(update.dataModel.elements, conn.proxy)
       val cleanDataModel = update.dataModel.copy(elements = cleanElements)
       val updateClean    = update.copy(dataModel = cleanDataModel)
-      renderInspectTx(action, update.dataModel, update_getAction(updateClean, conn))
+      //      renderInspectTx(action, update.dataModel, update_getAction(updateClean, conn))
+
+      "todo..."
     }
   }
 
@@ -717,31 +758,36 @@ trait SpiBaseJVM_sync
 
 
   // Delete --------------------------------------------------------
-  //
-  //  override def delete_transact(delete: Delete)(using conn0: Conn): TxReport = {
-  //    val conn = conn0.asInstanceOf[JdbcConn_JVM]
-  //    if (delete.printInspect)
-  //      delete_inspect(delete)
-  //    val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
-  //    val cleanDataModel = delete.dataModel.copy(elements = cleanElements)
-  //    val deleteClean    = delete.copy(dataModel = cleanDataModel)
-  //    val action         = delete_getAction(deleteClean, conn)
-  //    val txReport       = conn.transact_sync(action)
-  //
-  //
-  //
-  //    val sqlOps           = new ResolveDelete with SqlDelete {}
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //    await(conn.callback(cleanDataModel, true))
-  //    txReport
-  //  }
+
+  override def delete_transact(delete: Delete)(using conn0: Conn): TxReport = {
+    val conn = conn0.asInstanceOf[JdbcConn_JVM]
+    if (delete.printInspect)
+      delete_inspect(delete)
+    val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
+    val cleanDataModel = delete.dataModel.copy(elements = cleanElements)
+    val table          = getInitialEntity(cleanElements)
+    val resolver       = new ResolveDelete {}
+    val tableDelete    = resolver.resolve(cleanElements, true, TableDelete(table, Nil, None, None))
+    val sql            = tableDelete.getSql(getModel2SqlQuery(Nil))
+    //    println(sql)
+
+    val txReport = conn.atomicTransaction { () =>
+      val ps = conn.sqlConn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+      ps.addBatch()
+      ps.executeBatch
+
+      // Get generated ids
+      val resultSet = ps.getGeneratedKeys
+      val ids       = ListBuffer.empty[Long]
+      while (resultSet.next()) {
+        ids += resultSet.getLong(1)
+      }
+      ps.close()
+      ids.toList
+    }
+    await(conn.callback(cleanDataModel, true))
+    txReport
+  }
 
   override def delete_inspect(delete: Delete)(using conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]

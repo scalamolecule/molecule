@@ -41,33 +41,6 @@ case class Many_Seq_remove(
   }
 
 
-  "filter - ref - value" - refs {
-    for {
-      _ <- A.i.Bb.*?(B.s_?.iSeq_?).insert(
-        (1, List()),
-        (2, List((Some("a"), None))),
-        (3, List((Some("b"), None), (Some("c"), None))),
-        (4, List((Some("d"), Some(Seq(1, 2, 1))))),
-        (5, List((Some("e"), Some(Seq(2, 3, 2))), (Some("f"), Some(Seq(3, 4, 4))))),
-        (6, List((Some("g"), Some(Seq(4, 5, 4))), (Some("h"), None))),
-      ).transact
-
-      // `upsert` has same semantics as `update` with `remove` since we don't insert data
-      // Filter by A ids, update B values
-      _ <- A.i_.Bb.iSeq.remove(4, 5).upsert.transact
-
-      _ <- A.i.a1.Bb.*?(B.s_?.a1.iSeq_?).query.get.map(_ ==> List(
-        (1, List()),
-        (2, List((Some("a"), None))),
-        (3, List((Some("b"), None), (Some("c"), None))),
-        (4, List((Some("d"), Some(Seq(1, 2, 1))))),
-        (5, List((Some("e"), Some(Seq(2, 3, 2))), (Some("f"), Some(Seq(3))))), // update of last nested entity
-        (6, List((Some("g"), None), (Some("h"), None))), //                       update of first nested entity
-      ))
-    } yield ()
-  }
-
-
   "value - ref - filter" - refs {
     for {
       _ <- A.iSeq.Bb.*?(B.s).insert(

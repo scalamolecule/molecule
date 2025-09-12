@@ -6,11 +6,6 @@ import molecule.core.error.ModelError
 import molecule.db.common.validation.insert.InsertValidators_
 import java.sql.PreparedStatement as PS
 
-case class ForeignKey(
-  refAttr: String,
-  refPath: List[String],
-  tplIndex: Int,
-)
 
 case class TableInsert(
   refPath: List[String],

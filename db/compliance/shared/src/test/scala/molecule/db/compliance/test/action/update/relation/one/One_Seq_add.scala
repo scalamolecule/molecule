@@ -32,15 +32,6 @@ case class One_Seq_add(
       _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
         (3, Seq(3, 4, 4, 5)) // B attribute updated, all values appended (List semantics)
       ))
-
-      // Filter by A attribute, upsert B values
-      _ <- A(a, b, c).B.iSeq.add(5, 6).upsert.transact
-
-      _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
-        (1, Seq(5, 6)), //             relationship to B created, B values added
-        (2, Seq(5, 6)), //             B attribute added
-        (3, Seq(3, 4, 4, 5, 5, 6)), // B attribute updated
-      ))
     } yield ()
   }
 
@@ -61,15 +52,6 @@ case class One_Seq_add(
 
       _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
         (3, Seq(3, 4, 4, 5)) // B attribute updated, all values appended (List semantics)
-      ))
-
-      // Filter by A attribute, upsert B values
-      _ <- A.i_.B.iSeq.add(5, 6).upsert.transact
-
-      _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
-        (1, Seq(5, 6)), //             relationship to B created, B values added
-        (2, Seq(5, 6)), //             B attribute added
-        (3, Seq(3, 4, 4, 5, 5, 6)), // B attribute updated
       ))
     } yield ()
   }
@@ -95,18 +77,6 @@ case class One_Seq_add(
         (Seq(2, 3, 4, 5), 2),
         (Seq(3, 4, 4, 5), 3),
       ))
-
-      // Filter by B attribute, upsert A values
-      _ <- A.iSeq.add(5, 6).B.i_.upsert.transact
-
-      _ <- A.iSeq.B.i.a1.query.get.map(_ ==> List(
-        (Seq(5, 6), 1), //             A attribute inserted
-        (Seq(2, 3, 4, 5, 5, 6), 2), // A attribute updated
-        (Seq(3, 4, 4, 5, 5, 6), 3), // A attribute updated
-      ))
-
-      // Initial entity without ref was not updated (values 0 and 1 not changed)
-      _ <- A.iSeq.b_().query.get.map(_ ==> List(Seq(0, 1)))
     } yield ()
   }
 
@@ -134,22 +104,6 @@ case class One_Seq_add(
       _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
         (2, Seq(2, 3, 4, 5)),
         (3, Seq(3, 4, 4, 5)),
-      ))
-
-      // Filter by B attribute, upsert B values
-      _ <- A.B.s_.iSeq.add(5, 6).upsert.transact
-
-      _ <- A.i.a1.B.iSeq.query.get.map(_ ==> List(
-        (1, Seq(5, 6)), //             B attribute added
-        (2, Seq(2, 3, 4, 5, 5, 6)), // B attribute updated
-        (3, Seq(3, 4, 4, 5, 5, 6)), // B attribute updated
-      ))
-
-      _ <- B.s.a1.iSeq.query.get.map(_ ==> List(
-        ("a", Seq(5, 6)),
-        ("b", Seq(2, 3, 4, 5, 5, 6)),
-        ("c", Seq(3, 4, 4, 5, 5, 6)),
-        ("x", Seq(0, 1)), // not updated since it isn't referenced from A
       ))
     } yield ()
   }

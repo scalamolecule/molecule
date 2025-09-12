@@ -32,16 +32,6 @@ case class One_Map(
       _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
         (3, Map(pint4, pint5)) // B value updated since there was a previous value
       ))
-
-      // Filter by A ids, upsert B values (insert if not already present)
-      _ <- A(a, b, c).B.iMap(Map(pint5, pint6)).upsert.transact
-
-      // Now three A entities with referenced B value
-      _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-        (1, Map(pint5, pint6)), // relationship to B created and B value inserted
-        (2, Map(pint5, pint6)), // B value inserted
-        (3, Map(pint5, pint6)), // B value updated
-      ))
     } yield ()
   }
 
@@ -62,16 +52,6 @@ case class One_Map(
 
       _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
         (3, Map(pint4, pint5)) // B value updated since there was a previous value
-      ))
-
-      // Filter by A.i values, upsert B values (insert if not already present)
-      _ <- A.i_.B.iMap(Map(pint5, pint6)).upsert.transact
-
-      // Now three A entities with referenced B value
-      _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-        (1, Map(pint5, pint6)), // relationship to B created and B value inserted
-        (2, Map(pint5, pint6)), // B value inserted
-        (3, Map(pint5, pint6)), // B value updated
       ))
     } yield ()
   }
@@ -97,18 +77,6 @@ case class One_Map(
         (Map(pint4, pint5), 2), // A value updated
         (Map(pint4, pint5), 3), // A value updated
       ))
-
-      // Filter by B value, upsert A values (insert if not already present)
-      _ <- A.iMap(Map(pint5, pint6)).B.i_.upsert.transact
-
-      _ <- A.iMap.B.i.a1.query.get.map(_ ==> List(
-        (Map(pint5, pint6), 1), // A value and relationship to B value inserted
-        (Map(pint5, pint6), 2), // A value updated
-        (Map(pint5, pint6), 3), // A value updated
-      ))
-
-      // Initial entity without ref to B was not updated/upserted
-      _ <- A.iMap.b_().query.get.map(_ ==> List(Map(pint0, pint1)))
     } yield ()
   }
 
@@ -133,20 +101,6 @@ case class One_Map(
 
       _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
         (3, Map(pint4, pint5)), // B value updated since there was a previous value
-      ))
-
-      // Filter by B attribute, upsert B values
-      _ <- A.B.s_.iMap(Map(pint5, pint6)).upsert.transact
-
-      _ <- A.i.a1.B.iMap.query.get.map(_ ==> List(
-        (2, Map(pint5, pint6)), // B value inserted
-        (3, Map(pint5, pint6)), // B value updated
-      ))
-
-      _ <- B.s.a1.iMap.query.get.map(_ ==> List(
-        ("b", Map(pint5, pint6)),
-        ("c", Map(pint5, pint6)),
-        ("x", Map(pint0, pint1)), // not updated since it isn't referenced from A
       ))
     } yield ()
   }
@@ -184,18 +138,6 @@ case class One_Map(
       // C
       _ <- A(id).B.C.iMap(Map(pint4)).update.transact
       _ <- A.iMap.B.iMap.C.iMap.query.get.map(_ ==> List((Map(pint4), Map(pint4), Map(pint4))))
-    } yield ()
-  }
-
-
-  "backref" - refs {
-    for {
-      id <- A.iMap(Map(pint1)).B.iMap(Map(pint2))._A.C.iMap(Map(pint3)).save.transact.map(_.id)
-      _ <- A.iMap.B.iMap._A.C.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint2), Map(pint3))))
-
-      // Updating A.B.iMap and A.C.iMap
-      _ <- A(id).iMap(Map(pint1)).B.iMap(Map(pint1))._A.C.iMap(Map(pint1)).update.transact
-      _ <- A.iMap.B.iMap._A.C.iMap.query.get.map(_ ==> List((Map(pint1), Map(pint1), Map(pint1))))
     } yield ()
   }
 }

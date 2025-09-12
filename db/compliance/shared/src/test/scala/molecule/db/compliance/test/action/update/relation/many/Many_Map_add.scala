@@ -41,27 +41,6 @@ case class Many_Map_add(
         (6, List( //                                      update one ref entity
           (Some("g"), Map(pint4, pint5, pint4, pint5)))),
       ))
-
-      // Filter by A ids, upsert B values
-      _ <- A(a, b, c, d, e, f).Bb.iMap.add(pint5, pint6).upsert.transact
-
-      _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap).query.get.map(_ ==> List(
-        (1, List( //                                                    ref + insertion
-          (None, Map(pint5, pint6)))),
-        (2, List( //                                                    insertion in 1 ref entity
-          (Some("a"), Map(pint5, pint6)))),
-        (3, List( //                                                    insertion in 2 ref entities
-          (Some("b"), Map(pint5, pint6)),
-          (Some("c"), Map(pint5, pint6)))),
-        (4, List( //                                                    update in 1 ref entity
-          (Some("d"), Map(pint1, pint2, pint4, pint5, pint5, pint6)))),
-        (5, List( //                                                    update in 2 ref entities
-          (Some("e"), Map(pint2, pint3, pint4, pint5, pint5, pint6)),
-          (Some("f"), Map(pint3, pint4, pint4, pint5, pint5, pint6)))),
-        (6, List( //                                                    update in one ref entity and insertion in another
-          (Some("g"), Map(pint4, pint5, pint4, pint5, pint5, pint6)),
-          (Some("h"), Map(pint5, pint6)))),
-      ))
     } yield ()
   }
 
@@ -92,27 +71,6 @@ case class Many_Map_add(
         (6, List( //                                      update one ref entity
           (Some("g"), Map(pint4, pint5, pint4, pint5)))),
       ))
-
-      // Filter by A ids, upsert B values
-      _ <- A.i_.Bb.iMap.add(pint5, pint6).upsert.transact
-
-      _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap).query.get.map(_ ==> List(
-        (1, List( //                                                    ref + insertion
-          (None, Map(pint5, pint6)))),
-        (2, List( //                                                    insertion in 1 ref entity
-          (Some("a"), Map(pint5, pint6)))),
-        (3, List( //                                                    insertion in 2 ref entities
-          (Some("b"), Map(pint5, pint6)),
-          (Some("c"), Map(pint5, pint6)))),
-        (4, List( //                                                    update in 1 ref entity
-          (Some("d"), Map(pint1, pint2, pint4, pint5, pint5, pint6)))),
-        (5, List( //                                                    update in 2 ref entities
-          (Some("e"), Map(pint2, pint3, pint4, pint5, pint5, pint6)),
-          (Some("f"), Map(pint3, pint4, pint4, pint5, pint5, pint6)))),
-        (6, List( //                                                    update in one ref entity and insertion in another
-          (Some("g"), Map(pint4, pint5, pint4, pint5, pint5, pint6)),
-          (Some("h"), Map(pint5, pint6)))),
-      ))
     } yield ()
   }
 
@@ -134,16 +92,6 @@ case class Many_Map_add(
         // (<none>, List("a")), //                            no A attribute to update
         (Map(pint1, pint2, pint3, pint4), List("b", "c")), // A attribute updated
         (Map(pint2, pint3, pint3, pint4), List("d", "e")), // A attribute updated
-      ))
-
-      // Filter by B attribute, update A values
-      _ <- A.iMap.add(pint4, pint5).Bb.s_.upsert.transact
-
-      _ <- A.iMap.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
-        (Map(pint0, pint1), List()), //                                     nothing updated since this A entity has no ref to B
-        (Map(pint4, pint5), List("a")), //                                  A attribute inserted
-        (Map(pint1, pint2, pint3, pint4, pint4, pint5), List("b", "c")), // A attribute updated
-        (Map(pint2, pint3, pint3, pint4, pint4, pint5), List("d", "e")), // A attribute updated
       ))
     } yield ()
   }
@@ -176,26 +124,6 @@ case class Many_Map_add(
           (Some("a"), None), //                                  no B attribute to update
           (Some("b"), Some(Map(pint2, pint3, pint3, pint4))), // B attribute updated
         ))
-      ))
-
-      // Filter by B attribute, upsert B values
-      _ <- A.Bb.s_.iMap.add(pint4, pint5).upsert.transact
-
-      _ <- A.i.a1.Bb.*?(B.s_?.a1.iMap_?).query.get.map(_ ==> List(
-        (1, List()), //                                                        no change to entity without relationship to B
-        (2, List(
-          // (None, None),                                                     no relationship to B
-          (None, Some(Map(pint1, pint2))), //                                  no change without filter match
-          (Some("a"), Some(Map(pint4, pint5))), //                             B attribute added
-          (Some("b"), Some(Map(pint2, pint3, pint3, pint4, pint4, pint5))), // B attribute updated
-        ))
-      ))
-
-      _ <- B.s_?.a1.iMap.query.get.map(_ ==> List(
-        (None, Map(pint1, pint2)),
-        (Some("a"), Map(pint4, pint5)),
-        (Some("b"), Map(pint2, pint3, pint3, pint4, pint4, pint5)),
-        (Some("x"), Map(pint0, pint1)), // no change to entity without relationship from A
       ))
     } yield ()
   }

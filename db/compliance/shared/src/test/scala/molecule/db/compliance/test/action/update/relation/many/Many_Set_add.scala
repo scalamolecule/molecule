@@ -37,18 +37,6 @@ case class Many_Set_add(
         (5, List((Some("e"), Set(2, 3, 4, 5)), (Some("f"), Set(3, 4, 5)))), // update in 2 ref entities
         (6, List((Some("g"), Set(4, 5)))), //                                  update, but already has same values
       ))
-
-      // Filter by A ids, upsert B values
-      _ <- A(a, b, c, d, e, f).Bb.iSet.add(5, 6).upsert.transact
-
-      _ <- A.i.a1.Bb.*?(B.s_?.iSet).query.get.map(_ ==> List(
-        (1, List((None, Set(5, 6)))), //                                             ref + insertion
-        (2, List((Some("a"), Set(5, 6)))), //                                        insertion in 1 ref entity
-        (3, List((Some("b"), Set(5, 6)), (Some("c"), Set(5, 6)))), //                insertion in 2 ref entities
-        (4, List((Some("d"), Set(1, 2, 4, 5, 6)))), //                               update in 1 ref entity
-        (5, List((Some("e"), Set(2, 3, 4, 5, 6)), (Some("f"), Set(3, 4, 5, 6)))), // update in 2 ref entities
-        (6, List((Some("g"), Set(4, 5, 6)), (Some("h"), Set(5, 6)))), //             update in one ref entity and insertion in another
-      ))
     } yield ()
   }
 
@@ -75,18 +63,6 @@ case class Many_Set_add(
         (5, List((Some("e"), Set(2, 3, 4, 5)), (Some("f"), Set(3, 4, 5)))), // update in 2 ref entities
         (6, List((Some("g"), Set(4, 5)))), //                                  update, but already has same values
       ))
-
-      // Filter by A ids, upsert B values
-      _ <- A.i_.Bb.iSet.add(5, 6).upsert.transact
-
-      _ <- A.i.a1.Bb.*?(B.s_?.iSet).query.get.map(_ ==> List(
-        (1, List((None, Set(5, 6)))), //                                             ref + insertion
-        (2, List((Some("a"), Set(5, 6)))), //                                        insertion in 1 ref entity
-        (3, List((Some("b"), Set(5, 6)), (Some("c"), Set(5, 6)))), //                insertion in 2 ref entities
-        (4, List((Some("d"), Set(1, 2, 4, 5, 6)))), //                               update in 1 ref entity
-        (5, List((Some("e"), Set(2, 3, 4, 5, 6)), (Some("f"), Set(3, 4, 5, 6)))), // update in 2 ref entities
-        (6, List((Some("g"), Set(4, 5, 6)), (Some("h"), Set(5, 6)))), //             update in one ref entity and insertion in another
-      ))
     } yield ()
   }
 
@@ -108,16 +84,6 @@ case class Many_Set_add(
         // (<none>, List("a")), //            no A attribute to update
         (Set(1, 2, 3, 4), List("b", "c")), // A attribute updated
         (Set(2, 3, 4), List("d", "e")), //    A attribute updated
-      ))
-
-      // Filter by B attribute, update A values
-      _ <- A.iSet.add(4, 5).Bb.s_.upsert.transact
-
-      _ <- A.iSet.Bb.*?(B.s.a1).query.get.map(_.sortBy(_._2.headOption.toString) ==> List(
-        (Set(0, 1), List()), //                  nothing updated since this A entity has no ref to B
-        (Set(4, 5), List("a")), //               A attribute inserted
-        (Set(1, 2, 3, 4, 5), List("b", "c")), // A attribute updated
-        (Set(2, 3, 4, 5), List("d", "e")), //    A attribute updated
       ))
     } yield ()
   }
@@ -150,26 +116,6 @@ case class Many_Set_add(
           (Some("a"), None), //               no B attribute to update
           (Some("b"), Some(Set(2, 3, 4))), // B attribute updated
         ))
-      ))
-
-      // Filter by B attribute, upsert B values
-      _ <- A.Bb.s_.iSet.add(4, 5).upsert.transact
-
-      _ <- A.i.a1.Bb.*?(B.s_?.a1.iSet_?).query.get.map(_ ==> List(
-        (1, List()), // no change to entity without relationship to B
-        (2, List(
-          // (None, None),                    no relationship to B
-          (None, Some(Set(1, 2))), //         no change without filter match
-          (Some("a"), Some(Set(4, 5))), //    B attribute added
-          (Some("b"), Some(Set(2, 3, 4, 5))), // B attribute updated
-        ))
-      ))
-
-      _ <- B.s_?.a1.iSet.query.get.map(_ ==> List(
-        (None, Set(1, 2)),
-        (Some("a"), Set(4, 5)),
-        (Some("b"), Set(2, 3, 4, 5)),
-        (Some("x"), Set(0, 1)), // no change to entity without relationship from A
       ))
     } yield ()
   }

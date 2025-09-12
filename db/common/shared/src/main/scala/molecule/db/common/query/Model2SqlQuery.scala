@@ -39,6 +39,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
 
     // Recursively resolve molecule elements
     resolve(elements2)
+    //    resolve(elements1)
   }
 
   def getWhereClauses: ListBuffer[String] = {
@@ -46,7 +47,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
     where.map { case (col, expr) => s"$col $expr" }
   }
 
-  final private def renderSqlQuery(
+  final def renderSqlQuery(
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): String = {
