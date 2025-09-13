@@ -22,7 +22,7 @@ inThisBuild(
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     versionScheme := Some("early-semver"),
     version := moleculeVersion,
-    scalaVersion := "3.7.1",
+    scalaVersion := "3.7.3",
     publishTo := localStaging.value,
 
     // Run tests for all systems sequentially to avoid data locks with dbs.

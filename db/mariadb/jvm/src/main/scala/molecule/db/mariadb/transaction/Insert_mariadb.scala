@@ -2,7 +2,6 @@ package molecule.db.mariadb.transaction
 
 import java.sql.PreparedStatement as PS
 import java.util.Date
-import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.{InsertResolvers, ResolveInsert, SqlInsert}
 
 trait Insert_mariadb extends SqlInsert { self: ResolveInsert =>

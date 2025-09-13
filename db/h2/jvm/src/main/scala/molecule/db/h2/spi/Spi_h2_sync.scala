@@ -10,12 +10,6 @@ import molecule.db.common.marshalling.{ConnProxy, JdbcProxy}
 import molecule.db.common.query.{Model2SqlQuery, SqlQueryBase}
 import molecule.db.common.spi.{SpiBaseJVM_sync, TxReport}
 import molecule.db.common.transaction.*
-import molecule.db.common.transaction.strategy.{SqlAction, SqlOps}
-import molecule.db.common.transaction.strategy.delete.DeleteAction
-import molecule.db.common.transaction.strategy.insert.InsertAction
-import molecule.db.common.transaction.strategy.save.SaveAction
-import molecule.db.common.transaction.strategy.update.UpdateAction
-import molecule.db.common.transaction.plan.InsertEngine
 import molecule.db.common.util.Executor.*
 import molecule.db.h2.query.Model2SqlQuery_h2
 
@@ -35,12 +29,6 @@ trait Spi_h2_sync extends SpiBaseJVM_sync {
 
 
   // Util --------------------------------------
-
-  case class SqlOps_h2(conn: JdbcConn_JVM) extends SqlOps {
-    override val sqlConn = conn.sqlConn
-    override val m2q     = (elements: List[Element]) =>
-      new Model2SqlQuery_h2(elements)
-  }
 
   override def validateUpdateSet(
     proxy: ConnProxy, elements: List[Element], query2resultSet: String => RS

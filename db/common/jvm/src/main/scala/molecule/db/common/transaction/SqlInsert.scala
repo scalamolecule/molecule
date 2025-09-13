@@ -2,8 +2,6 @@ package molecule.db.common.transaction
 
 import java.sql.PreparedStatement as PS
 import molecule.core.dataModel.*
-import molecule.db.common.transaction.strategy.{SqlAction, SqlOps}
-import molecule.db.common.transaction.strategy.insert.{InsertAction, InsertRoot}
 
 
 trait SqlInsert extends ValueTransformers { self: ResolveInsert =>

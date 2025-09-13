@@ -10,11 +10,6 @@ import molecule.db.common.javaSql.ResultSetInterface as RS
 import molecule.db.common.marshalling.{ConnProxy, JdbcProxy}
 import molecule.db.common.spi.{Conn, SpiBaseJVM_sync, TxReport}
 import molecule.db.common.transaction.*
-import molecule.db.common.transaction.strategy.SqlOps
-import molecule.db.common.transaction.strategy.delete.DeleteAction
-import molecule.db.common.transaction.strategy.insert.InsertAction
-import molecule.db.common.transaction.strategy.save.SaveAction
-import molecule.db.common.transaction.strategy.update.UpdateAction
 import molecule.db.common.util.Executor.*
 import molecule.db.sqlite.facade.JdbcHandlerSQlite_JVM
 import molecule.db.sqlite.query.Model2SqlQuery_sqlite
@@ -35,43 +30,6 @@ trait Spi_sqlite_sync extends SpiBaseJVM_sync {
 
 
   // Util --------------------------------------
-
-//  case class SqlOps_sqlite(conn: JdbcConn_JVM) extends SqlOps {
-//    override val sqlConn       = conn.sqlConn
-//    override val defaultValues = "DEFAULT VALUES"
-//    override val m2q           = (elements: List[Element]) =>
-//      new Model2SqlQuery_sqlite(elements)
-//
-//    // Since SQlite doesn't allow us to get ps.getGeneratedKeys after an
-//    // executeBatch(), we get the affected ids by brute force with a query instead.
-//    override def getIds(
-//      ps: PS,
-//      table: String
-//    ): List[Long] = {
-//      val getPrevId = sqlConn.prepareStatement(
-//        s"select max(id) from $table"
-//      ).executeQuery()
-//      getPrevId.next()
-//      val prevId = getPrevId.getLong(1)
-//      getPrevId.close()
-//
-//      // Execute incoming batch of prepared statements
-//      ps.executeBatch()
-//      ps.close()
-//
-//      val getNewIds = sqlConn.prepareStatement(
-//        s"select id from $table where id > $prevId order by id asc"
-//      ).executeQuery()
-//
-//      val ids = ListBuffer.empty[Long]
-//      while (getNewIds.next()) {
-//        ids += getNewIds.getLong(1)
-//      }
-//      getNewIds.close()
-//
-//      ids.toList
-//    }
-//  }
 
   override def getIdsAndClose(
     ps: PS, conn: JdbcConn_JVM, table: String,

@@ -20,24 +20,13 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
     import molecule.db.compliance.domains.dsl.Types.*
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
-      //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      //      _ <- Entity.int(3).save.transact
-      //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      //      _ <- Entity(a).int(10).update.transact
-      //      _ <- Entity(b).delete.transact
-      //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      _ <- Entity.int(3).save.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- Entity(a).int(10).update.transact
+      _ <- Entity(b).delete.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
-      //      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
-      //      a = (1, Some(ref1))
-      //      b = (2, Some(ref2))
-      //      c = (3, Some(ref3))
-      //      x = (4, Option.empty[Long])
-
-      //      _ <- Entity.i.ref_?.insert(List(a, b, c, x)).transact
-      //      _ <- Entity.i.ref_?.insert(List(a)).transact
-//      _ <- Entity.i.string_?.insert(List((1, Some("a")))).i.transact
-      _ <- Entity.i.ref_?.insert(List((1, Some(1L)))).i.transact
-      _ <- Entity.i.ref.insert(List((1, 1L))).i.transact
     } yield ()
   }
 

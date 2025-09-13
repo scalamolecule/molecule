@@ -12,9 +12,7 @@ import molecule.db.common.api.Savepoint
 import molecule.db.common.javaSql.{ResultSetImpl, ResultSetInterface}
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.{Conn, TxReport}
-import molecule.db.common.transaction.plan.InsertEngine
-import molecule.db.common.transaction.strategy.SqlAction
-import molecule.db.common.transaction.{CachedConnection, SavepointImpl, SqlDataType_JVM}
+import molecule.db.common.transaction.{CachedConnection, SavepointImpl}
 import molecule.db.common.util.ModelUtils
 import zio.ZIO
 
@@ -24,7 +22,6 @@ case class JdbcConn_JVM(
 ) extends Conn(proxy)
   with AutoCloseable
   with CachedConnection
-  with SqlDataType_JVM
   with ModelUtils
   with MoleculeLogging {
 
@@ -40,10 +37,6 @@ case class JdbcConn_JVM(
 
   def resultSet(underlying: ResultSet): ResultSetInterface = {
     new ResultSetImpl(underlying)
-  }
-
-  override def transact_sync(action: SqlAction): TxReport = {
-    atomicTransaction(() => action.execute)
   }
 
   def atomicTransaction(executions: () => List[Long]): TxReport = {
@@ -211,9 +204,7 @@ case class JdbcConn_JVM(
       case -1             => // do nothing
       case savepointIndex => {
         sqlConn.rollback(savepointStack(savepointIndex))
-        savepointStack.remove(savepointIndex, savepointStack.length - savepointIndex)
-        // Could use takeInPlace instead, but not available on Scala 2.12
-        // savepointStack.takeInPlace(savepointIndex)
+        savepointStack.takeInPlace(savepointIndex)
       }
     }
   }

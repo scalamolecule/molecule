@@ -16,13 +16,6 @@ import molecule.db.common.marshalling.ConnProxy
 import molecule.db.common.query.casting.strategy.{CastOptEntity, CastOptRefs, CastTuple}
 import molecule.db.common.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.db.common.spi.{Conn, Renderer, Spi_sync, TxReport}
-import molecule.db.common.transaction.plan.InsertEngine
-import molecule.db.common.transaction.plan.render.PlanRenderer
-import molecule.db.common.transaction.strategy.SqlAction
-import molecule.db.common.transaction.strategy.delete.DeleteAction
-import molecule.db.common.transaction.strategy.insert.InsertAction
-import molecule.db.common.transaction.strategy.save.SaveAction
-import molecule.db.common.transaction.strategy.update.UpdateAction
 import molecule.db.common.transaction.*
 import molecule.db.common.util.Executor.*
 import molecule.db.common.util.FutureUtils
@@ -261,7 +254,7 @@ trait SpiBaseJVM_sync
         val tpls          = dataPartition.tuples
 
         sortTableInserts(tableInserts).foreach { tableInsert =>
-          println(tableInsert)
+          //          println(tableInsert)
           val ps = conn.sqlConn.prepareStatement(tableInsert.sql, Statement.RETURN_GENERATED_KEYS)
           if (tableInsert.foreignKeys.isEmpty) {
             tpls.foreach { tpl =>
@@ -674,15 +667,6 @@ trait SpiBaseJVM_sync
            |------------------ Error inspecting $action -----------------------
            |$dataModel""".stripMargin)
       throw e
-  }
-
-  private def renderInspectTx(
-    label: String,
-    dataModel: DataModel,
-    action: SqlAction,
-    tpls: Seq[Product] = Nil
-  ): String = {
-    renderInspection(label, dataModel, action.toString, tpls.mkString("\n"))
   }
 
 

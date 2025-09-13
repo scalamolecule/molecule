@@ -1,7 +1,6 @@
 package molecule.db.mariadb.transaction
 
 import java.sql.PreparedStatement as PS
-import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.{ResolveUpdate, SqlUpdate}
 
 trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>

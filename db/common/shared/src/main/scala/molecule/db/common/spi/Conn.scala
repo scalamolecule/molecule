@@ -10,15 +10,7 @@ import molecule.db.common.util.ModelUtils
 import zio.ZIO
 
 abstract class Conn(val proxy: ConnProxy)
-  extends ModelUtils { self: DataType =>
-
-
-  def transact_async(data: Data)
-                    (using ec: ExecutionContext): Future[TxReport] =
-    throw jvmOnly("transact_async")
-
-  def transact_sync(data: Data): TxReport =
-    throw jvmOnly("transact_sync")
+  extends ModelUtils {
 
   // Underlying real database connection
   def db: Any = ???

@@ -1,7 +1,6 @@
 package molecule.db.postgresql.transaction
 
 import java.sql.PreparedStatement as PS
-import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.{InsertResolvers, ResolveInsert, SqlInsert}
 
 trait Insert_postgresql extends SqlInsert { self: ResolveInsert =>

@@ -6,8 +6,7 @@ import boopickle.Default.*
 import molecule.core.dataModel.*
 import molecule.core.error.ModelError
 import molecule.db.common.spi.SpiHelpers
-import molecule.db.common.transaction.strategy.SqlOps
-import molecule.db.common.transaction.strategy.update.{UpdateAction, UpdateRoot}
+
 
 trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate =>
 
