@@ -18,6 +18,7 @@ trait Insert_sqlite
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
+    cast = ""
     addIterable(attr, optRef, tplIndex, value2json)
   }
 
@@ -31,6 +32,7 @@ trait Insert_sqlite
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
+    cast = ""
     addOptIterable(attr, optRef, tplIndex, value2json)
   }
 
@@ -44,6 +46,7 @@ trait Insert_sqlite
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
+    cast = ""
     addIterable(attr, optRef, tplIndex, value2json)
   }
 
@@ -57,6 +60,7 @@ trait Insert_sqlite
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
+    cast = ""
     addOptIterable(attr, optRef, tplIndex, value2json)
   }
 
@@ -68,6 +72,7 @@ trait Insert_sqlite
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
+    cast = ""
     val paramIndex   = insertAction.setCol(attr)
     val stableInsert = insertAction
     (tpl: Product) => {
@@ -94,6 +99,7 @@ trait Insert_sqlite
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
+    cast = ""
     val paramIndex   = insertAction.setCol(attr)
     val stableInsert = insertAction
     (tpl: Product) => {
@@ -121,6 +127,7 @@ trait Insert_sqlite
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
+    cast = ""
     val stableInsert = insertAction
     optRef.fold {
       val paramIndex = stableInsert.setCol(attr)
@@ -150,6 +157,7 @@ trait Insert_sqlite
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
+    cast = ""
     val stableInsert = insertAction
     optRef.fold {
       val paramIndex = stableInsert.setCol(attr)

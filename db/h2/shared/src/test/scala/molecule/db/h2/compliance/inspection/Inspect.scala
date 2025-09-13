@@ -11,7 +11,6 @@ import molecule.db.h2.setup.DbProviders_h2
 
 class Test_Inspect extends MUnit with DbProviders_h2 with TestUtils {
 
-
   "Inspect without fetching" - types {
     for {
       _ <- Entity.string("a").int(1).save.transact

@@ -143,7 +143,7 @@ case class FlatOptRef(
         }
 
       // Instead, use flat card-many ref
-      _ <- A.i.B.s.i.Cc.s.query.get.map(_ ==> List(
+      _ <- A.i.B.s.i.Cc.s.a1.query.get.map(_ ==> List(
         (2, "b", 2, "x"),
         (2, "b", 2, "y"),
       ))

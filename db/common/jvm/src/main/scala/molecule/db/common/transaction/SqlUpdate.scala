@@ -223,7 +223,7 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
     value2json: (StringBuffer, T) => StringBuffer,
   ): (String, PS => Unit) = {
     if (map.isEmpty) {
-      (s"$attr = $attr", (ps: PS) => ())
+      (s"$attr = $attr", (ps: PS) => ()) // unchanged value
     } else {
       val scalaBaseType = exts.head
       val colInput      = s"$attr = addPairs_$scalaBaseType($attr, ?)"
@@ -240,14 +240,14 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
     keys: Seq[String],
     exts: List[String],
   ): (String, PS => Unit) = {
-    val scalaBaseType = exts.head
-    val colInput      = s"$attr = removePairs_$scalaBaseType($attr, ?)"
-    val colSetter     = if (keys.isEmpty) {
-      (ps: PS) => ps.setNull(paramIndex, 0)
+    if (keys.isEmpty) {
+      (s"$attr = $attr", (ps: PS) => ()) // unchanged value
     } else {
-      (ps: PS) => ps.setArray(paramIndex, ps.getConnection.createArrayOf("String", keys.toArray))
+      val scalaBaseType = exts.head
+      val colInput      = s"$attr = removePairs_$scalaBaseType($attr, ?)"
+      val colSetter     = (ps: PS) => ps.setArray(paramIndex, ps.getConnection.createArrayOf("String", keys.toArray))
+      (colInput, colSetter)
     }
-    (colInput, colSetter)
   }
 
 
@@ -260,7 +260,8 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
     iterable: M[T],
     exts: List[String],
     vs2array: M[T] => Array[AnyRef],
-  ): (String, PS => Unit) = {tter = if (iterable.isEmpty)
+  ): (String, PS => Unit) = {
+    val colSetter = if (iterable.isEmpty)
       (ps: PS) => ps.setNull(paramIndex, java.sql.Types.NULL)
     else
       addArray(paramIndex, exts(1), vs2array(iterable))
@@ -276,7 +277,7 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
     iterable2array: M[T] => Array[AnyRef],
   ): (String, PS => Unit) = {
     if (iterable.isEmpty) {
-      (s"$attr = $attr", (ps: PS) => ())
+      (s"$attr = $attr", (ps: PS) => ()) // unchanged value
     } else {
       val cast      = exts(2) match {
         case ""  => ""
@@ -305,20 +306,6 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
       (colInput, addArray(paramIndex, dbBaseType, iterable2array(iterable)))
     }
   }
-
-
-  //    protected def setAttrPresence(ent: String, attr: String): (String, PS => Unit) = {
-  //      if (isUpsert) {
-  //        // Allow finding where clauses for ids query. Not used otherwise
-  //        query.filterAttrs += AttrOneOptByte(ent, attr)
-  //      } else {
-  //        // Attribute value present in updated data
-  //        query.filterAttrs += AttrOneTacByte(ent, attr)
-  //
-  //        // Used for single entity update with ids and no filters
-  //        updateAction.mandatoryCols += s"$ent.$attr IS NOT NULL"
-  //      }
-  //    }
 
   private def addArray(
     paramIndex: Int, dbBaseType: String, array: Array[AnyRef]

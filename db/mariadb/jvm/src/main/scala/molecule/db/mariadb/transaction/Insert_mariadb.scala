@@ -17,6 +17,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert =>
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     addIterable(attr, paramIndex, tplIndex, value2json)
   }
 
@@ -30,6 +31,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert =>
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     addOptIterable(attr, paramIndex, tplIndex, value2json)
   }
 
@@ -43,6 +45,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert =>
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     addIterable(attr, paramIndex, tplIndex, value2json)
   }
 
@@ -56,6 +59,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert =>
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     addOptIterable(attr, paramIndex, tplIndex, value2json)
   }
 
@@ -67,6 +71,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     (ps: PS, tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, ?]] match {
         case map if map.nonEmpty =>
@@ -89,6 +94,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert =>
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     (ps: PS, tpl: Product) => {
       val iterable = tpl.productElement(tplIndex).asInstanceOf[Iterable[T]]
       if (iterable.nonEmpty) {
@@ -106,6 +112,7 @@ trait Insert_mariadb extends SqlInsert { self: ResolveInsert =>
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     (ps: PS, tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(iterable: Iterable[_]) =>

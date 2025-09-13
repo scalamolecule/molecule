@@ -5,49 +5,50 @@ import java.util.Date
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.{ResolveSave, SqlSave}
 
-trait Save_mysql
-  extends SqlSave { self: ResolveSave & SqlOps =>
+trait Save_mysql extends SqlSave { self: ResolveSave =>
 
   override protected def addSet[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     optSet: Option[Set[T]],
-    transformValue: T => Any,
+    valueSetter: (PS, Int, T) => Unit,
     exts: List[String],
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = {
-    addIterable(attr, optRef, optSet, value2json)
+  ): (PS, Product) => Unit = {
+    cast = ""
+    addIterable(attr, paramIndex, optSet, value2json)
   }
 
   override protected def addSeq[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     optSeq: Option[Seq[T]],
-    transformValue: T => Any,
+    valueSetter: (PS, Int, T) => Unit,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = {
-    addIterable(attr, optRef, optSeq, value2json)
+  ): (PS, Product) => Unit = {
+    cast = ""
+    addIterable(attr, paramIndex, optSeq, value2json)
   }
 
   override protected def addMap[T](
     ent: String,
     attr: String,
+    paramIndex: Int,
     optMap: Option[Map[String, T]],
-    transformValue: T => Any,
+    valueSetter: (PS, Int, T) => Unit,
     value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = {
-    val paramIndex = saveAction.setCol(attr)
+  ): (PS, Product) => Unit = {
+    cast = ""
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        saveAction.addColSetter((ps: PS) =>
-          ps.setString(paramIndex, map2json(map, value2json)))
+        (ps: PS, _: Product) => ps.setString(paramIndex, map2json(map, value2json))
       case _                                    =>
-        saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        (ps: PS, _: Product) => ps.setNull(paramIndex, 0)
     }
   }
 
@@ -56,22 +57,16 @@ trait Save_mysql
 
   private def addIterable[T](
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     optIterable: Option[Iterable[T]],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = {
-    optRef.fold {
-      val paramIndex = saveAction.setCol(attr)
-      if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
-        val json = iterable2json(optIterable.get, value2json)
-        saveAction.addColSetter((ps: PS) => ps.setString(paramIndex, json))
-      } else {
-        saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
-      }
-    } { ref =>
-      optIterable.foreach(refIds =>
-        saveAction.refIds(attr, ref, refIds.asInstanceOf[Set[Long]])
-      )
+  ): (PS, Product) => Unit = {
+    cast = ""
+    if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
+      val json = iterable2json(optIterable.get, value2json)
+      (ps: PS, _: Product) => ps.setString(paramIndex, json)
+    } else {
+      (ps: PS, _: Product) => ps.setNull(paramIndex, 0)
     }
   }
 

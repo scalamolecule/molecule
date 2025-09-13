@@ -23,15 +23,15 @@ trait ResolveSave { self: SqlSave =>
           a match {
             case a: AttrOne => a match {
               case a: AttrOneMan =>
-                val tableInsert1 = tableInsert.add(a, resolveAttrOneMan(a, paramIndex))
+                val tableInsert1 = tableInsert.add(a, resolveAttrOneMan(a, paramIndex), cast)
                 resolve(tail, paramIndex + 1, tableInserts, tableInsert1)
 
               case a: AttrOneOpt =>
-                val tableInsert1 = tableInsert.add(a, resolveAttrOneOpt(a, paramIndex))
+                val tableInsert1 = tableInsert.add(a, resolveAttrOneOpt(a, paramIndex), cast)
                 resolve(tail, paramIndex + 1, tableInserts, tableInsert1)
 
               case a: AttrOneTac =>
-                val tableInsert1 = tableInsert.add(a, resolveAttrOneTac(a, paramIndex))
+                val tableInsert1 = tableInsert.add(a, resolveAttrOneTac(a, paramIndex), cast)
                 resolve(tail, paramIndex + 1, tableInserts, tableInsert1)
             }
 
@@ -65,11 +65,11 @@ trait ResolveSave { self: SqlSave =>
 
             case a: AttrMap => a match {
               case a: AttrMapMan =>
-                val tableInsert1 = tableInsert.add(a, resolveAttrMapMan(a, paramIndex))
+                val tableInsert1 = tableInsert.add(a, resolveAttrMapMan(a, paramIndex), cast)
                 resolve(tail, paramIndex + 1, tableInserts, tableInsert1)
 
               case a: AttrMapOpt =>
-                val tableInsert1 = tableInsert.add(a, resolveAttrMapOpt(a, paramIndex))
+                val tableInsert1 = tableInsert.add(a, resolveAttrMapOpt(a, paramIndex), cast)
                 resolve(tail, paramIndex + 1, tableInserts, tableInsert1)
 
               case a: AttrMapTac =>
@@ -119,6 +119,7 @@ trait ResolveSave { self: SqlSave =>
       tableInsert.refPath ++ List(refAttr, ref),
       Nil,
       List(reverseRefAttr.get -> tableInsert.refPath),
+      Nil,
       List("?"),
       Nil
     )
@@ -143,7 +144,7 @@ trait ResolveSave { self: SqlSave =>
     val refPath1  = tableInsert.refPath ++ List(refAttr, ref)
     val refInsert = tableInsert.copy(
       foreignKeys = tableInsert.foreignKeys :+ (refAttr -> refPath1),
-      inputPlaceHolders = tableInsert.inputPlaceHolders :+ "?",
+      refPlaceHolders = tableInsert.refPlaceHolders :+ "?",
     )
     resolve(tail, 1, tableInserts :+ refInsert, TableInsert(refPath1))
   }

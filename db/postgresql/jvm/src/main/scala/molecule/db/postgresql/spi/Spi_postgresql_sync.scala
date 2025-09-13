@@ -23,35 +23,14 @@ object Spi_postgresql_sync extends Spi_postgresql_sync
 
 trait Spi_postgresql_sync extends SpiBaseJVM_sync {
 
-  override def save_getAction(
-    save: Save, conn: JdbcConn_JVM
-  ): SaveAction = {
-    new SqlOps_postgres(conn) with ResolveSave with Save_postgresql {}
-      .getSaveAction(save.dataModel.elements)
-  }
+  override def getResolveSave(save: Save, conn: JdbcConn_JVM) =
+    new ResolveSave with Save_postgresql {}
 
-  override def insert_getAction(
-    insert: Insert, conn: JdbcConn_JVM
-  ): InsertAction = {
-    new SqlOps_postgres(conn) with ResolveInsert with Insert_postgresql {}
-      .getInsertAction(insert.dataModel.elements, insert.tpls)
-  }
+  override def getResolveInsert(insert: Insert, conn: JdbcConn_JVM) =
+    new ResolveInsert with Insert_postgresql {}
 
-  override def update_getAction(
-    update: Update, conn: JdbcConn_JVM
-  ): UpdateAction = {
-    new SqlOps_postgres(conn) with ResolveUpdate with Update_postgresql {
-      override val isUpsert: Boolean = update.isUpsert
-    }.getUpdateAction(update.dataModel.elements)
-  }
-
-  override def delete_getAction(
-    delete: Delete, conn: JdbcConn_JVM
-  ): DeleteAction = {
-    new SqlOps_postgres(conn)
-      with ResolveDelete with Spi_postgresql_sync with SqlDelete {}
-      .getDeleteAction(delete.dataModel.elements, conn.proxy.metaDb)
-  }
+  override def getResolveUpdate(update: Update, conn: JdbcConn_JVM) =
+    new ResolveUpdate(update.isUpsert) with Update_postgresql {}
 
 
   // Util --------------------------------------

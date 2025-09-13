@@ -10,14 +10,17 @@ import molecule.db.common.util.SerializationUtils
 
 trait SqlSave extends ValueTransformers with SerializationUtils { self: ResolveSave =>
 
+  var cast = ""
+
   protected def addOne[T](
     ent: String,
     attr: String,
     paramIndex: Int,
     optValue: Option[T],
     valueSetter: (PS, Int, T) => Unit,
-    exts: List[String] = Nil
+    exts: List[String]
   ): (PS, Product) => Unit = {
+    cast = exts(2)
     optValue.fold {
       (ps: PS, _: Product) => ps.setNull(paramIndex, java.sql.Types.NULL)
     } { value =>
@@ -31,10 +34,11 @@ trait SqlSave extends ValueTransformers with SerializationUtils { self: ResolveS
     paramIndex: Int,
     optSet: Option[Set[T]],
     valueSetter: (PS, Int, T) => Unit,
-    exts: List[String] = Nil,
+    exts: List[String],
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     addIterable(attr, paramIndex, optSet, exts(1), set2array)
   }
 
@@ -48,6 +52,7 @@ trait SqlSave extends ValueTransformers with SerializationUtils { self: ResolveS
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     addIterable(attr, paramIndex, optSeq, exts(1), seq2array)
   }
 
@@ -57,6 +62,7 @@ trait SqlSave extends ValueTransformers with SerializationUtils { self: ResolveS
     paramIndex: Int,
     optArray: Option[Array[Byte]],
   ): (PS, Product) => Unit = {
+    cast = ""
     if (optArray.nonEmpty && optArray.get.nonEmpty) {
       (ps: PS, _: Product) => ps.setBytes(paramIndex, optArray.get)
     } else {
@@ -72,6 +78,7 @@ trait SqlSave extends ValueTransformers with SerializationUtils { self: ResolveS
     valueSetter: (PS, Int, T) => Unit,
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
         (ps: PS, _: Product) => ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
@@ -80,7 +87,6 @@ trait SqlSave extends ValueTransformers with SerializationUtils { self: ResolveS
     }
   }
 
-
   private def addIterable[T, M[_] <: Iterable[?]](
     attr: String,
     paramIndex: Int,
@@ -88,6 +94,7 @@ trait SqlSave extends ValueTransformers with SerializationUtils { self: ResolveS
     sqlTpe: String,
     iterable2array: M[T] => Array[AnyRef],
   ): (PS, Product) => Unit = {
+    cast = ""
     if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
       val iterable = optIterable.get
       (ps: PS, _: Product) =>

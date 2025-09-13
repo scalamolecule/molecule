@@ -316,7 +316,7 @@ case class NestedOptional(
       _ <- A.i_.Bb.*?(B.i.<(2)).query.get.map(_ ==> List(List(1)))
       _ <- A.i_.Bb.*?(B.i.<=(2).a1).query.get.map(_ ==> List(List(1, 2)))
       _ <- A.i_.Bb.*?(B.i.>(2)).query.get.map(_ ==> List(List(3)))
-      _ <- A.i_.Bb.*?(B.i.>=(2)).query.get.map(_ ==> List(List(2, 3)))
+      _ <- A.i_.Bb.*?(B.i.>=(2).a1).query.get.map(_ ==> List(List(2, 3)))
     } yield ()
   }
 

@@ -27,62 +27,17 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
       //      _ <- Entity(b).delete.transact
       //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
-      id <- Entity.i(42).save.transact.map(_.id)
-      // Seq attribute not yet asserted
-      _ <- Entity.intSeq.query.get.map(_ ==> Nil)
+      //      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+      //      a = (1, Some(ref1))
+      //      b = (2, Some(ref2))
+      //      c = (3, Some(ref3))
+      //      x = (4, Option.empty[Long])
 
-      // Removing value from non-asserted Seq has no effect
-      _ <- Entity(id).intSeq.remove(int1).update.transact
-      _ <- Entity.intSeq.query.get.map(_ ==> Nil)
-
-      // Start with some values
-      _ <- Entity(id).intSeq.add(
-        int1, int2, int3, int4, int5, int6, int7,
-        int1, int2, int3, int4, int5, int6, int7,
-      ).upsert.transact
-
-      // Remove all instances of a value
-      _ <- Entity(id).intSeq.remove(int7).update.transact
-      _ <- Entity.intSeq.query.get.map(_.head ==> List(
-        int1, int2, int3, int4, int5, int6,
-        int1, int2, int3, int4, int5, int6,
-      ))
-
-      // Removing non-existing value has no effect
-      _ <- Entity(id).intSeq.remove(int9).update.transact
-      _ <- Entity.intSeq.query.get.map(_.head ==> List(
-        int1, int2, int3, int4, int5, int6,
-        int1, int2, int3, int4, int5, int6,
-      ))
-
-      // Removing duplicate values has same effect as applying the value once
-      _ <- Entity(id).intSeq.remove(int6, int6).update.transact
-      _ <- Entity.intSeq.query.get.map(_.head ==> List(
-        int1, int2, int3, int4, int5,
-        int1, int2, int3, int4, int5,
-      ))
-
-      // Remove multiple values with vararg
-      _ <- Entity(id).intSeq.remove(int4, int5).update.transact
-      _ <- Entity.intSeq.query.get.map(_.head ==> List(
-        int1, int2, int3,
-        int1, int2, int3,
-      ))
-
-      // Remove multiple values with Seq
-      _ <- Entity(id).intSeq.remove(List(int2, int3)).update.transact
-      _ <- Entity.intSeq.query.get.map(_.head ==> List(
-        int1,
-        int1
-      ))
-
-      // Removing empty Seq of values has no effect
-      _ <- Entity(id).intSeq.remove(List.empty[Int]).update.i.transact
-      _ <- Entity.intSeq.query.get.map(_.head ==> List(int1, int1))
-
-      // Removing all remaining values deletes the attribute
-      _ <- Entity(id).intSeq.remove(List(int1)).update.transact
-      _ <- Entity.intSeq.query.get.map(_ ==> Nil)
+      //      _ <- Entity.i.ref_?.insert(List(a, b, c, x)).transact
+      //      _ <- Entity.i.ref_?.insert(List(a)).transact
+//      _ <- Entity.i.string_?.insert(List((1, Some("a")))).i.transact
+      _ <- Entity.i.ref_?.insert(List((1, Some(1L)))).i.transact
+      _ <- Entity.i.ref.insert(List((1, 1L))).i.transact
     } yield ()
   }
 

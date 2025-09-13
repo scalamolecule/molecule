@@ -4,22 +4,22 @@ import java.sql.PreparedStatement as PS
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.{ResolveSave, SqlSave}
 
-trait Save_postgresql
-  extends SqlSave { self: ResolveSave & SqlOps =>
+trait Save_postgresql extends SqlSave { self: ResolveSave =>
 
   override protected def addMap[T](
     ent: String,
     attr: String,
+    paramIndex: Int,
     optMap: Option[Map[String, T]],
-    transformValue: T => Any,
+    valueSetter: (PS, Int, T) => Unit,
     value2json: (StringBuffer, T) => StringBuffer
-  ): Unit = {
-    val paramIndex = saveAction.setCol(attr, "::jsonb")
+  ): (PS, Product) => Unit = {
+    cast = "::jsonb"
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
-        saveAction.addColSetter((ps: PS) => ps.setString(paramIndex, map2json(map, value2json)))
+        (ps: PS, _: Product) => ps.setString(paramIndex, map2json(map, value2json))
       case _                                    =>
-        saveAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
+        (ps: PS, _: Product) => ps.setNull(paramIndex, 0)
     }
   }
 

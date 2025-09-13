@@ -18,6 +18,7 @@ trait Save_sqlite
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
+    cast = ""
     addIterable(attr, optRef, optSet, value2json)
   }
 
@@ -31,6 +32,7 @@ trait Save_sqlite
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
+    cast = ""
     addIterable(attr, optRef, optSeq, value2json)
   }
 
@@ -41,6 +43,7 @@ trait Save_sqlite
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
+    cast = ""
     val paramIndex1 = saveAction.setCol(attr)
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
@@ -60,6 +63,7 @@ trait Save_sqlite
     optIterable: Option[Iterable[T]],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
+    cast = ""
     optRef.fold {
       val paramIndex1 = saveAction.setCol(attr)
       if (optIterable.nonEmpty && optIterable.get.nonEmpty) {

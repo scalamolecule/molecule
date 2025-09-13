@@ -12,20 +12,23 @@ case class TableInsert(
   columns: List[String] = Nil,
   foreignKeys: List[(String, List[String])] = Nil,
   inputPlaceHolders: List[String] = Nil,
+  refPlaceHolders: List[String] = Nil,
   colSetters: List[(PS, Product) => Unit] = Nil,
 ) {
-  def add(a: Attr, colSetter: (PS, Product) => Unit) = copy(
-    columns = columns :+ a.attr,
-    inputPlaceHolders = inputPlaceHolders :+ "?",
-    colSetters = colSetters :+ colSetter
-  )
+  def add(a: Attr, colSetter: (PS, Product) => Unit, cast: String = "") = {
+    copy(
+      columns = columns :+ a.attr,
+      inputPlaceHolders = inputPlaceHolders :+ s"?$cast",
+      colSetters = colSetters :+ colSetter
+    )
+  }
 
   val defaultValues = "(id) VALUES (DEFAULT)"
 
   def sql = {
     val table  = refPath.last
     val cols   = (columns ++ foreignKeys.map(_._1)).mkString(",\n  ")
-    val inputs = inputPlaceHolders.mkString(", ")
+    val inputs = (inputPlaceHolders ++ refPlaceHolders).mkString(", ")
     if (cols.nonEmpty) {
       s"""INSERT INTO $table (
          |  $cols
@@ -42,6 +45,7 @@ case class TableInsert(
        |  columns           = $columns,
        |  foreignKeys       = $foreignKeys,
        |  inputPlaceHolders = $inputPlaceHolders,
+       |  refPlaceHolders   = $refPlaceHolders,
        |  colSetters        = <${colSetters.length} colSetters>
        |)
        |

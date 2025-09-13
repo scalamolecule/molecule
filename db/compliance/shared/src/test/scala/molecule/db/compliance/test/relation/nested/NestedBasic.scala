@@ -78,7 +78,7 @@ case class NestedBasic(
       _ <- Entity.i.Refs.*(ref23).insert((1, List(tpl23_1, tpl23_2))).transact
       _ <- Entity.i.Refs.*(
         Ref
-          .string
+          .string.a1
           .int
           .long
           .float

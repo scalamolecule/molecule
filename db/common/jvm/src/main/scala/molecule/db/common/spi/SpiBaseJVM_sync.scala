@@ -271,7 +271,7 @@ trait SpiBaseJVM_sync
         val tpls          = dataPartition.tuples
 
         sortTableInserts(tableInserts).foreach { tableInsert =>
-          //        println(tableInsert)
+          //          println(tableInsert)
           val ps = conn.sqlConn.prepareStatement(tableInsert.sql, Statement.RETURN_GENERATED_KEYS)
           if (tableInsert.foreignKeys.isEmpty) {
             tpls.foreach { tpl =>
@@ -363,14 +363,6 @@ trait SpiBaseJVM_sync
 
     def next(): DataPartition = {
       val partition = partitions(partitionIndex)
-
-      //      println(
-      //        s"""
-      //           |############################################################
-      //           |partitionIndex: $partitionIndex
-      //           |curTuples     : $curTuples
-      //           |$partition""".stripMargin)
-
       partitionIndex += 1
       val counts        = new Array[Int](curTuples.length)
       val nextTuples    = new ListBuffer[Product]
@@ -432,9 +424,6 @@ trait SpiBaseJVM_sync
           curTuples
       }
       val dataPartition = DataPartition(curTuples, childCounts)
-
-      //      println(dataPartition)
-
       curTuples = next
       childCounts = counts.toVector
       dataPartition
@@ -516,22 +505,6 @@ trait SpiBaseJVM_sync
   override def insert_inspect(insert: Insert)(using conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("insert", insert.dataModel) {
-      //      val jdbcConn       = conn.asInstanceOf[JdbcConn_JVM]
-      //      val cleanElements  = keywordsSuffixed(insert.dataModel.elements, conn.proxy)
-      //      val cleanDataModel = insert.dataModel.copy(elements = cleanElements)
-      //      val insertClean    = insert.copy(dataModel = cleanDataModel)
-
-      // Choose which action to render: planned plan (if supported) or legacy
-      //      val action: SqlAction =
-      //        if (isPlannableLinearScalar(cleanElements)) {
-      //          insert_getActionNEW(cleanElements, insert.tpls, jdbcConn)
-      //        } else {
-      //          insert_getAction(insertClean, jdbcConn)
-      //        }
-      //      val action: SqlAction = insert_getAction(insertClean, jdbcConn)
-      //
-      //      renderInspectTx("INSERT", insert.dataModel, action, insert.tpls)
-
       val (_, _, partitions, dataPartitions) = prepareInsert(insert, conn)
 
       val partitionsStr = partitions.flatMap(_.tableInserts.map(_.sql)).mkString("\n\n")
@@ -585,13 +558,7 @@ trait SpiBaseJVM_sync
             case buf: ListBuffer[Long] if buf.isEmpty => ()
             case ids                                  =>
               val updateSql = tableUpdate.sql(ids)
-
-              //          println("=================================")
-              //          cleanElements.foreach(println)
-              //              println("---------------------------------")
-              //              println(updateSql)
-
-              val ps = conn.sqlConn.prepareStatement(updateSql)
+              val ps        = conn.sqlConn.prepareStatement(updateSql)
               tableUpdate.colSetters.foreach(_(ps))
               ps.executeUpdate()
               ps.close()
@@ -633,8 +600,6 @@ trait SpiBaseJVM_sync
     if (!update.isUpsert)
       m2q.where.addAll(notNulls)
     val query = m2q.renderSqlQuery(None, None).dropRight(1) // skip ;
-    //    println(query)
-
     (tableUpdates, query)
   }
 
@@ -645,11 +610,6 @@ trait SpiBaseJVM_sync
     val conn   = conn0.asInstanceOf[JdbcConn_JVM]
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
     tryInspect(action, update.dataModel) {
-      //      val cleanElements  = keywordsSuffixed(update.dataModel.elements, conn.proxy)
-      //      val cleanDataModel = update.dataModel.copy(elements = cleanElements)
-      //      val updateClean    = update.copy(dataModel = cleanDataModel)
-      //      renderInspectTx(action, update.dataModel, update_getAction(updateClean, conn))
-
       val (_, tableUpdates, idsQuery) = prepareUpdate(update, conn)
 
       val idsQuery2 = s"Ids query:\n$idsQuery\n"
@@ -729,9 +689,6 @@ trait SpiBaseJVM_sync
     val tableDelete    = resolver.resolve(cleanElements, true, TableDelete(table, Nil, None, None))
     (cleanDataModel, tableDelete)
   }
-
-  // Database-specific implementations of the resolver.
-  //  def getResolveDelete(delete: Delete, conn: JdbcConn_JVM): ResolveDelete
 
 
   // Inspect --------------------------------------------------------

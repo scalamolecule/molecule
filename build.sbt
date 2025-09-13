@@ -49,10 +49,10 @@ lazy val root = project
     dbH2.jvm,
     dbMariaDB.js,
     dbMariaDB.jvm,
-//    dbMySQL.js,
-//    dbMySQL.jvm,
-//    dbPostgreSQL.js,
-//    dbPostgreSQL.jvm,
+    dbMySQL.js,
+    dbMySQL.jvm,
+    dbPostgreSQL.js,
+    dbPostgreSQL.jvm,
 //    dbSQlite.js,
 //    dbSQlite.jvm,
 
@@ -193,43 +193,43 @@ lazy val dbMariaDB = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
 
 
-//lazy val dbMySQL = crossProject(JSPlatform, JVMPlatform)
-//  .crossType(CrossType.Full)
-//  .in(file("db/mysql"))
-//  .settings(compilerArgs, checkPublishing,
-//    name := "molecule-db-mysql",
-//    testFrameworks := testingFrameworks)
-//  .jsSettings(jsEnvironment)
-//  .jvmSettings(
-//    libraryDependencies ++= Seq(
-//      "org.testcontainers" % "mysql" % testContainerVersion,
-//      "com.mysql" % "mysql-connector-j" % "9.2.0",
-//      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
-//    ),
-//    Test / fork := true
-//  )
-//  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
-//
-//
-//lazy val dbPostgreSQL = crossProject(JSPlatform, JVMPlatform)
-//  .crossType(CrossType.Full)
-//  .in(file("db/postgresql"))
-//  .settings(compilerArgs, checkPublishing,
-//    name := "molecule-db-postgresql",
-//    testFrameworks := testingFrameworks)
-//  .jsSettings(jsEnvironment)
-//  .jvmSettings(
-//    libraryDependencies ++= Seq(
-//      "org.testcontainers" % "postgresql" % testContainerVersion,
-//      "org.postgresql" % "postgresql" % "42.7.5",
-//      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
-//      //      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
-//    ),
-//    Test / fork := true
-//  )
-//  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
-//
-//
+lazy val dbMySQL = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/mysql"))
+  .settings(compilerArgs, checkPublishing,
+    name := "molecule-db-mysql",
+    testFrameworks := testingFrameworks)
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.testcontainers" % "mysql" % testContainerVersion,
+      "com.mysql" % "mysql-connector-j" % "9.2.0",
+      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
+    ),
+    Test / fork := true
+  )
+  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
+
+
+lazy val dbPostgreSQL = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/postgresql"))
+  .settings(compilerArgs, checkPublishing,
+    name := "molecule-db-postgresql",
+    testFrameworks := testingFrameworks)
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.testcontainers" % "postgresql" % testContainerVersion,
+      "org.postgresql" % "postgresql" % "42.7.5",
+      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
+      //      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
+    ),
+    Test / fork := true
+  )
+  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
+
+
 //lazy val dbSQlite = crossProject(JSPlatform, JVMPlatform)
 //  .crossType(CrossType.Full)
 //  .in(file("db/sqlite"))

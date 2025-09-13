@@ -1,7 +1,10 @@
 package molecule.db.postgresql
 
+import java.net.URI
+import java.util.UUID
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.util.Executor.*
+import molecule.db.compliance.domains.dsl.Types.Entity
 import molecule.db.postgresql.async.*
 import molecule.db.postgresql.setup.DbProviders_postgresql
 import org.scalactic.Equality
@@ -12,116 +15,51 @@ class Adhoc_postgresql_jvm_async extends MUnit with DbProviders_postgresql with 
   "types" - types {
     import molecule.db.compliance.domains.dsl.Types.*
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
-
     for {
 
-//      _ <- Entity.i.long.insert((1, long1), (1, long2), (1, long3), (2, long4)).transact
-//      _ <- Entity.i.float.insert((1, float1), (1, float2), (1, float3), (2, float4)).transact
-//      _ <- Entity.i.double.insert((1, double1), (1, double2), (1, double3), (2, double4)).transact
-//      _ <- Entity.i.bigInt.insert((1, bigInt1), (1, bigInt2), (1, bigInt3), (2, bigInt4)).transact
-//      _ <- Entity.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal2), (1, bigDecimal3), (2, bigDecimal4)).transact
-//      _ <- Entity.i.byte.insert((1, byte1), (1, byte2), (1, byte3), (2, byte4)).transact
-//      _ <- Entity.i.short.insert((1, short1), (1, short2), (1, short3), (2, short4)).transact
+      //      _ <- Entity.uuid(uuid1).save.i.transact
+//      _ <- rawTransact(
+//        """INSERT INTO Entity (
+//          |      uuid
+//          |    ) VALUES (('00000000-0000-0000-0000-000000000001'))""".stripMargin, true
+//      )
+//      _ <- Entity.uuid.insert(uuid1).transact
 
-
-      //      _ <- rawQuery(
-      //        s"""SELECT DISTINCT
-      //           |  Entity.i,
-      //           |  VAR_POP(Entity.int)
-      //           |FROM Entity
-      //           |WHERE
-      //           |  Entity.i IS NOT NULL
-      //           |GROUP BY Entity.i
-      //           |having round(VAR_POP(Entity.int), 10) = round(0.6666666666666666, 10)
-      //           |ORDER BY Entity.i NULLS FIRST
-      //           |
-      //           |;
-      //           |""".stripMargin, true
-      //      ).map(_ ==> 42)
-
-
-//      _ <- Entity.i.int.insert(
-//        (1, int1),
-//        (1, int2),
-//        (1, int3),
-//        (2, int4),
-//        (2, int5),
-//        (2, int6),
-//        (2, int6), // (make sure grouped values coalesce)
-//      ).transact
-//
-////      _ <- Entity.int(min(1)).query.get.map(_ ==> List(Set(int1)))
-////      _ <- Entity.int(min(2)).query.get.map(_ ==> List(Set(int1, int2)))
-////
-////      _ <- Entity.int(max(1)).query.get.map(_ ==> List(Set(int6)))
-////      _ <- Entity.int(max(2)).query.get.map(_ ==> List(Set(int5, int6)))
-////
-////      _ <- Entity.i.a1.int(min(2)).query.get.map(_ ==> List(
-////        (1, Set(int1, int2)),
-////        (2, Set(int4, int5))
-////      ))
-////
-////      _ <- Entity.i.a1.int(max(2)).query.get.map(_ ==> List(
-////        (1, Set(int2, int3)),
-////        (2, Set(int5, int6))
-////      ))
-////
-////      _ <- Entity.i.a1.int(min(2)).int(max(2)).query.get.map(_ ==> List(
-////        (1, Set(int1, int2), Set(int2, int3)),
-////        (2, Set(int4, int5), Set(int5, int6))
-////      ))
-//
-//      // Include aggregated attribute too (possible but will always be the same)
-//      _ <- Entity.int.a1.int(min(2)).query.i.get.map(_ ==> List(
-//        (int1, Set(int1)),
-//        (int2, Set(int2)),
-//        (int3, Set(int3)),
-//        (int4, Set(int4)),
-//        (int5, Set(int5)),
-//        (int6, Set(int6)),
-//      ))
-
-
-      _ <- Entity.i.int.insert(List(
-        (1, int1),
-        (2, int2),
-        (2, int2),
-        (2, int3),
-      )).transact
-
-      // Include aggregated attribute too
-      _ <- Entity.int.a1.int(count).query.i.get.map(_ ==> List(
-        (int1, 1),
-        (int2, 2),
-        (int3, 1),
-      ))
-
+      _ <- Entity.i(1).uuid_(uuid1).save.i.transact
+//      _ <- Entity.uuid(uuid1).save.i.transact
     } yield ()
   }
 
 
-  //  "refs" - refs {
-  //    import molecule.db.compliance.domains.dsl.Refs.*
-  //    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
-  //
-  //    for {
-  //
-  //      _ <- A.i.insert(1).transact
-  //      _ <- A.i.B.i.insert((2, 20), (3, 30)).transact
-  //
-  //      _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
-  //      _ <- A.i.a1.B.i.query.get.map(_ ==> List((2, 20), (3, 30)))
-  //
-  //      // Nothing deleted since entity 1 doesn't have a ref
-  //      _ <- A.i_(1).B.i_.delete.transact
-  //      _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
-  //
-  //      // Second entity has a ref and will be deleted
-  //      _ <- A.i_(2).B.i_.delete.i.transact
-  //      _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
-  //
-  //    } yield ()
-  //  }
+//    "refs" - refs {
+//      import molecule.db.compliance.domains.dsl.Refs.*
+//      given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+//
+//      for {
+//
+////        _ <- rawTransact(
+////          """INSERT INTO B (
+////            |  s,
+////            |  iMap,
+////            |  a
+////            |) VALUES (('d'), ('{"a": 1, "b": 2}'), ('1'::int8))""".stripMargin
+////        )
+//
+//        case List(a, b, c, d, e, f) <- A.i.a1.Bb.*?(B.s_?.iMap_?).insert(
+//          (1, List()),
+//          (2, List((Some("a"), None))),
+//          (3, List((Some("b"), None), (Some("c"), None))),
+//          (4, List((Some("d"), Some(Map(pint1, pint2))))),
+//          (5, List((Some("e"), Some(Map(pint2, pint3))), (Some("f"), Some(Map(pint3, pint4))))),
+//          (6, List((Some("g"), Some(Map(pint4, pint5))), (Some("h"), None))),
+//        ).transact.map(_.ids)
+//
+//        // Filter by A ids, update B values
+//        _ <- A(a, b, c, d, e, f).Bb.iMap(Map(pint4, pint5)).update.i.transact
+//
+//
+//      } yield ()
+//    }
 
 
   //    "unique" - unique {

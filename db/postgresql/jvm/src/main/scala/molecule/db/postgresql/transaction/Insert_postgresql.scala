@@ -4,31 +4,25 @@ import java.sql.PreparedStatement as PS
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.{InsertResolvers, ResolveInsert, SqlInsert}
 
-trait Insert_postgresql
-  extends SqlInsert { self: ResolveInsert & InsertResolvers & SqlOps =>
+trait Insert_postgresql extends SqlInsert { self: ResolveInsert =>
 
   override protected def addMap[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = {
-    val paramIndex   = insertAction.setCol(attr, "::jsonb")
-    val stableInsert = insertAction
-    (tpl: Product) => {
+  ): (PS, Product) => Unit = {
+    cast = "::jsonb"
+    (ps: PS, tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, ?]] match {
         case map if map.nonEmpty =>
-          stableInsert.addColSetter((ps: PS) =>
-            ps.setString(
-              paramIndex,
-              map2json(map.asInstanceOf[Map[String, T]], value2json)
-            ))
+          ps.setString(paramIndex,
+            map2json(map.asInstanceOf[Map[String, T]], value2json)
+          )
 
-        case _ =>
-          stableInsert.addColSetter((ps: PS) =>
-            ps.setNull(paramIndex, java.sql.Types.NULL))
+        case _ => ps.setNull(paramIndex, java.sql.Types.NULL)
       }
     }
   }
@@ -36,28 +30,24 @@ trait Insert_postgresql
   override protected def addMapOpt[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = {
-    val paramIndex   = insertAction.setCol(attr, "::jsonb")
-    val stableInsert = insertAction
-    (tpl: Product) => {
+  ): (PS, Product) => Unit = {
+    cast = "::jsonb"
+    (ps: PS, tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(map: Map[_, _]) if map.nonEmpty =>
-          stableInsert.addColSetter((ps: PS) =>
-            ps.setString(
-              paramIndex,
-              map2json(map.asInstanceOf[Map[String, T]], value2json)
-            ))
+          ps.setString(paramIndex,
+            map2json(map.asInstanceOf[Map[String, T]], value2json)
+          )
 
-        case _ =>
-          stableInsert.addColSetter((ps: PS) =>
-            ps.setNull(paramIndex, java.sql.Types.NULL))
+        case _ => ps.setNull(paramIndex, java.sql.Types.NULL)
       }
     }
   }
+
 
   override protected lazy val extsID             = List("ID", "VARCHAR", "")
   override protected lazy val extsString         = List("String", "VARCHAR", "")

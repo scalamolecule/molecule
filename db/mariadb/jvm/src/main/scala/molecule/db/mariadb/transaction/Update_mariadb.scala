@@ -112,18 +112,16 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
     keys: Seq[String],
     exts: List[String],
   ): (String, PS => Unit) = {
-    if (keys.isEmpty) {
-      (s"$attr = $attr", (ps: PS) => ()) // unchanged value
+    val colInput = if (keys.isEmpty) {
+      s"$attr = $attr" // unchanged value
     } else {
-      val keys1    = keys.map(k => s"'$$.$k'").mkString(", ")
-      val colInput =
-        s"""$ent.$attr = CASE JSON_REMOVE(IFNULL($ent.$attr, NULL), $keys1)
-           |    WHEN JSON_OBJECT() THEN NULL
-           |    ELSE JSON_REMOVE($ent.$attr, $keys1)
-           |  END""".stripMargin
-
-      (colInput, (_: PS) => ())
+      val keys1 = keys.map(k => s"'$$.$k'").mkString(", ")
+      s"""$ent.$attr = CASE JSON_REMOVE(IFNULL($ent.$attr, NULL), $keys1)
+         |    WHEN JSON_OBJECT() THEN NULL
+         |    ELSE JSON_REMOVE($ent.$attr, $keys1)
+         |  END""".stripMargin
     }
+    (colInput, (_: PS) => ())
   }
 
 
@@ -158,8 +156,6 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
       val colInput  = s"$attr = JSON_MERGE(IFNULL($attr, '[]'), ?)"
       val json      = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
       val colSetter = (ps: PS) => ps.setString(paramIndex, json)
-
-
       (colInput, colSetter)
     }
   }

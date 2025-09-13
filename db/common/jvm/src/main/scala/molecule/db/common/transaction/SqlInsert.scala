@@ -8,14 +8,17 @@ import molecule.db.common.transaction.strategy.insert.{InsertAction, InsertRoot}
 
 trait SqlInsert extends ValueTransformers { self: ResolveInsert =>
 
+  var cast = ""
+
   protected def addOne[T](
     ent: String,
     attr: String,
     paramIndex: Int,
     tplIndex: Int,
     valueSetter: (PS, Int, T) => Unit,
-    exts: List[String] = Nil
+    exts: List[String]
   ): (PS, Product) => Unit = {
+    cast = exts(2)
     (ps: PS, tpl: Product) =>
       valueSetter(ps, paramIndex, tpl.productElement(tplIndex).asInstanceOf[T])
   }
@@ -26,8 +29,9 @@ trait SqlInsert extends ValueTransformers { self: ResolveInsert =>
     paramIndex: Int,
     tplIndex: Int,
     valueSetter: (PS, Int, T) => Unit,
-    exts: List[String] = Nil
+    exts: List[String]
   ): (PS, Product) => Unit = {
+    cast = exts(2)
     (ps: PS, tpl: Product) =>
       tpl.productElement(tplIndex) match {
         case Some(scalaValue) => valueSetter(ps, paramIndex, scalaValue.asInstanceOf[T])
@@ -41,10 +45,11 @@ trait SqlInsert extends ValueTransformers { self: ResolveInsert =>
     paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
-    exts: List[String] = Nil,
+    exts: List[String],
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = exts(2)
     addIterable(attr, exts(1), paramIndex, tplIndex, set2array)
   }
 
@@ -55,6 +60,7 @@ trait SqlInsert extends ValueTransformers { self: ResolveInsert =>
     tplIndex: Int,
     iterable2array: M[T] => Array[AnyRef],
   ): (PS, Product) => Unit = {
+    cast = ""
     (ps: PS, tpl: Product) => {
       val array = iterable2array(tpl.productElement(tplIndex).asInstanceOf[M[T]])
       if (array.nonEmpty) {
@@ -73,10 +79,11 @@ trait SqlInsert extends ValueTransformers { self: ResolveInsert =>
     paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
-    exts: List[String] = Nil,
+    exts: List[String],
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = exts(2)
     addOptIterable(attr, exts(1), paramIndex, tplIndex, set2array)
   }
 
@@ -87,6 +94,7 @@ trait SqlInsert extends ValueTransformers { self: ResolveInsert =>
     tplIndex: Int,
     iterable2array: M[T] => Array[AnyRef],
   ): (PS, Product) => Unit = {
+    cast = ""
     (ps: PS, tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(iterable: Iterable[_]) =>
@@ -106,10 +114,11 @@ trait SqlInsert extends ValueTransformers { self: ResolveInsert =>
     paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
-    exts: List[String] = Nil,
+    exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = exts(2)
     addIterable(attr, exts(1), paramIndex, tplIndex, seq2array)
   }
 
@@ -119,10 +128,11 @@ trait SqlInsert extends ValueTransformers { self: ResolveInsert =>
     paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
-    exts: List[String] = Nil,
+    exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = exts(2)
     addOptIterable(attr, exts(1), paramIndex, tplIndex, seq2array)
   }
 
@@ -132,6 +142,7 @@ trait SqlInsert extends ValueTransformers { self: ResolveInsert =>
     paramIndex: Int,
     tplIndex: Int,
   ): (PS, Product) => Unit = {
+    cast = ""
     (ps: PS, tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case byteArray: Array[_] if byteArray.nonEmpty =>
@@ -153,6 +164,7 @@ trait SqlInsert extends ValueTransformers { self: ResolveInsert =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     (ps: PS, tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, ?]] match {
         case map if map.nonEmpty =>
@@ -174,6 +186,7 @@ trait SqlInsert extends ValueTransformers { self: ResolveInsert =>
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     (ps: PS, tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(map: Map[_, _]) if map.nonEmpty =>

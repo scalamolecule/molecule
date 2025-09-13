@@ -7,7 +7,6 @@ import molecule.core.error.ModelError
 import molecule.db.common.validation.insert.InsertValidators_
 
 
-//trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlInsert =>
 trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
 
   @tailrec
@@ -26,11 +25,11 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
           }
           a match {
             case a: AttrOneMan =>
-              val tableInsert1 = tableInsert.add(a, attrOneManSetter(tableInsert, a, paramIndex, tplIndex))
+              val tableInsert1 = tableInsert.add(a, attrOneManSetter(tableInsert, a, paramIndex, tplIndex), cast)
               resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
             case a: AttrOneOpt =>
-              val tableInsert1 = tableInsert.add(a, attrOneOptSetter(tableInsert, a, paramIndex, tplIndex))
+              val tableInsert1 = tableInsert.add(a, attrOneOptSetter(tableInsert, a, paramIndex, tplIndex), cast)
               resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
             case a: AttrSetMan =>
@@ -50,11 +49,11 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
               resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
             case a: AttrMapMan =>
-              val tableInsert1 = tableInsert.add(a, attrMapManSetter(a, paramIndex, tplIndex))
+              val tableInsert1 = tableInsert.add(a, attrMapManSetter(a, paramIndex, tplIndex), cast)
               resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
             case a: AttrMapOpt =>
-              val tableInsert1 = tableInsert.add(a, attrMapOptSetter(a, paramIndex, tplIndex))
+              val tableInsert1 = tableInsert.add(a, attrMapOptSetter(a, paramIndex, tplIndex), cast)
               resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
             case a => noTacit(a)
@@ -102,6 +101,7 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
       tableInsert.refPath ++ List(refAttr, ref),
       Nil,
       List(reverseRefAttr.get -> tableInsert.refPath),
+      Nil,
       List("?"),
       Nil
     )
@@ -120,7 +120,8 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
     val refPath1      = tableInsert.refPath ++ List(refAttr, ref)
     val refInsert     = tableInsert.copy(
       foreignKeys = tableInsert.foreignKeys :+ (refAttr -> refPath1),
-      inputPlaceHolders = tableInsert.inputPlaceHolders :+ "?",
+//      inputPlaceHolders = tableInsert.inputPlaceHolders :+ "?",
+      refPlaceHolders = tableInsert.refPlaceHolders :+ "?",
     )
     val lastPartition = partitions.last.copy(tableInserts = partitions.last.tableInserts :+ refInsert)
     resolve(tail, 1, tplIndex, partitions.init :+ lastPartition, TableInsert(refPath1))
@@ -177,6 +178,7 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
       tableInsert.refPath ++ List(refAttr, ref),
       Nil,
       List(reverseRefAttr.get -> tableInsert.refPath),
+      Nil,
       List("?"),
       Nil
     )
@@ -204,29 +206,29 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
     a match {
       case _: AttrOneManID             =>
         noNestedRef(tableInsert, a.ent, a.attr)
-        addOne(ent, attr, paramIndex, tplIndex, setterID)
-      case _: AttrOneManString         => addOne(ent, attr, paramIndex, tplIndex, setterString)
-      case _: AttrOneManInt            => addOne(ent, attr, paramIndex, tplIndex, setterInt)
-      case _: AttrOneManLong           => addOne(ent, attr, paramIndex, tplIndex, setterLong)
-      case _: AttrOneManFloat          => addOne(ent, attr, paramIndex, tplIndex, setterFloat)
-      case _: AttrOneManDouble         => addOne(ent, attr, paramIndex, tplIndex, setterDouble)
-      case _: AttrOneManBoolean        => addOne(ent, attr, paramIndex, tplIndex, setterBoolean)
-      case _: AttrOneManBigInt         => addOne(ent, attr, paramIndex, tplIndex, setterBigInt)
-      case _: AttrOneManBigDecimal     => addOne(ent, attr, paramIndex, tplIndex, setterBigDecimal)
-      case _: AttrOneManDate           => addOne(ent, attr, paramIndex, tplIndex, setterDate)
-      case _: AttrOneManDuration       => addOne(ent, attr, paramIndex, tplIndex, setterDuration)
-      case _: AttrOneManInstant        => addOne(ent, attr, paramIndex, tplIndex, setterInstant)
-      case _: AttrOneManLocalDate      => addOne(ent, attr, paramIndex, tplIndex, setterLocalDate)
-      case _: AttrOneManLocalTime      => addOne(ent, attr, paramIndex, tplIndex, setterLocalTime)
-      case _: AttrOneManLocalDateTime  => addOne(ent, attr, paramIndex, tplIndex, setterLocalDateTime)
-      case _: AttrOneManOffsetTime     => addOne(ent, attr, paramIndex, tplIndex, setterOffsetTime)
-      case _: AttrOneManOffsetDateTime => addOne(ent, attr, paramIndex, tplIndex, setterOffsetDateTime)
-      case _: AttrOneManZonedDateTime  => addOne(ent, attr, paramIndex, tplIndex, setterZonedDateTime)
-      case _: AttrOneManUUID           => addOne(ent, attr, paramIndex, tplIndex, setterUUID)
-      case _: AttrOneManURI            => addOne(ent, attr, paramIndex, tplIndex, setterURI)
-      case _: AttrOneManByte           => addOne(ent, attr, paramIndex, tplIndex, setterByte)
-      case _: AttrOneManShort          => addOne(ent, attr, paramIndex, tplIndex, setterShort)
-      case _: AttrOneManChar           => addOne(ent, attr, paramIndex, tplIndex, setterChar)
+        addOne(ent, attr, paramIndex, tplIndex, setterID, extsID)
+      case _: AttrOneManString         => addOne(ent, attr, paramIndex, tplIndex, setterString, extsString)
+      case _: AttrOneManInt            => addOne(ent, attr, paramIndex, tplIndex, setterInt, extsInt)
+      case _: AttrOneManLong           => addOne(ent, attr, paramIndex, tplIndex, setterLong, extsLong)
+      case _: AttrOneManFloat          => addOne(ent, attr, paramIndex, tplIndex, setterFloat, extsFloat)
+      case _: AttrOneManDouble         => addOne(ent, attr, paramIndex, tplIndex, setterDouble, extsDouble)
+      case _: AttrOneManBoolean        => addOne(ent, attr, paramIndex, tplIndex, setterBoolean, extsBoolean)
+      case _: AttrOneManBigInt         => addOne(ent, attr, paramIndex, tplIndex, setterBigInt, extsBigInt)
+      case _: AttrOneManBigDecimal     => addOne(ent, attr, paramIndex, tplIndex, setterBigDecimal, extsBigDecimal)
+      case _: AttrOneManDate           => addOne(ent, attr, paramIndex, tplIndex, setterDate, extsDate)
+      case _: AttrOneManDuration       => addOne(ent, attr, paramIndex, tplIndex, setterDuration, extsDuration)
+      case _: AttrOneManInstant        => addOne(ent, attr, paramIndex, tplIndex, setterInstant, extsInstant)
+      case _: AttrOneManLocalDate      => addOne(ent, attr, paramIndex, tplIndex, setterLocalDate, extsLocalDate)
+      case _: AttrOneManLocalTime      => addOne(ent, attr, paramIndex, tplIndex, setterLocalTime, extsLocalTime)
+      case _: AttrOneManLocalDateTime  => addOne(ent, attr, paramIndex, tplIndex, setterLocalDateTime, extsLocalDateTime)
+      case _: AttrOneManOffsetTime     => addOne(ent, attr, paramIndex, tplIndex, setterOffsetTime, extsOffsetTime)
+      case _: AttrOneManOffsetDateTime => addOne(ent, attr, paramIndex, tplIndex, setterOffsetDateTime, extsOffsetDateTime)
+      case _: AttrOneManZonedDateTime  => addOne(ent, attr, paramIndex, tplIndex, setterZonedDateTime, extsZonedDateTime)
+      case _: AttrOneManUUID           => addOne(ent, attr, paramIndex, tplIndex, setterUUID, extsUUID)
+      case _: AttrOneManURI            => addOne(ent, attr, paramIndex, tplIndex, setterURI, extsURI)
+      case _: AttrOneManByte           => addOne(ent, attr, paramIndex, tplIndex, setterByte, extsByte)
+      case _: AttrOneManShort          => addOne(ent, attr, paramIndex, tplIndex, setterShort, extsShort)
+      case _: AttrOneManChar           => addOne(ent, attr, paramIndex, tplIndex, setterChar, extsChar)
     }
   }
 
@@ -237,29 +239,29 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
     a match {
       case _: AttrOneOptID             =>
         noNestedRef(tableInsert, a.ent, a.attr)
-        addOneOpt(ent, attr, paramIndex, tplIndex, setterID)
-      case _: AttrOneOptString         => addOneOpt(ent, attr, paramIndex, tplIndex, setterString)
-      case _: AttrOneOptInt            => addOneOpt(ent, attr, paramIndex, tplIndex, setterInt)
-      case _: AttrOneOptLong           => addOneOpt(ent, attr, paramIndex, tplIndex, setterLong)
-      case _: AttrOneOptFloat          => addOneOpt(ent, attr, paramIndex, tplIndex, setterFloat)
-      case _: AttrOneOptDouble         => addOneOpt(ent, attr, paramIndex, tplIndex, setterDouble)
-      case _: AttrOneOptBoolean        => addOneOpt(ent, attr, paramIndex, tplIndex, setterBoolean)
-      case _: AttrOneOptBigInt         => addOneOpt(ent, attr, paramIndex, tplIndex, setterBigInt)
-      case _: AttrOneOptBigDecimal     => addOneOpt(ent, attr, paramIndex, tplIndex, setterBigDecimal)
-      case _: AttrOneOptDate           => addOneOpt(ent, attr, paramIndex, tplIndex, setterDate)
-      case _: AttrOneOptDuration       => addOneOpt(ent, attr, paramIndex, tplIndex, setterDuration)
-      case _: AttrOneOptInstant        => addOneOpt(ent, attr, paramIndex, tplIndex, setterInstant)
-      case _: AttrOneOptLocalDate      => addOneOpt(ent, attr, paramIndex, tplIndex, setterLocalDate)
-      case _: AttrOneOptLocalTime      => addOneOpt(ent, attr, paramIndex, tplIndex, setterLocalTime)
-      case _: AttrOneOptLocalDateTime  => addOneOpt(ent, attr, paramIndex, tplIndex, setterLocalDateTime)
-      case _: AttrOneOptOffsetTime     => addOneOpt(ent, attr, paramIndex, tplIndex, setterOffsetTime)
-      case _: AttrOneOptOffsetDateTime => addOneOpt(ent, attr, paramIndex, tplIndex, setterOffsetDateTime)
-      case _: AttrOneOptZonedDateTime  => addOneOpt(ent, attr, paramIndex, tplIndex, setterZonedDateTime)
-      case _: AttrOneOptUUID           => addOneOpt(ent, attr, paramIndex, tplIndex, setterUUID)
-      case _: AttrOneOptURI            => addOneOpt(ent, attr, paramIndex, tplIndex, setterURI)
-      case _: AttrOneOptByte           => addOneOpt(ent, attr, paramIndex, tplIndex, setterByte)
-      case _: AttrOneOptShort          => addOneOpt(ent, attr, paramIndex, tplIndex, setterShort)
-      case _: AttrOneOptChar           => addOneOpt(ent, attr, paramIndex, tplIndex, setterChar)
+        addOneOpt(ent, attr, paramIndex, tplIndex, setterID, extsID)
+      case _: AttrOneOptString         => addOneOpt(ent, attr, paramIndex, tplIndex, setterString, extsString)
+      case _: AttrOneOptInt            => addOneOpt(ent, attr, paramIndex, tplIndex, setterInt, extsInt)
+      case _: AttrOneOptLong           => addOneOpt(ent, attr, paramIndex, tplIndex, setterLong, extsLong)
+      case _: AttrOneOptFloat          => addOneOpt(ent, attr, paramIndex, tplIndex, setterFloat, extsFloat)
+      case _: AttrOneOptDouble         => addOneOpt(ent, attr, paramIndex, tplIndex, setterDouble, extsDouble)
+      case _: AttrOneOptBoolean        => addOneOpt(ent, attr, paramIndex, tplIndex, setterBoolean, extsBoolean)
+      case _: AttrOneOptBigInt         => addOneOpt(ent, attr, paramIndex, tplIndex, setterBigInt, extsBigInt)
+      case _: AttrOneOptBigDecimal     => addOneOpt(ent, attr, paramIndex, tplIndex, setterBigDecimal, extsBigDecimal)
+      case _: AttrOneOptDate           => addOneOpt(ent, attr, paramIndex, tplIndex, setterDate, extsDate)
+      case _: AttrOneOptDuration       => addOneOpt(ent, attr, paramIndex, tplIndex, setterDuration, extsDuration)
+      case _: AttrOneOptInstant        => addOneOpt(ent, attr, paramIndex, tplIndex, setterInstant, extsInstant)
+      case _: AttrOneOptLocalDate      => addOneOpt(ent, attr, paramIndex, tplIndex, setterLocalDate, extsLocalDate)
+      case _: AttrOneOptLocalTime      => addOneOpt(ent, attr, paramIndex, tplIndex, setterLocalTime, extsLocalTime)
+      case _: AttrOneOptLocalDateTime  => addOneOpt(ent, attr, paramIndex, tplIndex, setterLocalDateTime, extsLocalDateTime)
+      case _: AttrOneOptOffsetTime     => addOneOpt(ent, attr, paramIndex, tplIndex, setterOffsetTime, extsOffsetTime)
+      case _: AttrOneOptOffsetDateTime => addOneOpt(ent, attr, paramIndex, tplIndex, setterOffsetDateTime, extsOffsetDateTime)
+      case _: AttrOneOptZonedDateTime  => addOneOpt(ent, attr, paramIndex, tplIndex, setterZonedDateTime, extsZonedDateTime)
+      case _: AttrOneOptUUID           => addOneOpt(ent, attr, paramIndex, tplIndex, setterUUID, extsUUID)
+      case _: AttrOneOptURI            => addOneOpt(ent, attr, paramIndex, tplIndex, setterURI, extsURI)
+      case _: AttrOneOptByte           => addOneOpt(ent, attr, paramIndex, tplIndex, setterByte, extsByte)
+      case _: AttrOneOptShort          => addOneOpt(ent, attr, paramIndex, tplIndex, setterShort, extsShort)
+      case _: AttrOneOptChar           => addOneOpt(ent, attr, paramIndex, tplIndex, setterChar, extsChar)
     }
   }
 

@@ -23,35 +23,14 @@ object Spi_mysql_sync extends Spi_mysql_sync
 
 trait Spi_mysql_sync extends SpiBaseJVM_sync {
 
-  override def save_getAction(
-    save: Save, conn: JdbcConn_JVM
-  ): SaveAction = {
-    new SqlOps_mysql(conn) with ResolveSave with Save_mysql {}
-      .getSaveAction(save.dataModel.elements)
-  }
+  override def getResolveSave(save: Save, conn: JdbcConn_JVM) =
+    new ResolveSave with Save_mysql {}
 
-  override def insert_getAction(
-    insert: Insert, conn: JdbcConn_JVM
-  ): InsertAction = {
-    new SqlOps_mysql(conn) with ResolveInsert with Insert_mysql {}
-      .getInsertAction(insert.dataModel.elements, insert.tpls)
-  }
+  override def getResolveInsert(insert: Insert, conn: JdbcConn_JVM) =
+    new ResolveInsert with Insert_mysql {}
 
-  override def update_getAction(
-    update: Update, conn: JdbcConn_JVM
-  ): UpdateAction = {
-    new SqlOps_mysql(conn) with ResolveUpdate with Update_mysql {
-      override val isUpsert: Boolean = update.isUpsert
-    }.getUpdateAction(update.dataModel.elements)
-  }
-
-  override def delete_getAction(
-    delete: Delete, conn: JdbcConn_JVM
-  ): DeleteAction = {
-    new SqlOps_mysql(conn)
-      with ResolveDelete with Spi_mysql_sync with SqlDelete {}
-      .getDeleteAction(delete.dataModel.elements, conn.proxy.metaDb)
-  }
+  override def getResolveUpdate(update: Update, conn: JdbcConn_JVM) =
+    new ResolveUpdate(update.isUpsert) with Update_mysql {}
 
 
   // Util --------------------------------------

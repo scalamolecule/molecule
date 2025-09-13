@@ -18,6 +18,7 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     addIterable(attr, paramIndex, optSet, value2json)
   }
 
@@ -31,6 +32,7 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     addIterable(attr, paramIndex, optSeq, value2json)
   }
 
@@ -42,6 +44,7 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
     valueSetter: (PS, Int, T) => Unit,
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     optMap match {
       case Some(map: Map[_, _]) if map.nonEmpty =>
         (ps: PS, _: Product) =>
@@ -61,6 +64,7 @@ trait Save_mariadb extends SqlSave with BaseHelpers { self: ResolveSave =>
     optIterable: Option[Iterable[T]],
     value2json: (StringBuffer, T) => StringBuffer
   ): (PS, Product) => Unit = {
+    cast = ""
     if (optIterable.nonEmpty && optIterable.get.nonEmpty) {
       val json = iterable2json(optIterable.get, value2json)
       (ps: PS, _: Product) => ps.setString(paramIndex, json)
