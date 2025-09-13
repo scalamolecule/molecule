@@ -133,12 +133,12 @@ trait ResolveSave { self: SqlSave =>
     reverseRefAttr: Option[String],
     tail: List[Element]
   ): List[TableInsert] = {
-//    println("######################")
-//    println(tableInserts)
-//
-//    println("######################")
-//    println(tableInsert)
-//    println("######################")
+    //    println("######################")
+    //    println(tableInserts)
+    //
+    //    println("######################")
+    //    println(tableInsert)
+    //    println("######################")
 
     val refPath1  = tableInsert.refPath ++ List(refAttr, ref)
     val refInsert = tableInsert.copy(

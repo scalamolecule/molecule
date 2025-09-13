@@ -7,7 +7,8 @@ import molecule.core.error.ModelError
 import molecule.db.common.validation.insert.InsertValidators_
 
 
-trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlInsert =>
+//trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlInsert =>
+trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
 
   @tailrec
   final def resolve(
@@ -25,11 +26,11 @@ trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlIn
           }
           a match {
             case a: AttrOneMan =>
-              val tableInsert1 = tableInsert.add(a, attrOneManSetter(a, paramIndex, tplIndex))
+              val tableInsert1 = tableInsert.add(a, attrOneManSetter(tableInsert, a, paramIndex, tplIndex))
               resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
             case a: AttrOneOpt =>
-              val tableInsert1 = tableInsert.add(a, attrOneOptSetter(a, paramIndex, tplIndex))
+              val tableInsert1 = tableInsert.add(a, attrOneOptSetter(tableInsert, a, paramIndex, tplIndex))
               resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
             case a: AttrSetMan =>
@@ -72,10 +73,10 @@ trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlIn
         case _: OptRef    => noOptional("ref")
         case _: OptEntity => noOptional("entity")
 
-        case Nested(Ref(ent, refAttr, ref, relationship, _, _, reverseRefAttr), nestedElements) =>
+        case Nested(Ref(_, refAttr, ref, _, _, _, reverseRefAttr), nestedElements) =>
           resolveNested(partitions, nestedElements, refAttr, ref, reverseRefAttr, tableInsert, tplIndex)
 
-        case OptNested(Ref(ent, refAttr, ref, relationship, _, _, reverseRefAttr), nestedElements) =>
+        case OptNested(Ref(_, refAttr, ref, _, _, _, reverseRefAttr), nestedElements) =>
           resolveNested(partitions, nestedElements, refAttr, ref, reverseRefAttr, tableInsert, tplIndex)
       }
 
@@ -138,7 +139,6 @@ trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlIn
     val tableInserts        = partitions.last.tableInserts
     val prevTableInsert     = tableInserts.find(_.refPath == prevRefPath).get
     val curLevelWithoutPrev = tableInserts.filterNot(_.refPath == prevRefPath) :+ tableInsert
-    //    println(s"  BackRef: $backRef  $tplIndex  $prevRefPath ")
     val lastPartition       = partitions.last.copy(tableInserts = curLevelWithoutPrev)
 
     // Reset paramIndex to the next column slot for the previous table.
@@ -183,27 +183,28 @@ trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlIn
     resolve(nestedElements, 1, 0, curPartitions, nestedInsert)
   }
 
-
-  final override def resolve(
-    elements: List[Element],
-    resolvers: List[Product => Unit],
-    tplIndex: Int,
-    prevRefs: List[String]
-  ): List[Product => Unit] = ???
-
-
   private def noTacit(a: Attr) = throw ModelError(
     s"Can't use tacit attributes in insert molecule (${a.name})."
   )
   private def noOptional(kind: String) = throw ModelError(
     s"Insertion of optional $kind is not supported."
   )
+  private def noNestedRef(tableInsert: TableInsert, ent: String, attr: String) = {
+    if (tableInsert.foreignKeys.nonEmpty && tableInsert.foreignKeys.last._1 == attr) {
+      throw ModelError(
+        s"Foreign key attribute $ent.$attr not allowed to be set in nested tuple."
+      )
+    }
+  }
 
-
-  private def attrOneManSetter(a: AttrOneMan, paramIndex: Int, tplIndex: Int): (PS, Product) => Unit = {
+  private def attrOneManSetter(
+    tableInsert: TableInsert, a: AttrOneMan, paramIndex: Int, tplIndex: Int
+  ): (PS, Product) => Unit = {
     val (ent, attr) = (a.ent, a.attr)
     a match {
-      case _: AttrOneManID             => addOne(ent, attr, paramIndex, tplIndex, setterID)
+      case _: AttrOneManID             =>
+        noNestedRef(tableInsert, a.ent, a.attr)
+        addOne(ent, attr, paramIndex, tplIndex, setterID)
       case _: AttrOneManString         => addOne(ent, attr, paramIndex, tplIndex, setterString)
       case _: AttrOneManInt            => addOne(ent, attr, paramIndex, tplIndex, setterInt)
       case _: AttrOneManLong           => addOne(ent, attr, paramIndex, tplIndex, setterLong)
@@ -229,10 +230,14 @@ trait ResolveInsert extends InsertResolvers with InsertValidators_ { self: SqlIn
     }
   }
 
-  private def attrOneOptSetter(a: AttrOneOpt, paramIndex: Int, tplIndex: Int): (PS, Product) => Unit = {
+  private def attrOneOptSetter(
+    tableInsert: TableInsert, a: AttrOneOpt, paramIndex: Int, tplIndex: Int
+  ): (PS, Product) => Unit = {
     val (ent, attr) = (a.ent, a.attr)
     a match {
-      case _: AttrOneOptID             => addOneOpt(ent, attr, paramIndex, tplIndex, setterID)
+      case _: AttrOneOptID             =>
+        noNestedRef(tableInsert, a.ent, a.attr)
+        addOneOpt(ent, attr, paramIndex, tplIndex, setterID)
       case _: AttrOneOptString         => addOneOpt(ent, attr, paramIndex, tplIndex, setterString)
       case _: AttrOneOptInt            => addOneOpt(ent, attr, paramIndex, tplIndex, setterInt)
       case _: AttrOneOptLong           => addOneOpt(ent, attr, paramIndex, tplIndex, setterLong)

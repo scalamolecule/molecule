@@ -17,7 +17,7 @@ case class TableDelete(
     filterElements = filterElements :+ a,
   )
 
-  def getSql(m2q: Model2SqlQuery): String = {
+  def sql(m2q: Model2SqlQuery): String = {
     joinTable.fold {
       m2q.resolve(filterElements)
       val joins = m2q.mkJoins(1)
@@ -36,14 +36,15 @@ case class TableDelete(
     }
   }
 
-  //  override def toString =
-  //    s"""--------------------------------------------------
-  //       |TableDelete(
-  //       |  refPath           = $refPath,
-  //       |  columns           = $columns,
-  //       |  foreignKeys       = $foreignKeys,
-  //       |)
-  //       |
-  //       |$sql
-  //       |--------------------------------------------------""".stripMargin
+  override def toString =
+    s"""--------------------------------------------------
+       |TableDelete(
+       |  table             = $table,
+       |  filterElements    = $filterElements,
+       |  joinTable         = $joinTable,
+       |  joinClause        = $joinClause,
+       |)
+       |
+       |$sql
+       |--------------------------------------------------""".stripMargin
 }

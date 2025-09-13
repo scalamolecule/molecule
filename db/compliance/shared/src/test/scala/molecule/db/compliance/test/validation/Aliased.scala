@@ -24,9 +24,8 @@ case class Aliased(
       // Note how 'type' (and not the alias 'tpe') is used in the query
       _ <- Person.name.tpe.query.inspect.map(_ ==> {
         if (database == "mysql") {
-          // Eeserved keywords in Mysql 'name' and 'type' are transparently resolved by Molecule with appended underscore
-          s"""========================================
-             |QUERY:
+          // Reserved keywords in Mysql 'name' and 'type' are transparently resolved by Molecule with appended underscore
+          s"""=== QUERY =====================================
              |DataModel(
              |  List(
              |    AttrOneManString("Person", "name", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 1)),
@@ -45,8 +44,7 @@ case class Aliased(
              |----------------------------------------
              |""".stripMargin
         } else
-          s"""========================================
-             |QUERY:
+          s"""=== QUERY =====================================
              |DataModel(
              |  List(
              |    AttrOneManString("Person", "name", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 1)),

@@ -15,8 +15,7 @@ trait Renderer {
       if (dbString.isEmpty) None else Some(dbString),
       if (dataString.isEmpty) None else Some(dataString),
     ).flatten.mkString("\n\n")
-    val inspection = s"""========================================
-       |$action:
+    val inspection = s"""=== $action =====================================
        |$render
        |----------------------------------------
        |""".stripMargin

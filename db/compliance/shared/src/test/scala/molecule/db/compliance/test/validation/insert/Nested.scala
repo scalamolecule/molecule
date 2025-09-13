@@ -63,7 +63,7 @@ case class Nested(
                 Seq(
                   InsertError(
                     0,
-                    "Tpe.refs",
+                    "Tpe.Refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -102,7 +102,7 @@ case class Nested(
                 Seq(
                   InsertError(
                     0,
-                    "Tpe.refs",
+                    "Tpe.Refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -151,7 +151,7 @@ case class Nested(
                   ),
                   InsertError(
                     0,
-                    "Tpe.refs",
+                    "Tpe.Refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -200,7 +200,7 @@ case class Nested(
                   ),
                   InsertError(
                     0,
-                    "Tpe.refs",
+                    "Tpe.Refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -239,7 +239,7 @@ case class Nested(
                 Seq(
                   InsertError(
                     0,
-                    "Tpe.refs",
+                    "Tpe.Refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -301,7 +301,7 @@ case class Nested(
                   ),
                   InsertError(
                     0,
-                    "Tpe.refs",
+                    "Tpe.Refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
@@ -366,7 +366,7 @@ case class Nested(
                   ),
                   InsertError(
                     0, // tuple index
-                    "Tpe.refs",
+                    "Tpe.Refs",
                     Seq(),
                     Seq(
                       (
@@ -374,7 +374,7 @@ case class Nested(
                         Seq(
                           InsertError(
                             0, // tuple index
-                            "Strings.allowedAttrs",
+                            "Strings.AllowedAttrs",
                             Seq(),
                             Seq(
                               (
@@ -407,7 +407,7 @@ case class Nested(
                           ),
                           InsertError(
                             0, // tuple index
-                            "Strings.allowedAttrs",
+                            "Strings.AllowedAttrs",
                             Seq(),
                             Seq(
                               (

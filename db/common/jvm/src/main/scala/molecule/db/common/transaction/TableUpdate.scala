@@ -28,17 +28,14 @@ case class TableUpdate(
          |WHERE id IN (${ids.mkString(", ")})""".stripMargin
   }
 
-
-  //  override def toString =
-  //    s"""--------------------------------------------------
-  //       |TableUpdate(
-  //       |  refPath           = $refPath,
-  //       |  columns           = $columns,
-  //       |  foreignKeys       = $foreignKeys,
-  //       |  inputPlaceHolders = $inputPlaceHolders,
-  //       |  colSetters        = <${colSetters.length} colSetters>
-  //       |)
-  //       |
-  //       |$sql
-  //       |--------------------------------------------------""".stripMargin
+  override def toString =
+    s"""--------------------------------------------------
+       |TableUpdate(
+       |  refPath    = $refPath,
+       |  columns    = $colInputs,
+       |  colSetters = <${colSetters.length} colSetters>
+       |)
+       |
+       |${sql(ListBuffer(42, 43))}
+       |--------------------------------------------------""".stripMargin
 }

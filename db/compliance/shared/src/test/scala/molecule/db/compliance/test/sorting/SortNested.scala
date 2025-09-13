@@ -1,6 +1,7 @@
 package molecule.db.compliance.test.sorting
 
 import scala.concurrent.Future
+import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
 import molecule.db.common.spi.Spi_async
@@ -44,6 +45,9 @@ case class SortNested(
       _ <- Ref.i.Entities.*(Entity.short).insert((21, List(short1, short2))).transact
       _ <- Ref.i.Entities.*(Entity.char).insert((22, List(char1, char2))).transact
       _ <- Ref.i.Entities.*(Entity.ref).insert((23, List(ref1, ref2))).transact
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Foreign key attribute Entity.ref not allowed to be set in nested tuple."
+        }
 
       // Ascending
 
@@ -69,7 +73,6 @@ case class SortNested(
       _ <- Ref.i_(20).Entities.*(Entity.byte.a1).query.get.map(_ ==> List(List(byte1, byte2)))
       _ <- Ref.i_(21).Entities.*(Entity.short.a1).query.get.map(_ ==> List(List(short1, short2)))
       _ <- Ref.i_(22).Entities.*(Entity.char.a1).query.get.map(_ ==> List(List(char1, char2)))
-      _ <- Ref.i_(23).Entities.*(Entity.ref.a1).query.get.map(_ ==> List(List(ref1, ref2)))
 
       _ <- Ref.i_(1).Entities.*?(Entity.string.a1).query.get.map(_ ==> List(List(string1, string2)))
       _ <- Ref.i_(2).Entities.*?(Entity.int.a1).query.get.map(_ ==> List(List(int1, int2)))
@@ -93,7 +96,6 @@ case class SortNested(
       _ <- Ref.i_(20).Entities.*?(Entity.byte.a1).query.get.map(_ ==> List(List(byte1, byte2)))
       _ <- Ref.i_(21).Entities.*?(Entity.short.a1).query.get.map(_ ==> List(List(short1, short2)))
       _ <- Ref.i_(22).Entities.*?(Entity.char.a1).query.get.map(_ ==> List(List(char1, char2)))
-      _ <- Ref.i_(23).Entities.*?(Entity.ref.a1).query.get.map(_ ==> List(List(ref1, ref2)))
     } yield ()
   }
 
@@ -123,7 +125,6 @@ case class SortNested(
       _ <- Ref.i.Entities.*(Entity.byte).insert((20, List(byte1, byte2))).transact
       _ <- Ref.i.Entities.*(Entity.short).insert((21, List(short1, short2))).transact
       _ <- Ref.i.Entities.*(Entity.char).insert((22, List(char1, char2))).transact
-      _ <- Ref.i.Entities.*(Entity.ref).insert((23, List(ref1, ref2))).transact
 
       _ <- Ref.i_(1).Entities.*(Entity.string.d1).query.get.map(_ ==> List(List(string2, string1)))
       _ <- Ref.i_(2).Entities.*(Entity.int.d1).query.get.map(_ ==> List(List(int2, int1)))
@@ -147,7 +148,6 @@ case class SortNested(
       _ <- Ref.i_(20).Entities.*(Entity.byte.d1).query.get.map(_ ==> List(List(byte2, byte1)))
       _ <- Ref.i_(21).Entities.*(Entity.short.d1).query.get.map(_ ==> List(List(short2, short1)))
       _ <- Ref.i_(22).Entities.*(Entity.char.d1).query.get.map(_ ==> List(List(char2, char1)))
-      _ <- Ref.i_(23).Entities.*(Entity.ref.d1).query.get.map(_ ==> List(List(ref2, ref1)))
 
       _ <- Ref.i_(1).Entities.*?(Entity.string.d1).query.get.map(_ ==> List(List(string2, string1)))
       _ <- Ref.i_(2).Entities.*?(Entity.int.d1).query.get.map(_ ==> List(List(int2, int1)))
@@ -171,7 +171,6 @@ case class SortNested(
       _ <- Ref.i_(20).Entities.*?(Entity.byte.d1).query.get.map(_ ==> List(List(byte2, byte1)))
       _ <- Ref.i_(21).Entities.*?(Entity.short.d1).query.get.map(_ ==> List(List(short2, short1)))
       _ <- Ref.i_(22).Entities.*?(Entity.char.d1).query.get.map(_ ==> List(List(char2, char1)))
-      _ <- Ref.i_(23).Entities.*?(Entity.ref.d1).query.get.map(_ ==> List(List(ref2, ref1)))
     } yield ()
   }
 
@@ -466,14 +465,9 @@ case class SortNested(
         (1, Some(ref1)),
         (2, Some(ref2)),
         (3, None)))).transact
-      _ <- Ref.i_(23).Entities.*?(Entity.i.a2.ref_?.a1).query.get.map(_ ==> List(List(
-        (3, None),
-        (1, Some(ref1)),
-        (2, Some(ref2)))))
-      _ <- Ref.i_(23).Entities.*?(Entity.i.d2.ref_?.d1).query.get.map(_ ==> List(List(
-        (2, Some(ref2)),
-        (1, Some(ref1)),
-        (3, None))))
+        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Foreign key attribute Entity.ref not allowed to be set in nested tuple."
+        }
     } yield ()
   }
 

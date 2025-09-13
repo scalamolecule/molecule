@@ -27,72 +27,33 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
       //      _ <- Entity(b).delete.transact
       //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
-//      id <- Entity.i(1).save.transact.map(_.id)
-//      _ <- Entity.i.query.get.map(_ ==> List(1))
+//      _ <- Ref.i.Entities.*(Entity.int).insert((2, List(int1, int2))).i.transact
 
-      _ <- Entity(42).i(2).update.transact
-//      _ <- Entity.i.query.get.map(_ ==> List(2))
+      _ <- Ref.i.Entities.*(Entity.ref).insert((23, List(ref1, ref2))).transact
+
     } yield ()
   }
 
 
-//  "refs1" - refs {
-//    import molecule.db.compliance.domains.dsl.Refs.*
-//    for {
-//
-////      _ <- A.i.B.i._A.s.insert((1, 2, "a")).transact
-////      _ <- A.i.B.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
-////
-////      _ <- A.i.B.i._A.s.C.i.insert((1, 2, "a", 3)).transact
-////      _ <- A.i.B.i._A.s.C.i.query.get.map(_ ==> List((1, 2, "a", 3)))
-////
-////      _ <- A.i.B.i._A.C.i.insert((1, 2, 3)).transact
-////      _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
-////
-////      _ <- A.i.B.i.C.i._B.s.insert((1, 2, 3, "a")).transact
-////      _ <- A.i.B.i.C.i._B.s.query.get.map(_ ==> List((1, 2, 3, "a")))
-////
-////      _ <- A.i.B.i.C.i._B.s.D.i.insert((1, 2, 3, "a", 4)).transact
-////      _ <- A.i.B.i.C.i._B.s.D.i.query.get.map(_ ==> List((1, 2, 3, "a", 4)))
-////
-////      _ <- A.i.B.i.C.i._B.s._A.s.insert((1, 2, 3, "a", "b")).transact
-////      _ <- A.i.B.i.C.i._B.s._A.s.query.get.map(_ ==> List((1, 2, 3, "a", "b")))
-////
-////      _ <- A.i.B.i.C.i._B._A.s.insert((1, 2, 3, "b")).transact
-////      _ <- A.i.B.i.C.i._B._A.s.query.get.map(_ ==> List((1, 2, 3, "b")))
-////
-////      _ <- A.i.B.i.C.i._B.s._A.s.D.i.insert((1, 2, 3, "a", "b", 4)).transact
-////      _ <- A.i.B.i.C.i._B.s._A.s.D.i.query.get.map(_ ==> List((1, 2, 3, "a", "b", 4)))
-////
-//////      // Distinguish separate relationships to same entity
-////      _ <- A.i.B.i._A.B1.i.insert((1, 2, 3)).transact
-////
-////
-////
-////      _ <- rawQuery(
-////        """SELECT DISTINCT
-////          |  A.i,
-////          |  B_1.i,
-////          |  B_2.i
-////          |FROM A
-////          |  INNER JOIN B as B_1 ON
-////          |    A.b = B_1.id
-////          |  INNER JOIN B as B_2 ON
-////          |    A.b1 = B_2.id
-////          |WHERE
-////          |  A.i IS NOT NULL AND
-////          |  B_1.i IS NOT NULL AND
-////          |  B_2.i IS NOT NULL
-////          |""".stripMargin, true
-////      )
-//
-//
-//      _ <- A.i.B.i._A.B1.i.query.i.get.map(_ ==> List((1, 2, 3)))
-//
-////      _ <- A.i.B.i._A.B1.i._A.B2.i.insert((1, 2, 3, 4)).transact
-////      _ <- A.i.B.i._A.B1.i._A.B2.i.query.get.map(_ ==> List((1, 2, 3, 4)))
-//    } yield ()
-//  }
+  //  "refs1" - refs {
+  //    import molecule.db.compliance.domains.dsl.Refs.*
+  //    for {
+  //      _ <- A.s.i
+  //        .B.i._A
+  //        .C.i
+  //        .insert(
+  //          ("a", 1, 1, 0),
+  //          ("b", 1, 0, 1),
+  //        ).transact
+  //
+  //
+  //      _ <- A.s.i_(B.i_)
+  //        .B.i_._A
+  //        .C.i_
+  //        .query.i.get.map(_ ==> List("a"))
+  //
+  //    } yield ()
+  //  }
 
   //  "refs2" - refs {
   //    import molecule.db.compliance.domains.dsl.Refs.*

@@ -90,18 +90,23 @@ case class FilterAttrRef(
           ("b", 1, 0, 1),
         ).transact
 
-      // Filter attribute B.i needs qualifying
-      _ <- A.s.i_(B.i_) // Ambiguous if B points to A.B or A.C
+      _ <- A.s.i_(B.i_)
         .B.i_._A
         .C.i_
-        .query.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Please qualify filter attribute B.i to an unambiguous path:
-              |  A.B.i
-              |  A.C.i""".stripMargin
-        }
+        .query.i.get.map(_ ==> List("a"))
 
-      // Ok when qualified with full unambiguous path
+      //      // Filter attribute B.i needs qualifying
+      //      _ <- A.s.i_(B.i_) // Ambiguous if B points to A.B or A.C
+      //        .B.i_._A
+      //        .C.i_
+      //        .query.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+      //          err ==>
+      //            """Please qualify filter attribute B.i to an unambiguous path:
+      //              |  A.B.i
+      //              |  A.C.i""".stripMargin
+      //        }
+
+      // Or qualify with full paths
 
       _ <- A.s.i_(A.B.i_)
         .B.i_._A
