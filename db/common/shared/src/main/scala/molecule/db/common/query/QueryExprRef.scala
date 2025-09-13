@@ -59,11 +59,6 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
   override protected def queryRef(r: Ref, tail: List[Element]): Unit = {
     val Ref(ent, refAttr, ref, relationship, _, _, reverseRefAttr) = r
-    if (isOptNested && relationship == ManyToMany) {
-      throw ModelError(
-        s"Only cardinality-one refs allowed in optional nested queries ($ent.$refAttr)."
-      )
-    }
     checkOnlyOptRef()
     handleRef(refAttr, ref)
 
@@ -73,14 +68,6 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
       getOptExt(path.dropRight(2)).getOrElse("")
 
     relationship match {
-      case ManyToMany =>
-        if (nestedOptRef) {
-          onlyOneValueInsideOptRef(r)
-        }
-        val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
-        val joinType     = if (singleOptSet) "LEFT" else "INNER"
-        addJoins(ent, entExt, refAttr, ref, joinType)
-
       case ManyToOne =>
         val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
         val joinPredicates  = ListBuffer.empty[String]
@@ -107,9 +94,6 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
           List(s"$ent$entExt.$refAttr = $ref$refExt.id") ++ joinPredicates
         ))
 
-      case OneToMany if isNested =>
-        ???
-
       case OneToMany if isOptNested =>
         throw ModelError(
           s"Only cardinality-one refs allowed in optional nested queries ($ent...$refAttr)."
@@ -127,7 +111,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
           List(s"$ent$entExt.id = $ref$refExt.$revRefAttr") //++ joinPredicates
         ))
 
-      case _ => ???
+      case _ => throw new Exception("Unexpedted relationship: " + relationship)
     }
   }
 
