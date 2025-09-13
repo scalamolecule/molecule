@@ -256,19 +256,10 @@ abstract class DomainStructure {
   trait mapChar extends Options[mapChar, Map[String, Char], Char]
 
 
-  // Relationships ..................................................
+  // ManyToOne relationship ..................................................
 
   object one extends one
   trait one extends refOptions[one]
-
-  object many extends many
-  trait many extends refOptions[many]
-
-  object manyOwned extends manyOwned
-  trait manyOwned extends refOptions[manyOwned]
-
-  trait Join
-
 
 
   // Enums ..................................................
@@ -382,16 +373,6 @@ abstract class DomainStructure {
      */
     def apply[Ref](description: String): refOptions[Self] & Ref = ???
     def descr(description: String): Self = ???
-
-    /** Owner option.
-     *
-     * This entity owns the referenced entity/entities.
-     *
-     * - If this entity is deleted, its references are deleted too
-     * (and recursively if sub entities have owned entities!)
-     */
-    lazy val owner  : Self = ???
-    lazy val owned : Self = ???
 
     lazy val mandatory: Self = ???
 

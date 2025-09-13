@@ -18,7 +18,6 @@ object Refs extends DomainStructure {
     val b2   = one[B]("Aa2")
     val c    = one[C]("Aa")
     val d    = one[D]("Aa")
-    val ownB = one[B]("OwnAa").owner
   }
 
   trait B {
@@ -33,8 +32,6 @@ object Refs extends DomainStructure {
     val c    = one[C]("Bb")
     val c1   = one[C]("Bb1")
     val d    = one[D]("Bb")
-    val ownA = one[A]("OwnBb").owner
-    val ownC = one[C]("OwnBb").owner
   }
 
   trait C {
@@ -46,7 +43,6 @@ object Refs extends DomainStructure {
     val a    = one[A]("Cc")
     val b    = one[B]("Cc")
     val d    = one[D]("Cc")
-    val ownB = one[B]("OwnCc").owner
   }
 
 

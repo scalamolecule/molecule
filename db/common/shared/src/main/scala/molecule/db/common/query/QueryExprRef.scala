@@ -110,8 +110,6 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
         joins += ((s"INNER JOIN", ref, refAs,
           List(s"$ent$entExt.id = $ref$refExt.$revRefAttr") //++ joinPredicates
         ))
-
-      case _ => throw new Exception("Unexpedted relationship: " + relationship)
     }
   }
 
