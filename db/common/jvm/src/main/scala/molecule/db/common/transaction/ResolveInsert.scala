@@ -120,7 +120,6 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
     val refPath1      = tableInsert.refPath ++ List(refAttr, ref)
     val refInsert     = tableInsert.copy(
       foreignKeys = tableInsert.foreignKeys :+ (refAttr -> refPath1),
-//      inputPlaceHolders = tableInsert.inputPlaceHolders :+ "?",
       refPlaceHolders = tableInsert.refPlaceHolders :+ "?",
     )
     val lastPartition = partitions.last.copy(tableInserts = partitions.last.tableInserts :+ refInsert)
@@ -146,7 +145,6 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
     // This ensures that subsequent attribute setters target the correct parameter indices
     // and do not collide with foreign key placeholders.
     val nextParamIndexForPrev = prevTableInsert.columns.length + 1
-
     resolve(tail, nextParamIndexForPrev, tplIndex, partitions.init :+ lastPartition, prevTableInsert)
   }
 

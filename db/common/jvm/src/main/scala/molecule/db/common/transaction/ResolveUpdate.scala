@@ -165,17 +165,6 @@ class ResolveUpdate(isUpsert: Boolean) extends ModelUtils { self: SqlUpdate =>
     }
   }
 
-  //  private def resolveAttrOneTac(a: AttrOneTac, paramIndex: Int): (String, PS => Unit) = {
-  //    a match {
-  //      case AttrOneTacID(ent, "id", Eq, ids1, _, _, _, _, _, _, _, _) => handleIds(ent, ids1)
-  //
-  //      case a if a.attr == "id" => throw ModelError(
-  //        s"Generic id attribute not allowed in update molecule (${a.name}).")
-  //
-  //      case a => handleFilterAttr(a)
-  //    }
-  //  }
-
   private def resolveAttrSetMan(a: AttrSetMan, paramIndex: Int): (String, PS => Unit) = {
     val (ent, attr, ref) = (a.ent, a.attr, a.ref)
     a match {

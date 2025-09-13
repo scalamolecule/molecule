@@ -39,7 +39,6 @@ abstract class Model2SqlQuery(elements0: List[Element])
 
     // Recursively resolve molecule elements
     resolve(elements2)
-    //    resolve(elements1)
   }
 
   def getWhereClauses: ListBuffer[String] = {

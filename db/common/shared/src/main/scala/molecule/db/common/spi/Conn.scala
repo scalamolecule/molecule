@@ -59,7 +59,6 @@ abstract class Conn(val proxy: ConnProxy)
   }
 
 
-
   // Transaction handling ------------------------------------------------------
 
   protected var commit_ = true

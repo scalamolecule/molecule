@@ -134,13 +134,6 @@ trait ResolveSave { self: SqlSave =>
     reverseRefAttr: Option[String],
     tail: List[Element]
   ): List[TableInsert] = {
-    //    println("######################")
-    //    println(tableInserts)
-    //
-    //    println("######################")
-    //    println(tableInsert)
-    //    println("######################")
-
     val refPath1  = tableInsert.refPath ++ List(refAttr, ref)
     val refInsert = tableInsert.copy(
       foreignKeys = tableInsert.foreignKeys :+ (refAttr -> refPath1),
@@ -166,7 +159,6 @@ trait ResolveSave { self: SqlSave =>
     // This ensures that subsequent attribute setters target the correct parameter indices
     // and do not collide with foreign key placeholders.
     val nextParamIndexForPrev = prevTableInsert.columns.length + 1
-
     resolve(tail, nextParamIndexForPrev, curLevelWithoutPrev, prevTableInsert)
   }
 

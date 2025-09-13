@@ -7,55 +7,6 @@ import molecule.core.error.ModelError
 
 trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
-  protected def queryRefOLD(r: Ref, tail: List[Element]): Unit = {
-    val Ref(ent, refAttr, ref, card, _, _, _) = r
-    if (isOptNested && card == SetValue) {
-      throw ModelError(
-        s"Only cardinality-one refs allowed in optional nested queries ($ent.$refAttr)."
-      )
-    }
-    checkOnlyOptRef()
-    handleRef(refAttr, ref)
-
-    val entExt = if (ent == ref)
-      "" // self-joins
-    else
-      getOptExt(path.dropRight(2)).getOrElse("")
-
-    if (card == OneValue) {
-      val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
-      val joinPredicates  = ListBuffer.empty[String]
-      val joinType        =
-        if (insideOptEntity) {
-          if (select.nonEmpty) {
-            // Ensure clauses become join predicates
-            where.foreach {
-              case (attr, predicate) => joinPredicates += s"$attr $predicate"
-            }
-            where.clear()
-          } else {
-            // Optional entity attrs all tacit
-            hasOptEntityAttrs = false
-          }
-          insideOptEntity = false
-          "RIGHT"
-        } else if (isOptNested || nestedOptRef) {
-          "LEFT"
-        } else {
-          "INNER"
-        }
-      joins += ((s"$joinType JOIN", ref, refAs,
-        List(s"$ent$entExt.$refAttr = $ref$refExt.id") ++ joinPredicates
-      ))
-    } else {
-      if (nestedOptRef) {
-        onlyOneValueInsideOptRef(r)
-      }
-      val singleOptSet = tail.length == 1 && tail.head.isInstanceOf[AttrSetOpt]
-      val joinType     = if (singleOptSet) "LEFT" else "INNER"
-      addJoins(ent, entExt, refAttr, ref, joinType)
-    }
-  }
 
   override protected def queryRef(r: Ref, tail: List[Element]): Unit = {
     val Ref(ent, refAttr, ref, relationship, _, _, reverseRefAttr) = r

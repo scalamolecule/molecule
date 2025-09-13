@@ -13,7 +13,6 @@ trait InsertValidationExtraction
   private var curElements: List[Element] = List.empty[Element]
   private def noEmpty(a: Attr) = throw new Exception("Can't use tacit attributes in insert molecule (${a.name}).")
 
-//  @tailrec
   final override def getValidators(
     metaDb: MetaDb,
     elements: List[Element],

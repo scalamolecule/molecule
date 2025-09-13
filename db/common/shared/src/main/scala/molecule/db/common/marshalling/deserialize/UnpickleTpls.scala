@@ -18,8 +18,7 @@ import molecule.db.common.util.ModelUtils
 case class UnpickleTpls[Tpl](
   dataModel: DataModel,
   eitherSerialized: ByteBuffer
-)
-  extends UnpickleTpl_[Tpl]
+) extends UnpickleTpl_[Tpl]
     with ModelUtils
     with MoleculeLogging {
 
