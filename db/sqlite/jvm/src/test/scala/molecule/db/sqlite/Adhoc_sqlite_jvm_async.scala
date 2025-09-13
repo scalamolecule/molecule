@@ -14,12 +14,55 @@ class Adhoc_sqlite_jvm_async extends MUnit with DbProviders_sqlite with TestUtil
     import molecule.db.compliance.domains.dsl.Types.*
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- Entity(a).int(10).update.transact
-      _ <- Entity(b).delete.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+      //        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      //        _ <- Entity.int(3).save.transact
+      //        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      //        _ <- Entity(a).int(10).update.transact
+      //        _ <- Entity(b).delete.transact
+      //        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10)){
+
+      //        _ <- Entity.i(1).float(float1).save.transact
+      //        _ <- Entity.i(2).float_(float1).update.i.transact
+      //        _ <- Entity.i.float_.query.get.map(_.head ==> 2)
+
+
+
+//      _ <- Entity.i.double.insert((1, double1), (2, double2)).transact
+//      _ <- Entity.i.double.query.get.map { res =>
+//        println(res.head._2.getClass)
+//        res ==> List((1, double1), (2, double2))
+//      }
+//      _ <- rawTransact(
+//        """DELETE FROM Entity
+//          |WHERE
+//          |  Entity.double = 1.1""".stripMargin, true
+//      )
+//      //        _ <- Entity.double_(double1).delete.i.transact
+//      _ <- Entity.i.double_.query.get.map(_ ==> List(2))
+//
+//      _ <- Entity.i.double.query.get.map { res =>
+//        println(res.head._2.getClass)
+//        res ==> List((2, double2))
+//      }
+
+
+      _ <- Entity.i.float.insert((1, float1), (2, float2)).transact
+      _ <- Entity.i.float.query.get.map { res =>
+        println(res.head._2.getClass)
+        res ==> List((1, float1), (2, float2))
+      }
+      _ <- rawTransact(
+        """DELETE FROM Entity
+          |WHERE
+          |  Entity.float = 1.1""".stripMargin, true
+      )
+      ////        _ <- Entity.float_(float1).delete.i.transact
+
+      _ <- Entity.i.float.query.get.map { res =>
+        println(res.head._2.getClass)
+        res ==> List((2, float2))
+      }
+      //        _ <- Entity.i.float_.query.get.map(_ ==> List(2))
 
     } yield ()
   }
@@ -29,12 +72,14 @@ class Adhoc_sqlite_jvm_async extends MUnit with DbProviders_sqlite with TestUtil
   //  "refs" - refs {
   //    import molecule.db.compliance.domains.dsl.Refs.*
   //    for {
-  //      _ <- A.i.insert(1, 2).transact
-  //      _ <- A.i.query.stream // fs2.Stream[IO, List[Int]]
-  //        .compile
-  //        .toList
-  //        .map(_.sorted ==> List(1, 2))
-  //        .unsafeToFuture()
+  //      //      _ <- A.i.insert(1).transact
+  //      //      _ <- A.i.query.get.map(_ ==> List(1))
+  //
+  //      _ <- A.i.B.s.insert(
+  //        (1, "a"),
+  //        (2, "b"),
+  //      ).i.transact
+  //
   //    } yield ()
   //  }
   //

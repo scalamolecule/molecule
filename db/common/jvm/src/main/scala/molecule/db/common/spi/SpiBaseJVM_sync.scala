@@ -184,7 +184,6 @@ trait SpiBaseJVM_sync
             val fkIterator = parentIds.iterator
             (ps: PS) =>
               val fk = fkIterator.next()
-              //              println(s"refAttr: $refAttr, refPath: $refPath, paramIndex: $paramIndex, parentIds: $parentIds")
               ps.setLong(paramIndex, fk)
           }
 
@@ -192,16 +191,7 @@ trait SpiBaseJVM_sync
           foreignKeySetters.foreach(_(ps))
           ps.addBatch()
         }
-        ps.executeBatch()
-
-        // Get generated ids
-        val resultSet = ps.getGeneratedKeys
-        val ids       = ListBuffer.empty[Long]
-        while (resultSet.next()) {
-          ids += resultSet.getLong(1)
-        }
-        ps.close()
-        idss += tableInsert.refPath -> ids.toList
+        idss += tableInsert.refPath -> getIdsAndClose(ps, conn, tableInsert.refPath.last)
       }
       idss(firstRefPath)
     }
@@ -271,7 +261,7 @@ trait SpiBaseJVM_sync
         val tpls          = dataPartition.tuples
 
         sortTableInserts(tableInserts).foreach { tableInsert =>
-          //          println(tableInsert)
+          println(tableInsert)
           val ps = conn.sqlConn.prepareStatement(tableInsert.sql, Statement.RETURN_GENERATED_KEYS)
           if (tableInsert.foreignKeys.isEmpty) {
             tpls.foreach { tpl =>
@@ -316,16 +306,7 @@ trait SpiBaseJVM_sync
               ps.addBatch()
             }
           }
-          ps.executeBatch()
-
-          // Get generated ids
-          val resultSet = ps.getGeneratedKeys
-          val ids       = ListBuffer.empty[Long]
-          while (resultSet.next()) {
-            ids += resultSet.getLong(1)
-          }
-          ps.close()
-          idss += tableInsert.refPath -> ids.toList
+          idss += tableInsert.refPath -> getIdsAndClose(ps, conn, tableInsert.refPath.last)
         }
       }
       idss(firstRefPath)
@@ -333,7 +314,6 @@ trait SpiBaseJVM_sync
     await(conn.callback(cleanDataModel))
     txReport
   }
-
 
   private def prepareInsert(insert: Insert, conn: JdbcConn_JVM)
   : (DataModel, List[String], List[Partition], Iterator[DataPartition]) = {
@@ -656,16 +636,7 @@ trait SpiBaseJVM_sync
     val txReport = conn.atomicTransaction { () =>
       val ps = conn.sqlConn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
       ps.addBatch()
-      ps.executeBatch
-
-      // Get generated ids
-      val resultSet = ps.getGeneratedKeys
-      val ids       = ListBuffer.empty[Long]
-      while (resultSet.next()) {
-        ids += resultSet.getLong(1)
-      }
-      ps.close()
-      ids.toList
+      getIdsAndClose(ps, conn, tableDelete.table)
     }
     await(conn.callback(cleanDataModel, true))
     txReport
@@ -778,6 +749,20 @@ trait SpiBaseJVM_sync
 
 
   // Util --------------------------------------
+
+  def getIdsAndClose(ps: PS, conn: JdbcConn_JVM, table: String): List[Long] = {
+    // Execute incoming batch of prepared statements
+    ps.executeBatch()
+
+    // Get generated ids
+    val resultSet = ps.getGeneratedKeys
+    val ids       = ListBuffer.empty[Long]
+    while (resultSet.next()) {
+      ids += resultSet.getLong(1)
+    }
+    ps.close()
+    ids.toList
+  }
 
   def getModel2SqlQuery(elements: List[Element]): Model2SqlQuery & SqlQueryBase
 

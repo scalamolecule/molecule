@@ -5,88 +5,83 @@ import java.util.Date
 import molecule.db.common.transaction.strategy.SqlOps
 import molecule.db.common.transaction.{InsertResolvers, ResolveInsert, SqlInsert}
 
-trait Insert_sqlite
-  extends SqlInsert { self: ResolveInsert & InsertResolvers & SqlOps =>
+trait Insert_sqlite extends SqlInsert { self: ResolveInsert =>
 
   override protected def addSet[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = {
+  ): (PS, Product) => Unit = {
     cast = ""
-    addIterable(attr, optRef, tplIndex, value2json)
+    addIterable(attr, paramIndex, tplIndex, value2json)
   }
 
   override protected def addSetOpt[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
     set2array: Set[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = {
+  ): (PS, Product) => Unit = {
     cast = ""
-    addOptIterable(attr, optRef, tplIndex, value2json)
+    addOptIterable(attr, paramIndex, tplIndex, value2json)
   }
 
   override protected def addSeq[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String],
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = {
+  ): (PS, Product) => Unit = {
     cast = ""
-    addIterable(attr, optRef, tplIndex, value2json)
+    addIterable(attr, paramIndex, tplIndex, value2json)
   }
 
   override protected def addSeqOpt[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
     exts: List[String] = Nil,
     seq2array: Seq[T] => Array[AnyRef],
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = {
+  ): (PS, Product) => Unit = {
     cast = ""
-    addOptIterable(attr, optRef, tplIndex, value2json)
+    addOptIterable(attr, paramIndex, tplIndex, value2json)
   }
 
   override protected def addMap[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = {
+  ): (PS, Product) => Unit = {
     cast = ""
-    val paramIndex   = insertAction.setCol(attr)
-    val stableInsert = insertAction
-    (tpl: Product) => {
+    (ps: PS, tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Map[String, ?]] match {
         case map if map.nonEmpty =>
-          stableInsert.addColSetter((ps: PS) =>
-            ps.setString(
-              paramIndex,
-              map2json(map.asInstanceOf[Map[String, T]], value2json)
-            ))
+          ps.setString(
+            paramIndex,
+            map2json(map.asInstanceOf[Map[String, T]], value2json)
+          )
 
         case _ =>
-          stableInsert.addColSetter((ps: PS) =>
-            ps.setNull(paramIndex, java.sql.Types.NULL))
+          ps.setNull(paramIndex, java.sql.Types.NULL)
       }
     }
   }
@@ -94,26 +89,21 @@ trait Insert_sqlite
   override protected def addMapOpt[T](
     ent: String,
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     tplIndex: Int,
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = {
+  ): (PS, Product) => Unit = {
     cast = ""
-    val paramIndex   = insertAction.setCol(attr)
-    val stableInsert = insertAction
-    (tpl: Product) => {
+    (ps: PS, tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(map: Map[_, _]) if map.nonEmpty =>
-          stableInsert.addColSetter((ps: PS) =>
-            ps.setString(
-              paramIndex,
-              map2json(map.asInstanceOf[Map[String, T]], value2json)
-            ))
+          ps.setString(
+            paramIndex,
+            map2json(map.asInstanceOf[Map[String, T]], value2json)
+          )
 
-        case _ =>
-          stableInsert.addColSetter((ps: PS) =>
-            ps.setNull(paramIndex, java.sql.Types.NULL))
+        case _ => ps.setNull(paramIndex, java.sql.Types.NULL)
       }
     }
   }
@@ -123,70 +113,41 @@ trait Insert_sqlite
 
   private def addIterable[T, M[_] <: Iterable[?]](
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = {
+  ): (PS, Product) => Unit = {
     cast = ""
-    val stableInsert = insertAction
-    optRef.fold {
-      val paramIndex = stableInsert.setCol(attr)
-      (tpl: Product) => {
-        val iterable = tpl.productElement(tplIndex).asInstanceOf[Iterable[T]]
-        if (iterable.nonEmpty) {
-          val json = iterable2json(iterable, value2json)
-          stableInsert.addColSetter((ps: PS) =>
-            ps.setString(paramIndex, json))
-        } else {
-          stableInsert.addColSetter((ps: PS) =>
-            ps.setNull(paramIndex, java.sql.Types.NULL))
-        }
-      }
-    } { ref =>
-      val insertRefIds = insertAction.refIds(attr, ref)
-      (tpl: Product) => {
-        val refIds = tpl.productElement(tplIndex).asInstanceOf[Iterable[Long]]
-        insertRefIds.addRefIds(refIds)
+    (ps: PS, tpl: Product) => {
+      val iterable = tpl.productElement(tplIndex).asInstanceOf[Iterable[T]]
+      if (iterable.nonEmpty) {
+        val json = iterable2json(iterable, value2json)
+        ps.setString(paramIndex, json)
+      } else {
+        ps.setNull(paramIndex, java.sql.Types.NULL)
       }
     }
   }
 
   private def addOptIterable[T, M[_] <: Iterable[?]](
     attr: String,
-    optRef: Option[String],
+    paramIndex: Int,
     tplIndex: Int,
     value2json: (StringBuffer, T) => StringBuffer
-  ): Product => Unit = {
+  ): (PS, Product) => Unit = {
     cast = ""
-    val stableInsert = insertAction
-    optRef.fold {
-      val paramIndex = stableInsert.setCol(attr)
-      (tpl: Product) =>
-        tpl.productElement(tplIndex) match {
-          case Some(iterable: Iterable[_]) =>
-            if (iterable.nonEmpty) {
-              val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
-              stableInsert.addColSetter((ps: PS) =>
-                ps.setString(paramIndex, json))
-            } else {
-              stableInsert.addColSetter((ps: PS) =>
-                ps.setNull(paramIndex, java.sql.Types.NULL))
-            }
-          case None                        =>
-            stableInsert.addColSetter((ps: PS) =>
-              ps.setNull(paramIndex, java.sql.Types.NULL))
-        }
-    } { ref =>
-      val insertRefIds = insertAction.refIds(attr, ref)
-      (tpl: Product) => {
-        tpl.productElement(tplIndex) match {
-          case Some(set: Iterable[_]) =>
-            insertRefIds.addRefIds(set.asInstanceOf[Iterable[Long]])
-          case _                      =>
-            insertRefIds.addRefIds(Iterable.empty[Long])
-        }
+    (ps: PS, tpl: Product) =>
+      tpl.productElement(tplIndex) match {
+        case Some(iterable: Iterable[_]) =>
+          if (iterable.nonEmpty) {
+            val json = iterable2json(iterable.asInstanceOf[Iterable[T]], value2json)
+            ps.setString(paramIndex, json)
+          } else {
+            ps.setNull(paramIndex, java.sql.Types.NULL)
+          }
+        case None                        =>
+          ps.setNull(paramIndex, java.sql.Types.NULL)
       }
-    }
   }
 
   // Save Floats as Doubles (REAL PRECISION) in SQlite
@@ -195,4 +156,11 @@ trait Insert_sqlite
 
   override protected lazy val transformDate =
     (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
+
+
+  override protected lazy val setterFloat =
+    (ps: PS, n: Int, v: Float) => ps.setDouble(n, v.toString.toDouble)
+
+  override protected lazy val setterDate =
+    (ps: PS, n: Int, v: Date) => ps.setLong(n, v.getTime)
 }

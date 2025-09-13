@@ -53,8 +53,8 @@ lazy val root = project
     dbMySQL.jvm,
     dbPostgreSQL.js,
     dbPostgreSQL.jvm,
-//    dbSQlite.js,
-//    dbSQlite.jvm,
+    dbSQlite.js,
+    dbSQlite.jvm,
 
 //    server,
 //    serverHttp4s,
@@ -230,24 +230,24 @@ lazy val dbPostgreSQL = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
 
 
-//lazy val dbSQlite = crossProject(JSPlatform, JVMPlatform)
-//  .crossType(CrossType.Full)
-//  .in(file("db/sqlite"))
-//  .settings(compilerArgs, checkPublishing,
-//    name := "molecule-db-sqlite",
-//    testFrameworks := testingFrameworks
-//  )
-//  .jsSettings(jsEnvironment)
-//  .jvmSettings(
-//    libraryDependencies ++= Seq(
-//      "org.xerial" % "sqlite-jdbc" % "3.49.1.0",
-//      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
-//    ),
-//    Test / fork := true
-//  )
-//  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
-//
-//
+lazy val dbSQlite = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/sqlite"))
+  .settings(compilerArgs, checkPublishing,
+    name := "molecule-db-sqlite",
+    testFrameworks := testingFrameworks
+  )
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.xerial" % "sqlite-jdbc" % "3.49.1.0",
+      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
+    ),
+    Test / fork := true
+  )
+  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
+
+
 //// Server =============================================================================================
 //
 //// CLI to run Tapir example backend servers

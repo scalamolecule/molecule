@@ -72,4 +72,7 @@ trait Save_mysql extends SqlSave { self: ResolveSave =>
 
   override protected lazy val transformDate =
     (v: Date) => (ps: PS, n: Int) => ps.setLong(n, v.getTime)
+
+  override protected lazy val setterDate  =
+    (ps: PS, n: Int, v: Date) => ps.setLong(n, v.getTime)
 }

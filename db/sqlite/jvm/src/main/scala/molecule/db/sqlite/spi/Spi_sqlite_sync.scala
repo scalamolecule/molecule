@@ -24,74 +24,81 @@ object Spi_sqlite_sync extends Spi_sqlite_sync
 
 trait Spi_sqlite_sync extends SpiBaseJVM_sync {
 
-  override def save_getAction(
-    save: Save, conn: JdbcConn_JVM
-  ): SaveAction = {
-    new SqlOps_sqlite(conn) with ResolveSave with Save_sqlite {}
-      .getSaveAction(save.dataModel.elements)
-  }
+  override def getResolveSave(save: Save, conn: JdbcConn_JVM) =
+    new ResolveSave with Save_sqlite {}
 
-  override def insert_getAction(
-    insert: Insert, conn: JdbcConn_JVM
-  ): InsertAction = {
-    new SqlOps_sqlite(conn) with ResolveInsert with Insert_sqlite {}
-      .getInsertAction(insert.dataModel.elements, insert.tpls)
-  }
+  override def getResolveInsert(insert: Insert, conn: JdbcConn_JVM) =
+    new ResolveInsert with Insert_sqlite {}
 
-  override def update_getAction(
-    update: Update, conn0: JdbcConn_JVM
-  ): UpdateAction = {
-    new SqlOps_sqlite(conn0) with ResolveUpdate with Update_sqlite {
-      override val isUpsert: Boolean = update.isUpsert
-    }.getUpdateAction(update.dataModel.elements)
-  }
-
-  override def delete_getAction(
-    delete: Delete, conn: JdbcConn_JVM
-  ): DeleteAction = {
-    new SqlOps_sqlite(conn)
-      with ResolveDelete with SqlDelete {}
-      .getDeleteAction(delete.dataModel.elements, conn.proxy.metaDb)
-  }
+  override def getResolveUpdate(update: Update, conn: JdbcConn_JVM) =
+    new ResolveUpdate(update.isUpsert) with Update_sqlite {}
 
 
   // Util --------------------------------------
 
-  case class SqlOps_sqlite(conn: JdbcConn_JVM) extends SqlOps {
-    override val sqlConn       = conn.sqlConn
-    override val defaultValues = "DEFAULT VALUES"
-    override val m2q           = (elements: List[Element]) =>
-      new Model2SqlQuery_sqlite(elements)
+//  case class SqlOps_sqlite(conn: JdbcConn_JVM) extends SqlOps {
+//    override val sqlConn       = conn.sqlConn
+//    override val defaultValues = "DEFAULT VALUES"
+//    override val m2q           = (elements: List[Element]) =>
+//      new Model2SqlQuery_sqlite(elements)
+//
+//    // Since SQlite doesn't allow us to get ps.getGeneratedKeys after an
+//    // executeBatch(), we get the affected ids by brute force with a query instead.
+//    override def getIds(
+//      ps: PS,
+//      table: String
+//    ): List[Long] = {
+//      val getPrevId = sqlConn.prepareStatement(
+//        s"select max(id) from $table"
+//      ).executeQuery()
+//      getPrevId.next()
+//      val prevId = getPrevId.getLong(1)
+//      getPrevId.close()
+//
+//      // Execute incoming batch of prepared statements
+//      ps.executeBatch()
+//      ps.close()
+//
+//      val getNewIds = sqlConn.prepareStatement(
+//        s"select id from $table where id > $prevId order by id asc"
+//      ).executeQuery()
+//
+//      val ids = ListBuffer.empty[Long]
+//      while (getNewIds.next()) {
+//        ids += getNewIds.getLong(1)
+//      }
+//      getNewIds.close()
+//
+//      ids.toList
+//    }
+//  }
 
-    // Since SQlite doesn't allow us to get ps.getGeneratedKeys after an
-    // executeBatch(), we get the affected ids by brute force with a query instead.
-    override def getIds(
-      ps: PS,
-      table: String
-    ): List[Long] = {
-      val getPrevId = sqlConn.prepareStatement(
-        s"select max(id) from $table"
-      ).executeQuery()
-      getPrevId.next()
-      val prevId = getPrevId.getLong(1)
-      getPrevId.close()
+  override def getIdsAndClose(
+    ps: PS, conn: JdbcConn_JVM, table: String,
+  ): List[Long] = {
+    val sqlConn = conn.sqlConn
+    val getPrevId = sqlConn.prepareStatement(
+      s"select max(id) from $table"
+    ).executeQuery()
+    getPrevId.next()
+    val prevId = getPrevId.getLong(1)
+    getPrevId.close()
 
-      // Execute incoming batch of prepared statements
-      ps.executeBatch()
-      ps.close()
+    // Execute incoming batch of prepared statements
+    ps.executeBatch()
+    ps.close()
 
-      val getNewIds = sqlConn.prepareStatement(
-        s"select id from $table where id > $prevId order by id asc"
-      ).executeQuery()
+    val getNewIds = sqlConn.prepareStatement(
+      s"select id from $table where id > $prevId order by id asc"
+    ).executeQuery()
 
-      val ids = ListBuffer.empty[Long]
-      while (getNewIds.next()) {
-        ids += getNewIds.getLong(1)
-      }
-      getNewIds.close()
-
-      ids.toList
+    val ids = ListBuffer.empty[Long]
+    while (getNewIds.next()) {
+      ids += getNewIds.getLong(1)
     }
+    getNewIds.close()
+
+    ids.toList
   }
 
   override def validateUpdateSet(
