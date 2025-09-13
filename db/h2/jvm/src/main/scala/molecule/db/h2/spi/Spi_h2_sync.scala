@@ -24,61 +24,14 @@ object Spi_h2_sync extends Spi_h2_sync
 
 trait Spi_h2_sync extends SpiBaseJVM_sync {
 
-//  override def save_getAction(
-//    save: Save, conn: JdbcConn_JVM
-//  ): SaveAction = {
-//        new SqlOps_h2(conn) with ResolveSave with Spi_h2_sync with SqlSave {}
-//          .getSaveAction(save.dataModel.elements)
-//    ???
-//  }
-//  override def getTableInserts(save: Save, conn: JdbcConn_JVM): ResolveSave with SqlSave = {
-//
-//    new ResolveSave with SqlSave {}
-//  }
+  override def getResolveSave(save: Save, conn: JdbcConn_JVM) =
+    new ResolveSave with SqlSave {}
 
-  //  def insert_resolveTables(
-  //    insert: Insert, conn: JdbcConn_JVM
-  //  ): List[TableInsert] = {
-  //    new SqlOps_h2(conn) with ResolveInsert with SqlInsert {}
-  //      .getTableInserts(insert.dataModel.elements)
-  //  }
+  override def getResolveInsert(insert: Insert, conn: JdbcConn_JVM) =
+    new ResolveInsert with SqlInsert {}
 
-//  override def insert_getAction(
-//    insert: Insert, conn: JdbcConn_JVM
-//  ): InsertAction = {
-//    //    new SqlOps_h2(conn) with ResolveInsertOLD with SqlInsertOLD {}
-//    //      .getInsertAction(insert.dataModel.elements, insert.tpls)
-//
-//    ???
-//  }
-
-  //  def insert_getTableInserts(insert: Insert): List[TableInsert] = {
-  //    val elements = insert.dataModel.elements
-  //    val refPath = List(getInitialEntity(elements))
-  //    new ResolveInsert with SqlInsert {}
-  //      .resolve(elements, 1, 0, Nil, TableInsert(refPath, 0, Nil, Nil, Nil))
-  //  }
-
-//  override def getInsertEngine(conn: JdbcConn_JVM): InsertEngine =
-//    new InsertEngine(SqlOps_h2(conn))
-
-//  override def update_getAction(
-//    update: Update, conn0: JdbcConn_JVM
-//  ): UpdateAction = {
-//    //    new SqlOps_h2(conn0) with ResolveUpdate with Spi_h2_sync with SqlUpdate {
-//    //      override val isUpsert: Boolean = update.isUpsert
-//    //    }.getUpdateAction(update.dataModel.elements)
-//
-//    ???
-//  }
-
-//  override def delete_getAction(
-//    delete: Delete, conn: JdbcConn_JVM
-//  ): DeleteAction = {
-//    new SqlOps_h2(conn)
-//      with ResolveDelete with SqlDelete {}
-//      .getDeleteAction(delete.dataModel.elements, conn.proxy.metaDb)
-//  }
+  override def getResolveUpdate(update: Update, conn: JdbcConn_JVM) =
+    new ResolveUpdate(update.isUpsert) with SqlUpdate {}
 
 
   // Util --------------------------------------

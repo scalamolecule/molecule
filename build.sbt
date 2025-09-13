@@ -47,8 +47,8 @@ lazy val root = project
     dbCompliance.jvm,
     dbH2.js,
     dbH2.jvm,
-//    dbMariaDB.js,
-//    dbMariaDB.jvm,
+    dbMariaDB.js,
+    dbMariaDB.jvm,
 //    dbMySQL.js,
 //    dbMySQL.jvm,
 //    dbPostgreSQL.js,
@@ -174,25 +174,25 @@ lazy val dbH2 = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
 
 
-//lazy val dbMariaDB = crossProject(JSPlatform, JVMPlatform)
-//  .crossType(CrossType.Full)
-//  .in(file("db/mariadb"))
-//  .settings(compilerArgs, checkPublishing,
-//    name := "molecule-db-mariadb",
-//    testFrameworks := testingFrameworks)
-//  .jsSettings(jsEnvironment)
-//  .jvmSettings(
-//    libraryDependencies ++= Seq(
-//      "com.dimafeng" %% "testcontainers-scala-mariadb" % dimafengContainerVersion,
-//      "org.mariadb.jdbc" % "mariadb-java-client" % "3.5.1",
-//      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
-//      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
-//    ),
-//    Test / fork := true
-//  )
-//  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
-//
-//
+lazy val dbMariaDB = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("db/mariadb"))
+  .settings(compilerArgs, checkPublishing,
+    name := "molecule-db-mariadb",
+    testFrameworks := testingFrameworks)
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.dimafeng" %% "testcontainers-scala-mariadb" % dimafengContainerVersion,
+      "org.mariadb.jdbc" % "mariadb-java-client" % "3.5.1",
+      "ch.qos.logback" % "logback-classic" % logbackVersion % Test,
+      "org.slf4j" % "slf4j-nop" % "2.0.17", // avoid slf4j warnings
+    ),
+    Test / fork := true
+  )
+  .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
+
+
 //lazy val dbMySQL = crossProject(JSPlatform, JVMPlatform)
 //  .crossType(CrossType.Full)
 //  .in(file("db/mysql"))

@@ -23,35 +23,14 @@ object Spi_mariadb_sync extends Spi_mariadb_sync
 
 trait Spi_mariadb_sync extends SpiBaseJVM_sync {
 
-  override def save_getAction(
-    save: Save, conn: JdbcConn_JVM
-  ): SaveAction = {
-    new SqlOps_mariadb(conn) with ResolveSave with Save_mariadb {}
-      .getSaveAction(save.dataModel.elements)
-  }
+  override def getResolveSave(save: Save, conn: JdbcConn_JVM) =
+    new ResolveSave with Save_mariadb {}
 
-  override def insert_getAction(
-    insert: Insert, conn: JdbcConn_JVM
-  ): InsertAction = {
-    new SqlOps_mariadb(conn) with ResolveInsert with Insert_mariadb {}
-      .getInsertAction(insert.dataModel.elements, insert.tpls)
-  }
+  override def getResolveInsert(insert: Insert, conn: JdbcConn_JVM) =
+    new ResolveInsert with Insert_mariadb {}
 
-  override def update_getAction(
-    update: Update, conn: JdbcConn_JVM
-  ): UpdateAction = {
-    new SqlOps_mariadb(conn) with ResolveUpdate with Update_mariadb {
-      override val isUpsert: Boolean = update.isUpsert
-    }.getUpdateAction(update.dataModel.elements)
-  }
-
-  override def delete_getAction(
-    delete: Delete, conn: JdbcConn_JVM
-  ): DeleteAction = {
-    new SqlOps_mariadb(conn)
-      with ResolveDelete with Spi_mariadb_sync with SqlDelete {}
-      .getDeleteAction(delete.dataModel.elements, conn.proxy.metaDb)
-  }
+  override def getResolveUpdate(update: Update, conn: JdbcConn_JVM) =
+    new ResolveUpdate(update.isUpsert) with Update_mariadb {}
 
 
   // Util --------------------------------------

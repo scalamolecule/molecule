@@ -205,20 +205,11 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
     transformValue: T => Any,
     value2json: (StringBuffer, T) => StringBuffer
   ): (String, PS => Unit) = {
-    //    val paramIndex = updateAction.setCol(s"$attr = ?")
     val colSetter = if (map.isEmpty) {
       (ps: PS) => ps.setNull(paramIndex, 0)
     } else {
-      //      setAttrPresence(ent, attr)
       (ps: PS) => ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
     }
-
-
-    //    val colSetter = if (byteArray.isEmpty) {
-    //      (ps: PS) => ps.setNull(paramIndex, 0)
-    //    } else {
-    //      (ps: PS) => ps.setBytes(paramIndex, byteArray)
-    //    }
     (s"$attr = ?", colSetter)
   }
 
@@ -234,10 +225,6 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
     if (map.isEmpty) {
       (s"$attr = $attr", (ps: PS) => ())
     } else {
-      //      setAttrPresence(ent, attr)
-      //      val scalaBaseType = exts.head
-      //      val setAttr       = s"$attr = addPairs_$scalaBaseType($attr, ?)"
-      //      val paramIndex    = updateAction.setCol(setAttr)
       val scalaBaseType = exts.head
       val colInput      = s"$attr = addPairs_$scalaBaseType($attr, ?)"
       val colSetter     = (ps: PS) => ps.setBytes(paramIndex, map2jsonByteArray(map, value2json))
@@ -257,11 +244,7 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
     val colInput      = s"$attr = removePairs_$scalaBaseType($attr, ?)"
     val colSetter     = if (keys.isEmpty) {
       (ps: PS) => ps.setNull(paramIndex, 0)
-
     } else {
-      //      setAttrPresence(ent, attr)
-
-      //      val paramIndex    = updateAction.setCol(setAttr)
       (ps: PS) => ps.setArray(paramIndex, ps.getConnection.createArrayOf("String", keys.toArray))
     }
     (colInput, colSetter)
@@ -277,20 +260,10 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
     iterable: M[T],
     exts: List[String],
     vs2array: M[T] => Array[AnyRef],
-  ): (String, PS => Unit) = {
-    //    val dbBaseType = exts(1)
-    //    val paramIndex = updateAction.setCol(s"$attr = ?")
-    //    if (iterable.nonEmpty) {
-    //      setAttrPresence(ent, attr)
-    //      addArray(paramIndex, dbBaseType, vs2array(iterable))
-    //    } else {
-    //      updateAction.addColSetter((ps: PS) => ps.setNull(paramIndex, 0))
-    //    }
-    val colSetter = if (iterable.isEmpty)
+  ): (String, PS => Unit) = {tter = if (iterable.isEmpty)
       (ps: PS) => ps.setNull(paramIndex, java.sql.Types.NULL)
     else
       addArray(paramIndex, exts(1), vs2array(iterable))
-
     (s"$attr = ?", colSetter)
   }
 
@@ -302,24 +275,6 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
     exts: List[String],
     iterable2array: M[T] => Array[AnyRef],
   ): (String, PS => Unit) = {
-    //    if (iterable.nonEmpty) {
-    //      setAttrPresence(ent, attr)
-    //      val dbBaseType = exts(1)
-    //      val cast       = exts(2) match {
-    //        case ""  => ""
-    //        case tpe => tpe + "[]"
-    //      }
-    //      val setAttr    = s"$attr = COALESCE($attr, ARRAY[]$cast) || ?"
-    //      val paramIndex = updateAction.setCol(setAttr)
-    //      addArray(paramIndex, dbBaseType, iterable2array(iterable))
-    //    }
-
-    //    val cast     = exts(2) match {
-    //      case ""  => ""
-    //      case tpe => tpe + "[]"
-    //    }
-    //    val colInput = s"$attr = COALESCE($attr, ARRAY[]$cast) || ?"
-
     if (iterable.isEmpty) {
       (s"$attr = $attr", (ps: PS) => ())
     } else {
@@ -328,17 +283,9 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
         case tpe => tpe + "[]"
       }
       val colInput  = s"$attr = COALESCE($attr, ARRAY[]$cast) || ?"
-      //      val dbBaseType = exts(1)
-      //      val cast       = exts(2) match {
-      //        case ""  => ""
-      //        case tpe => tpe + "[]"
-      //      }
-      //      val setAttr    = s"$attr = COALESCE($attr, ARRAY[]$cast) || ?"
-      //      val paramIndex = updateAction.setCol(setAttr)
       val colSetter = addArray(paramIndex, exts(1), iterable2array(iterable))
       (colInput, colSetter)
     }
-
   }
 
   private def updateIterableRemove[T, M[_] <: Iterable[?]](
@@ -349,69 +296,38 @@ trait SqlUpdate extends ValueTransformers with SpiHelpers { self: ResolveUpdate 
     exts: List[String],
     iterable2array: M[T] => Array[AnyRef]
   ): (String, PS => Unit) = {
-    //    if (iterable.nonEmpty) {
-    //      setAttrPresence(ent, attr)
-    //      val scalaBaseType = exts.head
-    //      val dbBaseType    = exts(1)
-    //      val setAttr       = s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
-    //      val paramIndex    = updateAction.setCol(setAttr)
-    //      addArray(paramIndex, dbBaseType, iterable2array(iterable))
-    //    }
-
-    val scalaBaseType = exts.head
-    val dbBaseType    = exts(1)
-    val colInput      = s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
-
-    val colSetter = if (iterable.isEmpty)
-      (ps: PS) => ps.setNull(paramIndex, java.sql.Types.NULL)
-    else {
-      //      val scalaBaseType = exts.head
-      //      val dbBaseType    = exts(1)
-      //      val setAttr       = s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
-      //      val paramIndex    = updateAction.setCol(setAttr)
-      addArray(paramIndex, exts(1), iterable2array(iterable))
+    if (iterable.isEmpty) {
+      (s"$attr = $attr", (ps: PS) => ()) // unchanged value
+    } else {
+      val scalaBaseType = exts.head
+      val dbBaseType    = exts(1)
+      val colInput      = s"$attr = removeFromArray_$scalaBaseType($attr, ?)"
+      (colInput, addArray(paramIndex, dbBaseType, iterable2array(iterable)))
     }
-
-    (colInput, colSetter)
   }
 
 
-  //  protected def setAttrPresence(ent: String, attr: String): (String, PS => Unit) = {
-  //    if (isUpsert) {
-  //      // Allow finding where clauses for ids query. Not used otherwise
-  //      query.filterAttrs += AttrOneOptByte(ent, attr)
-  //    } else {
-  //      // Attribute value present in updated data
-  //      query.filterAttrs += AttrOneTacByte(ent, attr)
+  //    protected def setAttrPresence(ent: String, attr: String): (String, PS => Unit) = {
+  //      if (isUpsert) {
+  //        // Allow finding where clauses for ids query. Not used otherwise
+  //        query.filterAttrs += AttrOneOptByte(ent, attr)
+  //      } else {
+  //        // Attribute value present in updated data
+  //        query.filterAttrs += AttrOneTacByte(ent, attr)
   //
-  //      // Used for single entity update with ids and no filters
-  //      updateAction.mandatoryCols += s"$ent.$attr IS NOT NULL"
+  //        // Used for single entity update with ids and no filters
+  //        updateAction.mandatoryCols += s"$ent.$attr IS NOT NULL"
+  //      }
   //    }
-  //  }
 
   private def addArray(
     paramIndex: Int, dbBaseType: String, array: Array[AnyRef]
   ): PS => Unit = {
-    //    updateAction.addColSetter((ps: PS) => {
-    //      val conn = ps.getConnection
-    //      ps.setArray(paramIndex, conn.createArrayOf(dbBaseType, array))
-    //    })
-
     (ps: PS) => {
       val conn = ps.getConnection
       ps.setArray(paramIndex, conn.createArrayOf(dbBaseType, array))
     }
   }
-
-
-  //  protected def getUpdateId: Long = {
-  //    updateAction.ids match {
-  //      case List(v) => v
-  //      case other   => throw ModelError(
-  //        "Expected to update one entity. Found multiple ids: " + other
-  //      )
-  //    }
-  //  }
 
   override protected lazy val extsID             = List("ID", "BIGINT", "")
   override protected lazy val extsString         = List("String", "LONGVARCHAR", "")

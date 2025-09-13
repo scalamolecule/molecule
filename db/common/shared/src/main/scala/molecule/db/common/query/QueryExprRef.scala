@@ -72,10 +72,6 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     else
       getOptExt(path.dropRight(2)).getOrElse("")
 
-
-    println(s"path: $path")
-
-
     relationship match {
       case ManyToMany =>
         if (nestedOptRef) {
@@ -87,9 +83,6 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
       case ManyToOne =>
         val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
-
-        println(s"refAs: $refAs, refExt: $refExt, getOptExt: ${getOptExt()}")
-
         val joinPredicates  = ListBuffer.empty[String]
         val joinType        =
           if (insideOptEntity) {

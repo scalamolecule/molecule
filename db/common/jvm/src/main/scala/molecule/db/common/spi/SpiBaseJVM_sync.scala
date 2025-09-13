@@ -166,7 +166,7 @@ trait SpiBaseJVM_sync
 
     val txReport = conn.atomicTransaction { () =>
       sortTableInserts(tableInserts).foreach { tableInsert =>
-        println(tableInsert)
+        //        println(tableInsert)
         val ps         = conn.sqlConn.prepareStatement(tableInsert.sql, Statement.RETURN_GENERATED_KEYS)
         val dummyTuple = EmptyTuple
 
@@ -217,11 +217,13 @@ trait SpiBaseJVM_sync
     val firstEntity      = getInitialEntity(cleanElements)
     val firstRefPath     = List(firstEntity)
     val firstTableInsert = TableInsert(firstRefPath)
-    val resolver         = new ResolveSave with SqlSave {}
+    val resolver         = getResolveSave(save, conn)
     val tableInserts     = resolver.resolve(cleanElements, 1, Nil, firstTableInsert)
     (cleanDataModel, firstRefPath, tableInserts)
   }
 
+  // Database-specific implementations of the resolver.
+  def getResolveSave(save: Save, conn: JdbcConn_JVM): ResolveSave & SqlSave
 
   override def save_inspect(save: Save)(using conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
@@ -230,27 +232,6 @@ trait SpiBaseJVM_sync
       val inserts              = tableInserts.map(_.sql).mkString("\n\n")
       renderInspection("SAVE", save.dataModel, inserts)
     }
-  }
-
-  private def tryInspect(action: String, dataModel: DataModel)
-                        (body: => String): String = try {
-    body
-  } catch {
-    case NonFatal(e) =>
-      println(
-        s"""
-           |------------------ Error inspecting $action -----------------------
-           |$dataModel""".stripMargin)
-      throw e
-  }
-
-  private def renderInspectTx(
-    label: String,
-    dataModel: DataModel,
-    action: SqlAction,
-    tpls: Seq[Product] = Nil
-  ): String = {
-    renderInspection(label, dataModel, action.toString, tpls.mkString("\n"))
   }
 
 
@@ -363,11 +344,14 @@ trait SpiBaseJVM_sync
     val firstRefPath     = List(firstEntity)
     val firstTableInsert = TableInsert(firstRefPath)
     val firstPartition   = Partition(Nil, 0, Tpl)
-    val resolver         = new ResolveInsert with SqlInsert {}
+    val resolver         = getResolveInsert(insert, conn)
     val partitions       = resolver.resolve(cleanElements, 1, 0, List(firstPartition), firstTableInsert)
     val dataPartitions   = tuplePartitions(insert.tpls, partitions)
     (cleanDataModel, firstRefPath, partitions, dataPartitions)
   }
+
+  // Database-specific implementations of the resolver.
+  def getResolveInsert(insert: Insert, conn: JdbcConn_JVM): ResolveInsert & SqlInsert
 
 
   private def tuplePartitions(topLevel: Seq[Product], partitions: Seq[Partition]) = new Iterator[DataPartition] {
@@ -499,7 +483,7 @@ trait SpiBaseJVM_sync
 
     // Start with all nodes that have no prerequisites (in-degree 0), in original order for stability
     val zeroInDegreeRefPaths = tableInserts.map(_.refPath).filter(refPath => inDegrees(refPath) == 0)
-    val queue                = mutable.Queue[List[String]](zeroInDegreeRefPaths: _*)
+    val queue                = mutable.Queue.from[List[String]](zeroInDegreeRefPaths)
 
     // Kahn's algorithm: repeatedly remove nodes with in-degree 0 and "release" their children
     val orderedInserts = mutable.ListBuffer.empty[TableInsert]
@@ -581,11 +565,6 @@ trait SpiBaseJVM_sync
 
     val (cleanDataModel, tableUpdates, idsQuery) = prepareUpdate(update, conn)
 
-    //    val cleanElements            = keywordsSuffixed(update.dataModel.elements, conn.proxy)
-    //    val cleanDataModel           = update.dataModel.copy(elements = cleanElements)
-    //    val updateClean              = update.copy(dataModel = cleanDataModel)
-    //    val (tableUpdates, idsQuery) = update_getStmt(update, cleanElements)
-
     val tableCount   = tableUpdates.length
     val idLists      = new Array[ListBuffer[Long]](tableCount).map(_ => ListBuffer.empty[Long])
     val idsResultSet = conn.sqlConn.prepareStatement(idsQuery).executeQuery()
@@ -602,17 +581,23 @@ trait SpiBaseJVM_sync
       tableUpdates.foreach {
         case tableUpdate if tableUpdate.colSetters.isEmpty => idss.next()
         case tableUpdate                                   =>
-          val updateSql = tableUpdate.sql(idss.next())
+          idss.next() match {
+            case buf: ListBuffer[Long] if buf.isEmpty => ()
+            case ids                                  =>
+              val updateSql = tableUpdate.sql(ids)
 
-          //          println("=================================")
-          //          cleanElements.foreach(println)
-          //          println("---------------------------------")
-          //          println(updateSql)
+              //          println("=================================")
+              //          cleanElements.foreach(println)
+              //              println("---------------------------------")
+              //              println(updateSql)
 
-          val ps = conn.sqlConn.prepareStatement(updateSql)
-          tableUpdate.colSetters.foreach(_(ps))
-          ps.executeUpdate()
-          ps.close()
+              val ps = conn.sqlConn.prepareStatement(updateSql)
+              tableUpdate.colSetters.foreach(_(ps))
+              ps.executeUpdate()
+              ps.close()
+          }
+
+
       }
       idLists.head.toList
     }
@@ -620,23 +605,23 @@ trait SpiBaseJVM_sync
     txReport
   }
 
-
   private def prepareUpdate(update: Update, conn: JdbcConn_JVM)
   : (DataModel, List[TableUpdate], String) = {
     val cleanElements            = keywordsSuffixed(update.dataModel.elements, conn.proxy)
     val cleanDataModel           = update.dataModel.copy(elements = cleanElements)
     val updateClean              = update.copy(dataModel = cleanDataModel)
-    val (tableUpdates, idsQuery) = update_getStmt(update, cleanElements)
+    val (tableUpdates, idsQuery) = getTableUpdates(update, cleanElements, conn)
     (cleanDataModel, tableUpdates, idsQuery)
   }
 
-  private def update_getStmt(
+  private def getTableUpdates(
     update: Update,
-    cleanElements: List[Element]
+    cleanElements: List[Element],
+    conn: JdbcConn_JVM
   ): (List[TableUpdate], String) = {
     val firstEntity      = getInitialEntity(cleanElements)
     val firstTableUpdate = TableUpdate(List(firstEntity))
-    val resolver         = new ResolveUpdate(update.isUpsert) with SqlUpdate {}
+    val resolver         = getResolveUpdate(update, conn)
 
     val (tableUpdates, filterElements, notNulls) = resolver.resolve(
       cleanElements, 1, Nil, firstTableUpdate, List(AttrOneManID(firstEntity, "id")), Nil
@@ -653,6 +638,9 @@ trait SpiBaseJVM_sync
     (tableUpdates, query)
   }
 
+  // Database-specific implementations of the resolver.
+  def getResolveUpdate(update: Update, conn: JdbcConn_JVM): ResolveUpdate & SqlUpdate
+
   override def update_inspect(update: Update)(using conn0: Conn): String = {
     val conn   = conn0.asInstanceOf[JdbcConn_JVM]
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
@@ -665,7 +653,7 @@ trait SpiBaseJVM_sync
       val (_, tableUpdates, idsQuery) = prepareUpdate(update, conn)
 
       val idsQuery2 = s"Ids query:\n$idsQuery\n"
-      val updates = tableUpdates.map(_.sql(ListBuffer(42, 43))).mkString("\n\n")
+      val updates   = tableUpdates.map(_.sql(ListBuffer(42, 43))).mkString("\n\n")
       renderInspection(action, update.dataModel, idsQuery2, updates)
     }
   }
@@ -704,14 +692,7 @@ trait SpiBaseJVM_sync
 
     val (cleanDataModel, tableDelete) = prepareDelete(delete, conn)
 
-    //    val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
-    //    val cleanDataModel = delete.dataModel.copy(elements = cleanElements)
-    //    val table          = getInitialEntity(cleanElements)
-    //    val resolver       = new ResolveDelete {}
-    //    val tableDelete    = resolver.resolve(cleanElements, true, TableDelete(table, Nil, None, None))
-
-    val sql = tableDelete.sql(getModel2SqlQuery(Nil))
-
+    val sql      = tableDelete.sql(getModel2SqlQuery(Nil))
     val txReport = conn.atomicTransaction { () =>
       val ps = conn.sqlConn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
       ps.addBatch()
@@ -733,14 +714,8 @@ trait SpiBaseJVM_sync
   override def delete_inspect(delete: Delete)(using conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
     tryInspect("delete", delete.dataModel) {
-      //      val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
-      //      val cleanDataModel = delete.dataModel.copy(elements = cleanElements)
-      //      val deleteClean    = delete.copy(dataModel = cleanDataModel)
-      //      renderInspectTx("DELETE", delete.dataModel, delete_getAction(deleteClean, conn))
-
       val (_, tableDelete) = prepareDelete(delete, conn)
       val deleteSql        = tableDelete.sql(getModel2SqlQuery(Nil))
-
       renderInspection("DELETE", delete.dataModel, deleteSql)
     }
   }
@@ -750,35 +725,37 @@ trait SpiBaseJVM_sync
     val cleanElements  = keywordsSuffixed(delete.dataModel.elements, conn.proxy)
     val cleanDataModel = delete.dataModel.copy(elements = cleanElements)
     val table          = getInitialEntity(cleanElements)
-    val resolver       = new ResolveDelete {}
+    val resolver       = new ResolveDelete {} // same for all databases
     val tableDelete    = resolver.resolve(cleanElements, true, TableDelete(table, Nil, None, None))
     (cleanDataModel, tableDelete)
   }
 
+  // Database-specific implementations of the resolver.
+  //  def getResolveDelete(delete: Delete, conn: JdbcConn_JVM): ResolveDelete
 
 
   // Inspect --------------------------------------------------------
 
-  //  private def tryInspect(action: String, dataModel: DataModel)
-  //                        (body: => String): String = try {
-  //    body
-  //  } catch {
-  //    case NonFatal(e) =>
-  //      println(
-  //        s"""
-  //           |------------------ Error inspecting $action -----------------------
-  //           |$dataModel""".stripMargin)
-  //      throw e
-  //  }
+  private def tryInspect(action: String, dataModel: DataModel)
+                        (body: => String): String = try {
+    body
+  } catch {
+    case NonFatal(e) =>
+      println(
+        s"""
+           |------------------ Error inspecting $action -----------------------
+           |$dataModel""".stripMargin)
+      throw e
+  }
 
-  //  private def renderInspectTx(
-  //    label: String,
-  //    dataModel: DataModel,
-  //    action: SqlAction,
-  //    tpls: Seq[Product] = Nil
-  //  ): String = {
-  //    renderInspection(label, dataModel, action.toString, tpls.mkString("\n"))
-  //  }
+  private def renderInspectTx(
+    label: String,
+    dataModel: DataModel,
+    action: SqlAction,
+    tpls: Seq[Product] = Nil
+  ): String = {
+    renderInspection(label, dataModel, action.toString, tpls.mkString("\n"))
+  }
 
 
   // Fallback --------------------------------------
