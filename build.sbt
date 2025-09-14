@@ -25,7 +25,7 @@ inThisBuild(
     scalaVersion := "3.7.3",
     publishTo := localStaging.value,
 
-    // Run tests for all systems sequentially to avoid data locks with dbs.
+    // Run tests sequentially to avoid data locks with dbs.
     // Only applies on JVM. On the JS platform there's no parallelism anyway.
     Test / parallelExecution := false,
   )

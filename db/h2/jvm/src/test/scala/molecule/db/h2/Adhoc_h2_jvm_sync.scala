@@ -19,23 +19,6 @@ class Adhoc_h2_jvm_sync extends MUnit with DbProviders_h2 with TestUtils {
   //  }
 
 
-  "accounting" - accounting {
-    import molecule.db.compliance.domains.relationship.dsl.Accounting.*
-
-
-    Invoice.no.Lines.*(InvoiceLine.amount).insert(
-      (1, List(10, 20, 30)),
-      (2, List(20, 70)),
-    ).i.transact
-
-    Invoice.no.a1.Lines.*(InvoiceLine.amount).query.i.get ==> List(
-      (1, List(10, 20, 30)),
-      (2, List(20, 70)),
-    )
-
-  }
-
-
   "refs" - refs {
     import molecule.db.compliance.domains.dsl.Refs.*
 

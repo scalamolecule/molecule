@@ -9,12 +9,9 @@ import molecule.db.h2.setup.DbProviders_h2
 import org.scalactic.Equality
 import molecule.core.dataModel.*
 import scala.Tuple.:*
-import molecule.db.compliance.domains.dsl.Types.Entity
 
 
 class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
-
-  import molecule.db.compliance.domains.dsl.Refs.*
 
   "types" - types {
     import molecule.db.compliance.domains.dsl.Types.*
@@ -31,25 +28,16 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
   }
 
 
-  //  "refs1" - refs {
-  //    import molecule.db.compliance.domains.dsl.Refs.*
-  //    for {
-  //      _ <- A.s.i
-  //        .B.i._A
-  //        .C.i
-  //        .insert(
-  //          ("a", 1, 1, 0),
-  //          ("b", 1, 0, 1),
-  //        ).transact
-  //
-  //
-  //      _ <- A.s.i_(B.i_)
-  //        .B.i_._A
-  //        .C.i_
-  //        .query.i.get.map(_ ==> List("a"))
-  //
-  //    } yield ()
-  //  }
+//  "refs1" - refs {
+//    import molecule.db.compliance.domains.dsl.Refs.*
+//    for {
+//      _ <- A.i.Bb.i.query.get
+//      _ <- A.i.B.i.query.get
+//      _ <- B.i.A.i.query.get
+//      _ <- B.i.Aa.i.query.get
+//
+//    } yield ()
+//  }
 
   //  "refs2" - refs {
   //    import molecule.db.compliance.domains.dsl.Refs.*

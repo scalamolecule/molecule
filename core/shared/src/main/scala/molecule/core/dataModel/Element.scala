@@ -35,7 +35,6 @@ sealed trait Attr extends Element {
   protected def coords: String = if (coord.isEmpty) "Nil" else coord.mkString("List(", ", ", ")")
 }
 
-
 sealed trait AttrOne extends Attr {
   val binding: Boolean
 }
@@ -45,7 +44,6 @@ sealed trait AttrMap extends Attr {
   val keys: Seq[String] = Nil
   protected def ks: String = if (keys.isEmpty) "Nil" else keys.mkString("List(\"", "\", \"", "\")")
 }
-
 
 case class Ref(
   ent: String,
