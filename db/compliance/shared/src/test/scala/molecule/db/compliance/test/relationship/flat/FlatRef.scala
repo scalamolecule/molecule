@@ -1,4 +1,4 @@
-package molecule.db.compliance.test.relation.flat
+package molecule.db.compliance.test.relationship.flat
 
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async

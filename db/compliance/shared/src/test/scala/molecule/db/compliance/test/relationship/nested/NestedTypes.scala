@@ -1,4 +1,4 @@
-package molecule.db.compliance.test.relation.nested
+package molecule.db.compliance.test.relationship.nested
 
 import scala.concurrent.Future
 import molecule.core.setup.{MUnit_arrays, TestUtils}

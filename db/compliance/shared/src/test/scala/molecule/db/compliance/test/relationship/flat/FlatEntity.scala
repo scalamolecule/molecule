@@ -1,4 +1,4 @@
-package molecule.db.compliance.test.relation.flat
+package molecule.db.compliance.test.relationship.flat
 
 import molecule.core.setup.MUnit
 import molecule.db.common.api.Api_async
@@ -6,7 +6,7 @@ import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.DbProviders
-import molecule.db.compliance.test.relation.Arity23
+import molecule.db.compliance.test.relationship.Arity23
 
 case class FlatEntity(
   suite: MUnit,

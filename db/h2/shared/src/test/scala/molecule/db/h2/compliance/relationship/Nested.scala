@@ -1,8 +1,8 @@
-package molecule.db.h2.compliance.relation
+package molecule.db.h2.compliance.relationship
 
 import molecule.core.setup.{MUnit, MUnit_arrays}
 import molecule.db
-import molecule.db.compliance.test.relation.nested.*
+import molecule.db.compliance.test.relationship.nested.*
 import molecule.db.h2.setup.Api_h2_async
 
 class NestedBasicTest extends MUnit {

@@ -1,4 +1,4 @@
-package molecule.db.compliance.test.relation.nested
+package molecule.db.compliance.test.relationship.nested
 
 import molecule.core.setup.MUnit
 import molecule.db.common.api.Api_async
@@ -7,7 +7,7 @@ import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Refs.*
 import molecule.db.compliance.domains.dsl.Types.{Entity, Ref}
 import molecule.db.compliance.setup.DbProviders
-import molecule.db.compliance.test.relation.Arity23
+import molecule.db.compliance.test.relationship.Arity23
 
 
 case class NestedOptional(

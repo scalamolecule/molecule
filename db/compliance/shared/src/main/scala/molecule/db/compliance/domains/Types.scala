@@ -43,8 +43,8 @@ object Types extends DomainStructure {
     val short          = oneShort
     val char           = oneChar
 
-    val ref   = one[Ref]
-    val other = one[Other]
+    val ref   = manyToOne[Ref]
+    val other = manyToOne[Other]
 
     // Set
     val stringSet         = setString
@@ -196,7 +196,7 @@ object Types extends DomainStructure {
     val shortSeq          = seqShort
     val charSeq           = seqChar
 
-    val entity = one[Entity]("Refs")
+    val entity = manyToOne[Entity].oneToMany("Refs")
   }
 
   trait Other {

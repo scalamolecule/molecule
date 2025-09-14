@@ -38,8 +38,8 @@ object Artists2 extends DomainStructure {
 //    val sculpturer = one[Artist].Sculpturers
 //    val painter    = one[Artist].Paintings
 
-    val sculpturer = one[Artist]("Sculptures") // Distinguish reverse refs
-    val painter    = one[Artist]("Paintings") // Distinguish reverse refs
+    val sculpturer = manyToOne[Artist].oneToMany("Sculptures") // Distinguish reverse refs
+    val painter    = manyToOne[Artist].oneToMany("Paintings") // Distinguish reverse refs
 
     // .painter
     // .Painter.name

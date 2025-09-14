@@ -27,7 +27,7 @@ object Accounting extends DomainStructure {
     val product = oneString
     val amount  = oneInt
 
-    val invoice = one[Invoice]("Lines")
+    val invoice = manyToOne[Invoice].oneToMany("Lines")
 
     // .invoice
     // .Invoice.no

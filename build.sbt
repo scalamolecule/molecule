@@ -56,12 +56,12 @@ lazy val root = project
     dbSQlite.js,
     dbSQlite.jvm,
 
-//    server,
-//    serverHttp4s,
-//    serverNetty,
-//    serverPekko,
-//    serverPlay,
-//    serverZioHttp,
+    server,
+    serverHttp4s,
+    serverNetty,
+    serverPekko,
+    serverPlay,
+    serverZioHttp,
 
     //    graphqlClient.js,
     //    graphqlClient.jvm,
@@ -248,102 +248,102 @@ lazy val dbSQlite = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(dbCommon, dbCompliance % "compile->compile;test->test")
 
 
-//// Server =============================================================================================
-//
-//// CLI to run Tapir example backend servers
-//lazy val server = project
-//  .in(file("server/cli"))
-//  .settings(
-//    publish / skip := true,
-//    dependencyOverrides ++= Seq(
-//      "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
-//    ),
-//    libraryDependencies ++= Seq(
-//      // Avoid "No SLF4J providers were found" errors
-//      "org.slf4j" % "slf4j-nop" % "2.0.17",
-//    ),
-//  )
-//  .dependsOn(
-//    dbH2.jvm,
-//    dbMySQL.jvm,
-//    dbMariaDB.jvm,
-//    dbPostgreSQL.jvm,
-//    dbSQlite.jvm,
-//
-//    serverHttp4s % "test->test",
-//    serverNetty % "test->test",
-//    serverPekko % "test->test",
-//    serverPlay % "test->test",
-//    serverZioHttp % "test->test",
-//  )
-//
-//
-//lazy val serverEndpoints = project
-//  .in(file("server/endpoints"))
-//  .settings(
-//    publish / skip := true,
-//    libraryDependencies ++= Seq(
-//      "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
-//    ),
-//  )
-//  .dependsOn(dbCommon.jvm)
-//
-//lazy val serverPekko = project
-//  .in(file("server/pekko"))
-//  .settings(checkPublishing,
-//    name := "molecule-db-server-pekko",
-//    publish / skip := true,
-//    libraryDependencies ++= Seq(
-//      // Enforce using same Pekko versions
-//      "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
-//      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
-//
-//      "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
-//    ),
-//  )
-//  .dependsOn(serverEndpoints)
-//
-//
-//lazy val serverHttp4s = project
-//  .in(file("server/http4s"))
-//  .settings(
-//    publish / skip := true,
-//    libraryDependencies ++= Seq(
-//      "org.http4s" %% "http4s-ember-server" % http4sVersion,
-//      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
-//    ),
-//  )
-//  .dependsOn(serverEndpoints)
-//
-//lazy val serverNetty = project
-//  .in(file("server/netty"))
-//  .settings(
-//    publish / skip := true,
-//    libraryDependencies ++= Seq(
-//      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-cats" % tapirVersion,
-//    ),
-//  )
-//  .dependsOn(serverHttp4s)
-//
-//lazy val serverPlay = project
-//  .in(file("server/play"))
-//  .settings(
-//    publish / skip := true,
-//    libraryDependencies ++= Seq(
-//      "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion,
-//    ),
-//  )
-//  .dependsOn(serverPekko)
-//
-//lazy val serverZioHttp = project
-//  .in(file("server/zioHttp"))
-//  .settings(
-//    publish / skip := true,
-//    libraryDependencies ++= Seq(
-//      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
-//    ),
-//  )
-//  .dependsOn(serverEndpoints)
+// Server =============================================================================================
+
+// CLI to run Tapir example backend servers
+lazy val server = project
+  .in(file("server/cli"))
+  .settings(
+    publish / skip := true,
+    dependencyOverrides ++= Seq(
+      "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
+    ),
+    libraryDependencies ++= Seq(
+      // Avoid "No SLF4J providers were found" errors
+      "org.slf4j" % "slf4j-nop" % "2.0.17",
+    ),
+  )
+  .dependsOn(
+    dbH2.jvm,
+    dbMySQL.jvm,
+    dbMariaDB.jvm,
+    dbPostgreSQL.jvm,
+    dbSQlite.jvm,
+
+    serverHttp4s % "test->test",
+    serverNetty % "test->test",
+    serverPekko % "test->test",
+    serverPlay % "test->test",
+    serverZioHttp % "test->test",
+  )
+
+
+lazy val serverEndpoints = project
+  .in(file("server/endpoints"))
+  .settings(
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
+    ),
+  )
+  .dependsOn(dbCommon.jvm)
+
+lazy val serverPekko = project
+  .in(file("server/pekko"))
+  .settings(checkPublishing,
+    name := "molecule-db-server-pekko",
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      // Enforce using same Pekko versions
+      "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion,
+      "org.apache.pekko" %% "pekko-serialization-jackson" % pekkoVersion,
+
+      "com.softwaremill.sttp.tapir" %% "tapir-pekko-http-server" % tapirVersion,
+    ),
+  )
+  .dependsOn(serverEndpoints)
+
+
+lazy val serverHttp4s = project
+  .in(file("server/http4s"))
+  .settings(
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      "org.http4s" %% "http4s-ember-server" % http4sVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
+    ),
+  )
+  .dependsOn(serverEndpoints)
+
+lazy val serverNetty = project
+  .in(file("server/netty"))
+  .settings(
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-cats" % tapirVersion,
+    ),
+  )
+  .dependsOn(serverHttp4s)
+
+lazy val serverPlay = project
+  .in(file("server/play"))
+  .settings(
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.tapir" %% "tapir-play-server" % tapirVersion,
+    ),
+  )
+  .dependsOn(serverPekko)
+
+lazy val serverZioHttp = project
+  .in(file("server/zioHttp"))
+  .settings(
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
+    ),
+  )
+  .dependsOn(serverEndpoints)
 
 
 //// Graphql =========================================================================================

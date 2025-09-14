@@ -12,8 +12,8 @@ object WebShop extends DomainStructure {
     // .Frontends.budget // plural reverse name
     // .Backends.budget
     // nested
-    // .Frontends.*(Project.budget)
-    // .Backends.*(Project.budget)
+    // .Frontends.*(Frontend.Project.budget)
+    // .Backends.*(Backend.Project.budget)
 
     // Developer --> join table
     // .Frontend_.role.Frontend.budget // no nested Frontend.budget!
@@ -39,13 +39,12 @@ object WebShop extends DomainStructure {
 
   //  trait Frontend extends Join {
   trait Frontend {
-    val designer = one[Developer] // (optional explicit plural reverse name)
-    val frontend = one[Project]
+    val designer = manyToOne[Developer] // (optional explicit plural reverse name)
+    val project = manyToOne[Project]
     val role     = oneDate
-    // val project = one[Project] // can't have multiple refs with same name to same entity (Project)
 
     // Direct access to join table
-    // Frontend_.designer.frontend.role.insert(
+    // Frontend.designer.project.role.insert(
     //   (1, 7, "Lead"),
     //   (2, 7, "Layout"),
     // ).transact
@@ -53,10 +52,9 @@ object WebShop extends DomainStructure {
 
   //  trait Backend extends Join {
   trait Backend {
-    val engineer = one[Developer]
-    val backend  = one[Project]
+    val engineer = manyToOne[Developer]
+    val project  = manyToOne[Project]
     val role     = oneDate
-    // val project = one[Project] // can't have multiple refs with same name to same entity (Project)
   }
 }
 
@@ -80,8 +78,8 @@ object WebShop extends DomainStructure {
 //Developer.name.Backends.title
 //
 //// nested
-//Developer.name.Frontends.*(Project.title)
-//Developer.name.Backends.*(Project.title)
+//Developer.name.Frontends.*(Frontend.role)
+//Developer.name.Backends.*(Backend.Project.title)
 //
 //
 //// Project --> Developer

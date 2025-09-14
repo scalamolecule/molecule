@@ -27,8 +27,8 @@ object Company extends DomainStructure {
   trait Assignment {
     val role = oneString
 
-    val employee = one[Employee] // implicit reverse ref "Assignments" in Employee
-    val project  = one[Project] //  implicit reverse ref "Assignments" in Project
+    val employee = manyToOne[Employee] // implicit reverse ref "Assignments" in Employee
+    val project  = manyToOne[Project] //  implicit reverse ref "Assignments" in Project
 
     //    val employee = one[Employee].Projects
     //    val project  = one[Project].Employees

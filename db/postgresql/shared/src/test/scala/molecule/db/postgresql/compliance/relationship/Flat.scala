@@ -1,8 +1,8 @@
-package molecule.db.postgresql.compliance.relation
+package molecule.db.postgresql.compliance.relationship
 
 import molecule.core.setup.MUnit
 import molecule.db
-import molecule.db.compliance.test.relation.flat.*
+import molecule.db.compliance.test.relationship.flat.*
 import molecule.db.postgresql.setup.Api_postgresql_async
 
 class FlatEntityTest extends MUnit {

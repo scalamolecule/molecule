@@ -1,4 +1,4 @@
-package molecule.db.compliance.test.relation.nested
+package molecule.db.compliance.test.relationship.nested
 
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async

@@ -1,8 +1,8 @@
-package molecule.db.mariadb.compliance.relation
+package molecule.db.mariadb.compliance.relationship
 
 import molecule.core.setup.MUnit
 import molecule.db
-import molecule.db.compliance.test.relation.flat.*
+import molecule.db.compliance.test.relationship.flat.*
 import molecule.db.mariadb.setup.Api_mariadb_async
 
 class FlatEntityTest extends MUnit {

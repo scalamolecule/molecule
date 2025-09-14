@@ -258,8 +258,8 @@ abstract class DomainStructure {
 
   // ManyToOne relationship ..................................................
 
-  object one extends one
-  trait one extends refOptions[one]
+  object manyToOne extends manyToOne
+  trait manyToOne extends refOptions[manyToOne]
 
 
   // Enums ..................................................
@@ -291,6 +291,9 @@ abstract class DomainStructure {
 
   // Options ..................................................
 
+  /**
+   * Elements that can be required
+   */
   trait Requierable
 
   /** Attribute options.
@@ -360,19 +363,25 @@ abstract class DomainStructure {
 
     /** Apply entity type to reference.
      *
+     * Without calling `oneToMany` too, the plural name of the defining entity will be used as reverse ref name.
+     *
      * @tparam Ref Ref entity type
      */
-    def apply[Ref](implicit x: DummyImplicit): refOptions[Self] & Ref = ???
+    def apply[Ref]: refOptions[Self] & Ref = ???
 
+
+    def oneToMany(reverseRef: String): Self = ???
 
     /**
+     * Add description of relationship
      *
      * @param description
-     * @tparam Ref
      * @return
      */
-    def apply[Ref](description: String): refOptions[Self] & Ref = ???
     def descr(description: String): Self = ???
+
+    // No direct apply of description to avoid confusion with reverse ref name
+    // def apply[Ref](description: String): refOptions[Self] & Ref = ???
 
     lazy val mandatory: Self = ???
 

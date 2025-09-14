@@ -34,8 +34,8 @@ object Validation extends DomainStructure {
       Seq(7, 9, 13),
       "Lucky number can only be 7, 9 or 13"
     )
-    val strings      = one[Strings]("AllowedAttrs")
-    val tpe          = one[Tpe]("Refs")
+    val strings      = manyToOne[Strings].oneToMany("AllowedAttrs")
+    val tpe          = manyToOne[Tpe].oneToMany("Refs")
   }
 
   trait Tpe {
@@ -61,7 +61,7 @@ object Validation extends DomainStructure {
     val byte           = oneByte.validate(_ > 2)
     val short          = oneShort.validate(_ > 2)
     val char           = oneChar.validate(_ > 'b')
-    val ref            = one[Strings]
+    val ref            = manyToOne[Strings]
 
     val stringSet         = setString.validate(_ > "c")
     val intSet            = setInt.validate(_ > 3)
@@ -295,16 +295,16 @@ object Validation extends DomainStructure {
 
   trait MandatoryRefAB {
     val i    = oneInt
-    val refA = one[RefA].mandatory
+    val refA = manyToOne[RefA].mandatory
   }
   trait MandatoryRefB {
     val i    = oneInt
-    val refB = one[RefB].mandatory
+    val refB = manyToOne[RefB].mandatory
   }
 
   trait RefA {
     val i    = oneInt
-    val refB = one[RefB].mandatory
+    val refB = manyToOne[RefB].mandatory
   }
   trait RefB {
     val i = oneInt
@@ -345,10 +345,10 @@ object Validation extends DomainStructure {
 
     // Mixed ref/attr
     val int  = oneInt.require(refB)
-    val refB = one[RefB]("Requires")
+    val refB = manyToOne[RefB].oneToMany("Requires")
 
     // Ref-only tuples
-    val ref1 = one[RefB]("Requires1").require(ref2)
-    val ref2 = one[AllowedAttrs]
+    val ref1 = manyToOne[RefB].oneToMany("Requires1").require(ref2)
+    val ref2 = manyToOne[AllowedAttrs]
   }
 }

@@ -8,13 +8,13 @@ object Segments extends DomainStructure {
   object gen {
     trait Profession {
       val name   = oneString
-      val person = one[Person]
+      val person = manyToOne[Person]
     }
 
     trait Person {
       val name         = oneString
       val gender       = oneString.allowedValues("male", "female")
-      val reviewedBook = one[lit.Book]("Reviewers")
+      val reviewedBook = manyToOne[lit.Book].oneToMany("Reviewers")
     }
   }
 
@@ -23,11 +23,8 @@ object Segments extends DomainStructure {
   object lit {
     trait Book {
       val title  = oneString
-      val author = one[gen.Person]("Authors")
-
-      // To avoid attr/partition name clashes we can prepend the definition object name
-      // (in case we would have needed an attribute named `gen` for instance)
-      val editor = one[gen.Person]("Editors")
+      val author = manyToOne[gen.Person].oneToMany("Authors")
+      val editor = manyToOne[gen.Person].oneToMany("Editors")
       val cat    = oneString.allowedValues("good", "bad")
     }
   }
@@ -37,13 +34,13 @@ object Segments extends DomainStructure {
   object accounting {
     trait Invoice {
       val no          = oneInt
-      val mainProduct = one[warehouse.Item]
+      val mainProduct = manyToOne[warehouse.Item]
     }
     trait InvoiceLine {
       val text    = oneString
       val qty     = oneInt
-      val product = one[warehouse.Item]
-      val invoice = one[Invoice]("Lines")
+      val product = manyToOne[warehouse.Item]
+      val invoice = manyToOne[Invoice].oneToMany("Lines")
     }
   }
 

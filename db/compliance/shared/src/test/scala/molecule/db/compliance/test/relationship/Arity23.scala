@@ -1,4 +1,4 @@
-package molecule.db.compliance.test.relation
+package molecule.db.compliance.test.relationship
 
 import molecule.core.setup.TestUtils
 import molecule.db.compliance.domains.dsl.Types.*

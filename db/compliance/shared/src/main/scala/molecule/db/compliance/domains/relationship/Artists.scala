@@ -29,8 +29,8 @@ object Artists extends DomainStructure {
   trait Work {
     val title  = oneString
     val price  = oneInt
-    val artist = one[Artist] // transparently adds reverse ref "Works" (plural of this entity)
-    //    val artist = one[Artist]("Works") // explicit reverse ref "Works"
+    val artist = manyToOne[Artist] // transparently adds reverse ref "Works" (plural of this entity)
+    //    val artist = one[Artist].oneToMany("Works") // explicit reverse ref "Works"
 
 
     // .painter

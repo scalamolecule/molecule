@@ -1,8 +1,8 @@
-package molecule.db.mysql.compliance.relation
+package molecule.db.mysql.compliance.relationship
 
 import molecule.core.setup.MUnit
 import molecule.db
-import molecule.db.compliance.test.relation.flat.*
+import molecule.db.compliance.test.relationship.flat.*
 import molecule.db.mysql.setup.Api_mysql_async
 
 class FlatEntityTest extends MUnit {

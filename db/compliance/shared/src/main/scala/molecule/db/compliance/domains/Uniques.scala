@@ -36,14 +36,14 @@ object Uniques extends DomainStructure {
     val intSeq = seqInt.unique
     val intMap = mapInt.unique
 
-    val ref = one[Ref]
+    val ref = manyToOne[Ref]
   }
 
   trait Ref {
     val i       = oneInt
     val s       = oneString
     val int     = oneInt.unique
-    val uniques = one[Uniques]
+    val uniques = manyToOne[Uniques].oneToMany("Refs")
   }
 
   trait Other {
