@@ -52,13 +52,12 @@ case class Ref(
   refAttr: String,
   ref: String = "",
   relationship: Relationship = ManyToOne,
-  owner: Boolean = false,
   coord: List[Int] = Nil,
   reverseRefAttr: Option[String] = None,
 ) extends Element {
   override def toString: String = {
     val coords = if (coord.isEmpty) "Nil" else coord.mkString("List(", ", ", ")")
-    s"""Ref("$ent", "$refAttr", "$ref", $relationship, $owner, $coords, ${oStr(reverseRefAttr)})"""
+    s"""Ref("$ent", "$refAttr", "$ref", $relationship, $coords, ${oStr(reverseRefAttr)})"""
   }
   def name = ent + "." + refAttr
 }

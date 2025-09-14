@@ -98,13 +98,13 @@ class ResolveUpdate(isUpsert: Boolean) extends ModelUtils { self: SqlUpdate =>
             }
           }
 
-        case r@Ref(ent, refAttr, ref, OneToMany, _, _, reverseRefAttr) =>
+        case r@Ref(ent, refAttr, ref, OneToMany, _, reverseRefAttr) =>
           noUpsertRef
           val filterElements1 = filterElements :+ r :+ AttrOneManID(r.ref, "id")
           val refPath         = tableUpdate.refPath ++ List(refAttr, ref)
           resolve(tail, 1, tableUpdates :+ tableUpdate, TableUpdate(refPath), filterElements1, notNulls)
 
-        case r@Ref(ent, refAttr, ref, _ /* ManyToOne */ , _, _, reverseRefAttr) =>
+        case r@Ref(ent, refAttr, ref, _ /* ManyToOne */ , _, reverseRefAttr) =>
           noUpsertRef
           val filterElements1 = filterElements :+ r :+ AttrOneManID(r.ref, "id")
           val refPath         = tableUpdate.refPath ++ List(refAttr, ref)

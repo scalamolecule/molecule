@@ -9,7 +9,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
 
   override protected def queryRef(r: Ref, tail: List[Element]): Unit = {
-    val Ref(ent, refAttr, ref, relationship, _, _, reverseRefAttr) = r
+    val Ref(ent, refAttr, ref, relationship, _, reverseRefAttr) = r
     checkOnlyOptRef()
     handleRef(refAttr, ref)
 
@@ -98,7 +98,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     // Know where we should steal predicates from subsequent `where` additions
     whereSplit = where.length
 
-    val Ref(ent, refAttr, ref, rel, _, _, optRevRef) = r
+    val Ref(ent, refAttr, ref, rel, _, optRevRef) = r
     handleRef(refAttr, ref)
     val revRef          = optRevRef.get
     val entExt          = getOptExt(path.dropRight(2)).getOrElse("")
@@ -165,7 +165,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     noCardManyInsideOptRef()
     checkOnlyOptRef()
 
-    val Ref(ent, refAttr, ref, relationship, _, _, optRevRefAttr) = r
+    val Ref(ent, refAttr, ref, relationship, _, optRevRefAttr) = r
     val revRefAttr = optRevRefAttr.get
 
     level += 1

@@ -31,10 +31,10 @@ trait ModelUtils {
     elements.head match {
       case a: Attr                               => a.ent
       case r: Ref                                => r.ent
-      case OptRef(Ref(ent, _, _, _, _, _, _), _)    => ent
+      case OptRef(Ref(ent, _, _, _, _, _), _)    => ent
       case OptEntity(attrs)                      => attrs.head.ent
-      case Nested(Ref(ent, _, _, _, _, _, _), _)    => ent
-      case OptNested(Ref(ent, _, _, _, _, _, _), _) => ent
+      case Nested(Ref(ent, _, _, _, _, _), _)    => ent
+      case OptNested(Ref(ent, _, _, _, _, _), _) => ent
       case other                                 => throw ModelError("Unexpected head element: " + other)
     }
   }
@@ -45,10 +45,10 @@ trait ModelUtils {
       case a: Attr if a.attr == "id"             => getInitialNonGenericEntity(elements.tail)
       case a: Attr                               => a.ent
       case r: Ref                                => r.ent
-      case OptRef(Ref(ent, _, _, _, _, _, _), _)    => ent
+      case OptRef(Ref(ent, _, _, _, _, _), _)    => ent
       case OptEntity(attrs)                      => attrs.head.ent
-      case Nested(Ref(ent, _, _, _, _, _, _), _)    => ent
-      case OptNested(Ref(ent, _, _, _, _, _, _), _) => ent
+      case Nested(Ref(ent, _, _, _, _, _), _)    => ent
+      case OptNested(Ref(ent, _, _, _, _, _), _) => ent
       case other                                 => throw ModelError("Unexpected head element: " + other)
     }
   }
@@ -160,7 +160,7 @@ trait ModelUtils {
     backRef: String
   ): Unit = {
     nextElement match {
-      case Ref(_, refAttr, _, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
+      case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
         s"Can't re-use previous entity ${refAttr.capitalize} after backref _$backRef."
       )
 

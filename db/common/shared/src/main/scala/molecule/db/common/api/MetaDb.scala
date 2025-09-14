@@ -14,9 +14,6 @@ trait MetaDb {
   /** entity -> List[(entity.attr, mandatory refEntity)] */
   val mandatoryRefs: Map[String, List[(String, String)]]
 
-  /** entity -> List[(refAttr, Value, owned refEntity)] */
-  val ownedRefs: Map[String, List[(String, Value, String)]]
-
   /** attr -> (Value, Scala type, required attributes) */
   val attrData: Map[String, (Value, String, List[String])]
 

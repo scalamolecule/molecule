@@ -32,7 +32,7 @@ trait ResolveDelete() {
             s"Can only filter delete by values applied to tacit card-one attributes (${a.name})."
           )
         }
-        case r@Ref(ent, refAttr, ref, relationship, _, _, reverseRefAttr) =>
+        case r@Ref(ent, refAttr, ref, relationship, _, reverseRefAttr) =>
           if (topLevel) {
             val joinClause = if (relationship == OneToMany) {
               s"$ref.${reverseRefAttr.get} = $ent.id"
