@@ -3,7 +3,7 @@ package molecule.db.common.spi
 import scala.concurrent.{Future, ExecutionContext as EC}
 import cats.effect.IO
 import molecule.core.error.{ExecutionError, InsertError}
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 
 trait Spi_async {
 

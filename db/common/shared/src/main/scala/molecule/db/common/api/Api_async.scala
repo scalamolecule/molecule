@@ -4,7 +4,7 @@ import scala.concurrent.{Future, ExecutionContext as EC}
 import cats.effect.IO
 import molecule.core.dataModel.Keywords
 import molecule.core.error.InsertError
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 import molecule.db.common.spi.*
 import molecule.db.common.util.ModelUtils
 
@@ -69,17 +69,17 @@ trait Api_async extends Keywords with ModelUtils { spi: Spi_async =>
 
 trait Api_async_transact { api: Api_async & Spi_async =>
 
-  def transact(a1: Action, a2: Action, aa: Action*)
-              (using conn: Conn, ec: EC): Future[Seq[TxReport]] = transact(a1 +: a2 +: aa)
+  def transact(a: Mutation, b: Mutation, cc: Mutation*)
+              (using conn: Conn, ec: EC): Future[Seq[TxReport]] = transact(a +: b +: cc)
 
-  def transact(actions: Seq[Action])
+  def transact(mutations: Seq[Mutation])
               (using conn: Conn, ec: EC): Future[Seq[TxReport]] = {
     var ok = true
     conn.waitCommitting()
     val txReports = Future.sequence(
-      actions.flatMap {
-        case action if ok => Some(
-          (action match {
+      mutations.flatMap {
+        case mutation if ok => Some(
+          (mutation match {
             case save: Save     => save_transact(save)
             case insert: Insert => insert_transact(insert)
             case update: Update => update_transact(update)

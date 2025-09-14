@@ -3,7 +3,7 @@ package molecule.db.common.spi
 import cats.effect.IO
 import fs2.Stream
 import molecule.core.error.{ExecutionError, MoleculeError}
-import molecule.db.common.action.Query
+import molecule.db.common.crud.Query
 import molecule.db.common.javaSql.ResultSetInterface as RS
 import molecule.db.common.spi.Conn
 import zio.*

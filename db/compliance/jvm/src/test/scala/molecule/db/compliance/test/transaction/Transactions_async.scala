@@ -33,7 +33,7 @@ case class Transactions_async(
   }
 
 
-  "Transact actions: simple" - types {
+  "Transact mutations: simple" - types {
     for {
       _ <- transact(
         Entity.int(1).save,
@@ -44,7 +44,7 @@ case class Transactions_async(
   }
 
 
-  "Transact actions: mixed" - types {
+  "Transact mutations: mixed" - types {
     for {
       _ <- transact(
         Entity.int(1).save, //         List(1)
@@ -57,7 +57,7 @@ case class Transactions_async(
   }
 
 
-  "Transact actions: validation 1" - validation {
+  "Transact mutations: validation 1" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     for {
       _ <- transact(
@@ -77,7 +77,7 @@ case class Transactions_async(
   }
 
 
-  "Transact actions: validation 2" - validation {
+  "Transact mutations: validation 2" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     for {
       _ <- transact(
@@ -97,7 +97,7 @@ case class Transactions_async(
   }
 
 
-  "Transact actions: validation 3" - validation {
+  "Transact mutations: validation 3" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     for {
       _ <- transact(

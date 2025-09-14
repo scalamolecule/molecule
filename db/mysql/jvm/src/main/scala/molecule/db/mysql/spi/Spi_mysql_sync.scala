@@ -3,7 +3,7 @@ package molecule.db.mysql.spi
 import java.sql.DriverManager
 import scala.concurrent.Future
 import molecule.core.dataModel.Element
-import molecule.db.common.action.{Delete, Insert, Save, Update}
+import molecule.db.common.crud.{Delete, Insert, Save, Update}
 import molecule.db.common.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import molecule.db.common.javaSql.ResultSetInterface as RS
 import molecule.db.common.marshalling.{ConnProxy, JdbcProxy}

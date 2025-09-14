@@ -4,7 +4,7 @@ import scala.util.control.NonFatal
 import geny.Generator
 import molecule.core.dataModel.Keywords
 import molecule.core.error.InsertError
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 import molecule.db.common.spi.*
 
 trait Api_sync extends Keywords { spi: Spi_sync =>
@@ -68,13 +68,13 @@ trait Api_sync extends Keywords { spi: Spi_sync =>
 
 trait Api_sync_transact { api: Api_sync & Spi_sync =>
 
-  def transact(a1: Action, a2: Action, aa: Action*)
-              (using conn: Conn): Seq[TxReport] = transact(a1 +: a2 +: aa)
+  def transact(a: Mutation, b: Mutation, cc: Mutation*)
+              (using conn: Conn): Seq[TxReport] = transact(a +: b +: cc)
 
-  def transact(actions: Seq[Action])(using conn: Conn): Seq[TxReport] = {
+  def transact(mutations: Seq[Mutation])(using conn: Conn): Seq[TxReport] = {
     conn.waitCommitting()
     try {
-      val txReports = actions.map {
+      val txReports = mutations.map {
         case save: Save     => save_transact(save)
         case insert: Insert => insert_transact(insert)
         case update: Update => update_transact(update)

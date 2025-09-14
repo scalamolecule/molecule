@@ -4,7 +4,7 @@ import java.sql.{DriverManager, Statement, PreparedStatement as PS}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import molecule.core.dataModel.Element
-import molecule.db.common.action.{Delete, Insert, Save, Update}
+import molecule.db.common.crud.{Delete, Insert, Save, Update}
 import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.javaSql.ResultSetInterface as RS
 import molecule.db.common.marshalling.{ConnProxy, JdbcProxy}

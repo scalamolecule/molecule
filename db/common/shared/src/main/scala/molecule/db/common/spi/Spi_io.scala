@@ -2,7 +2,7 @@ package molecule.db.common.spi
 
 import cats.effect.IO
 import molecule.core.error.{ExecutionError, InsertError}
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 
 /**
  * Choosing pragmatic IO[T] as Doobie does:

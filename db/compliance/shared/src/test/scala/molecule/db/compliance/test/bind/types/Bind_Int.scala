@@ -20,7 +20,7 @@ case class Bind_Int(
     for {
       _ <- Entity.int.insert(int1, int2, int3).transact
 
-      eq = Entity.int(?).a1.query
+      eq = Entity.int.apply(?).a1.query
       _ <- eq(int1).get.map(_ ==> List(int1))
       _ <- eq(int2).get.map(_ ==> List(int2))
       _ <- eq(int3).get.map(_ ==> List(int3))

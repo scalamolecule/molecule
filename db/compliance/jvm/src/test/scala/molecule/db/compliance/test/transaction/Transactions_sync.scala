@@ -29,7 +29,7 @@ case class Transactions_sync(
   }
 
 
-  "Transact actions: simple" - types {
+  "Transact mutations: simple" - types {
     transact(
       Entity.int(1).save,
       Entity.int(2).save,
@@ -38,7 +38,7 @@ case class Transactions_sync(
   }
 
 
-  "Transact actions: mixed" - types {
+  "Transact mutations: mixed" - types {
     transact(
       Entity.int(1).save, //         List(1)
       Entity.int.insert(2, 3), //    List(1, 2, 3)
@@ -49,7 +49,7 @@ case class Transactions_sync(
   }
 
 
-  "Transact actions: validation 1" - validation {
+  "Transact mutations: validation 1" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     try {
       transact(
@@ -69,7 +69,7 @@ case class Transactions_sync(
   }
 
 
-  "Transact actions: validation 2" - validation {
+  "Transact mutations: validation 2" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     try {
       transact(
@@ -89,7 +89,7 @@ case class Transactions_sync(
   }
 
 
-  "Transact actions: validation 3" - validation {
+  "Transact mutations: validation 3" - validation {
     import molecule.db.compliance.domains.dsl.Validation.*
     transact(
       Tpe.int.insert(4, 5),

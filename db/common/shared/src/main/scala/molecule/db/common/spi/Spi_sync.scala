@@ -2,7 +2,7 @@ package molecule.db.common.spi
 
 import geny.Generator
 import molecule.core.error.InsertError
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 
 trait Spi_sync {
 

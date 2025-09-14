@@ -9,7 +9,7 @@ import geny.Generator
 import molecule.core.dataModel.{AttrOneManID, DataModel, Element, Eq}
 import molecule.core.error.{InsertError, InsertErrors, ModelError, ValidationErrors}
 import molecule.core.util.BaseHelpers
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.javaSql.{PrepStmtImpl, ResultSetInterface as RS}
 import molecule.db.common.marshalling.ConnProxy

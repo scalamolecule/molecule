@@ -1,7 +1,7 @@
 package molecule.db.mariadb.spi
 
 import molecule.core.error.{InsertError, InsertErrors, MoleculeError, ValidationErrors}
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.spi.{Conn, Spi_zio, StreamingJdbc, TxReport}
 import molecule.db.common.util.ModelUtils

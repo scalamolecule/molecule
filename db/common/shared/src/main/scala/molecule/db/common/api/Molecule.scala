@@ -3,7 +3,7 @@ package molecule.db.common.api
 import scala.annotation.compileTimeOnly
 import molecule.core.dataModel.DataModel
 import molecule.core.error.ModelError
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 
 trait Molecule {
   val dataModel: DataModel

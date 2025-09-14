@@ -5,7 +5,7 @@ import scala.concurrent.Future
 import boopickle.Default.*
 import molecule.core.dataModel.{DataModel, Value}
 import molecule.core.error.MoleculeError
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.deserialize.UnpickleTpls

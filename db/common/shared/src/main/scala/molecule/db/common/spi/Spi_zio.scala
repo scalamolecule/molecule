@@ -1,7 +1,7 @@
 package molecule.db.common.spi
 
 import molecule.core.error.{ExecutionError, InsertError, MoleculeError}
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 import zio.stream.ZStream
 import zio.{Task, ZIO}
 

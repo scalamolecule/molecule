@@ -3,7 +3,7 @@ package molecule.db.common.api
 import cats.effect.*
 import molecule.core.dataModel.Keywords
 import molecule.core.error.InsertError
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 import molecule.db.common.spi.*
 import molecule.db.common.util.ModelUtils
 
@@ -69,12 +69,12 @@ trait Api_io extends Keywords with ModelUtils { spi: Spi_io =>
 trait Api_io_transact { api: Api_io & Spi_io =>
 
   def transact(
-    a1: Action, a2: Action, aa: Action*
-  )(using conn: Conn): IO[Seq[TxReport]] = transact(a1 +: a2 +: aa)
+    a: Mutation, b: Mutation, cc: Mutation*
+  )(using conn: Conn): IO[Seq[TxReport]] = transact(a +: b +: cc)
 
-  def transact(actions: Seq[Action])(using conn: Conn): IO[Seq[TxReport]] = {
-    actions.foldLeft(IO.pure(Seq.empty[TxReport])) { (acc, action) =>
-      val next = action match {
+  def transact(mutations: Seq[Mutation])(using conn: Conn): IO[Seq[TxReport]] = {
+    mutations.foldLeft(IO.pure(Seq.empty[TxReport])) { (acc, mutation) =>
+      val next = mutation match {
         case save: Save     => save_transact(save)
         case insert: Insert => insert_transact(insert)
         case update: Update => update_transact(update)

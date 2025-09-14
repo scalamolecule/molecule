@@ -2,7 +2,7 @@ package molecule.db.sqlite.spi
 
 import cats.effect.IO
 import molecule.core.error.InsertError
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 import molecule.db.common.spi.{Conn, Spi_io, StreamingJdbc, TxReport}
 import molecule.db.common.util.ModelUtils
 

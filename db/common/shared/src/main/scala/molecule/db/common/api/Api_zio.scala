@@ -2,7 +2,7 @@ package molecule.db.common.api
 
 import molecule.core.dataModel.Keywords
 import molecule.core.error.{InsertError, MoleculeError}
-import molecule.db.common.action.*
+import molecule.db.common.crud.*
 import molecule.db.common.spi.*
 import zio.ZIO
 import zio.stream.ZStream
@@ -68,13 +68,13 @@ trait Api_zio extends Keywords { spi: Spi_zio =>
 trait Api_zio_transact { api: Api_zio & Spi_zio =>
 
   def transact(
-    a1: Action, a2: Action, aa: Action*
-  ): ZIO[Conn, MoleculeError, Seq[TxReport]] = transact(a1 +: a2 +: aa)
+    a: Mutation, b: Mutation, cc: Mutation*
+  ): ZIO[Conn, MoleculeError, Seq[TxReport]] = transact(a +: b +: cc)
 
 
-  def transact(actions: Seq[Action]): ZIO[Conn, MoleculeError, Seq[TxReport]] = {
+  def transact(mutations: Seq[Mutation]): ZIO[Conn, MoleculeError, Seq[TxReport]] = {
     ZIO.collectAll(
-      actions.map {
+      mutations.map {
         case save: Save     => save_transact(save)
         case insert: Insert => insert_transact(insert)
         case update: Update => update_transact(update)
