@@ -59,10 +59,10 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
             case a => noTacit(a)
           }
 
-        case Ref(ent, refAttr, ref, OneToMany, _, reverseRefAttr) =>
+        case Ref(ent, refAttr, ref, OneToMany, _, reverseRefAttr, _) =>
           resolveOneToManyRef(partitions, tableInsert, refAttr, ref, reverseRefAttr, tplIndex, tail)
 
-        case Ref(ent, refAttr, ref, _ /* ManyToOne */ , _, reverseRefAttr) =>
+        case Ref(ent, refAttr, ref, _ /* ManyToOne */ , _, reverseRefAttr, _) =>
           resolveManyToOneRef(partitions, tableInsert, refAttr, ref, reverseRefAttr, tplIndex, tail)
 
 
@@ -72,10 +72,10 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
         case _: OptRef    => noOptional("ref")
         case _: OptEntity => noOptional("entity")
 
-        case Nested(Ref(_, refAttr, ref, _, _, reverseRefAttr), nestedElements) =>
+        case Nested(Ref(_, refAttr, ref, _, _, reverseRefAttr, _), nestedElements) =>
           resolveNested(partitions, nestedElements, refAttr, ref, reverseRefAttr, tableInsert, tplIndex)
 
-        case OptNested(Ref(_, refAttr, ref, _, _, reverseRefAttr), nestedElements) =>
+        case OptNested(Ref(_, refAttr, ref, _, _, reverseRefAttr, _), nestedElements) =>
           resolveNested(partitions, nestedElements, refAttr, ref, reverseRefAttr, tableInsert, tplIndex)
       }
 

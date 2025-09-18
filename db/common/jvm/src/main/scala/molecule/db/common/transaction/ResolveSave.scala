@@ -78,10 +78,10 @@ trait ResolveSave { self: SqlSave =>
             }
           }
 
-        case Ref(ent, refAttr, ref, OneToMany, _, reverseRefAttr) =>
+        case Ref(ent, refAttr, ref, OneToMany, _, reverseRefAttr, _) =>
           resolveOneToManyRef(tableInserts, tableInsert, refAttr, ref, reverseRefAttr, tail)
 
-        case Ref(ent, refAttr, ref, _ /* ManyToOne */ , _, reverseRefAttr) =>
+        case Ref(ent, refAttr, ref, _ /* ManyToOne */ , _, reverseRefAttr, _) =>
           resolveManyToOneRef(tableInserts, tableInsert, refAttr, ref, reverseRefAttr, tail)
 
         case BackRef(backRef, _, _) =>

@@ -80,6 +80,6 @@ object Refs extends DomainStructure {
   trait H {
     val i = oneInt
     val s = oneString
-    val g = manyToOne[G].oneToMany("Hh")
+    val g = manyToOne[G].oneToMany("Hh").owner
   }
 }

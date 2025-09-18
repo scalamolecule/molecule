@@ -41,11 +41,35 @@ trait ModelTransformations_ {
     )
   }
 
+  def addNestedJoin(self: Molecule, nestedMolecule: Molecule): DataModel = {
+    val dataModel       = self.dataModel
+    val nestedDataModel = nestedMolecule.dataModel
+    val ent2join = dataModel.elements.init.last
+    val join2ref = dataModel.elements.last
+    DataModel(
+      dataModel.elements.dropRight(2) :+ Nested(ent2join.asInstanceOf[Ref], join2ref :: nestedDataModel.elements),
+      dataModel.attrIndexes ++ nestedDataModel.attrIndexes,
+      binds = dataModel.binds + nestedDataModel.binds
+    )
+  }
+
   def addOptNested(self: Molecule, nestedMolecule: Molecule): DataModel = {
     val dataModel       = self.dataModel
     val nestedDataModel = nestedMolecule.dataModel
     DataModel(
       dataModel.elements.init :+ OptNested(dataModel.elements.last.asInstanceOf[Ref], nestedDataModel.elements),
+      dataModel.attrIndexes ++ nestedDataModel.attrIndexes,
+      binds = dataModel.binds + nestedDataModel.binds
+    )
+  }
+
+  def addOptNestedJoin(self: Molecule, nestedMolecule: Molecule): DataModel = {
+    val dataModel       = self.dataModel
+    val nestedDataModel = nestedMolecule.dataModel
+    val ent2join = dataModel.elements.init.last
+    val join2ref = dataModel.elements.last
+    DataModel(
+      dataModel.elements.dropRight(2) :+ OptNested(ent2join.asInstanceOf[Ref], join2ref :: nestedDataModel.elements),
       dataModel.attrIndexes ++ nestedDataModel.attrIndexes,
       binds = dataModel.binds + nestedDataModel.binds
     )

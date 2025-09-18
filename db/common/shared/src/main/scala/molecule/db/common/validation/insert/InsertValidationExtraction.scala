@@ -77,14 +77,14 @@ trait InsertValidationExtraction
             }
           }
 
-        case Ref(_, refAttr, _, _, _, _) =>
+        case Ref(_, refAttr, _, _, _, _, _) =>
           getValidators(metaDb, tail, validators, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRef, _, _) =>
           noEntityReUseAfterBackref(tail.head, prevRefs, backRef)
           getValidators(metaDb, tail, validators, tplIndex, prevRefs)
 
-        case OptRef(Ref(ent, refAttr, _, _, _, _), optRefElements) =>
+        case OptRef(Ref(ent, refAttr, _, _, _, _, _), optRefElements) =>
           curElements = optRefElements
           getValidators(metaDb, tail, validators :+
             addOptRef(metaDb, tplIndex, ent, refAttr, optRefElements), tplIndex + 1, Nil)
@@ -94,12 +94,12 @@ trait InsertValidationExtraction
           getValidators(metaDb, tail, validators :+
             addOptRef(metaDb, tplIndex, "Optional", "entity", optRefElements), tplIndex + 1, Nil)
 
-        case Nested(Ref(ent, refAttr, _, _, _, _), nestedElements) =>
+        case Nested(Ref(ent, refAttr, _, _, _, _, _), nestedElements) =>
           curElements = nestedElements
           getValidators(metaDb, tail, validators :+
             addNested(metaDb, tplIndex, ent, refAttr, nestedElements), tplIndex, Nil)
 
-        case OptNested(Ref(ent, refAttr, _, _, _, _), nestedElements) =>
+        case OptNested(Ref(ent, refAttr, _, _, _, _, _), nestedElements) =>
           curElements = nestedElements
           getValidators(metaDb, tail, validators :+
             addNested(metaDb, tplIndex, ent, refAttr, nestedElements), tplIndex, Nil)

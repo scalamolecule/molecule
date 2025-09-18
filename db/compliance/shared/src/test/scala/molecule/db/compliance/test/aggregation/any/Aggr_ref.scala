@@ -10,7 +10,7 @@ import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.DbProviders
 import org.scalactic.Equality
 
-case class Aggr_ref_(
+case class Aggr_ref(
   suite: MUnit,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
@@ -20,6 +20,7 @@ case class Aggr_ref_(
 
   "distinct" - types {
     for {
+      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
       _ <- Entity.i.ref.insert(List(
         (1, ref1),
         (2, ref2),
@@ -59,8 +60,9 @@ case class Aggr_ref_(
 
 
   "min" - types {
-    val (a, b) = ((1, ref1), (1, ref2))
     for {
+      List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+      (a, b) = ((1, ref1), (1, ref2))
       _ <- Entity.i.ref.insert(a, b).transact
 
       // 1 attribute
@@ -119,8 +121,9 @@ case class Aggr_ref_(
 
 
   "max" - types {
-    val (a, b) = ((1, ref1), (1, ref2))
     for {
+      List(ref1, ref2) <- Ref.i.insert(1, 2).transact.map(_.ids)
+      (a, b) = ((1, ref1), (1, ref2))
       _ <- Entity.i.ref.insert(a, b).transact
 
       // 1 attribute
@@ -180,6 +183,7 @@ case class Aggr_ref_(
 
   "min/max" - types {
     for {
+      List(ref1, ref2, ref3, ref4) <- Ref.i.insert(1, 2, 3, 4).transact.map(_.ids)
       _ <- Entity.i.ref.insert(
         (1, ref1),
         (1, ref2),
@@ -206,6 +210,7 @@ case class Aggr_ref_(
 
   "min/max n" - types {
     for {
+      List(ref1, ref2, ref3, ref4, ref5, ref6) <- Ref.i.insert(1, 2, 3, 4, 5, 6).transact.map(_.ids)
       _ <- Entity.i.ref.insert(
         (1, ref1),
         (1, ref2),
@@ -276,9 +281,11 @@ case class Aggr_ref_(
 
 
   "sample" - types {
-    val all      = Set(ref1, ref2, ref3)
-    val allPairs = List((1, ref1), (2, ref2), (3, ref3))
     for {
+      all <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+      List(ref1, ref2, ref3) = all
+      allPairs = List((1, ref1), (2, ref2), (3, ref3))
+
       _ <- Entity.i.ref.insert(allPairs).transact
 
       // 1 attribute
@@ -296,10 +303,11 @@ case class Aggr_ref_(
           err ==> "Operations on sample not implemented for this database."
         }
     } else {
-      val all       = Set(ref1, ref2, ref3)
-      val (a, b, c) = ((1, ref1), (2, ref2), (3, ref3))
-      val allPairs  = List(a, b, c)
       for {
+        List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+        all = Set(ref1, ref2, ref3)
+        (a, b, c) = ((1, ref1), (2, ref2), (3, ref3))
+        allPairs = List(a, b, c)
         _ <- Entity.i.ref.insert(allPairs).transact
 
         // 1 attribute
@@ -356,9 +364,10 @@ case class Aggr_ref_(
 
 
   "samples(n)" - types {
-    val all = Set(ref1, ref2, ref3)
     for {
-      _ <- Entity.ref.insert(List(ref1, ref2, ref3)).transact
+      refs <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+      all = refs.toSet
+      _ <- Entity.ref.insert(refs).transact
       _ <- Entity.ref(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
       _ <- Entity.ref(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
     } yield ()
@@ -366,8 +375,9 @@ case class Aggr_ref_(
 
 
   "count" - types {
-    val (a, b) = ((1, 1), (2, 3))
     for {
+      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+      (a, b) = ((1, 1), (2, 3))
       _ <- Entity.i.ref.insert(List(
         (1, ref1),
         (2, ref2),
@@ -433,8 +443,9 @@ case class Aggr_ref_(
 
 
   "countDistinct" - types {
-    val (a, b) = ((1, 1), (2, 2))
     for {
+      List(ref1, ref2, ref3) <- Ref.i.insert(1, 2, 3).transact.map(_.ids)
+      (a, b) = ((1, 1), (2, 2))
       _ <- Entity.i.ref.insert(List(
         (1, ref1),
         (2, ref2),

@@ -7,7 +7,7 @@ import boilerplate.db.compliance.DbComplianceGenBase
 object _Aggr extends Base {
 
   //    def generate(): Unit = tpeVarImp.take(1).foreach { case (name, tpe, v, imp) =>
-  def generate(): Unit = tpeVarImp.foreach { case (name, tpe, v, imp) =>
+  def generate(): Unit = tpeVarImp.filterNot(_._1 == "ref").foreach { case (name, tpe, v, imp) =>
     TransformFile(name, tpe, v, imp).generate()
   }
 

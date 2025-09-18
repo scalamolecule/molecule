@@ -14,7 +14,7 @@ trait ResolveDelete() {
   ): TableDelete = {
     elements match {
       case element :: tail => element match {
-        case a: Attr                                                      => a match {
+        case a: Attr                                                          => a match {
           case AttrOneTacID(_, "id", Eq, ids1, _, _, _, _, _, _, _, _) =>
             if (!topLevel)
               throw ModelError(
@@ -32,9 +32,12 @@ trait ResolveDelete() {
             s"Can only filter delete by values applied to tacit card-one attributes (${a.name})."
           )
         }
-        case r@Ref(ent, refAttr, ref, relationship, _, reverseRefAttr) =>
+        case r@Ref(ent, refAttr, ref, relationship, _, reverseRefAttr, owner) =>
           if (topLevel) {
             val joinClause = if (relationship == OneToMany) {
+              if (!owner)
+                throw ModelError(s"Can't delete parent $ent of children $ref if children are not owned. " +
+                  s"If children are owned they would be deleted with the owning parent.")
               s"$ref.${reverseRefAttr.get} = $ent.id"
             } else {
               s"$ref.id = $ent.$refAttr"

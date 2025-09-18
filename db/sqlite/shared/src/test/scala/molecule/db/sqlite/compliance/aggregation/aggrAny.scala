@@ -73,5 +73,5 @@ class Aggr_Char_Test extends MUnit {
 }
 
 class Aggr_ref_Test extends MUnit {
-  Aggr_ref_(this, Api_sqlite_async)
+  Aggr_ref(this, Api_sqlite_async)
 }

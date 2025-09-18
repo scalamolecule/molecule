@@ -237,28 +237,38 @@ case class Delete_filter(
       _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
       _ <- A.i.a1.Bb.i.query.get.map(_ ==> List((2, 20), (3, 30)))
 
-      // Nothing deleted since entity 1 doesn't have a ref
+      // Referential integrity constraint prevents deleting parent entity (A) when it has owned children (B)
       _ <- A.i_(1).Bb.i_.delete.transact
-      _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
+        .map(_ ==> "Unexpected success").recover {
+          case ModelError(err) =>
+            err ==> "Can't delete parent A of children B if children are not owned. " +
+              "If children are owned they would be deleted with the owning parent."
+        }
 
-      // Second entity has a ref and will be deleted
-      _ <- A.i_(2).Bb.i_.delete.transact
-      _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
-      _ <- A.i.a1.Bb.i.query.get.map(_ ==> List((3, 30)))
+      // Nothing deleted
+      _ <- A.i.a1.Bb.i.query.get.map(_ ==> List((2, 20), (3, 30)))
+    } yield ()
+  }
 
-      // Note that B.int entity is a separate entity and is not deleted.
-      // Only the entity of the initial entity is deleted
-      _ <- B.i.a1.query.get.map(_ ==> List(20, 30))
+  "OneToMany owner" - refs {
+    for {
+      _ <- G.i.insert(1).transact
+      _ <- G.i.Hh.i.insert((2, 20), (3, 30)).transact
 
-      // A.i entity has no ref to B.i_(42) so nothing is deleted
-      _ <- A.i_.Bb.i_(42).delete.transact
-      _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
-      _ <- A.i.Bb.i.query.get.map(_ ==> List((3, 30)))
+      _ <- G.i.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- G.i.a1.Hh.i.query.get.map(_ ==> List((2, 20), (3, 30)))
 
-      // A.i entity has a ref to B.i_(30) so it will be deleted
-      _ <- A.i_.Bb.i_(30).delete.transact
-      _ <- A.i.query.get.map(_ ==> List(1))
-      _ <- A.i.Bb.i.query.get.map(_ ==> List())
+      // Nothing deleted since first parent row has no H child
+      _ <- G.i_(1).Hh.i_.delete.transact
+      _ <- G.i.a1.query.get.map(_ ==> List(1, 2, 3))
+
+      // Second parent row has a child and will be deleted
+      _ <- G.i_(2).Hh.i_.delete.transact
+      _ <- G.i.a1.query.get.map(_ ==> List(1, 3))
+      _ <- G.i.a1.Hh.i.query.get.map(_ ==> List((3, 30)))
+
+      // Child row cascade deleted too
+      _ <- H.i.a1.query.get.map(_ ==> List(30))
     } yield ()
   }
 

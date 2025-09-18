@@ -261,6 +261,8 @@ abstract class DomainStructure {
   object manyToOne extends manyToOne
   trait manyToOne extends refOptions[manyToOne]
 
+  trait Join
+
 
   // Enums ..................................................
 
@@ -384,6 +386,8 @@ abstract class DomainStructure {
     // def apply[Ref](description: String): refOptions[Self] & Ref = ???
 
     lazy val mandatory: Self = ???
+
+    lazy val owner: Self = ???
 
     // Tupled attributes
     def require(attrs: Requierable*): Self = ???

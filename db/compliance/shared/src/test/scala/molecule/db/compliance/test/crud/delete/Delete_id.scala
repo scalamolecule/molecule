@@ -59,7 +59,7 @@ case class Delete_id(
   }
 
 
-  "Referenced entities: Card-one" - refs {
+  "Delete child rows" - refs {
     for {
       e1 <- A.i.B.i.insert(
         (1, 10),
@@ -85,7 +85,8 @@ case class Delete_id(
   }
 
 
-  "Referenced entities: Card-many" - refs {
+  "Parents with non-owned children can't be deleted " - refs {
+    // A doesn't own B
     for {
       e1 <- A.i.Bb.*(B.i).insert(
         (1, Seq(10, 11)),
@@ -101,75 +102,53 @@ case class Delete_id(
       // 4 referenced entities
       _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
 
-      _ <- if (platform == "Jdbc jvm") {
-        // 4 join rows from A to B
-        rawQuery("SELECT * FROM A_bb_B").map(_ ==> List(
-          List(1, 1),
-          List(1, 2),
-          List(2, 3),
-          List(2, 4),
-        ))
-      } else Future.unit
-
-      // Delete first A entity and implicitly its joins to B
+      // Referential integrity constraint on fk prevents orphaning B children
       _ <- A(e1).delete.transact
+        .map(_ ==> "Unexpected success").recover {
+          case e: Exception =>
+            e.getMessage ==>
+              """Referential integrity constraint violation: "_A_2: PUBLIC.B FOREIGN KEY(A) REFERENCES PUBLIC.A(ID) (CAST(1 AS BIGINT))"; SQL statement:
+                |DELETE FROM A
+                |WHERE
+                |  A.id = 1 [23503-232]""".stripMargin
+        }
 
-      // 1 entity with 2 referenced entities left
-      _ <- A.i.Bb.*(B.i.a1).query.get.map(_ ==> List(
+      // No data deleted
+      _ <- A.i.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
+        (1, Seq(10, 11)),
+        (2, Seq(20, 21))
+      ))
+    } yield ()
+  }
+
+
+  "Delete parent and owned children" - refs {
+    // G owns H
+    for {
+      e1 <- G.i.Hh.*(H.i).insert(
+        (1, Seq(10, 11)),
+        (2, Seq(20, 21))
+      ).transact.map(_.id)
+
+      // 2 entities, each with 2 sub-entities
+      _ <- G.i.a1.Hh.*(H.i.a1).query.get.map(_ ==> List(
+        (1, Seq(10, 11)),
         (2, Seq(20, 21))
       ))
 
-      // Referenced entities are not deleted
-      _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
+      // 4 referenced entities
+      _ <- H.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
 
-      _ <- if (platform == "Jdbc jvm") {
-        // Join rows deleted
-        rawQuery("SELECT * FROM A_bb_B").map(_ ==> List(
-          // List(1, 1),
-          // List(1, 2),
-          List(2, 3),
-          List(2, 4),
-        ))
-      } else Future.unit
-    } yield ()
-  }
+      // Delete first G parent and its H children with cascade deletion
+      _ <- G(e1).delete.transact
 
+      // 1 parent with 2 children remains
+      _ <- G.i.Hh.*(H.i.a1).query.get.map(_ ==> List(
+        (2, Seq(20, 21))
+      ))
 
-  "Orphan refs: delete ref" - refs {
-    for {
-      b <- B.i(2).save.transact.map(_.id)
-      _ <- A.i(1).b(b).save.transact
-
-      // Delete B entity
-      _ <- B(b).delete.transact
-      _ <- B(b).i.query.get.map(_ ==> List())
-
-      _ <- A.b.query.get.map(_ ==> List(b))
-
-      // But orphan ref points to nothing (the deleted ref entity)
-      _ <- A.i.B.i.query.get.map(_ ==> List())
-
-      // Add foreign key constraint to database schema manually to forbid deleting
-      // entities that other entities refer to (creating orphans).
-      // Copy constraints from the generated schema and add them to your live schema.
-    } yield ()
-  }
-
-  "Orphan refs: delete ref and orphan ref id manually" - refs {
-    for {
-      b <- B.i(2).save.transact.map(_.id)
-      a <- A.i(1).b(b).save.transact.map(_.id)
-
-      // Delete B entity
-      _ <- B(b).delete.transact
-      _ <- B(b).i.query.get.map(_ ==> List())
-
-      // Delete ref id to avoid orphan ref id hanging around pointing to nothing
-      _ <- A(a).b().update.transact
-
-      // No orphan ref and no relationship
-      _ <- A.b.query.get.map(_ ==> List())
-      _ <- A.i.B.i.query.get.map(_ ==> List())
+      // Children (10, 11) of fist parent are cascade deleted
+      _ <- H.i.a1.query.get.map(_ ==> List(20, 21))
     } yield ()
   }
 }

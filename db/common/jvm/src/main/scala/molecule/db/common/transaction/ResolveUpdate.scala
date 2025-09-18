@@ -30,7 +30,7 @@ class ResolveUpdate(isUpsert: Boolean) extends ModelUtils { self: SqlUpdate =>
               case a: AttrOneTac =>
                 resolve(tail, paramIndex, tableUpdates, tableUpdate, filterElements :+ a, notNulls)
 
-              case _: AttrOneOpt => noOptional(a)
+              case _: AttrOneOpt => noOptional(a, isUpsert)
             }
 
             case a: AttrSet => a match {
@@ -51,7 +51,7 @@ class ResolveUpdate(isUpsert: Boolean) extends ModelUtils { self: SqlUpdate =>
               }
               case a: AttrSetTac =>
                 resolve(tail, paramIndex, tableUpdates, tableUpdate, filterElements :+ a, notNulls)
-              case _: AttrSetOpt => noOptional(a)
+              case _: AttrSetOpt => noOptional(a, isUpsert)
             }
 
             case a: AttrSeq => a match {
@@ -72,7 +72,7 @@ class ResolveUpdate(isUpsert: Boolean) extends ModelUtils { self: SqlUpdate =>
               }
               case a: AttrSeqTac =>
                 resolve(tail, paramIndex, tableUpdates, tableUpdate, filterElements :+ a, notNulls)
-              case _: AttrSeqOpt => noOptional(a)
+              case _: AttrSeqOpt => noOptional(a, isUpsert)
             }
 
             case a: AttrMap => a match {
@@ -94,17 +94,17 @@ class ResolveUpdate(isUpsert: Boolean) extends ModelUtils { self: SqlUpdate =>
               case a: AttrMapTac =>
                 resolve(tail, paramIndex, tableUpdates, tableUpdate, filterElements :+ a, notNulls)
 
-              case a: AttrMapOpt => noOptional(a)
+              case a: AttrMapOpt => noOptional(a, isUpsert)
             }
           }
 
-        case r@Ref(ent, refAttr, ref, OneToMany, _, reverseRefAttr) =>
+        case r@Ref(ent, refAttr, ref, OneToMany, _, reverseRefAttr, _) =>
           noUpsertRef
           val filterElements1 = filterElements :+ r :+ AttrOneManID(r.ref, "id")
           val refPath         = tableUpdate.refPath ++ List(refAttr, ref)
           resolve(tail, 1, tableUpdates :+ tableUpdate, TableUpdate(refPath), filterElements1, notNulls)
 
-        case r@Ref(ent, refAttr, ref, _ /* ManyToOne */ , _, reverseRefAttr) =>
+        case r@Ref(ent, refAttr, ref, _ /* ManyToOne */ , _, reverseRefAttr, _) =>
           noUpsertRef
           val filterElements1 = filterElements :+ r :+ AttrOneManID(r.ref, "id")
           val refPath         = tableUpdate.refPath ++ List(refAttr, ref)

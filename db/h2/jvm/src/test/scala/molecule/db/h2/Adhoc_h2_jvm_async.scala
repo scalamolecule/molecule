@@ -13,31 +13,43 @@ import scala.Tuple.:*
 
 class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
 
-  "types" - types {
-    import molecule.db.compliance.domains.dsl.Types.*
-    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+  //  "types" - types {
+  //    import molecule.db.compliance.domains.dsl.Types.*
+  //    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+  //    for {
+  //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+  //      _ <- Entity.int(3).save.transact
+  //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+  //      _ <- Entity(a).int(10).update.transact
+  //      _ <- Entity(b).delete.transact
+  //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+  //
+  //    } yield ()
+  //  }
+
+
+  "refs1" - refs {
+    import molecule.db.compliance.domains.dsl.Refs.*
     for {
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- Entity(a).int(10).update.transact
-      _ <- Entity(b).delete.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+
+      b <- B.i(2).save.transact.map(_.id)
+      _ <- A.i(1).b(b).save.transact
+
+      // Delete B entity
+      _ <- B(b).delete.transact
+      _ <- B(b).i.query.get.map(_ ==> List())
+
+      _ <- A.b.query.get.map(_ ==> List(b))
+
+      // But orphan ref points to nothing (the deleted ref entity)
+      _ <- A.i.B.i.query.get.map(_ ==> List())
+
+      // Add foreign key constraint to database schema manually to forbid deleting
+      // entities that other entities refer to (creating orphans).
+      // Copy constraints from the generated schema and add them to your live schema.
 
     } yield ()
   }
-
-
-//  "refs1" - refs {
-//    import molecule.db.compliance.domains.dsl.Refs.*
-//    for {
-//      _ <- A.i.Bb.i.query.get
-//      _ <- A.i.B.i.query.get
-//      _ <- B.i.A.i.query.get
-//      _ <- B.i.Aa.i.query.get
-//
-//    } yield ()
-//  }
 
   //  "refs2" - refs {
   //    import molecule.db.compliance.domains.dsl.Refs.*
