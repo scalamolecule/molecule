@@ -106,11 +106,29 @@ case class Delete_id(
       _ <- A(e1).delete.transact
         .map(_ ==> "Unexpected success").recover {
           case e: Exception =>
-            e.getMessage ==>
-              """Referential integrity constraint violation: "_A_2: PUBLIC.B FOREIGN KEY(A) REFERENCES PUBLIC.A(ID) (CAST(1 AS BIGINT))"; SQL statement:
-                |DELETE FROM A
-                |WHERE
-                |  A.id = 1 [23503-232]""".stripMargin
+            e.getMessage ==> (database match {
+              case "h2" =>
+                """Referential integrity constraint violation: "_A_2: PUBLIC.B FOREIGN KEY(A) REFERENCES PUBLIC.A(ID) (CAST(1 AS BIGINT))"; SQL statement:
+                  |DELETE FROM A
+                  |WHERE
+                  |  A.id = 1 [23503-232]""".stripMargin
+
+              case "mariadb" =>
+                """(conn=4) Cannot delete or update a parent row: a foreign key constraint fails (`test`.`B`, CONSTRAINT `_a_2` FOREIGN KEY (`a`) REFERENCES `A` (`id`))""".stripMargin
+
+              case "mysql" =>
+                """Cannot delete or update a parent row: a foreign key constraint fails (`test`.`B`, CONSTRAINT `_a_2` FOREIGN KEY (`a`) REFERENCES `A` (`id`))""".stripMargin
+
+              case "postgresql" =>
+                """Batch entry 0 DELETE FROM A
+                  |WHERE
+                  |  A.id = 1
+                  |RETURNING * was aborted: ERROR: update or delete on table "a" violates foreign key constraint "_a_2" on table "b"
+                  |  Detail: Key (id)=(1) is still referenced from table "b".  Call getNextException to see other errors in the batch.""".stripMargin
+
+              case "sqlite" =>
+                """[SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)""".stripMargin
+            })
         }
 
       // No data deleted

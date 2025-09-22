@@ -53,7 +53,7 @@ case class JdbcConn_JVM(
 
       TxReport(ids)
     } catch {
-      // re-throw errors to keep stacktrace back to original error
+      // re-throw errors to keep stacktrace back to the original error
       case e: SQLException =>
         try {
           sqlConn.rollback()

@@ -29,27 +29,27 @@ trait ModelUtils {
 
   final protected def getInitialEntity(elements: List[Element]): String = {
     elements.head match {
-      case a: Attr                               => a.ent
-      case r: Ref                                => r.ent
+      case a: Attr                                  => a.ent
+      case r: Ref                                   => r.ent
       case OptRef(Ref(ent, _, _, _, _, _, _), _)    => ent
-      case OptEntity(attrs)                      => attrs.head.ent
+      case OptEntity(attrs)                         => attrs.head.ent
       case Nested(Ref(ent, _, _, _, _, _, _), _)    => ent
       case OptNested(Ref(ent, _, _, _, _, _, _), _) => ent
-      case other                                 => throw ModelError("Unexpected head element: " + other)
+      case other                                    => throw ModelError("Unexpected head element: " + other)
     }
   }
 
   @tailrec
   final protected def getInitialNonGenericEntity(elements: List[Element]): String = {
     elements.head match {
-      case a: Attr if a.attr == "id"             => getInitialNonGenericEntity(elements.tail)
-      case a: Attr                               => a.ent
-      case r: Ref                                => r.ent
+      case a: Attr if a.attr == "id"                => getInitialNonGenericEntity(elements.tail)
+      case a: Attr                                  => a.ent
+      case r: Ref                                   => r.ent
       case OptRef(Ref(ent, _, _, _, _, _, _), _)    => ent
-      case OptEntity(attrs)                      => attrs.head.ent
+      case OptEntity(attrs)                         => attrs.head.ent
       case Nested(Ref(ent, _, _, _, _, _, _), _)    => ent
       case OptNested(Ref(ent, _, _, _, _, _, _), _) => ent
-      case other                                 => throw ModelError("Unexpected head element: " + other)
+      case other                                    => throw ModelError("Unexpected head element: " + other)
     }
   }
 
@@ -146,7 +146,7 @@ trait ModelUtils {
   }
 
   def noOptional(a: Attr, isUpsert: Boolean): Nothing = {
-    val kind = if(isUpsert) "upsert" else "update"
+    val kind = if (isUpsert) "upsert" else "update"
     throw ModelError(s"Can't $kind optional values (${a.cleanName}_?)")
   }
 

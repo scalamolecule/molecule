@@ -28,55 +28,146 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
   //  }
 
 
-  "refs1" - refs {
+  "refs" - refs {
     import molecule.db.compliance.domains.dsl.Refs.*
     for {
 
-      b <- B.i(2).save.transact.map(_.id)
-      _ <- A.i(1).b(b).save.transact
+      List(b1, b2) <- B.i.insert(1, 2).transact.map(_.ids)
 
-      // Delete B entity
-      _ <- B(b).delete.transact
-      _ <- B(b).i.query.get.map(_ ==> List())
+      // Foreign key in A pointing to B (many-to-one relationship)
+      _ <- A.i.b.insert(
+        (1, b1),
+        (2, b1),
+        (3, b2)
+      ).transact
 
-      _ <- A.b.query.get.map(_ ==> List(b))
+      // Many-to-one
+      _ <- A.i.B.i.query.get.map(_ ==> List(
+        (1, 1),
+        (2, 1),
+        (3, 2)
+      ))
 
-      // But orphan ref points to nothing (the deleted ref entity)
-      _ <- A.i.B.i.query.get.map(_ ==> List())
+      // One-to-Many accessor Aa
+      _ <- B.i.Aa.i.query.get.map(_ ==> List(
+        (1, 1),
+        (1, 2),
+        (2, 3)
+      ))
 
-      // Add foreign key constraint to database schema manually to forbid deleting
-      // entities that other entities refer to (creating orphans).
-      // Copy constraints from the generated schema and add them to your live schema.
-
+      // One-to-many relationship can even be nested
+      _ <- B.i.Aa.*(A.i).query.get.map(_ ==> List(
+        (1, List(1, 2)),
+        (2, List(3))
+      ))
     } yield ()
   }
 
-  //  "refs2" - refs {
-  //    import molecule.db.compliance.domains.dsl.Refs.*
-  //    for {
-  //      _ <- A.i(1).B.i(1).save.transact
-  //      _ <- A.i_.B.i(2).update.i.transact
-  //      _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
-  //    } yield ()
-  //  }
-  //
-  //  "refs3" - refs {
-  //    import molecule.db.compliance.domains.dsl.Refs.*
-  //    for {
-  //      _ <- A.i(1).Bb.i(1).save.transact
-  //      _ <- A.i_.Bb.i(2).update.i.transact
-  //      _ <- A.i.Bb.i.query.get.map(_ ==> List((2, 1)))
-  //    } yield ()
-  //  }
-  //
-  //  "refs4" - refs {
-  //    import molecule.db.compliance.domains.dsl.Refs.*
-  //    for {
-  //      _ <- A.i(1).Bb.i(1).save.transact
-  //      _ <- A.i(2).Bb.i_.update.i.transact
-  //      _ <- A.i.Bb.i.query.get.map(_ ==> List((1, 2)))
-  //    } yield ()
-  //  }
+
+  "Join property" - joinTable {
+    import molecule.db.compliance.domains.dsl.JoinTable.*
+    for {
+      // Entities to be joined
+      List(a1, a2) <- A.i.insert(1, 2).transact.map(_.ids)
+      List(b1, b2) <- B.i.insert(3, 4).transact.map(_.ids)
+
+      // Insert joins
+      _ <- J.a.i.b.insert(
+        (a1, 10, b1),
+        (a2, 20, b2),
+      ).transact
+
+      // Access join property
+      _ <- A.i.Js.i.a1.B.i.query.get.map(_ ==> List(
+        (1, 10, 3),
+        (2, 20, 4),
+      ))
+
+      // Reverse direction
+      _ <- B.i.Js.i.a1.A.i.query.get.map(_ ==> List(
+        (3, 10, 1),
+        (4, 20, 2),
+      ))
+    } yield ()
+  }
+
+  "Bridged join values" - joinTable {
+    import molecule.db.compliance.domains.dsl.JoinTable.*
+    for {
+      // Entities to be joined
+      List(a1, a2) <- A.i.insert(1, 2).transact.map(_.ids)
+      List(b1, b2, b3) <- B.i.insert(3, 4, 5).transact.map(_.ids)
+
+      // Insert joins
+      _ <- J.a.b.insert(
+        (a1, b1),
+        (a2, b2),
+        (a2, b3)
+      ).transact
+
+      // Via join
+      _ <- A.i.Js.B.i.a1.query.get.map(_ ==> List(
+        (1, 3),
+        (2, 4),
+        (2, 5)
+      ))
+      _ <- B.i.a1.Js.A.i.query.get.map(_ ==> List(
+        (3, 1),
+        (4, 2),
+        (5, 2)
+      ))
+
+      // Bridging to target (same as above)
+      _ <- A.i.Bs.i.a1.query.get.map(_ ==> List(
+        (1, 3),
+        (2, 4),
+        (2, 5)
+      ))
+      _ <- B.i.a1.As.i.query.get.map(_ ==> List(
+        (3, 1),
+        (4, 2),
+        (5, 2)
+      ))
+    } yield ()
+  }
+
+  "Nested join values" - joinTable {
+    import molecule.db.compliance.domains.dsl.JoinTable.*
+    for {
+      // Entities to be joined
+      List(a1, a2) <- A.i.insert(1, 2).transact.map(_.ids)
+      List(b1, b2, b3) <- B.i.insert(3, 4, 5).transact.map(_.ids)
+
+      // Insert joins
+      _ <- J.a.b.insert(
+        (a1, b1),
+        (a2, b2),
+        (a2, b3)
+      ).transact
+
+      // Nested via join
+      _ <- A.i.Js.*(J.B.i.a1).query.get.map(_ ==> List(
+        (1, List(3)),
+        (2, List(4, 5))
+      ))
+      _ <- B.i.a1.Js.*(J.A.i).query.get.map(_ ==> List(
+        (3, List(1)),
+        (4, List(2)),
+        (5, List(2))
+      ))
+
+      // Nested joined values
+      _ <- A.i.Bs.**(B.i.a1).query.get.map(_ ==> List(
+        (1, List(3)),
+        (2, List(4, 5))
+      ))
+      _ <- B.i.a1.As.**(A.i).query.get.map(_ ==> List(
+        (3, List(1)),
+        (4, List(2)),
+        (5, List(2))
+      ))
+    } yield ()
+  }
 
 
   //  "ids, ref" - refs {

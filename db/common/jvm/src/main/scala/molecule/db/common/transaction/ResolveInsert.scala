@@ -162,7 +162,7 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
     val lastPartition = partitions.last.copy(
       tableInserts = partitions.last.tableInserts :+ tableInsert,
       tupleIndex = tplIndex,
-      dataKind = if (nestedElements.length == 1) HasNestedValues else HasNestedTuples
+      dataKind = if (countValueAttrs(nestedElements) == 1) HasNestedValues else HasNestedTuples
     )
 
     // Start a new nested partition, with tupleIndex pointing at the nested container in the parent tuple

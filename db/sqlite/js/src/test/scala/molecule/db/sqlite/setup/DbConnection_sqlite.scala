@@ -6,6 +6,7 @@ import molecule.db.common.facade.JdbcConn_JS
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.Conn
+import molecule.db.compliance.domains.dsl.JoinTable.metadb.JoinTable_sqlite
 import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_sqlite
 import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_sqlite
 import molecule.db.compliance.domains.dsl.Types.metadb.Types_sqlite
@@ -16,6 +17,7 @@ import zio.{ZIO, ZLayer}
 
 trait DbConnection_sqlite extends DbConnection {
 
+  pickleMetaDb.addConcreteType[JoinTable_sqlite]
   pickleMetaDb.addConcreteType[Types_sqlite]
   pickleMetaDb.addConcreteType[Refs_sqlite]
   pickleMetaDb.addConcreteType[Uniques_sqlite]

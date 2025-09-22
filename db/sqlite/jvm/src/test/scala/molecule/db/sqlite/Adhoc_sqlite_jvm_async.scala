@@ -5,42 +5,72 @@ import molecule.db.common.util.Executor.*
 import molecule.db.sqlite.async.*
 import molecule.db.sqlite.setup.DbProviders_sqlite
 import org.scalactic.Equality
+import scala.concurrent.Future
 
 
 class Adhoc_sqlite_jvm_async extends MUnit with DbProviders_sqlite with TestUtils {
 
 
-  "types" - types {
-    import molecule.db.compliance.domains.dsl.Types.*
-    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+  //  "types" - types {
+  //    import molecule.db.compliance.domains.dsl.Types.*
+  //    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+  //    for {
+  //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+  //      _ <- Entity.int(3).save.transact
+  //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+  //      _ <- Entity(a).int(10).update.transact
+  //      _ <- Entity(b).delete.transact
+  //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+  //
+  //    } yield ()
+  //  }
+
+
+
+  "refs" - refs {
+    import molecule.db.compliance.domains.dsl.Refs.*
     for {
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- Entity(a).int(10).update.transact
-      _ <- Entity(b).delete.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+      //      _ <- A.i.insert(1).transact
+      //      _ <- A.i.query.get.map(_ ==> List(1))
+
+
+      e1 <- A.i.Bb.*(B.i).insert(
+        (1, Seq(10, 11)),
+        (2, Seq(20, 21))
+      ).transact.map(_.id)
+
+      // 2 entities, each with 2 sub-entities
+      _ <- A.i.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
+        (1, Seq(10, 11)),
+        (2, Seq(20, 21))
+      ))
+
+      // 4 referenced entities
+      _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
+
+      // Referential integrity constraint on fk prevents orphaning B children
+      _ <- A(e1).delete.transact.map(_ ==> "Unexpected success").recover {
+        case e: Exception =>
+          e.getMessage ==> (database match {
+            case "sqlite" => "[SQLITE_CONSTRAINT_FOREIGNKEY] A foreign key constraint failed (FOREIGN KEY constraint failed)"
+            case "h2"     =>
+              """Referential integrity constraint violation: "_A_2: PUBLIC.B FOREIGN KEY(A) REFERENCES PUBLIC.A(ID) (CAST(1 AS BIGINT))"; SQL statement:
+                |DELETE FROM A
+                |WHERE
+                |  A.id = 1 [23503-232]""".stripMargin
+          })
+      }
+
+      // No data deleted
+      _ <- A.i.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
+        (1, Seq(10, 11)),
+        (2, Seq(20, 21))
+      ))
 
     } yield ()
   }
 
 
-
-  //  "refs" - refs {
-  //    import molecule.db.compliance.domains.dsl.Refs.*
-  //    for {
-  //      //      _ <- A.i.insert(1).transact
-  //      //      _ <- A.i.query.get.map(_ ==> List(1))
-  //
-  //      _ <- A.i.B.s.insert(
-  //        (1, "a"),
-  //        (2, "b"),
-  //      ).i.transact
-  //
-  //    } yield ()
-  //  }
-  //
-  //
   //  //    "unique" - unique {
   //  //      import molecule.db.compliance.domains.dsl.Uniques._
   //  //      //          val triples             = getTriples.map(t => (t._3, t._1, t._2))

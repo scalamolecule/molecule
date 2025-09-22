@@ -7,6 +7,7 @@ import molecule.db.common.facade.JdbcConn_JS
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.Conn
+import molecule.db.compliance.domains.dsl.JoinTable.metadb.JoinTable_postgresql
 import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_postgresql
 import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_postgresql
 import molecule.db.compliance.domains.dsl.Types.metadb.Types_postgresql
@@ -16,6 +17,7 @@ import zio.{ZIO, ZLayer}
 
 object DbConnection_postgresql {
 
+  pickleMetaDb.addConcreteType[JoinTable_postgresql]
   pickleMetaDb.addConcreteType[Types_postgresql]
   pickleMetaDb.addConcreteType[Refs_postgresql]
   pickleMetaDb.addConcreteType[Uniques_postgresql]
