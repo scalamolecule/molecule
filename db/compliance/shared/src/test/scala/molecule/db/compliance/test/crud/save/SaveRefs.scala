@@ -129,7 +129,7 @@ case class SaveRefs(
       _ <- A.i(1).Bb.i(2).Cc.i(3)._B.s("a")._A.s("b").D.i(4).save.transact
       _ <- A.i.Bb.i.Cc.i._B.s._A.s.D.i.query.get.map(_ ==> List((1, 2, 3, "a", "b", 4)))
 
-      // Distinguish separate relationships to same entity
+      // Distinguish separate relationships to the same entity
       // card-many B and card-one B should be distinguished from each other
       _ <- A.i(1).Bb.i(2)._A.s("a").B.s("b").save.transact
       _ <- A.i.Bb.i._A.s.B.s.query.get.map(_ ==> List((1, 2, "a", "b")))
