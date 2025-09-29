@@ -312,17 +312,17 @@ object Validation extends DomainStructure {
 
   // Mandatory circular dependencies not allowed
   //  trait Self {
-  //    val self = one[Self].mandatory
+  //    val self = manyToOne[Self].mandatory
   //  }
   //
   //  trait Aa {
-  //    val refB = one[Bb].mandatory
+  //    val refB = manyToOne[Bb].mandatory
   //  }
   //  trait Bb {
-  //    val refC = one[Cc].mandatory
+  //    val refC = manyToOne[Cc].mandatory
   //  }
   //  trait Cc {
-  //    val refA = one[Aa].mandatory
+  //    val refA = manyToOne[Aa].mandatory
   //  }
 
 

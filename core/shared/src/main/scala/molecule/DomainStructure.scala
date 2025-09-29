@@ -35,7 +35,7 @@ import java.util.{Date, UUID}
  *     trait Person {
  *       val name    = oneString
  *       val age     = oneInt
- *       val address = one[Address] // Cardinality-one relationship to Address
+ *       val address = manyToOne[Address]
  *     }
  *     trait Address {
  *       val street = oneString
