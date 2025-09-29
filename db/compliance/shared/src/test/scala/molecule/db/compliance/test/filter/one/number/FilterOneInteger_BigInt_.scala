@@ -38,34 +38,34 @@ case class FilterOneInteger_BigInt_(
   "modulo" - types {
     for {
       _ <- Entity.i.bigInt.insert(
+        (-4, -bigInt4),
+        (-3, -bigInt3),
+        (-2, -bigInt2),
+        (-1, -bigInt1),
+        (0, bigInt0),
         (1, bigInt1),
         (2, bigInt2),
         (3, bigInt3),
         (4, bigInt4),
-        (5, bigInt5),
-        (6, bigInt6),
-        (7, bigInt7),
-        (8, bigInt8),
-        (9, bigInt9),
       ).transact
 
       // Mandatory
 
-      _ <- Entity.bigInt.%(bigInt2, bigInt0).query.get.map(_ ==> List(bigInt2, bigInt4, bigInt6, bigInt8))
-      _ <- Entity.bigInt.%(bigInt2, bigInt1).query.get.map(_ ==> List(bigInt1, bigInt3, bigInt5, bigInt7, bigInt9))
+      _ <- Entity.bigInt.%(bigInt2, bigInt0).query.get.map(_ ==> List(-bigInt4, -bigInt2, bigInt0, bigInt2, bigInt4))
+      _ <- Entity.bigInt.%(bigInt2, bigInt1).query.get.map(_ ==> List(-bigInt3, -bigInt1, bigInt1, bigInt3))
 
-      _ <- Entity.bigInt.%(bigInt3, bigInt0).query.get.map(_ ==> List(bigInt3, bigInt6, bigInt9))
-      _ <- Entity.bigInt.%(bigInt3, bigInt1).query.get.map(_ ==> List(bigInt1, bigInt4, bigInt7))
-      _ <- Entity.bigInt.%(bigInt3, bigInt2).query.get.map(_ ==> List(bigInt2, bigInt5, bigInt8))
+      _ <- Entity.bigInt.%(bigInt3, bigInt0).query.get.map(_ ==> List(-bigInt3, bigInt0, bigInt3))
+      _ <- Entity.bigInt.%(bigInt3, bigInt1).query.get.map(_ ==> List(-bigInt4, -bigInt1, bigInt1, bigInt4))
+      _ <- Entity.bigInt.%(bigInt3, bigInt2).query.get.map(_ ==> List(-bigInt2, bigInt2))
 
       // Tacit
 
-      _ <- Entity.i.bigInt_.%(bigInt2, bigInt0).query.get.map(_ ==> List(2, 4, 6, 8))
-      _ <- Entity.i.bigInt_.%(bigInt2, bigInt1).query.get.map(_ ==> List(1, 3, 5, 7, 9))
+      _ <- Entity.i.bigInt_.%(bigInt2, bigInt0).query.get.map(_ ==> List(-4, -2, 0, 2, 4))
+      _ <- Entity.i.bigInt_.%(bigInt2, bigInt1).query.get.map(_ ==> List(-3, -1, 1, 3))
 
-      _ <- Entity.i.bigInt_.%(bigInt3, bigInt0).query.get.map(_ ==> List(3, 6, 9))
-      _ <- Entity.i.bigInt_.%(bigInt3, bigInt1).query.get.map(_ ==> List(1, 4, 7))
-      _ <- Entity.i.bigInt_.%(bigInt3, bigInt2).query.get.map(_ ==> List(2, 5, 8))
+      _ <- Entity.i.bigInt_.%(bigInt3, bigInt0).query.get.map(_ ==> List(-3, 0, 3))
+      _ <- Entity.i.bigInt_.%(bigInt3, bigInt1).query.get.map(_ ==> List(-4, -1, 1, 4))
+      _ <- Entity.i.bigInt_.%(bigInt3, bigInt2).query.get.map(_ ==> List(-2, 2))
     } yield ()
   }
 }

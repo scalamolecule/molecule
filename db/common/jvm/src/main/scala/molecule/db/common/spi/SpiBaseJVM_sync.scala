@@ -95,8 +95,7 @@ trait SpiBaseJVM_sync
   ): String = {
     tryInspect("query", dataModel) {
       val elementsClean = keywordsSuffixed(dataModel.elements, proxy)
-      val query         = getModel2SqlQuery(elementsClean)
-        .getSqlQuery(Nil, optLimit, optOffset, Some(proxy)).init // skip last ; when inspecting
+      val query         = getModel2SqlQuery(elementsClean).getSqlQuery(Nil, optLimit, optOffset, Some(proxy))
       renderInspection(label, dataModel, query)
     }
   }
@@ -407,15 +406,15 @@ trait SpiBaseJVM_sync
    * We need to run INSERTs so that when a table has foreign keys to another table,
    * the referenced table is inserted first (so its generated IDs exist).
    *
-   * Node     = refPath (List[String]) identifying a TableInsert in this partition.
-   * Edge     = dependsOnRefPath -> refPath if the current TableInsert has a foreign key
-   *            to dependsOnRefPath. This enforces that parents are inserted before children.
-   * Shape    = Intended to be a DAG (Directed Acyclic Graph) per partition; if a cycle exists,
-   *            there is no valid insert order and we fail with a clear error.
-   * Props    = Multiple disconnected components supported; stable order among nodes that
-   *            are simultaneously available (we preserve the original input order).
-   * Cost     = O(V + E) time; low allocation via mutable Map/ListBuffer/Queue.
-   * Ref      = https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
+   * Node  = refPath (List[String]) identifying a TableInsert in this partition.
+   * Edge  = dependsOnRefPath -> refPath if the current TableInsert has a foreign key
+   *         to dependsOnRefPath. This enforces that parents are inserted before children.
+   * Shape = Intended to be a DAG (Directed Acyclic Graph) per partition; if a cycle exists,
+   *         there is no valid insert order and we fail with a clear error.
+   * Props = Multiple disconnected components supported; stable order among nodes that
+   *         are simultaneously available (we preserve the original input order).
+   * Cost  = O(V + E) time; low allocation via mutable Map/ListBuffer/Queue.
+   * Ref   = https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
    */
   def sortTableInserts(tableInserts: List[TableInsert]): List[TableInsert] = {
     // Collect the nodes (refPaths) present at this partition and a lookup to the original inserts
@@ -571,7 +570,7 @@ trait SpiBaseJVM_sync
     m2q.resolveElements(filterElements)
     if (!update.isUpsert)
       m2q.where.addAll(notNulls)
-    val query = m2q.renderSqlQuery(None, None).dropRight(1) // skip ;
+    val query = m2q.renderSqlQuery(None, None)
     (tableUpdates, query)
   }
 

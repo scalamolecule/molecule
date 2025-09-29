@@ -405,7 +405,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   // number filters ------------------------------------------------------------
 
   protected def remainder[T](col: String, args: Seq[T]): Unit =
-    where += ((col, s"% ${args.head} = ${args(1)}"))
+    where += ((col, s"% ${args.head} IN (${args(1)}, -${args(1)})"))
 
   protected def even(col: String): Unit = where += ((col, s"% 2 = 0"))
 

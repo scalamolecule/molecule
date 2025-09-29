@@ -26,9 +26,12 @@ object _FilterOneInteger extends Base {
         .replace("int", v)
         .replace("-byte1", "-1.toByte")
         .replace("-byte2", "-2.toByte")
+        .replace("-byte3", "-3.toByte")
+        .replace("-byte4", "-4.toByte")
         .replace("-short1", "-1.toShort")
         .replace("-short2", "-2.toShort")
-
+        .replace("-short3", "-3.toShort")
+        .replace("-short4", "-4.toShort")
     }
   }
 }

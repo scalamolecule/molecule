@@ -112,12 +112,12 @@ Molecule supports:
 - H2
 - (more can easily be added...)
 
-All Molecule queries behave identically across these databases. Each backend passes the same SPI compliance test suite with +2000 tests.
+All Molecule queries behave identically across these databases. Each backend passes the same SPI compliance test suite with ~2000 tests.
 
 
 ## Features
 
-- Scala 3.7.1 support (JVM + Scala.js)
+- Scala 3.7.3 support (JVM + Scala.js)
 - Type-safe and composable molecules
 - Synchronous and asynchronous APIs:
     - `Future`, `cats.effect.IO`, `ZIO`
@@ -286,7 +286,7 @@ There's also a shorthand alternative `i` that you can add like in `query.i.get` 
 
 `project/build.properties`:
 ```
-sbt.version = 1.11.3
+sbt.version = 1.11.6
 ```
 
 `project/plugins.sbt`:
@@ -300,7 +300,7 @@ lazy val yourProject = project.in(file("app"))
   .enablePlugins(MoleculePlugin)
   .settings(
     libraryDependencies ++= Seq(
-      // import for the database(s) that you need
+      // import database(s) that you need
       "org.scalamolecule" %% "molecule-db-h2" % "0.25.1",
       "org.scalamolecule" %% "molecule-db-mariadb" % "0.25.1",
       "org.scalamolecule" %% "molecule-db-mysql" % "0.25.1",
@@ -315,7 +315,7 @@ Use `%%%` instead of `%%` for Scala.js.
 
 ## Explore code
 
-The `dbCompliance` module in this repo has several domain structure definitions and +2000 tests that show all details of
+The `dbCompliance` module in this repo has several domain structure definitions and ~2000 tests that show all details of
 how molecule can be used. This forms the tests that each database implementation needs to comply with
 in order to offer all functionality of Molecule and be a compliant implementation.
 
@@ -329,8 +329,7 @@ Then run some tests on either ScalaJVM or ScalaJS:
 
 ### Run JVM tests
 
-Make sure Docker is running to run tests for Postgres, SQlite, Mysql and MariaDB. H2 can be run in memory for tests.
-On a mac you can for instance start Docker Desktop.
+Make sure Docker is running to run tests for Postgres, SQlite, Mysql and MariaDB. H2 can be run in memory for tests. On a mac you can for instance start Docker Desktop.
 
 Run the tests on the jvm with a databases of your choice:
 

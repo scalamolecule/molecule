@@ -32,7 +32,7 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
           |FROM Entity
           |WHERE
           |  Entity.string IS NOT NULL AND
-          |  Entity.int_   IS NOT NULL
+          |  Entity.int_   IS NOT NULL;
           |----------------------------------------
           |""".stripMargin
       )
@@ -183,7 +183,7 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
             |WHERE
             |  Entity.id     IS NOT NULL AND
             |  Entity.id     = 1 AND
-            |  Entity.string IS NOT NULL
+            |  Entity.string IS NOT NULL;
             |
             |
             |UPDATE Entity SET

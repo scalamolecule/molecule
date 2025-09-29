@@ -40,7 +40,7 @@ case class Aliased(
              |FROM Person
              |WHERE
              |  Person.name_ IS NOT NULL AND
-             |  Person.type_ IS NOT NULL
+             |  Person.type_ IS NOT NULL;
              |----------------------------------------
              |""".stripMargin
         } else
@@ -59,7 +59,7 @@ case class Aliased(
              |FROM Person
              |WHERE
              |  Person.name IS NOT NULL AND
-             |  Person.type IS NOT NULL
+             |  Person.type IS NOT NULL;
              |----------------------------------------
              |""".stripMargin
       })

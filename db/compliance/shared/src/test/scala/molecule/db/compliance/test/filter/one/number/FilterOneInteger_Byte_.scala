@@ -38,34 +38,34 @@ case class FilterOneInteger_Byte_(
   "modulo" - types {
     for {
       _ <- Entity.i.byte.insert(
+        (-4, -4.toByte),
+        (-3, -3.toByte),
+        (-2, -2.toByte),
+        (-1, -1.toByte),
+        (0, byte0),
         (1, byte1),
         (2, byte2),
         (3, byte3),
         (4, byte4),
-        (5, byte5),
-        (6, byte6),
-        (7, byte7),
-        (8, byte8),
-        (9, byte9),
       ).transact
 
       // Mandatory
 
-      _ <- Entity.byte.%(byte2, byte0).query.get.map(_ ==> List(byte2, byte4, byte6, byte8))
-      _ <- Entity.byte.%(byte2, byte1).query.get.map(_ ==> List(byte1, byte3, byte5, byte7, byte9))
+      _ <- Entity.byte.%(byte2, byte0).query.get.map(_ ==> List(-4.toByte, -2.toByte, byte0, byte2, byte4))
+      _ <- Entity.byte.%(byte2, byte1).query.get.map(_ ==> List(-3.toByte, -1.toByte, byte1, byte3))
 
-      _ <- Entity.byte.%(byte3, byte0).query.get.map(_ ==> List(byte3, byte6, byte9))
-      _ <- Entity.byte.%(byte3, byte1).query.get.map(_ ==> List(byte1, byte4, byte7))
-      _ <- Entity.byte.%(byte3, byte2).query.get.map(_ ==> List(byte2, byte5, byte8))
+      _ <- Entity.byte.%(byte3, byte0).query.get.map(_ ==> List(-3.toByte, byte0, byte3))
+      _ <- Entity.byte.%(byte3, byte1).query.get.map(_ ==> List(-4.toByte, -1.toByte, byte1, byte4))
+      _ <- Entity.byte.%(byte3, byte2).query.get.map(_ ==> List(-2.toByte, byte2))
 
       // Tacit
 
-      _ <- Entity.i.byte_.%(byte2, byte0).query.get.map(_ ==> List(2, 4, 6, 8))
-      _ <- Entity.i.byte_.%(byte2, byte1).query.get.map(_ ==> List(1, 3, 5, 7, 9))
+      _ <- Entity.i.byte_.%(byte2, byte0).query.get.map(_ ==> List(-4, -2, 0, 2, 4))
+      _ <- Entity.i.byte_.%(byte2, byte1).query.get.map(_ ==> List(-3, -1, 1, 3))
 
-      _ <- Entity.i.byte_.%(byte3, byte0).query.get.map(_ ==> List(3, 6, 9))
-      _ <- Entity.i.byte_.%(byte3, byte1).query.get.map(_ ==> List(1, 4, 7))
-      _ <- Entity.i.byte_.%(byte3, byte2).query.get.map(_ ==> List(2, 5, 8))
+      _ <- Entity.i.byte_.%(byte3, byte0).query.get.map(_ ==> List(-3, 0, 3))
+      _ <- Entity.i.byte_.%(byte3, byte1).query.get.map(_ ==> List(-4, -1, 1, 4))
+      _ <- Entity.i.byte_.%(byte3, byte2).query.get.map(_ ==> List(-2, 2))
     } yield ()
   }
 }

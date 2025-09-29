@@ -17,12 +17,45 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
     import molecule.db.compliance.domains.dsl.Types.*
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- Entity(a).int(10).update.transact
-      _ <- Entity(b).delete.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+//      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+//      _ <- Entity.int(3).save.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+//      _ <- Entity(a).int(10).update.transact
+//      _ <- Entity(b).delete.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+
+
+
+      _ <- Entity.i.int.insert(
+        (-4, -int4),
+        (-3, -int3),
+        (-2, -int2),
+        (-1, -int1),
+        (0, int0),
+        (1, int1),
+        (2, int2),
+        (3, int3),
+        (4, int4),
+      ).transact
+
+      // Mandatory
+
+      _ <- Entity.int.%(int2, int0).query.get.map(_ ==> List(-int4, -int2, int0, int2, int4))
+      _ <- Entity.int.%(int2, int1).query.get.map(_ ==> List(-int3, -int1, int1, int3))
+
+      _ <- Entity.int.%(int3, int0).query.get.map(_ ==> List(-int3, int0, int3))
+      _ <- Entity.int.%(int3, int1).query.get.map(_ ==> List(-int4, -int1, int1, int4))
+      _ <- Entity.int.%(int3, int2).query.get.map(_ ==> List(-int2, int2))
+
+      // Tacit
+
+      _ <- Entity.i.int_.%(int2, int0).query.get.map(_ ==> List(-4, -2, 0, 2, 4))
+      _ <- Entity.i.int_.%(int2, int1).query.get.map(_ ==> List(-3, -1, 1, 3))
+
+      _ <- Entity.i.int_.%(int3, int0).query.get.map(_ ==> List(-3, 0, 3))
+      _ <- Entity.i.int_.%(int3, int1).query.get.map(_ ==> List(-4, -1, 1, 4))
+      _ <- Entity.i.int_.%(int3, int2).query.get.map(_ ==> List(-2, 2))
+
 
     } yield ()
   }
