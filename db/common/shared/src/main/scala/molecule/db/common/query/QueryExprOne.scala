@@ -46,10 +46,13 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
   }
 
   override protected def queryAttrOneTac(attr: AttrOneTac): Unit = {
-    if (isOptNested)
+    if (isOptNested && !attr.isInstanceOf[AttrOneTacID])
       throw ModelError(s"Tacit attributes not allowed in optional nested queries (${attr.name}_).")
     attr match {
-      case at: AttrOneTacID             => tac(attr, at.vs, resId1)
+      case at: AttrOneTacID             =>
+        // Sort each nested level
+        addSort(attr, at.ent + ".id")
+        tac(attr, at.vs, resId1)
       case at: AttrOneTacString         => tac(attr, at.vs, resString1)
       case at: AttrOneTacInt            => tac(attr, at.vs, resInt1)
       case at: AttrOneTacLong           => tac(attr, at.vs, resLong1)

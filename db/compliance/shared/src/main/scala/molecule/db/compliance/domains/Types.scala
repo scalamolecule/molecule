@@ -90,7 +90,7 @@ object Types extends DomainStructure {
     val zonedDateTimeSeq  = seqZonedDateTime
     val uuidSeq           = seqUUID
     val uriSeq            = seqURI
-    val byteArray         = arrayByte.descr("special case")
+    val byteArray         = arrayByte.description("special case")
     val shortSeq          = seqShort
     val charSeq           = seqChar
 

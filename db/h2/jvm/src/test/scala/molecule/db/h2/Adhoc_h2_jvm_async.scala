@@ -13,161 +13,51 @@ import scala.Tuple.:*
 
 class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
 
-  //  "types" - types {
-  //    import molecule.db.compliance.domains.dsl.Types.*
-  //    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+  "types" - types {
+    import molecule.db.compliance.domains.dsl.Types.*
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+    for {
+      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      _ <- Entity.int(3).save.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- Entity(a).int(10).update.transact
+      _ <- Entity(b).delete.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+
+    } yield ()
+  }
+
+
+  //  "refs" - refs {
+  //    import molecule.db.compliance.domains.dsl.Refs.*
   //    for {
-  //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-  //      _ <- Entity.int(3).save.transact
-  //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-  //      _ <- Entity(a).int(10).update.transact
-  //      _ <- Entity(b).delete.transact
-  //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+  ////      _ <- A.s.Bb.*(B.i).insert(
+  ////        ("a", List(1, 2)),
+  ////        ("a", List(3, 4)),
+  ////      ).transact
+  ////
+  ////      // Mandatory nested data
+  //////      _ <- A.s.Bb.i.query.get.map(_ ==> List(
+  //////        ("a", 1),
+  //////        ("a", 2),
+  //////        ("b", 3),
+  //////        ("b", 4),
+  //////      ))
+  ////
+  //////      _ <- A.s.Bb.*(B.i.a1).query.i.get.map(_ ==> List(
+  //////      _ <- A.s.Bb.*(B.i.a1).query.i.get.map(_ ==> List(
+  //////      _ <- A.s.d1.Bb.*(B.i.a1).query.i.get.map(_ ==> List(
+  ////      _ <- A.s.Bb.*(B.i.a1).query.i.get.map(_ ==> List(
+  ////        ("a", List(1, 2)),
+  ////        ("a", List(3, 4)),
+  ////      ))
+  //
+  //      _ <- A.i.Bb.*(B.i.a1).query.i.get.map(_ ==> 42)
+  //      _ <- A.i.Bb.*(B.i.C.i.a1).query.i.get.map(_ ==> 42)
+  //
   //
   //    } yield ()
   //  }
-
-
-  "refs" - refs {
-    import molecule.db.compliance.domains.dsl.Refs.*
-    for {
-
-      List(b1, b2) <- B.i.insert(1, 2).transact.map(_.ids)
-
-      // Foreign key in A pointing to B (many-to-one relationship)
-      _ <- A.i.b.insert(
-        (1, b1),
-        (2, b1),
-        (3, b2)
-      ).transact
-
-      // Many-to-one
-      _ <- A.i.B.i.query.get.map(_ ==> List(
-        (1, 1),
-        (2, 1),
-        (3, 2)
-      ))
-
-      // One-to-Many accessor Aa
-      _ <- B.i.Aa.i.query.get.map(_ ==> List(
-        (1, 1),
-        (1, 2),
-        (2, 3)
-      ))
-
-      // One-to-many relationship can even be nested
-      _ <- B.i.Aa.*(A.i).query.get.map(_ ==> List(
-        (1, List(1, 2)),
-        (2, List(3))
-      ))
-    } yield ()
-  }
-
-
-  "Join property" - joinTable {
-    import molecule.db.compliance.domains.dsl.JoinTable.*
-    for {
-      // Entities to be joined
-      List(a1, a2) <- A.i.insert(1, 2).transact.map(_.ids)
-      List(b1, b2) <- B.i.insert(3, 4).transact.map(_.ids)
-
-      // Insert joins
-      _ <- J.a.i.b.insert(
-        (a1, 10, b1),
-        (a2, 20, b2),
-      ).transact
-
-      // Access join property
-      _ <- A.i.Js.i.a1.B.i.query.get.map(_ ==> List(
-        (1, 10, 3),
-        (2, 20, 4),
-      ))
-
-      // Reverse direction
-      _ <- B.i.Js.i.a1.A.i.query.get.map(_ ==> List(
-        (3, 10, 1),
-        (4, 20, 2),
-      ))
-    } yield ()
-  }
-
-  "Bridged join values" - joinTable {
-    import molecule.db.compliance.domains.dsl.JoinTable.*
-    for {
-      // Entities to be joined
-      List(a1, a2) <- A.i.insert(1, 2).transact.map(_.ids)
-      List(b1, b2, b3) <- B.i.insert(3, 4, 5).transact.map(_.ids)
-
-      // Insert joins
-      _ <- J.a.b.insert(
-        (a1, b1),
-        (a2, b2),
-        (a2, b3)
-      ).transact
-
-      // Via join
-      _ <- A.i.Js.B.i.a1.query.get.map(_ ==> List(
-        (1, 3),
-        (2, 4),
-        (2, 5)
-      ))
-      _ <- B.i.a1.Js.A.i.query.get.map(_ ==> List(
-        (3, 1),
-        (4, 2),
-        (5, 2)
-      ))
-
-      // Bridging to target (same as above)
-      _ <- A.i.Bs.i.a1.query.get.map(_ ==> List(
-        (1, 3),
-        (2, 4),
-        (2, 5)
-      ))
-      _ <- B.i.a1.As.i.query.get.map(_ ==> List(
-        (3, 1),
-        (4, 2),
-        (5, 2)
-      ))
-    } yield ()
-  }
-
-  "Nested join values" - joinTable {
-    import molecule.db.compliance.domains.dsl.JoinTable.*
-    for {
-      // Entities to be joined
-      List(a1, a2) <- A.i.insert(1, 2).transact.map(_.ids)
-      List(b1, b2, b3) <- B.i.insert(3, 4, 5).transact.map(_.ids)
-
-      // Insert joins
-      _ <- J.a.b.insert(
-        (a1, b1),
-        (a2, b2),
-        (a2, b3)
-      ).transact
-
-      // Nested via join
-      _ <- A.i.Js.*(J.B.i.a1).query.get.map(_ ==> List(
-        (1, List(3)),
-        (2, List(4, 5))
-      ))
-      _ <- B.i.a1.Js.*(J.A.i).query.get.map(_ ==> List(
-        (3, List(1)),
-        (4, List(2)),
-        (5, List(2))
-      ))
-
-      // Nested joined values
-      _ <- A.i.Bs.**(B.i.a1).query.get.map(_ ==> List(
-        (1, List(3)),
-        (2, List(4, 5))
-      ))
-      _ <- B.i.a1.As.**(A.i).query.get.map(_ ==> List(
-        (3, List(1)),
-        (4, List(2)),
-        (5, List(2))
-      ))
-    } yield ()
-  }
 
 
   //  "ids, ref" - refs {

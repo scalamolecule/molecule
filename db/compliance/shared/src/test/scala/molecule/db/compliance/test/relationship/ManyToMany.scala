@@ -43,6 +43,7 @@ case class ManyToMany(
     } yield ()
   }
 
+
   "Bridge to target values" - joinTable {
     import molecule.db.compliance.domains.dsl.JoinTable.*
     for {
@@ -83,6 +84,7 @@ case class ManyToMany(
     } yield ()
   }
 
+
   "Nested m2m values" - joinTable {
     import molecule.db.compliance.domains.dsl.JoinTable.*
     for {
@@ -117,6 +119,36 @@ case class ManyToMany(
         (3, List(1)),
         (4, List(2)),
         (5, List(2))
+      ))
+    } yield ()
+  }
+
+
+  "Correct level sorts" - joinTable {
+    import molecule.db.compliance.domains.dsl.JoinTable.*
+    for {
+      List(a1, a2) <- A.i.insert(1, 2).transact.map(_.ids)
+      List(e1, e2, e3, e4) <- B.i.insert(1, 2, 3, 4).transact.map(_.ids)
+
+      _ <- J.a.i.b.insert(
+        (a1, 2, e3),
+        (a1, 1, e4),
+        (a2, 2, e1),
+        (a2, 1, e2),
+      ).transact
+
+      _ <- A.i.Js.*(J.i.B.i.a1).query.get.map(_ ==> List(
+        (1, List(
+          (2, 3),
+          (1, 4))),
+        (2, List(
+          (2, 1),
+          (1, 2)))
+      ))
+
+      _ <- A.i.Bs.**(B.i.a1).query.get.map(_ ==> List(
+        (1, List(3, 4)),
+        (2, List(1, 2))
       ))
     } yield ()
   }

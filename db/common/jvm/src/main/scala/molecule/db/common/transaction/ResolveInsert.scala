@@ -56,6 +56,9 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
               val tableInsert1 = tableInsert.add(a, attrMapOptSetter(a, paramIndex, tplIndex), cast)
               resolve(tail, paramIndex + 1, tplIndex + 1, partitions, tableInsert1)
 
+            case a: AttrOneTacID =>
+              resolve(tail, paramIndex, tplIndex, partitions, tableInsert)
+
             case a => noTacit(a)
           }
 

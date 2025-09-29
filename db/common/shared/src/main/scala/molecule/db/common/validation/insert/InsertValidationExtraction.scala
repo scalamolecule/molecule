@@ -37,6 +37,10 @@ trait InsertValidationExtraction
               case a: AttrOneOpt => getValidators(metaDb, tail, validators :+
                 resolveAttrOneOpt(a, tplIndex), tplIndex + 1, prevRefs)
 
+              case a: AttrOneTacID =>
+                // Let pass through
+                getValidators(metaDb, tail, validators, tplIndex, prevRefs)
+
               case a => noEmpty(a)
             }
 

@@ -96,7 +96,7 @@ trait SpiBaseJVM_sync
     tryInspect("query", dataModel) {
       val elementsClean = keywordsSuffixed(dataModel.elements, proxy)
       val query         = getModel2SqlQuery(elementsClean)
-        .getSqlQuery(Nil, optLimit, optOffset, Some(proxy))
+        .getSqlQuery(Nil, optLimit, optOffset, Some(proxy)).init // skip last ; when inspecting
       renderInspection(label, dataModel, query)
     }
   }

@@ -186,16 +186,4 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     castStrategy = castStrategy.nest
     resolve(nestedElements)
   }
-
-  private def addJoins(
-    ent: String, entExt: String, refAttr: String, ref: String, joinType: String
-  ): Unit = {
-    val (refAs, refExt) = getOptExt().fold(("", ""))(ext => (ref + ext, ext))
-    val joinTable       = ss(ent, refAttr, ref)
-    val (id1, id2)      = if (ent == ref) ("1_id", "2_id") else ("id", "id")
-    val eid1            = ss(ent, id1)
-    val ref_id2         = ss(ref, id2)
-    joins += ((s"$joinType JOIN", joinTable, "", List(s"$ent$entExt.id = $joinTable.$eid1")))
-    joins += ((s"$joinType JOIN", ref, refAs, List(s"$joinTable.$ref_id2 = $ref$refExt.id")))
-  }
 }

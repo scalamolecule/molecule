@@ -76,10 +76,8 @@ trait Model2Query extends QueryExpr with ModelUtils {
       case backRef: BackRef                     => queryBackRef(backRef, tail); resolve(tail)
       case OptRef(ref, refElements)             => queryOptRef(ref, refElements); resolve(tail)
       case OptEntity(refElements)               => queryOptEntity(refElements); resolve(tail)
-      case Nested(ref, nestedElements)          =>
-        queryNested(ref, nestedElements); resolve(tail)
-      case OptNested(nestedRef, nestedElements) =>
-        queryOptNested(nestedRef, nestedElements); resolve(tail)
+      case Nested(ref, nestedElements)          => queryNested(ref, nestedElements); resolve(tail)
+      case OptNested(nestedRef, nestedElements) => queryOptNested(nestedRef, nestedElements); resolve(tail)
     }
     case Nil             => ()
   }
@@ -225,6 +223,8 @@ trait Model2Query extends QueryExpr with ModelUtils {
     sortsPerLevel.foreach {
       case (_, Nil)         => ()
       case (level, indexes) => indexes.sorted match {
+        // Index 6s are for entity ids on each nested level.
+        // Is always last on each level to allow user sort indexes to sort first.
         case Nil                    =>
         case List(1)                =>
         case List(6)                =>

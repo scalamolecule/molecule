@@ -17,7 +17,7 @@ trait ResolveSave { self: SqlSave =>
     elements match {
       case element :: tail => element match {
         case a: Attr =>
-          if (a.op != Eq) {
+          if (a.op != Eq && !a.isInstanceOf[AttrOneTacID]) {
             throw ModelError(s"Missing applied value for attribute ${a.ent}.${a.attr}")
           }
           a match {

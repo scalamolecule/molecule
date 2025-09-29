@@ -11,15 +11,16 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |import java.net.URI
        |import java.time.*
        |import java.util.{Date, UUID}
-       |import molecule.core.error.ModelError
+       |import scala.annotation.tailrec
        |import molecule.core.dataModel.*
        |import molecule.core.dataModel.Keywords.*
+       |import molecule.core.error.ModelError
        |import molecule.db.common.api.Molecule
-       |import scala.annotation.tailrec
+       |import molecule.db.common.util.ModelUtils
        |
        |object ModelTransformations_ extends ModelTransformations_
        |
-       |trait ModelTransformations_ {
+       |trait ModelTransformations_ extends ModelUtils {
        |
        |  private def unexpected(element: Element) = throw ModelError("Unexpected element: " + element)
        |
@@ -38,11 +39,32 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |    )
        |  }
        |
+       |  private def getSortedTacitId(ns: String) = {
+       |    // Add sorting by entity id out of range from up to 5 custom sorts
+       |    AttrOneTacID(ns, "id", V, Seq(), None, None, Nil, Nil, None, Some("a6"), false, List(0, 0))
+       |  }
+       |
        |  def addNested(self: Molecule, nestedMolecule: Molecule): DataModel = {
        |    val dataModel       = self.dataModel
        |    val nestedDataModel = nestedMolecule.dataModel
+       |    val ns              = getInitialEntity(dataModel.elements.reverse)
+       |    val initialElements = dataModel.elements.init :+ getSortedTacitId(ns)
        |    DataModel(
-       |      dataModel.elements.init :+ Nested(dataModel.elements.last.asInstanceOf[Ref], nestedDataModel.elements),
+       |      initialElements :+ Nested(dataModel.elements.last.asInstanceOf[Ref], nestedDataModel.elements),
+       |      dataModel.attrIndexes ++ nestedDataModel.attrIndexes,
+       |      binds = dataModel.binds + nestedDataModel.binds
+       |    )
+       |  }
+       |
+       |  def addNestedJoin(self: Molecule, nestedMolecule: Molecule): DataModel = {
+       |    val dataModel       = self.dataModel
+       |    val nestedDataModel = nestedMolecule.dataModel
+       |    val ent2join        = dataModel.elements.init.last
+       |    val join2ref        = dataModel.elements.last
+       |    val ns              = getInitialEntity(dataModel.elements.dropRight(2).reverse)
+       |    val initialElements = dataModel.elements.dropRight(2) :+ getSortedTacitId(ns)
+       |    DataModel(
+       |      initialElements :+ Nested(ent2join.asInstanceOf[Ref], join2ref :: nestedDataModel.elements),
        |      dataModel.attrIndexes ++ nestedDataModel.attrIndexes,
        |      binds = dataModel.binds + nestedDataModel.binds
        |    )
@@ -53,6 +75,18 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |    val nestedDataModel = nestedMolecule.dataModel
        |    DataModel(
        |      dataModel.elements.init :+ OptNested(dataModel.elements.last.asInstanceOf[Ref], nestedDataModel.elements),
+       |      dataModel.attrIndexes ++ nestedDataModel.attrIndexes,
+       |      binds = dataModel.binds + nestedDataModel.binds
+       |    )
+       |  }
+       |
+       |  def addOptNestedJoin(self: Molecule, nestedMolecule: Molecule): DataModel = {
+       |    val dataModel       = self.dataModel
+       |    val nestedDataModel = nestedMolecule.dataModel
+       |    val ent2join        = dataModel.elements.init.last
+       |    val join2ref        = dataModel.elements.last
+       |    DataModel(
+       |      dataModel.elements.dropRight(2) :+ OptNested(ent2join.asInstanceOf[Ref], join2ref :: nestedDataModel.elements),
        |      dataModel.attrIndexes ++ nestedDataModel.attrIndexes,
        |      binds = dataModel.binds + nestedDataModel.binds
        |    )
@@ -136,11 +170,11 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |  }
        |
        |  def addAggrOp[T](dataModel: DataModel, aggrOp: Op, aggrOpV: Option[T]): DataModel = {
-       |    val es   = dataModel.elements
-       |    val last = es.last match {
+       |    val es    = dataModel.elements
+       |    val last  = es.last match {
        |      case a: AttrOneMan =>
        |        val fn = a.op.asInstanceOf[Fn]
-       |         a match {
+       |        a match {
        |          case a: AttrOneManID             => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneLong(v.asInstanceOf[Long])))))
        |          case a: AttrOneManString         => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneString(v.asInstanceOf[String])))))
        |          case a: AttrOneManInt            => aggrOpV.fold(a.copy(op = fn.copy(op = Some(aggrOp)), binding = true))(v => a.copy(op = fn.copy(op = Some(aggrOp), v = Some(OneInt(v.asInstanceOf[Int])))))

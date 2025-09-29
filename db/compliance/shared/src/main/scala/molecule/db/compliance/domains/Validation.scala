@@ -12,7 +12,7 @@ object Validation extends DomainStructure {
   // Test various options
   trait Person {
     val name   = oneString
-    val `type` = oneString.alias("tpe").descr("Use attr name in SQL and alias in Scala code")
+    val `type` = oneString.alias("tpe").description("Use attr name in SQL and alias in Scala code")
 
     val favoriteColor = oneEnum[Color]("Choose from static enums - basically typed String representations")
   }
