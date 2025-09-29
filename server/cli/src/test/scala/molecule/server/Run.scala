@@ -9,11 +9,7 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.MoleculeRpc
-import molecule.db.compliance.domains.dsl.Refs.metadb.*
-import molecule.db.compliance.domains.dsl.Segments.metadb.*
-import molecule.db.compliance.domains.dsl.Types.metadb.*
-import molecule.db.compliance.domains.dsl.Uniques.metadb.*
-import molecule.db.compliance.domains.dsl.Validation.metadb.*
+import molecule.db.compliance.marshalling.PickleMetaDbs
 import molecule.db.h2.marshalling.Rpc_h2
 import molecule.db.mariadb.marshalling.Rpc_mariadb
 import molecule.db.mysql.marshalling.Rpc_mysql
@@ -45,6 +41,9 @@ import zio.{Runtime, Unsafe}
  */
 object Run extends App {
 
+  // Add concrete meta database definitions for boopickle
+  PickleMetaDbs(pickleMetaDb)
+
   println("\nPlease choose a database and a server backend to test the Molecule RPC API:\n")
 
   List("H2", "MariaDB", "MySQL", "PostgreSQL", "SQlite")
@@ -55,48 +54,12 @@ object Run extends App {
     @tailrec
     def chooseDb(): (MoleculeRpc, String) = {
       StdIn.readLine("Database: ").trim.toIntOption match {
-        case Some(1) =>
-          // Add concrete meta database definitions for boopickle to resolve on server side
-          pickleMetaDb.addConcreteType[Types_h2]
-          pickleMetaDb.addConcreteType[Refs_h2]
-          pickleMetaDb.addConcreteType[Uniques_h2]
-          pickleMetaDb.addConcreteType[Validation_h2]
-          pickleMetaDb.addConcreteType[Segments_h2]
-          (Rpc_h2, "H2")
-
-        case Some(2) =>
-          pickleMetaDb.addConcreteType[Types_mariadb]
-          pickleMetaDb.addConcreteType[Refs_mariadb]
-          pickleMetaDb.addConcreteType[Uniques_mariadb]
-          pickleMetaDb.addConcreteType[Validation_mariadb]
-          pickleMetaDb.addConcreteType[Segments_mariadb]
-          (Rpc_mariadb, "MariaDB")
-
-        case Some(3) =>
-          pickleMetaDb.addConcreteType[Types_mysql]
-          pickleMetaDb.addConcreteType[Refs_mysql]
-          pickleMetaDb.addConcreteType[Uniques_mysql]
-          pickleMetaDb.addConcreteType[Validation_mysql]
-          pickleMetaDb.addConcreteType[Segments_mysql]
-          (Rpc_mysql, "MySQL")
-
-        case Some(4) =>
-          pickleMetaDb.addConcreteType[Types_postgresql]
-          pickleMetaDb.addConcreteType[Refs_postgresql]
-          pickleMetaDb.addConcreteType[Uniques_postgresql]
-          pickleMetaDb.addConcreteType[Validation_postgresql]
-          pickleMetaDb.addConcreteType[Segments_postgresql]
-          (Rpc_postgresql, "PostgreSQL")
-
-        case Some(5) =>
-          pickleMetaDb.addConcreteType[Types_sqlite]
-          pickleMetaDb.addConcreteType[Refs_sqlite]
-          pickleMetaDb.addConcreteType[Uniques_sqlite]
-          pickleMetaDb.addConcreteType[Validation_sqlite]
-          pickleMetaDb.addConcreteType[Segments_sqlite]
-          (Rpc_sqlite, "SQlite")
-
-        case _ =>
+        case Some(1) => (Rpc_h2, "H2")
+        case Some(2) => (Rpc_mariadb, "MariaDB")
+        case Some(3) => (Rpc_mysql, "MySQL")
+        case Some(4) => (Rpc_postgresql, "PostgreSQL")
+        case Some(5) => (Rpc_sqlite, "SQlite")
+        case _       =>
           println("Please choose a valid number.")
           chooseDb()
       }

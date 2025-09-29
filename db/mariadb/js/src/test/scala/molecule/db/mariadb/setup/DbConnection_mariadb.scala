@@ -7,22 +7,13 @@ import molecule.db.common.facade.JdbcConn_JS
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.Conn
-import molecule.db.compliance.domains.dsl.JoinTable.metadb.JoinTable_mariadb
-import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_mariadb
-import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_mariadb
-import molecule.db.compliance.domains.dsl.Types.metadb.Types_mariadb
-import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_mariadb
-import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_mariadb
+import molecule.db.compliance.marshalling.PickleMetaDbs
 import zio.{ZIO, ZLayer}
 
-object DbConnection_mariadb {
+object DbConnection_mariadb  {
 
-  pickleMetaDb.addConcreteType[JoinTable_mariadb]
-  pickleMetaDb.addConcreteType[Types_mariadb]
-  pickleMetaDb.addConcreteType[Refs_mariadb]
-  pickleMetaDb.addConcreteType[Uniques_mariadb]
-  pickleMetaDb.addConcreteType[Validation_mariadb]
-  pickleMetaDb.addConcreteType[Segments_mariadb]
+  // Add concrete meta database definitions for boopickle
+  PickleMetaDbs(pickleMetaDb)
 
   def run(test: Conn ?=> Any, metaDb: MetaDb_mariadb): Any = {
     // Since RPC calls run in parallel we need a new connection for

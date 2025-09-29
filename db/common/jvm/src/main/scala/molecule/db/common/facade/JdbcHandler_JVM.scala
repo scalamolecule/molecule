@@ -10,7 +10,7 @@ object JdbcHandler_JVM extends SchemaLoader {
 
   // For docker test containers
   def updateDb(conn: JdbcConn_JVM): JdbcConn_JVM = blocking {
-    val stmt   = conn.sqlConn.createStatement
+    val stmt = conn.sqlConn.createStatement
     stmt.executeUpdate(getSqlInit(conn.proxy))
     stmt.close()
     conn

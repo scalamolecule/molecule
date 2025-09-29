@@ -734,9 +734,9 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleFileNotFoundException: CompositePickler[FileNotFoundException] =
     compositePickler[FileNotFoundException]
 
-  implicit val pickleMetaDb         : CompositePickler[MetaDb]          = compositePickler[MetaDb]
-  implicit val pickleMetaDb_h2      : CompositePickler[MetaDb_h2]       = compositePickler[MetaDb_h2]
-  implicit val pickleMetaDb_mariadb : CompositePickler[MetaDb_mariadb]  = compositePickler[MetaDb_mariadb]
+  implicit val pickleMetaDb         : CompositePickler[MetaDb]            = compositePickler[MetaDb]
+  implicit val pickleMetaDb_h2      : CompositePickler[MetaDb_h2]         = compositePickler[MetaDb_h2]
+  implicit val pickleMetaDb_mariadb : CompositePickler[MetaDb_mariadb]    = compositePickler[MetaDb_mariadb]
   implicit val pickleMetaDb_mysql   : CompositePickler[MetaDb_mysql]      = compositePickler[MetaDb_mysql]
   implicit val pickleMetaDb_postgres: CompositePickler[MetaDb_postgresql] = compositePickler[MetaDb_postgresql]
   implicit val pickleMetaDb_sqlite  : CompositePickler[MetaDb_sqlite]     = compositePickler[MetaDb_sqlite]

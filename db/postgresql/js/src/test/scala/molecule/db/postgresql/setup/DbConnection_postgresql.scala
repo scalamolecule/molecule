@@ -7,22 +7,13 @@ import molecule.db.common.facade.JdbcConn_JS
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.Conn
-import molecule.db.compliance.domains.dsl.JoinTable.metadb.JoinTable_postgresql
-import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_postgresql
-import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_postgresql
-import molecule.db.compliance.domains.dsl.Types.metadb.Types_postgresql
-import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_postgresql
-import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_postgresql
+import molecule.db.compliance.marshalling.PickleMetaDbs
 import zio.{ZIO, ZLayer}
 
-object DbConnection_postgresql {
+object DbConnection_postgresql  {
 
-  pickleMetaDb.addConcreteType[JoinTable_postgresql]
-  pickleMetaDb.addConcreteType[Types_postgresql]
-  pickleMetaDb.addConcreteType[Refs_postgresql]
-  pickleMetaDb.addConcreteType[Uniques_postgresql]
-  pickleMetaDb.addConcreteType[Validation_postgresql]
-  pickleMetaDb.addConcreteType[Segments_postgresql]
+  // Add concrete meta database definitions for boopickle
+  PickleMetaDbs(pickleMetaDb)
 
   def getConnection(metaDb: MetaDb_postgresql): JdbcConn_JS = {
     // Since RPC calls run in parallel we need a new connection for

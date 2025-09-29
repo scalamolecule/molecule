@@ -72,7 +72,7 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
             |)
             |
             |INSERT INTO Entity (
-            |  string_,
+            |  string,
             |  int_
             |) VALUES (?, ?)
             |----------------------------------------
@@ -122,7 +122,7 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
             |)
             |
             |INSERT INTO Entity (
-            |  string_,
+            |  string,
             |  int_
             |) VALUES (?, ?)
             |
@@ -176,10 +176,19 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
             |  Set(10), 0, 0, Nil
             |)
             |
-            |INSERT INTO Entity (
-            |  string_,
-            |  int_
-            |) VALUES (?, ?)
+            |Ids query:
+            |SELECT DISTINCT
+            |  Entity.id
+            |FROM Entity
+            |WHERE
+            |  Entity.id     IS NOT NULL AND
+            |  Entity.id     = 1 AND
+            |  Entity.string IS NOT NULL
+            |
+            |
+            |UPDATE Entity SET
+            |  string = ?
+            |WHERE id IN (42, 43)
             |----------------------------------------
             |""".stripMargin
         } else {

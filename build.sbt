@@ -264,11 +264,14 @@ lazy val server = project
     ),
   )
   .dependsOn(
+
     dbH2.jvm,
     dbMySQL.jvm,
     dbMariaDB.jvm,
     dbPostgreSQL.jvm,
     dbSQlite.jvm,
+
+    dbCompliance.jvm % "test->test",
 
     serverHttp4s % "test->test",
     serverNetty % "test->test",

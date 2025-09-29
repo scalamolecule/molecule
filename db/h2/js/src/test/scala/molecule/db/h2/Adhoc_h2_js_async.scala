@@ -13,24 +13,17 @@ class Adhoc_h2_js_async extends MUnit with DbProviders_h2 with TestUtils {
   "types" - types {
     import molecule.db.compliance.domains.dsl.Types.*
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
-    val a = (1, Some(true))
-    val b = (2, Some(false))
-    val x = (3, Option.empty[Boolean])
     for {
-      _ <- Entity.i.boolean_?.insert(List(a, b, x)).transact
 
-      // Find all optional attribute values
-      _ <- Entity.i.a1.boolean_?.query.get.map(_ ==> List(a, b, x))
+//      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+//      _ <- Entity.int(3).save.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+//      _ <- Entity(a).int(10).update.transact
+//      _ <- Entity(b).delete.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
-      // Find optional values matching
-      _ <- Entity.i.a1.boolean_?(Some(true)).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.boolean_?(Some(false)).query.get.map(_ ==> List(b))
-
-      // None matches non-asserted/null values
-      _ <- Entity.i.a1.boolean_?(Option.empty[Boolean]).query.get.map(_ ==> List(x))
-      // Easier to apply nothing to tacit attribute
-      _ <- Entity.i.a1.boolean_().query.get.map(_ ==> List(3))
-
+      _ <- Entity.int(3).save.transact
+//      _ <- Entity.int.a1.query.get.map(_ ==> List(3))
     } yield ()
   }
 

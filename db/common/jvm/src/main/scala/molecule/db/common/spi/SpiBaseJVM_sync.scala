@@ -159,7 +159,6 @@ trait SpiBaseJVM_sync
 
     val txReport = conn.atomicTransaction { () =>
       sortTableInserts(tableInserts).foreach { tableInsert =>
-        //        println(tableInsert)
         val ps         = conn.sqlConn.prepareStatement(tableInsert.sql, Statement.RETURN_GENERATED_KEYS)
         val dummyTuple = EmptyTuple
 

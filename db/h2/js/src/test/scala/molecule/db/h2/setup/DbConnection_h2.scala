@@ -7,23 +7,14 @@ import molecule.db.common.facade.JdbcConn_JS
 import molecule.db.common.marshalling.Boopicklers.*
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.Conn
-import molecule.db.compliance.domains.dsl.JoinTable.metadb.JoinTable_mariadb
-import molecule.db.compliance.domains.dsl.Refs.metadb.Refs_h2
-import molecule.db.compliance.domains.dsl.Segments.metadb.Segments_h2
-import molecule.db.compliance.domains.dsl.Types.metadb.Types_h2
-import molecule.db.compliance.domains.dsl.Uniques.metadb.Uniques_h2
-import molecule.db.compliance.domains.dsl.Validation.metadb.Validation_h2
+import molecule.db.compliance.marshalling.PickleMetaDbs
 import molecule.db.compliance.setup.DbConnection
 import zio.{ZIO, ZLayer}
 
 trait DbConnection_h2 extends DbConnection {
 
-  pickleMetaDb.addConcreteType[JoinTable_mariadb]
-  pickleMetaDb.addConcreteType[Types_h2]
-  pickleMetaDb.addConcreteType[Refs_h2]
-  pickleMetaDb.addConcreteType[Uniques_h2]
-  pickleMetaDb.addConcreteType[Validation_h2]
-  pickleMetaDb.addConcreteType[Segments_h2]
+  // Add concrete meta database definitions for boopickle
+  PickleMetaDbs(pickleMetaDb)
 
   def run(test: Conn ?=> Any, metaDb: MetaDb_h2): Any = {
     val url   = s"jdbc:h2:mem:test" + Random.nextInt().abs
