@@ -87,7 +87,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
         case (join, table, as, predicates) =>
           val as_         = if (as.isEmpty) "" else " " + as
           val predicates_ = if (predicates.isEmpty) "" else
-            predicates.mkString(s" ON\n$indent  ", s" AND\n$indent  ", "")
+            predicates.mkString(s" ON ", s" AND ", "")
           s"$join $table$as_$predicates_"
       }.mkString(s"\n$indent", s"\n$indent", "")
     }

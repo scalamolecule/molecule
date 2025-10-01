@@ -212,14 +212,11 @@ Prints:
 ```
 SAVE:
 DataModel(...)
-Save(
-  Entity(
-    INSERT INTO Person (
-      name,
-      age
-    ) VALUES (?, ?)
-  )
-)
+
+INSERT INTO Person (
+  name,
+  age
+) VALUES (?, ?)
 ```
 
 Query inspection:
@@ -231,6 +228,7 @@ Prints:
 ```
 QUERY:
 DataModel(...)
+
 SELECT DISTINCT
   Person.name,
   Person.age
@@ -291,7 +289,7 @@ sbt.version = 1.11.6
 
 `project/plugins.sbt`:
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.21.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.21.1")
 ```
 
 `build.sbt`:

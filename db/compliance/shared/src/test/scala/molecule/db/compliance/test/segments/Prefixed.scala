@@ -18,14 +18,14 @@ case class Prefixed(
 
   "Nested 2 levels" - segments {
     for {
-      _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)
+      _ <- lit_Book.title.gen_Reviewers.name.gen_Professions.*(gen_Profession.name)
         .insert(("book", "Jan", List("Musician"))).transact
 
-      _ <- lit_Book.title.Reviewers.name.Professions.*(gen_Profession.name)
+      _ <- lit_Book.title.gen_Reviewers.name.gen_Professions.*(gen_Profession.name)
         .query.get.map(_ ==> List(("book", "Jan", List("Musician"))))
 
       // Same as
-      _ <- lit_Book.title.Reviewers.Professions.*(gen_Profession.name)
+      _ <- lit_Book.title.gen_Reviewers.gen_Professions.*(gen_Profession.name)
         .query.get.map(_ ==> List(("book", List("Musician"))))
     } yield ()
   }
@@ -42,13 +42,13 @@ case class Prefixed(
 
   "Adjacent" - segments {
     for {
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.name
         .insert(("book", "John", "Marc")).transact
 
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.name
         .query.get.map(_ ==> List(("book", "John", "Marc")))
 
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(gen_Person.name)
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.*(gen_Person.name)
         .query.get.map(_ ==> List(("book", "John", List("Marc"))))
     } yield ()
   }
@@ -56,13 +56,13 @@ case class Prefixed(
 
   "Nested" - segments {
     for {
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(gen_Person.name)
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.*(gen_Person.name)
         .insert(("book", "John", List("Marc"))).transact
 
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.name
         .query.get.map(_ ==> List(("book", "John", "Marc")))
 
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(gen_Person.name)
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.*(gen_Person.name)
         .query.get.map(_ ==> List(("book", "John", List("Marc"))))
     } yield ()
   }
@@ -70,14 +70,14 @@ case class Prefixed(
 
   "Nested + adjacent" - segments {
     for {
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(
-        gen_Person.name.Professions.name
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.*(
+        gen_Person.name.gen_Professions.name
       ).insert(("book", "John", List(("Marc", "Musician")))).transact
 
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name.Professions.name
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.name.gen_Professions.name
         .query.get.map(_ ==> List(("book", "John", "Marc", "Musician")))
 
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(gen_Person.name.Professions.name)
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.*(gen_Person.name.gen_Professions.name)
         .query.get.map(_ ==> List(("book", "John", List(("Marc", "Musician")))))
     } yield ()
   }
@@ -85,16 +85,16 @@ case class Prefixed(
 
   "Nested + nested" - segments {
     for {
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(
-          gen_Person.name.Professions.*(
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.*(
+          gen_Person.name.gen_Professions.*(
             gen_Profession.name))
         .insert(("book", "John", List(("Marc", List("Musician"))))).transact
 
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.name.Professions.name
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.name.gen_Professions.name
         .query.get.map(_ ==> List(("book", "John", "Marc", "Musician")))
 
-      _ <- lit_Book.title.Author.name._lit_Book.Reviewers.*(
-          gen_Person.name.Professions.*(
+      _ <- lit_Book.title.Author.name._lit_Book.gen_Reviewers.*(
+          gen_Person.name.gen_Professions.*(
             gen_Profession.name))
         .query.get.map(_ ==> List(("book", "John", List(("Marc", List("Musician"))))))
     } yield ()
