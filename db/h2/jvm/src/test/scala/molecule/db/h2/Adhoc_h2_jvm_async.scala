@@ -9,6 +9,7 @@ import molecule.db.h2.setup.DbProviders_h2
 import org.scalactic.Equality
 import molecule.core.dataModel.*
 import scala.Tuple.:*
+import molecule.db.compliance.domains.dsl.Refs.{A, B, D}
 
 
 class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
@@ -17,80 +18,37 @@ class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
     import molecule.db.compliance.domains.dsl.Types.*
     given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
-//      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-//      _ <- Entity.int(3).save.transact
-//      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-//      _ <- Entity(a).int(10).update.transact
-//      _ <- Entity(b).delete.transact
-//      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+      //        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      //        _ <- Entity.int(3).save.transact
+      //        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      //        _ <- Entity(a).int(10).update.transact
+      //        _ <- Entity(b).delete.transact
+      //        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
+      //        _ <- Entity.i.a1.B.?(B.s.i.C.s.i).D.?(D.s.i).query.i.get
+      //
+      //        _ <- Entity.?(Entity.i_).B.s.a1.query.get.map(_ ==> List(
+      //          (None, "a"),
+      //        ))
 
-
-      _ <- Entity.i.int.insert(
-        (-4, -int4),
-        (-3, -int3),
-        (-2, -int2),
-        (-1, -int1),
-        (0, int0),
-        (1, int1),
-        (2, int2),
-        (3, int3),
-        (4, int4),
-      ).transact
-
-      // Mandatory
-
-      _ <- Entity.int.%(int2, int0).query.get.map(_ ==> List(-int4, -int2, int0, int2, int4))
-      _ <- Entity.int.%(int2, int1).query.get.map(_ ==> List(-int3, -int1, int1, int3))
-
-      _ <- Entity.int.%(int3, int0).query.get.map(_ ==> List(-int3, int0, int3))
-      _ <- Entity.int.%(int3, int1).query.get.map(_ ==> List(-int4, -int1, int1, int4))
-      _ <- Entity.int.%(int3, int2).query.get.map(_ ==> List(-int2, int2))
-
-      // Tacit
-
-      _ <- Entity.i.int_.%(int2, int0).query.get.map(_ ==> List(-4, -2, 0, 2, 4))
-      _ <- Entity.i.int_.%(int2, int1).query.get.map(_ ==> List(-3, -1, 1, 3))
-
-      _ <- Entity.i.int_.%(int3, int0).query.get.map(_ ==> List(-3, 0, 3))
-      _ <- Entity.i.int_.%(int3, int1).query.get.map(_ ==> List(-4, -1, 1, 4))
-      _ <- Entity.i.int_.%(int3, int2).query.get.map(_ ==> List(-2, 2))
-
+      _ <- Entity.i.Ref.i._Entity.Other.i.query.i.get
+      _ <- Entity.?(Entity.i).Ref.i.Entity.i.query.i.get
 
     } yield ()
   }
 
 
-  //  "refs" - refs {
-  //    import molecule.db.compliance.domains.dsl.Refs.*
-  //    for {
-  ////      _ <- A.s.Bb.*(B.i).insert(
-  ////        ("a", List(1, 2)),
-  ////        ("a", List(3, 4)),
-  ////      ).transact
-  ////
-  ////      // Mandatory nested data
-  //////      _ <- A.s.Bb.i.query.get.map(_ ==> List(
-  //////        ("a", 1),
-  //////        ("a", 2),
-  //////        ("b", 3),
-  //////        ("b", 4),
-  //////      ))
-  ////
-  //////      _ <- A.s.Bb.*(B.i.a1).query.i.get.map(_ ==> List(
-  //////      _ <- A.s.Bb.*(B.i.a1).query.i.get.map(_ ==> List(
-  //////      _ <- A.s.d1.Bb.*(B.i.a1).query.i.get.map(_ ==> List(
-  ////      _ <- A.s.Bb.*(B.i.a1).query.i.get.map(_ ==> List(
-  ////        ("a", List(1, 2)),
-  ////        ("a", List(3, 4)),
-  ////      ))
-  //
-  //      _ <- A.i.Bb.*(B.i.a1).query.i.get.map(_ ==> 42)
-  //      _ <- A.i.Bb.*(B.i.C.i.a1).query.i.get.map(_ ==> 42)
-  //
-  //
-  //    } yield ()
-  //  }
+//  "refs" - refs {
+//    import molecule.db.compliance.domains.dsl.Refs.*
+//    for {
+//      _ <- A.s.Bb.*(B.i).insert(
+//        ("a", List(1, 2)),
+//        ("a", List(3, 4)),
+//      ).transact
+//
+//
+//    } yield ()
+//  }
 
 
   //  "ids, ref" - refs {
