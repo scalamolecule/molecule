@@ -278,6 +278,9 @@ abstract class DomainStructure {
   // User-defined roles need to extend this
   trait Role
 
+  // Entity-level authentication requirement
+  trait Authenticated
+
   sealed trait Constraint
   object Constraint {
     case object AuthenticatedOnly extends Constraint

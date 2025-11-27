@@ -45,12 +45,12 @@ object SocialApp extends DomainStructure {
     // === Role + Action Combinations (all 4 variations) ===
     val views1 = oneLong.allowRoleActions[StandardUser, update]                       // Single role, single action
     val views2 = oneLong.allowRoleActions[StandardUser, (update, delete)]             // Single role, multiple actions
-    val views3 = oneLong.allowRoleActions[(Guest, StandardUser), update]          // Multiple roles, single action
-    val views4 = oneLong.allowRoleActions[(Guest, StandardUser), (update, delete)] // Multiple roles, multiple actions
+    val views3 = oneLong.allowRoleActions[(Guest, StandardUser), update]              // Multiple roles, single action
+    val views4 = oneLong.allowRoleActions[(Guest, StandardUser), (update, delete)]    // Multiple roles, multiple actions
 
     // === Composite Actions with Roles ===
-    val readableByUser  = oneString.allowRoleActions[StandardUser, read]
-    val writableByMod   = oneString.allowRoleActions[Moderator, write]
+    val readableByUser   = oneString.allowRoleActions[StandardUser, read]
+    val writableByMod    = oneString.allowRoleActions[Moderator, write]
     val allAccessByAdmin = oneString.allowRoleActions[Admin, all]
 
     // === Chained allowRoleActions (permission matrix) ===
@@ -58,15 +58,6 @@ object SocialApp extends DomainStructure {
       .allowRoleActions[StandardUser, insertMany]
       .allowRoleActions[Moderator, (save, update, insertMany)]
       .allowRoleActions[(Guest, Moderator), (subscribe, delete)]
-
-
-    // === Authentication ===
-
-    // Pure authentication (no other constraints)
-    val authenticatedOnly = oneString.authenticated
-
-    // Authentication mixed with other constraints
-    val authenticatedEmail = oneString.email.authenticated
 
 
     // === Conditional Authorization (authorizeIf) ===
@@ -81,10 +72,9 @@ object SocialApp extends DomainStructure {
     // Multiple authorizeIf (chained)
     val content1 = oneString
       .allowRoles[StandardUser]                       // Role constraint
-      .authorizeIf(age.validate(_ >= 18))         // Age check
-      .authenticated                              // Auth constraint
-      .authorizeIf(verified.validate(_ == true))  // Verification check
-      .authorizeIf(publishDate.validate(_ > 42))  // Publish check
+      .authorizeIf(age.validate(_ >= 18))             // Age check
+      .authorizeIf(verified.validate(_ == true))      // Verification check
+      .authorizeIf(publishDate.validate(_ > 42))      // Publish check
 
     // Multiple authorizeIf (varargs - same as chained)
     val content2 = oneString
@@ -118,20 +108,36 @@ object SocialApp extends DomainStructure {
   // Entity extending Role (demonstrates entity can be a role)
   trait User extends StandardUser {
     val name  = oneString
-    val email = oneString.email.authenticated
+    val email = oneString.email
   }
 
 
-  // Entity with no authorization constraints (baseline/public)
+  // Entity extending Authenticated (all fields require any authenticated user)
+  trait UserProfile extends Authenticated {
+    val bio         = oneString  // Any authenticated user
+    val location    = oneString  // Any authenticated user
+    val website     = oneString  // Any authenticated user
+    val phoneNumber = oneString.allowRoles[Admin]  // Override: only Admin
+  }
+
+
+  // Public entity (no role extension = public by default, like GraphQL)
   trait PublicData {
-    val info        = oneString  // No constraints = accessible to all
-    val description = oneString
+    val info        = oneString  // Public (no role required)
+    val description = oneString  // Public
+    val preview     = oneString  // Public
+
+    // Require login but accept any authenticated user (regardless of role)
+    val fullArticle = oneString.authenticated  // Any logged-in user
+
+    // Or restrict to specific role(s)
+    val adminNotes  = oneString.allowRoles[Admin]  // Only Admin
   }
 
 
-  // Entity with no default roles (explicit deny by default)
-  trait AdminPanel {
-    val revenue   = oneDouble.allowRoles[Admin]
-    val userCount = oneLong.allowRoles[(Admin, Moderator)]
+  // Private entity (use role extension to restrict access)
+  trait AdminPanel extends Admin {
+    val revenue   = oneDouble  // Only Admin can access (entity default)
+    val userCount = oneLong.allowRoles[(Admin, Moderator)]  // Expand to Admin OR Moderator
   }
 }
