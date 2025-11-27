@@ -46,11 +46,6 @@ trait SpiBaseJVM_sync
       .getListFromOffset_sync(using conn)._1
   }
 
-  override def query_inspect[Tpl](q: Query[Tpl])(using conn: Conn): String = {
-    inspectQuery("QUERY", q.dataModel, q.optLimit, None, conn.proxy)
-  }
-
-
   override def queryOffset_get[Tpl](query: QueryOffset[Tpl])
                                    (using conn0: Conn): (List[Tpl], Int, Boolean) = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
@@ -62,10 +57,6 @@ trait SpiBaseJVM_sync
     m2q.bindValues.addAll(query.bindValues)
     SqlQueryResolveOffset[Tpl](queryClean.dataModel, queryClean.optLimit, Some(queryClean.offset), m2q)
       .getListFromOffset_sync(using conn)
-  }
-
-  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(using conn: Conn): String = {
-    inspectQuery("QUERY (offset)", q.dataModel, q.optLimit, Some(q.offset), conn.proxy)
   }
 
   override def queryCursor_get[Tpl](query: QueryCursor[Tpl])
@@ -81,11 +72,16 @@ trait SpiBaseJVM_sync
       .getListFromCursor_sync(using conn)
   }
 
+
+  override def query_inspect[Tpl](q: Query[Tpl])(using conn: Conn): String = {
+    inspectQuery("QUERY", q.dataModel, q.optLimit, None, conn.proxy)
+  }
+  override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(using conn: Conn): String = {
+    inspectQuery("QUERY (offset)", q.dataModel, q.optLimit, Some(q.offset), conn.proxy)
+  }
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])(using conn: Conn): String = {
     inspectQuery("QUERY (cursor)", q.dataModel, q.optLimit, None, conn.proxy)
   }
-
-
   protected def inspectQuery(
     label: String,
     dataModel: DataModel,

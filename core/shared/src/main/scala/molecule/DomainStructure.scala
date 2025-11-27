@@ -86,27 +86,27 @@ abstract class DomainStructure {
   object oneChar extends oneChar
 
   trait oneString extends stringOptions[oneString, String] with Validations[oneString, String]
-  trait oneInt extends Options[oneInt, Int, Int] with Validations[oneInt, Int]
-  trait oneLong extends Options[oneLong, Long, Long] with Validations[oneLong, Long]
-  trait oneFloat extends Options[oneFloat, Float, Float] with Validations[oneFloat, Float]
-  trait oneDouble extends Options[oneDouble, Double, Double] with Validations[oneDouble, Double]
-  trait oneBoolean extends Options[oneBoolean, Boolean, Boolean] with Validations[oneBoolean, Boolean]
-  trait oneBigInt extends Options[oneBigInt, BigInt, BigInt] with Validations[oneBigInt, BigInt]
-  trait oneBigDecimal extends Options[oneBigDecimal, BigDecimal, BigDecimal] with Validations[oneBigDecimal, BigDecimal]
-  trait oneDate extends Options[oneDate, Date, Date] with Validations[oneDate, Date]
-  trait oneDuration extends Options[oneDuration, Duration, Duration] with Validations[oneDuration, Duration]
-  trait oneInstant extends Options[oneInstant, Instant, Instant] with Validations[oneInstant, Instant]
-  trait oneLocalDate extends Options[oneLocalDate, LocalDate, LocalDate] with Validations[oneLocalDate, LocalDate]
-  trait oneLocalTime extends Options[oneLocalTime, LocalTime, LocalTime] with Validations[oneLocalTime, LocalTime]
-  trait oneLocalDateTime extends Options[oneLocalDateTime, LocalDateTime, LocalDateTime] with Validations[oneLocalDateTime, LocalDateTime]
-  trait oneOffsetTime extends Options[oneOffsetTime, OffsetTime, OffsetTime] with Validations[oneOffsetTime, OffsetTime]
-  trait oneOffsetDateTime extends Options[oneOffsetDateTime, OffsetDateTime, OffsetDateTime] with Validations[oneOffsetDateTime, OffsetDateTime]
-  trait oneZonedDateTime extends Options[oneZonedDateTime, ZonedDateTime, ZonedDateTime] with Validations[oneZonedDateTime, ZonedDateTime]
-  trait oneUUID extends Options[oneUUID, UUID, UUID] with Validations[oneUUID, UUID]
-  trait oneURI extends Options[oneURI, URI, URI] with Validations[oneURI, URI]
-  trait oneByte extends Options[oneByte, Byte, Byte] with Validations[oneByte, Byte]
-  trait oneShort extends Options[oneShort, Short, Short] with Validations[oneShort, Short]
-  trait oneChar extends Options[oneChar, Char, Char] with Validations[oneChar, Char]
+  trait oneInt extends AttrOptions[oneInt, Int, Int] with Validations[oneInt, Int]
+  trait oneLong extends AttrOptions[oneLong, Long, Long] with Validations[oneLong, Long]
+  trait oneFloat extends AttrOptions[oneFloat, Float, Float] with Validations[oneFloat, Float]
+  trait oneDouble extends AttrOptions[oneDouble, Double, Double] with Validations[oneDouble, Double]
+  trait oneBoolean extends AttrOptions[oneBoolean, Boolean, Boolean] with Validations[oneBoolean, Boolean]
+  trait oneBigInt extends AttrOptions[oneBigInt, BigInt, BigInt] with Validations[oneBigInt, BigInt]
+  trait oneBigDecimal extends AttrOptions[oneBigDecimal, BigDecimal, BigDecimal] with Validations[oneBigDecimal, BigDecimal]
+  trait oneDate extends AttrOptions[oneDate, Date, Date] with Validations[oneDate, Date]
+  trait oneDuration extends AttrOptions[oneDuration, Duration, Duration] with Validations[oneDuration, Duration]
+  trait oneInstant extends AttrOptions[oneInstant, Instant, Instant] with Validations[oneInstant, Instant]
+  trait oneLocalDate extends AttrOptions[oneLocalDate, LocalDate, LocalDate] with Validations[oneLocalDate, LocalDate]
+  trait oneLocalTime extends AttrOptions[oneLocalTime, LocalTime, LocalTime] with Validations[oneLocalTime, LocalTime]
+  trait oneLocalDateTime extends AttrOptions[oneLocalDateTime, LocalDateTime, LocalDateTime] with Validations[oneLocalDateTime, LocalDateTime]
+  trait oneOffsetTime extends AttrOptions[oneOffsetTime, OffsetTime, OffsetTime] with Validations[oneOffsetTime, OffsetTime]
+  trait oneOffsetDateTime extends AttrOptions[oneOffsetDateTime, OffsetDateTime, OffsetDateTime] with Validations[oneOffsetDateTime, OffsetDateTime]
+  trait oneZonedDateTime extends AttrOptions[oneZonedDateTime, ZonedDateTime, ZonedDateTime] with Validations[oneZonedDateTime, ZonedDateTime]
+  trait oneUUID extends AttrOptions[oneUUID, UUID, UUID] with Validations[oneUUID, UUID]
+  trait oneURI extends AttrOptions[oneURI, URI, URI] with Validations[oneURI, URI]
+  trait oneByte extends AttrOptions[oneByte, Byte, Byte] with Validations[oneByte, Byte]
+  trait oneShort extends AttrOptions[oneShort, Short, Short] with Validations[oneShort, Short]
+  trait oneChar extends AttrOptions[oneChar, Char, Char] with Validations[oneChar, Char]
 
 
   object setString extends setString
@@ -135,27 +135,27 @@ abstract class DomainStructure {
   object setChar extends setChar
 
   trait setString extends stringOptions[setString, Set[String]] with Validations[oneString, String]
-  trait setInt extends Options[setInt, Set[Int], Int] with Validations[oneInt, Int]
-  trait setLong extends Options[setLong, Set[Long], Long] with Validations[oneLong, Long]
-  trait setFloat extends Options[setFloat, Set[Float], Float] with Validations[oneFloat, Float]
-  trait setDouble extends Options[setDouble, Set[Double], Double] with Validations[oneDouble, Double]
-  trait setBoolean extends Options[setBoolean, Set[Boolean], Boolean] with Validations[oneBoolean, Boolean]
-  trait setBigInt extends Options[setBigInt, Set[BigInt], BigInt] with Validations[oneBigInt, BigInt]
-  trait setBigDecimal extends Options[setBigDecimal, Set[BigDecimal], BigDecimal] with Validations[oneBigDecimal, BigDecimal]
-  trait setDate extends Options[setDate, Set[Date], Date] with Validations[oneDate, Date]
-  trait setDuration extends Options[setDuration, Set[Duration], Duration] with Validations[oneDuration, Duration]
-  trait setInstant extends Options[setInstant, Set[Instant], Instant] with Validations[oneInstant, Instant]
-  trait setLocalDate extends Options[setLocalDate, Set[LocalDate], LocalDate] with Validations[oneLocalDate, LocalDate]
-  trait setLocalTime extends Options[setLocalTime, Set[LocalTime], LocalTime] with Validations[oneLocalTime, LocalTime]
-  trait setLocalDateTime extends Options[setLocalDateTime, Set[LocalDateTime], LocalDateTime] with Validations[oneLocalDateTime, LocalDateTime]
-  trait setOffsetTime extends Options[setOffsetTime, Set[OffsetTime], OffsetTime] with Validations[oneOffsetTime, OffsetTime]
-  trait setOffsetDateTime extends Options[setOffsetDateTime, Set[OffsetDateTime], OffsetDateTime] with Validations[oneOffsetDateTime, OffsetDateTime]
-  trait setZonedDateTime extends Options[setZonedDateTime, Set[ZonedDateTime], ZonedDateTime] with Validations[oneZonedDateTime, ZonedDateTime]
-  trait setUUID extends Options[setUUID, Set[UUID], UUID] with Validations[oneUUID, UUID]
-  trait setURI extends Options[setURI, Set[URI], URI] with Validations[oneURI, URI]
-  trait setByte extends Options[setByte, Set[Byte], Byte] with Validations[oneByte, Byte]
-  trait setShort extends Options[setShort, Set[Short], Short] with Validations[oneShort, Short]
-  trait setChar extends Options[setChar, Set[Char], Char] with Validations[oneChar, Char]
+  trait setInt extends AttrOptions[setInt, Set[Int], Int] with Validations[oneInt, Int]
+  trait setLong extends AttrOptions[setLong, Set[Long], Long] with Validations[oneLong, Long]
+  trait setFloat extends AttrOptions[setFloat, Set[Float], Float] with Validations[oneFloat, Float]
+  trait setDouble extends AttrOptions[setDouble, Set[Double], Double] with Validations[oneDouble, Double]
+  trait setBoolean extends AttrOptions[setBoolean, Set[Boolean], Boolean] with Validations[oneBoolean, Boolean]
+  trait setBigInt extends AttrOptions[setBigInt, Set[BigInt], BigInt] with Validations[oneBigInt, BigInt]
+  trait setBigDecimal extends AttrOptions[setBigDecimal, Set[BigDecimal], BigDecimal] with Validations[oneBigDecimal, BigDecimal]
+  trait setDate extends AttrOptions[setDate, Set[Date], Date] with Validations[oneDate, Date]
+  trait setDuration extends AttrOptions[setDuration, Set[Duration], Duration] with Validations[oneDuration, Duration]
+  trait setInstant extends AttrOptions[setInstant, Set[Instant], Instant] with Validations[oneInstant, Instant]
+  trait setLocalDate extends AttrOptions[setLocalDate, Set[LocalDate], LocalDate] with Validations[oneLocalDate, LocalDate]
+  trait setLocalTime extends AttrOptions[setLocalTime, Set[LocalTime], LocalTime] with Validations[oneLocalTime, LocalTime]
+  trait setLocalDateTime extends AttrOptions[setLocalDateTime, Set[LocalDateTime], LocalDateTime] with Validations[oneLocalDateTime, LocalDateTime]
+  trait setOffsetTime extends AttrOptions[setOffsetTime, Set[OffsetTime], OffsetTime] with Validations[oneOffsetTime, OffsetTime]
+  trait setOffsetDateTime extends AttrOptions[setOffsetDateTime, Set[OffsetDateTime], OffsetDateTime] with Validations[oneOffsetDateTime, OffsetDateTime]
+  trait setZonedDateTime extends AttrOptions[setZonedDateTime, Set[ZonedDateTime], ZonedDateTime] with Validations[oneZonedDateTime, ZonedDateTime]
+  trait setUUID extends AttrOptions[setUUID, Set[UUID], UUID] with Validations[oneUUID, UUID]
+  trait setURI extends AttrOptions[setURI, Set[URI], URI] with Validations[oneURI, URI]
+  trait setByte extends AttrOptions[setByte, Set[Byte], Byte] with Validations[oneByte, Byte]
+  trait setShort extends AttrOptions[setShort, Set[Short], Short] with Validations[oneShort, Short]
+  trait setChar extends AttrOptions[setChar, Set[Char], Char] with Validations[oneChar, Char]
 
 
   object seqString extends seqString
@@ -184,27 +184,27 @@ abstract class DomainStructure {
   object seqChar extends seqChar
 
   trait seqString extends stringOptions[seqString, Seq[String]] with Validations[oneString, String]
-  trait seqInt extends Options[seqInt, Seq[Int], Int] with Validations[oneInt, Int]
-  trait seqLong extends Options[seqLong, Seq[Long], Long] with Validations[oneLong, Long]
-  trait seqFloat extends Options[seqFloat, Seq[Float], Float] with Validations[oneFloat, Float]
-  trait seqDouble extends Options[seqDouble, Seq[Double], Double] with Validations[oneDouble, Double]
-  trait seqBoolean extends Options[seqBoolean, Seq[Boolean], Boolean] with Validations[oneBoolean, Boolean]
-  trait seqBigInt extends Options[seqBigInt, Seq[BigInt], BigInt] with Validations[oneBigInt, BigInt]
-  trait seqBigDecimal extends Options[seqBigDecimal, Seq[BigDecimal], BigDecimal] with Validations[oneBigDecimal, BigDecimal]
-  trait seqDate extends Options[seqDate, Seq[Date], Date] with Validations[oneDate, Date]
-  trait seqDuration extends Options[seqDuration, Seq[Duration], Duration] with Validations[oneDuration, Duration]
-  trait seqInstant extends Options[seqInstant, Seq[Instant], Instant] with Validations[oneInstant, Instant]
-  trait seqLocalDate extends Options[seqLocalDate, Seq[LocalDate], LocalDate] with Validations[oneLocalDate, LocalDate]
-  trait seqLocalTime extends Options[seqLocalTime, Seq[LocalTime], LocalTime] with Validations[oneLocalTime, LocalTime]
-  trait seqLocalDateTime extends Options[seqLocalDateTime, Seq[LocalDateTime], LocalDateTime] with Validations[oneLocalDateTime, LocalDateTime]
-  trait seqOffsetTime extends Options[seqOffsetTime, Seq[OffsetTime], OffsetTime] with Validations[oneOffsetTime, OffsetTime]
-  trait seqOffsetDateTime extends Options[seqOffsetDateTime, Seq[OffsetDateTime], OffsetDateTime] with Validations[oneOffsetDateTime, OffsetDateTime]
-  trait seqZonedDateTime extends Options[seqZonedDateTime, Seq[ZonedDateTime], ZonedDateTime] with Validations[oneZonedDateTime, ZonedDateTime]
-  trait seqUUID extends Options[seqUUID, Seq[UUID], UUID] with Validations[oneUUID, UUID]
-  trait seqURI extends Options[seqURI, Seq[URI], URI] with Validations[oneURI, URI]
-  trait arrayByte extends Options[arrayByte, Seq[Byte], Byte] with Validations[oneByte, Byte]
-  trait seqShort extends Options[seqShort, Seq[Short], Short] with Validations[oneShort, Short]
-  trait seqChar extends Options[seqChar, Seq[Char], Char] with Validations[oneChar, Char]
+  trait seqInt extends AttrOptions[seqInt, Seq[Int], Int] with Validations[oneInt, Int]
+  trait seqLong extends AttrOptions[seqLong, Seq[Long], Long] with Validations[oneLong, Long]
+  trait seqFloat extends AttrOptions[seqFloat, Seq[Float], Float] with Validations[oneFloat, Float]
+  trait seqDouble extends AttrOptions[seqDouble, Seq[Double], Double] with Validations[oneDouble, Double]
+  trait seqBoolean extends AttrOptions[seqBoolean, Seq[Boolean], Boolean] with Validations[oneBoolean, Boolean]
+  trait seqBigInt extends AttrOptions[seqBigInt, Seq[BigInt], BigInt] with Validations[oneBigInt, BigInt]
+  trait seqBigDecimal extends AttrOptions[seqBigDecimal, Seq[BigDecimal], BigDecimal] with Validations[oneBigDecimal, BigDecimal]
+  trait seqDate extends AttrOptions[seqDate, Seq[Date], Date] with Validations[oneDate, Date]
+  trait seqDuration extends AttrOptions[seqDuration, Seq[Duration], Duration] with Validations[oneDuration, Duration]
+  trait seqInstant extends AttrOptions[seqInstant, Seq[Instant], Instant] with Validations[oneInstant, Instant]
+  trait seqLocalDate extends AttrOptions[seqLocalDate, Seq[LocalDate], LocalDate] with Validations[oneLocalDate, LocalDate]
+  trait seqLocalTime extends AttrOptions[seqLocalTime, Seq[LocalTime], LocalTime] with Validations[oneLocalTime, LocalTime]
+  trait seqLocalDateTime extends AttrOptions[seqLocalDateTime, Seq[LocalDateTime], LocalDateTime] with Validations[oneLocalDateTime, LocalDateTime]
+  trait seqOffsetTime extends AttrOptions[seqOffsetTime, Seq[OffsetTime], OffsetTime] with Validations[oneOffsetTime, OffsetTime]
+  trait seqOffsetDateTime extends AttrOptions[seqOffsetDateTime, Seq[OffsetDateTime], OffsetDateTime] with Validations[oneOffsetDateTime, OffsetDateTime]
+  trait seqZonedDateTime extends AttrOptions[seqZonedDateTime, Seq[ZonedDateTime], ZonedDateTime] with Validations[oneZonedDateTime, ZonedDateTime]
+  trait seqUUID extends AttrOptions[seqUUID, Seq[UUID], UUID] with Validations[oneUUID, UUID]
+  trait seqURI extends AttrOptions[seqURI, Seq[URI], URI] with Validations[oneURI, URI]
+  trait arrayByte extends AttrOptions[arrayByte, Seq[Byte], Byte] with Validations[oneByte, Byte]
+  trait seqShort extends AttrOptions[seqShort, Seq[Short], Short] with Validations[oneShort, Short]
+  trait seqChar extends AttrOptions[seqChar, Seq[Char], Char] with Validations[oneChar, Char]
 
 
   object mapString extends mapString
@@ -233,35 +233,76 @@ abstract class DomainStructure {
   object mapChar extends mapChar
 
   trait mapString extends stringOptions[mapString, Map[String, String]]
-  trait mapInt extends Options[mapInt, Map[String, Int], Int]
-  trait mapLong extends Options[mapLong, Map[String, Long], Long]
-  trait mapFloat extends Options[mapFloat, Map[String, Float], Float]
-  trait mapDouble extends Options[mapDouble, Map[String, Double], Double]
-  trait mapBoolean extends Options[mapBoolean, Map[String, Boolean], Boolean]
-  trait mapBigInt extends Options[mapBigInt, Map[String, BigInt], BigInt]
-  trait mapBigDecimal extends Options[mapBigDecimal, Map[String, BigDecimal], BigDecimal]
-  trait mapDate extends Options[mapDate, Map[String, Date], Date]
-  trait mapDuration extends Options[mapDuration, Map[String, Duration], Duration]
-  trait mapInstant extends Options[mapInstant, Map[String, Instant], Instant]
-  trait mapLocalDate extends Options[mapLocalDate, Map[String, LocalDate], LocalDate]
-  trait mapLocalTime extends Options[mapLocalTime, Map[String, LocalTime], LocalTime]
-  trait mapLocalDateTime extends Options[mapLocalDateTime, Map[String, LocalDateTime], LocalDateTime]
-  trait mapOffsetTime extends Options[mapOffsetTime, Map[String, OffsetTime], OffsetTime]
-  trait mapOffsetDateTime extends Options[mapOffsetDateTime, Map[String, OffsetDateTime], OffsetDateTime]
-  trait mapZonedDateTime extends Options[mapZonedDateTime, Map[String, ZonedDateTime], ZonedDateTime]
-  trait mapUUID extends Options[mapUUID, Map[String, UUID], UUID]
-  trait mapURI extends Options[mapURI, Map[String, URI], URI]
-  trait mapByte extends Options[mapByte, Map[String, Byte], Byte]
-  trait mapShort extends Options[mapShort, Map[String, Short], Short]
-  trait mapChar extends Options[mapChar, Map[String, Char], Char]
+  trait mapInt extends AttrOptions[mapInt, Map[String, Int], Int]
+  trait mapLong extends AttrOptions[mapLong, Map[String, Long], Long]
+  trait mapFloat extends AttrOptions[mapFloat, Map[String, Float], Float]
+  trait mapDouble extends AttrOptions[mapDouble, Map[String, Double], Double]
+  trait mapBoolean extends AttrOptions[mapBoolean, Map[String, Boolean], Boolean]
+  trait mapBigInt extends AttrOptions[mapBigInt, Map[String, BigInt], BigInt]
+  trait mapBigDecimal extends AttrOptions[mapBigDecimal, Map[String, BigDecimal], BigDecimal]
+  trait mapDate extends AttrOptions[mapDate, Map[String, Date], Date]
+  trait mapDuration extends AttrOptions[mapDuration, Map[String, Duration], Duration]
+  trait mapInstant extends AttrOptions[mapInstant, Map[String, Instant], Instant]
+  trait mapLocalDate extends AttrOptions[mapLocalDate, Map[String, LocalDate], LocalDate]
+  trait mapLocalTime extends AttrOptions[mapLocalTime, Map[String, LocalTime], LocalTime]
+  trait mapLocalDateTime extends AttrOptions[mapLocalDateTime, Map[String, LocalDateTime], LocalDateTime]
+  trait mapOffsetTime extends AttrOptions[mapOffsetTime, Map[String, OffsetTime], OffsetTime]
+  trait mapOffsetDateTime extends AttrOptions[mapOffsetDateTime, Map[String, OffsetDateTime], OffsetDateTime]
+  trait mapZonedDateTime extends AttrOptions[mapZonedDateTime, Map[String, ZonedDateTime], ZonedDateTime]
+  trait mapUUID extends AttrOptions[mapUUID, Map[String, UUID], UUID]
+  trait mapURI extends AttrOptions[mapURI, Map[String, URI], URI]
+  trait mapByte extends AttrOptions[mapByte, Map[String, Byte], Byte]
+  trait mapShort extends AttrOptions[mapShort, Map[String, Short], Short]
+  trait mapChar extends AttrOptions[mapChar, Map[String, Char], Char]
 
 
   // ManyToOne relationship ..................................................
 
   object manyToOne extends manyToOne
-  trait manyToOne extends refOptions[manyToOne]
+  trait manyToOne extends refOptions[manyToOne] with Validations[oneLong, Long]
 
   trait Join
+
+  sealed trait Action
+  trait query extends Action
+  trait subscribe extends Action
+  trait save extends Action
+  trait insertMany extends Action
+  trait update extends Action
+  trait delete extends Action
+
+  trait read extends query with subscribe
+  trait write extends save with insertMany with update with delete
+  trait all extends read with write
+
+  // User-defined roles need to extend this
+  trait Role
+
+  sealed trait Constraint
+  object Constraint {
+    case object AuthenticatedOnly extends Constraint
+    final case class SelfOnly(field: String) extends Constraint // ownerId == ctx.userId
+    final case class SameOrg(field: String) extends Constraint // orgId == ctx.orgId
+    final case class CustomPolicy(id: String) extends Constraint // hook
+  }
+
+  // === Access Control Type Classes (at DomainStructure level for implicit scope) ===
+
+  /** Evidence that A is either a single Role or tuple of Roles */
+  trait RolesOnly[A]
+  object RolesOnly:
+    given single[R <: Role]: RolesOnly[R] = new RolesOnly[R] {}
+    given empty: RolesOnly[EmptyTuple] = new RolesOnly[EmptyTuple] {}
+    given tuple[H <: Role, T <: Tuple](using RolesOnly[T]): RolesOnly[H *: T] =
+      new RolesOnly[H *: T] {}
+
+  /** Evidence that A is either a single Action or tuple of Actions */
+  trait ActionsOnly[A]
+  object ActionsOnly:
+    given single[A <: Action]: ActionsOnly[A] = new ActionsOnly[A] {}
+    given empty: ActionsOnly[EmptyTuple] = new ActionsOnly[EmptyTuple] {}
+    given tuple[H <: Action, T <: Tuple](using ActionsOnly[T]): ActionsOnly[H *: T] =
+      new ActionsOnly[H *: T] {}
 
 
   // Enums ..................................................
@@ -291,6 +332,9 @@ abstract class DomainStructure {
     def apply[EnumType <: Product](description: String): Nothing = ???
   }
 
+
+  trait Attr
+
   // Options ..................................................
 
   /**
@@ -302,7 +346,7 @@ abstract class DomainStructure {
    *
    * @group opt
    */
-  sealed trait Options[Self, Tpe, BaseTpe] extends Requierable {
+  sealed trait AttrOptions[Self, Tpe, BaseTpe] extends Requierable {
 
     /** Description of attribute
      *
@@ -344,16 +388,33 @@ abstract class DomainStructure {
 
     // Value accessor for validation code
     val value: Tpe = ???
+
+
+    // === Access Control Methods ===============================
+
+    // Restrict to specific role(s)
+    def allowRoles[R](using RolesOnly[R]): Self = ???
+
+    // Restrict to specific action(s) (all entity roles)
+    def allowActions[A](using ActionsOnly[A]): Self = ???
+
+    // Restrict to specific role(s) AND action(s)
+    def allowRoleActions[R, A](using RolesOnly[R], ActionsOnly[A]): Self = ???
+
+    // Attribute constraints
+    def authenticated: Self = ???
+
+    // Use validation dsl as authorization conditions
+    def authorizeIf(condition: Validated*): Self = ???
   }
 
-
+  trait Validated
   trait Validations[Self, BaseTpe] {
-    def validate(ok: BaseTpe => Boolean, errorMsg: String = ""): Self = ???
-    def validate(err2msg: PartialFunction[BaseTpe, String]): Self = ???
+    def validate(predicate: BaseTpe => Boolean, errorMsg: String = ""): Self & Validated = ???
+    def validate(err2msg: PartialFunction[BaseTpe, String]): Self & Validated = ???
   }
 
-
-  trait stringOptions[Self, Tpe] extends Options[Self, Tpe, String] {
+  trait stringOptions[Self, Tpe] extends AttrOptions[Self, Tpe, String] {
     // Validation
     val email: Self = ???
     def email(msg: String): Self = ???
@@ -369,9 +430,18 @@ abstract class DomainStructure {
      *
      * @tparam Ref Ref entity type
      */
-    def apply[Ref]: refOptions[Self] & Ref = ???
+    def apply[Ref]: refOptions[Self] & Ref & Validations[Self, Long] = ???
+//    def apply[Ref]: refOptions[Self] & Ref & Validated = ???
+
+    // Value accessor for validation code
+    val value: Long = ???
 
 
+    /**
+     *
+     * @param reverseRef Custom reverse ref name
+     * @return
+     */
     def oneToMany(reverseRef: String): Self = ???
 
     /**
