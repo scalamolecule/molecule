@@ -18,14 +18,23 @@ import zio.ZIO
 
 case class JdbcConn_JVM(
   override val proxy: JdbcProxy,
-  private val sqlConn0: sql.Connection
-) extends Conn(proxy)
+  private val sqlConn0: sql.Connection,
+  override val authContext: Option[molecule.db.common.api.AuthContext] = None
+) extends Conn(proxy, authContext)
   with AutoCloseable
   with CachedConnection
   with ModelUtils
   with MoleculeLogging {
 
   val sqlConn: Connection = sqlConn0
+
+  /** Create a new connection with the specified authentication context */
+  override def withAuthContext(authCtx: molecule.db.common.api.AuthContext): Conn =
+    copy(authContext = Some(authCtx))
+
+  /** Create a new connection without authentication (public access only) */
+  override def clearAuth: Conn =
+    copy(authContext = None)
 
   def queryStmt(query: String): PreparedStatement = {
     sqlConn.prepareStatement(

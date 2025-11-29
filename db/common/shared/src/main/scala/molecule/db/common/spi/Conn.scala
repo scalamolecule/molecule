@@ -4,16 +4,44 @@ import scala.concurrent.{ExecutionContext, Future}
 import cats.effect.IO
 import molecule.core.dataModel.DataModel
 import molecule.core.error.{ExecutionError, MoleculeError}
-import molecule.db.common.api.Savepoint
+import molecule.db.common.api.{AuthContext, Savepoint}
 import molecule.db.common.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.db.common.util.ModelUtils
 import zio.ZIO
 
-abstract class Conn(val proxy: ConnProxy)
-  extends ModelUtils {
+abstract class Conn(
+  val proxy: ConnProxy,
+  val authContext: Option[AuthContext] = None
+) extends ModelUtils {
 
   // Underlying real database connection
   def db: Any = ???
+
+  /** Authentication context created by backend after validating credentials
+    *
+    * This is NEVER sent from frontend. It is created on the backend by:
+    * 1. Receiving authentication token (JWT, OAuth, etc.)
+    * 2. Validating token with appropriate AuthProvider
+    * 3. Extracting userId and role from validated token
+    * 4. Creating AuthContext with validated information
+    *
+    * None means unauthenticated (public access only)
+    *
+    * IMMUTABLE: To change auth context, create a new connection with:
+    * - conn.withAuth(userId, role)
+    * - conn.withAuthContext(authContext)
+    * - conn.clearAuth
+    */
+
+  /** Create a new connection with the specified authentication context */
+  def withAuthContext(authCtx: AuthContext): Conn
+
+  /** Create a new connection with the specified userId and role */
+  def withAuth(userId: String, role: String): Conn =
+    withAuthContext(AuthContext(userId, role))
+
+  /** Create a new connection without authentication (public access only) */
+  def clearAuth: Conn
 
   private[molecule] lazy val rpc: MoleculeRpc = throw jsOnly("rpc")
 

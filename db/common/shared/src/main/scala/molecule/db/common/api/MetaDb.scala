@@ -25,6 +25,23 @@ trait MetaDb {
 
   /** Indexed flags for reserved attribute names */
   val reservedAttributes: IArray[Byte] = IArray.empty[Byte]
+
+
+  // Access control -------------------------------------------------------
+
+  /** Role name to bit index (0-31) */
+  val roleIndex: Map[String, Int] = Map.empty[String, Int]
+
+  /** Bitwise role access for entities on query action
+    * Each Int is a bitmask where bit N = role N can query
+    * Supports up to 32 roles (bits 0-31)
+    */
+  val queryAccessEntities: IArray[Int] = IArray.empty[Int]
+
+  /** Bitwise role access for attributes on query action
+    * Each Int is a bitmask where bit N = role N can query
+    */
+  val queryAccessAttributes: IArray[Int] = IArray.empty[Int]
 }
 
 trait MetaDb_h2 extends MetaDb

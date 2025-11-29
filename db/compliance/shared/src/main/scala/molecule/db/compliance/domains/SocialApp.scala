@@ -6,138 +6,119 @@ import molecule.db.compliance.domains.JoinTable.A
 
 object SocialApp extends DomainStructure {
 
-  // Roles need to extend `Role` for the plugin to recognize a Role definition
-  trait Admin extends Role with all
-  trait Moderator extends Role with read with update with delete
-  trait StandardUser extends Role with read with save
-  trait Guest extends Role with query
+  // ============================================================================
+  // ROLES (sorted alphabetically)
+  // ============================================================================
+
+  trait Admin extends Role with all // All actions
+  trait ContentModerator extends Role with read with delete // Same actions as Moderator, different scope
+  trait Guest extends Role with query // Read-only, minimal
+  trait Moderator extends Role with read with delete // Can read and clean up
+  trait StandardUser extends Role with read with save // Can read and create
 
 
-  // Entity with default roles and comprehensive authorization examples
-  trait Post extends StandardUser with Moderator { // default roles allowed for Post entity
-    val title    = oneString
-    val content  = oneString
-    val authorId = oneString
+  // ============================================================================
+  // ENTITY 1: PUBLIC ENTITY
+  // Tests: Public access, .authenticated, .allowOnlyRoles, .allowMoreRoles on public entity
+  // ============================================================================
 
-    // === Single Role ===
-    val published = oneBoolean.allowRoles[Guest]
-
-    // === Multiple Roles (2 roles) ===
-    val published2 = oneBoolean.allowRoles[(Guest, StandardUser)]
-
-    // === Multiple Roles (3+ roles) ===
-    val published3 = oneBoolean.allowRoles[(Guest, StandardUser, Moderator)]
-
-    // === Single Action ===
-    val flagged = oneBoolean.allowActions[update]
-
-    // === Multiple Actions (2 actions) ===
-    val flagged2 = oneBoolean.allowActions[(update, delete)]
-
-    // === Multiple Actions (3+ actions) ===
-    val flagged3 = oneBoolean.allowActions[(query, update, delete)]
-
-    // === Composite Actions ===
-    val readableContent  = oneString.allowActions[read]   // query + subscribe
-    val writableContent  = oneString.allowActions[write]  // save + insertMany + update + delete
-    val allAccessContent = oneString.allowActions[all]    // read + write
-
-    // === Role + Action Combinations (all 4 variations) ===
-    val views1 = oneLong.allowRoleActions[StandardUser, update]                       // Single role, single action
-    val views2 = oneLong.allowRoleActions[StandardUser, (update, delete)]             // Single role, multiple actions
-    val views3 = oneLong.allowRoleActions[(Guest, StandardUser), update]              // Multiple roles, single action
-    val views4 = oneLong.allowRoleActions[(Guest, StandardUser), (update, delete)]    // Multiple roles, multiple actions
-
-    // === Composite Actions with Roles ===
-    val readableByUser   = oneString.allowRoleActions[StandardUser, read]
-    val writableByMod    = oneString.allowRoleActions[Moderator, write]
-    val allAccessByAdmin = oneString.allowRoleActions[Admin, all]
-
-    // === Chained allowRoleActions (permission matrix) ===
-    val mixed = oneLong
-      .allowRoleActions[StandardUser, insertMany]
-      .allowRoleActions[Moderator, (save, update, insertMany)]
-      .allowRoleActions[(Guest, Moderator), (subscribe, delete)]
-
-
-    // === Conditional Authorization (authorizeIf) ===
-
-    val age         = oneInt
-    val publishDate = oneInt
-    val verified    = oneBoolean
-
-    // Single authorizeIf
-    val ageRestricted = oneString.authorizeIf(age.validate(_ >= 18))
-
-    // Multiple authorizeIf (chained)
-    val content1 = oneString
-      .allowRoles[StandardUser]                       // Role constraint
-      .authorizeIf(age.validate(_ >= 18))             // Age check
-      .authorizeIf(verified.validate(_ == true))      // Verification check
-      .authorizeIf(publishDate.validate(_ > 42))      // Publish check
-
-    // Multiple authorizeIf (varargs - same as chained)
-    val content2 = oneString
-      .allowRoles[StandardUser]
-      .authorizeIf(
-        age.validate(_ >= 18),
-        verified.validate(_ == true),
-        publishDate.validate(_ > 42)
-      )
-
-    // Complex predicate in authorizeIf
-    val complexRestriction = oneString.authorizeIf(
-      age.validate(v => v >= 18 && v < 65 && v % 5 == 0)
-    )
-
-    // Cross-field validation with .value
-    val minAge  = oneInt
-    val userAge = oneInt
-    val crossFieldRestriction = oneString.authorizeIf(
-      userAge.validate(_ >= minAge.value)
-    )
-
-    // Boolean field authorization
-    val isPublic = oneBoolean
-    val publicOnlyContent = oneString.authorizeIf(
-      isPublic.validate(identity)
-    )
+  trait Article {
+    val title             = oneString // Public (no auth required)
+    val preview           = oneString // Public
+    val fullText          = oneString.authenticated // Any authenticated role
+    val adminNotes        = oneString.allowOnlyRoles[Admin] // Admin only (replace: public -> Admin)
+    val subscriberContent = oneString.allowMoreRoles[(StandardUser, Moderator)] // Add specific roles to public
   }
 
 
-  // Entity extending Role (demonstrates entity can be a role)
-  trait User extends StandardUser {
-    val name  = oneString
-    val email = oneString.email
+  // ============================================================================
+  // ENTITY 2: SINGLE ROLE ENTITY
+  // Tests: Single role inheritance, .allowMoreRoles adding roles, .allowOnlyRoles replacing role
+  // ============================================================================
+
+  trait ModeratorLog extends Moderator {
+    val action     = oneString // Inherits: Moderator only
+    val timestamp  = oneLong // Inherits: Moderator only
+    val details    = oneString.allowMoreRoles[Admin] // Moderator + Admin (additive)
+    val auditTrail = oneString.allowOnlyRoles[Admin] // Admin only (replace: Moderator -> Admin)
   }
 
 
-  // Entity extending Authenticated (all fields require any authenticated user)
+  // ============================================================================
+  // ENTITY 3: MULTIPLE ROLES ENTITY (Main test entity)
+  // Tests: Multiple role inheritance, .allowMoreRoles adding new roles, .allowOnlyRoles narrowing
+  // ============================================================================
+
+  trait Post extends StandardUser with Moderator {
+    // === Attributes inheriting entity defaults ===
+    val title    = oneString // StandardUser, Moderator
+    val content  = oneString // StandardUser, Moderator
+    val authorId = oneString // StandardUser, Moderator
+
+    // === .allowMoreRoles with NEW role (adds Guest) ===
+    val viewCount = oneLong.allowMoreRoles[Guest]
+    // Expected: Guest + StandardUser + Moderator
+
+    // === .allowMoreRoles with EXISTING role (should be compile error, but testing codegen) ===
+    val likeCount = oneLong.allowMoreRoles[StandardUser]
+    // Expected: StandardUser + Moderator (redundant - should error in production)
+
+    // === .allowMoreRoles with MULTIPLE NEW roles ===
+    val published = oneBoolean.allowMoreRoles[(Guest, Admin)]
+    // Expected: Guest + Admin + StandardUser + Moderator
+
+    // === .allowMoreRoles with MIX of new and existing roles ===
+    val featured = oneBoolean.allowMoreRoles[(Guest, Moderator)]
+    // Expected: Guest + StandardUser + Moderator (Moderator redundant)
+
+    // === .allowOnlyRoles narrowing from multiple to single ===
+    val moderatorNotes = oneString.allowOnlyRoles[Moderator]
+    // Expected: Moderator only (replace: StandardUser + Moderator -> Moderator)
+
+    // === .allowOnlyRoles narrowing from multiple to different multiple ===
+    val internalFlags = oneString.allowOnlyRoles[(Moderator, Admin)]
+    // Expected: Moderator + Admin (replace: StandardUser + Moderator -> Moderator + Admin)
+  }
+
+
+  // ============================================================================
+  // ENTITY 4: AUTHENTICATED ENTITY
+  // Tests: Authenticated requirement, .allowOnlyRoles override on Authenticated
+  // ============================================================================
+
   trait UserProfile extends Authenticated {
-    val bio         = oneString  // Any authenticated user
-    val location    = oneString  // Any authenticated user
-    val website     = oneString  // Any authenticated user
-    val phoneNumber = oneString.allowRoles[Admin]  // Override: only Admin
+    val displayName = oneString // Any authenticated role
+    val bio         = oneString // Any authenticated role
+    val email       = oneString.allowOnlyRoles[Admin] // Admin only (replace)
+    val karma       = oneLong.allowOnlyRoles[(StandardUser, Moderator, Admin)] // Subset (excludes Guest)
   }
 
 
-  // Public entity (no role extension = public by default, like GraphQL)
-  trait PublicData {
-    val info        = oneString  // Public (no role required)
-    val description = oneString  // Public
-    val preview     = oneString  // Public
+  // ============================================================================
+  // ENTITY 5: ADMIN-ONLY ENTITY
+  // Tests: Admin-only access, .allowMoreRoles expanding access
+  // ============================================================================
 
-    // Require login but accept any authenticated user (regardless of role)
-    val fullArticle = oneString.authenticated  // Any logged-in user
-
-    // Or restrict to specific role(s)
-    val adminNotes  = oneString.allowRoles[Admin]  // Only Admin
+  trait SystemConfig extends Admin {
+    val apiKey    = oneString // Admin only
+    val secretKey = oneString // Admin only
+    val publicKey = oneString.allowMoreRoles[Moderator] // Admin + Moderator (additive)
   }
 
 
-  // Private entity (use role extension to restrict access)
-  trait AdminPanel extends Admin {
-    val revenue   = oneDouble  // Only Admin can access (entity default)
-    val userCount = oneLong.allowRoles[(Admin, Moderator)]  // Expand to Admin OR Moderator
+  // ============================================================================
+  // ENTITY 6: SCOPE DIMENSION DEMONSTRATION
+  // Tests: Same actions (read+delete), different scopes
+  // Demonstrates that actions and scope are orthogonal dimensions
+  // ============================================================================
+
+  // ContentModerator scope - reviews user-generated content
+  trait ContentQueue extends ContentModerator {
+    val reportedContent = oneString // ContentModerator only
+    val reportReason    = oneString // ContentModerator only
+    val reviewNotes     = oneString.allowMoreRoles[Admin] // ContentModerator + Admin
   }
+
+  // Note: ContentModerator and Moderator have identical actions (read+delete)
+  // but different scopes (ContentQueue and ModeratorLog respectively)
 }

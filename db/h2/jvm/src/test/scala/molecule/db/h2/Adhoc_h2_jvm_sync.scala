@@ -7,30 +7,33 @@ import molecule.db.h2.sync.*
 class Adhoc_h2_jvm_sync extends MUnit with DbProviders_h2 with TestUtils {
 
 
-  //  "basic" - types {
-  //    import molecule.db.compliance.domains.dsl.Types.*
-  //
-  //    val List(a, b) = Entity.int.insert(1, 2).transact.ids
-  //    Entity.int(3).save.transact
-  //    Entity.int.a1.query.get ==> List(1, 2, 3)
-  //    Entity(a).int(10).update.transact
-  //    Entity(b).delete.transact
-  //    Entity.int.a1.query.get ==> List(3, 10)
-  //  }
+  "basic" - types {
+    import molecule.db.compliance.domains.dsl.Types.*
+
+    //    val List(a, b) = Entity.int.insert(1, 2).transact.ids
+    //    Entity.int(3).save.transact
+    //    Entity.int.a1.query.get ==> List(1, 2, 3)
+    //    Entity(a).int(10).update.transact
+    //    Entity(b).delete.transact
+    //    Entity.int.a1.query.get ==> List(3, 10)
 
 
-  "refs" - refs {
-    import molecule.db.compliance.domains.dsl.Refs.*
-
-    A.s.Bb.*(B.i).insert(
-      ("a", List(1)),
-    ).transact
-
-    A.s.a1.Bb.*?(B.i).query.get ==> List(
-      ("a", List(1)),
-    )
-
+    Entity.int.query.i.get
   }
+
+
+  //  "refs" - refs {
+  //    import molecule.db.compliance.domains.dsl.Refs.*
+  //
+  //    A.s.Bb.*(B.i).insert(
+  //      ("a", List(1)),
+  //    ).transact
+  //
+  //    A.s.a1.Bb.*?(B.i).query.get ==> List(
+  //      ("a", List(1)),
+  //    )
+  //
+  //  }
 
   //  "integer" - types {
   //    import molecule.db.compliance.domains.dsl.Types.*

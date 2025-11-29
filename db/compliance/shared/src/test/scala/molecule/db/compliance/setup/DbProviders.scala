@@ -11,5 +11,6 @@ trait DbProviders { self: DbConnection & Platform =>
   def joinTable(test: Conn ?=> Any): Any = ???
   def unique(test: Conn ?=> Any): Any = ???
   def validation(test: Conn ?=> Any): Any = ???
+  def social(test: Conn ?=> Any): Any = ???
   def segments(test: Conn ?=> Any): Any = ???
 }

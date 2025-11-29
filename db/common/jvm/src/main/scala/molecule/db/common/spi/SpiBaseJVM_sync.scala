@@ -6,7 +6,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 import geny.Generator
-import molecule.core.dataModel.{AttrOneManID, DataModel, Element, Eq}
+import molecule.core.dataModel.*
 import molecule.core.error.{InsertError, InsertErrors, ModelError, ValidationErrors}
 import molecule.core.util.BaseHelpers
 import molecule.db.common.crud.*
@@ -32,10 +32,101 @@ trait SpiBaseJVM_sync
     with BaseHelpers {
 
 
+  // Access Control --------------------------------------------------------
+
+  private def checkQueryAccess(elements: List[Element], conn: Conn): Unit = {
+    import molecule.db.common.marshalling.Mode
+
+    conn.authContext match {
+      case None =>
+        // No authentication context
+        conn.proxy.mode match {
+          case Mode.Dev =>
+            // Dev mode: Allow access for convenience (local development)
+            ()
+          case Mode.Test | Mode.Stage | Mode.Prod =>
+            // Test/Stage/Prod: Check if accessing non-public resources
+            elements.collect {
+              case a: Attr =>
+                val List(entityIndex, attrIndex) = a.coord.take(2)
+
+                // Check entity access
+                val entityPermissions: Int = conn.proxy.metaDb.queryAccessEntities(entityIndex)
+                if (entityPermissions != -1) {
+                  // Entity requires authentication (not public)
+                  throw ModelError("Access denied: No authenticated role provided")
+                }
+
+                // Check attribute access
+                val attrPermissions: Int = conn.proxy.metaDb.queryAccessAttributes(attrIndex)
+                if (attrPermissions != -1) {
+                  // Attribute requires authentication (not public)
+                  throw ModelError("Access denied: No authenticated role provided")
+                }
+            }
+        }
+
+      case Some(authCtx) =>
+        val roleName = authCtx.role
+        val roleIdx = conn.proxy.metaDb.roleIndex.getOrElse(
+          roleName,
+          throw ModelError(s"Unknown role: $roleName")
+        )
+
+        if (roleIdx < 0 || roleIdx > 31) {
+          throw ModelError(s"Invalid role index: $roleIdx (must be 0-31)")
+        }
+
+        val roleMask: Int = 1 << roleIdx
+
+        elements.collect {
+          case a: Attr =>
+            val List(entityIndex, attrIndex) = a.coord.take(2)
+
+            // Check entity access
+            val entityPermissions: Int = conn.proxy.metaDb.queryAccessEntities(entityIndex)
+            // Skip check if entity is public (all bits set)
+            if (entityPermissions != -1 && (entityPermissions & roleMask) == 0) {
+              val errorMsg = conn.proxy.mode match {
+                case Mode.Dev | Mode.Test | Mode.Stage =>
+                  // Verbose error for debugging
+                  s"Access denied: Role '$roleName' (index $roleIdx, mask ${roleMask.toBinaryString}) " +
+                  s"cannot query entity '${a.ent}' (permissions ${entityPermissions.toBinaryString})"
+                case Mode.Prod =>
+                  // Sanitized error for production
+                  s"Access denied: Role '$roleName' cannot query entity '${a.ent}'"
+              }
+              throw ModelError(errorMsg)
+            }
+
+            // Check attribute access
+            val attrPermissions: Int = conn.proxy.metaDb.queryAccessAttributes(attrIndex)
+            // Skip check if attribute is public (all bits set)
+            if (attrPermissions != -1 && (attrPermissions & roleMask) == 0) {
+              val errorMsg = conn.proxy.mode match {
+                case Mode.Dev | Mode.Test | Mode.Stage =>
+                  // Verbose error for debugging
+                  s"Access denied: Role '$roleName' (index $roleIdx, mask ${roleMask.toBinaryString}) " +
+                  s"cannot query attribute '${a.ent}.${a.attr}' (permissions ${attrPermissions.toBinaryString})"
+                case Mode.Prod =>
+                  // Sanitized error for production
+                  s"Access denied: Role '$roleName' cannot query attribute '${a.ent}.${a.attr}'"
+              }
+              throw ModelError(errorMsg)
+            }
+        }
+    }
+  }
+
+
   // Query --------------------------------------------------------
 
   override def query_get[Tpl](query: Query[Tpl])(using conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
+
+    // Check query access based on authenticated role
+    checkQueryAccess(query.dataModel.elements, conn)
+
     if (query.printInspect)
       query_inspect(query)
     val cleanElements  = keywordsSuffixed(query.dataModel.elements, conn.proxy)
