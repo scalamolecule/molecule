@@ -276,13 +276,13 @@ abstract class DomainStructure {
   trait query extends Action
   trait subscribe extends Action
   trait save extends Action
-  trait insertMany extends Action
+  trait insert extends Action
   trait update extends Action
   trait delete extends Action
 
   // Convenience action collections
   trait read extends query with subscribe
-  trait write extends save with insertMany with update with delete
+  trait write extends save with insert with update with delete
   trait all extends read with write
 
   /** Evidence that A is either a single Role or tuple of Roles */
@@ -301,6 +301,12 @@ abstract class DomainStructure {
     given tuple[H <: Action, T <: Tuple](using ActionsOnly[T]): ActionsOnly[H *: T] =
       new ActionsOnly[H *: T] {}
 
+
+  // used for entity-level grant only
+  trait deleting[R](using RolesOnly[R])
+
+  // used for both entity- and attribute-level grants
+  trait updating[R](using RolesOnly[R])
 
   // Enums .....................................................................
 
@@ -386,79 +392,9 @@ abstract class DomainStructure {
 
 
     // Access Control Methods
-
-    /** Allow any authenticated role (override public/entity defaults).
-     * <br><br>
-     * Makes attribute accessible to any authenticated user regardless of role.
-     * Useful for public entities with some protected fields.
-     */
-    def authenticated: Self = ???
-
-    /** Add more role(s) to entity's default roles (additive).
-     * <br><br>
-     * Adds specified role(s) to the roles already permitted by the entity.
-     * Cannot be used on public entities (compile error - use allowOnlyRoles instead).
-     * Cannot add roles already present in entity (compile error - redundant).
-     *
-     * @tparam R Single role or tuple of roles
-     */
-    def allowMoreRoles[R](using RolesOnly[R]): Self = ???
-
-    /** Replace entity roles with specific role(s) only (replacing).
-     * <br><br>
-     * Restricts access to only the specified role(s), ignoring entity defaults.
-     * Use this to narrow permissions on public entities or override entity roles.
-     *
-     * @tparam R Single role or tuple of roles
-     */
-    def allowOnlyRoles[R](using RolesOnly[R]): Self = ???
-
-    /** Add action requirement to entity's default roles (additive filtering).
-     * <br><br>
-     * Narrows entity's default roles to only those possessing ALL specified actions.
-     * Works on entity roles - filters existing permissions based on action capability.
-     * Cannot be used on public entities (no entity roles to filter).
-     *
-     * @tparam A Single action or tuple of actions
-     */
-    def allowMoreActions[A](using ActionsOnly[A]): Self = ???
-
-    /** Require specific action(s) from all defined roles (replacing).
-     * <br><br>
-     * Grants access to ALL roles (from role definitions) that possess ALL specified actions.
-     * Replaces entity defaults - determines permissions solely by action capability.
-     * Can be used on public entities to restrict to roles having specific actions.
-     *
-     * @tparam A Single action or tuple of actions
-     */
-    def allowOnlyActions[A](using ActionsOnly[A]): Self = ???
-
-    /** Grant specific action(s) to specific role(s).
-     * <br><br>
-     * Allows fine-grained control by granting specific actions to specific roles
-     * on this attribute, independent of entity-level role grants and role-level
-     * action definitions.
-     * <br><br>
-     * Example: `val comments = oneString.allowRoleActions[(Moderator, Admin), delete]`
-     * <br>
-     * Grants Moderator and Admin the ability to delete comments on this attribute.
-     * <br><br>
-     * Semantics to be finalized.
-     *
-     * @tparam R Single role or tuple of roles
-     * @tparam A Single action or tuple of actions
-     */
-    def allowRoleActions[R, A](using RolesOnly[R], ActionsOnly[A]): Self = ???
-
-    /** Allow access if validation condition(s) pass.
-     * <br><br>
-     * Grants access based on runtime validation of data/context.
-     * <br><br>
-     * Semantics to be finalized.
-     *
-     * @param conditions Validation conditions that must pass
-     */
-    def allowValidated(conditions: Validated*): Self = ???
+    def exclude[R](using RolesOnly[R]): Self = ???
+    def only[R](using RolesOnly[R]): Self = ???
+    def updating[R](using RolesOnly[R]): Self = ???
   }
 
   trait Validated

@@ -14,109 +14,100 @@ import molecule.db.common.spi.Conn
 
 class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
 
-  //  "types" - types {
-  //    import molecule.db.compliance.domains.dsl.Types.*
-  //    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+  "types" - types {
+    import molecule.db.compliance.domains.dsl.Types.*
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+    for {
+      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+      _ <- Entity.int(3).save.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+      _ <- Entity(a).int(10).update.transact
+      _ <- Entity(b).delete.transact
+      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+
+    } yield ()
+  }
+  //
+  //  "allowRoles, new role" - social {
+  //    import molecule.db.compliance.domains.dsl.SocialApp.*
+  //    import molecule.db.common.api.AuthContext
   //    for {
-  //      //        List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-  //      //        _ <- Entity.int(3).save.transact
-  //      //        _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-  //      //        _ <- Entity(a).int(10).update.transact
-  //      //        _ <- Entity(b).delete.transact
-  //      //        _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+  //      _ <- Post.title("victory").published(true).save.transact
   //
-  //      //        _ <- Entity.i.a1.B.?(B.s.i.C.s.i).D.?(D.s.i).query.i.get
-  //      //
-  //      //        _ <- Entity.?(Entity.i_).B.s.a1.query.get.map(_ ==> List(
-  //      //          (None, "a"),
-  //      //        ))
+  //      _ <- Post.published.query.get
+  //        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+  //          err ==> "Access denied: No authenticated role provided"
+  //        }
   //
-  //      _ <- Entity.i.Ref.i._Entity.Other.i.query.i.get
-  //      _ <- Entity.?(Entity.i).Ref.i.Entity.i.query.i.get
+  //      // Authenticate a Guest
+  //      _ = summon[Conn].authContext = Some(AuthContext(
+  //        userId = "user123",
+  //        role = "Guest"
+  //      ))
   //
+  //      // Guest still not allowed! Needs to "override" entity roles...
+  //      _ <- Post.published.query.get.map(_ ==> List(true))
+  //
+  //      // But title is still not allowed since it's not allowed for Guests
+  //      // and neither StandardUser or Moderator is authenticated
+  //      _ <- Post.title.query.get
+  //        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+  //          err ==> "Access denied: Role 'Guest' cannot query attribute 'Post.title'"
+  //        }
   //    } yield ()
   //  }
-//
-//  "allowRoles, new role" - social {
-//    import molecule.db.compliance.domains.dsl.SocialApp.*
-//    import molecule.db.common.api.AuthContext
-//    for {
-//      _ <- Post.title("victory").published(true).save.transact
-//
-//      _ <- Post.published.query.get
-//        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//          err ==> "Access denied: No authenticated role provided"
-//        }
-//
-//      // Authenticate a Guest
-//      _ = summon[Conn].authContext = Some(AuthContext(
-//        userId = "user123",
-//        role = "Guest"
-//      ))
-//
-//      // Guest still not allowed! Needs to "override" entity roles...
-//      _ <- Post.published.query.get.map(_ ==> List(true))
-//
-//      // But title is still not allowed since it's not allowed for Guests
-//      // and neither StandardUser or Moderator is authenticated
-//      _ <- Post.title.query.get
-//        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//          err ==> "Access denied: Role 'Guest' cannot query attribute 'Post.title'"
-//        }
-//    } yield ()
-//  }
-//
-//  "allowRoles, existing role" - social {
-//    import molecule.db.compliance.domains.dsl.SocialApp.*
-//    import molecule.db.common.api.AuthContext
-//    for {
-//      _ <- Post.published2(true).save.transact
-//
-//      _ <- Post.published2.query.get
-//        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-//          err ==> "Access denied: No authenticated role provided"
-//        }
-//
-//      // Authenticate a StandardUser - kind of redundant to add that role to allowRoles since the entity already extends it, no?
-//      _ = summon[Conn].authContext = Some(AuthContext(
-//        userId = "user123",
-//        role = "StandardUser"
-//      ))
-//
-//      //
-//      _ <- Post.published2.query.get.map(_ ==> List(true))
-//    } yield ()
-//  }
-/*
+  //
+  //  "allowRoles, existing role" - social {
+  //    import molecule.db.compliance.domains.dsl.SocialApp.*
+  //    import molecule.db.common.api.AuthContext
+  //    for {
+  //      _ <- Post.published2(true).save.transact
+  //
+  //      _ <- Post.published2.query.get
+  //        .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+  //          err ==> "Access denied: No authenticated role provided"
+  //        }
+  //
+  //      // Authenticate a StandardUser - kind of redundant to add that role to allowRoles since the entity already extends it, no?
+  //      _ = summon[Conn].authContext = Some(AuthContext(
+  //        userId = "user123",
+  //        role = "StandardUser"
+  //      ))
+  //
+  //      //
+  //      _ <- Post.published2.query.get.map(_ ==> List(true))
+  //    } yield ()
+  //  }
+  /*
 
-    /** Role name to bit index (0-31) */
-  override val roleIndex: Map[String, Int] = Map(
-    "Admin"        -> 0,
-    "Guest"        -> 1,
-    "Moderator"    -> 2,
-    "StandardUser" -> 3
-  )
+      /** Role name to bit index (0-31) */
+    override val roleIndex: Map[String, Int] = Map(
+      "Admin"        -> 0,
+      "Guest"        -> 1,
+      "Moderator"    -> 2,
+      "StandardUser" -> 3
+    )
 
-  /** Bitwise role access for entities on query action */
-  override val queryAccessEntities: IArray[Int] = IArray(
-    /* Post        */ 12,
-    /* User        */ 8,
-    /* UserProfile */ 15,
-    /* PublicData  */ -1,
-    /* AdminPanel  */ 1
-  )
+    /** Bitwise role access for entities on query action */
+    override val queryAccessEntities: IArray[Int] = IArray(
+      /* Post        */ 12,
+      /* User        */ 8,
+      /* UserProfile */ 15,
+      /* PublicData  */ -1,
+      /* AdminPanel  */ 1
+    )
 
-  /** Bitwise role access for attributes on query action */
-  override val queryAccessAttributes: IArray[Int] = IArray(
-    /* Post        */ 12, 12, 12, 12, 2, 10, 14, 4, 4, 4, 12, 0, 0, 0, 0, 0, 0, 8, 0, 1, 4,
-    /* User        */ 8, 8, 8,
-    /* UserProfile */ 15, 15, 15, 15, 1,
-    /* PublicData  */ -1, -1, -1, -1, 15, 1,
-    /* AdminPanel  */ 1, 1, 5
-  )
-}
-}
- */
+    /** Bitwise role access for attributes on query action */
+    override val queryAccessAttributes: IArray[Int] = IArray(
+      /* Post        */ 12, 12, 12, 12, 2, 10, 14, 4, 4, 4, 12, 0, 0, 0, 0, 0, 0, 8, 0, 1, 4,
+      /* User        */ 8, 8, 8,
+      /* UserProfile */ 15, 15, 15, 15, 1,
+      /* PublicData  */ -1, -1, -1, -1, 15, 1,
+      /* AdminPanel  */ 1, 1, 5
+    )
+  }
+  }
+   */
 
   //  "refs" - refs {
   //    import molecule.db.compliance.domains.dsl.Refs.*
