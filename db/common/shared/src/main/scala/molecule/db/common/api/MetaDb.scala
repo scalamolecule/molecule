@@ -63,25 +63,6 @@ trait MetaDb {
 
   val deleteAccessEntities  : IArray[Int] = IArray.empty[Int]
   val deleteAccessAttributes: IArray[Int] = IArray.empty[Int]
-
-
-  /**
-   * Maps each entity index to the list of attribute indices belonging to that entity.
-   * Excludes 'id' attributes since they are not checked during permission validation.
-   *
-   * Index: entity coordinate (coord(0))
-   * Value: array of attribute coordinates (coord(1)) for that entity, excluding id
-   */
-  val entityAttributesNoId: IArray[IArray[Int]] = IArray.empty[IArray[Int]]
-
-  /**
-   * Maps attribute index to attribute name for error messages.
-   * Index: attribute coordinate (coord(1))
-   * Value: "EntityName.attributeName"
-   *
-   * This is only used for generating human-readable error messages.
-   */
-  val attrNames: IArray[String] = IArray.empty[String]
 }
 
 trait MetaDb_h2 extends MetaDb
@@ -89,3 +70,4 @@ trait MetaDb_mariadb extends MetaDb
 trait MetaDb_mysql extends MetaDb
 trait MetaDb_postgresql extends MetaDb
 trait MetaDb_sqlite extends MetaDb
+

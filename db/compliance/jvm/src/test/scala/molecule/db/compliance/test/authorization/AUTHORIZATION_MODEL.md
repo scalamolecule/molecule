@@ -11,9 +11,9 @@ Molecule provides a declarative, compile-time validated authorization system int
 Authorization in Molecule is built on 4 distinct concepts that work together:
 
 1. **Layer 1: Roles** - Which roles have access to entities
-2. **Layer 2: Role Actions** - What actions roles can perform at entity level
-3. **Layer 3: Attribute Roles** - Which roles can access specific attributes
-4. **Layer 4: Attribute Update** - Which roles can update specific attributes
+2. **Layer 2: Role Actions** - Action grants at entity level
+3. **Layer 3: Attribute Roles** - Attribute role restrictions
+4. **Layer 4: Attribute Update** - Attribute update grants
 
 These layers build on each other, providing progressively finer control.
 
@@ -23,9 +23,9 @@ These layers build on each other, providing progressively finer control.
 
 1. **Public entities (no roles) are unrestricted** - Entities with no roles can be accessed by anyone with all 6 actions (query, subscribe, save, insert, update, delete) without authentication
 2. **Roles define baseline capabilities** via action traits (Layer 1)
-3. **Entity grants ADD capabilities** to specific roles (Layer 2 - additive, per-role)
+3. **Action grants ADD capabilities** to specific roles (Layer 2 - additive, per-role)
 4. **Attribute restrictions NARROW access** from entity baseline (Layer 3 - restrictive)
-5. **Attribute grants ADD capabilities** to specific roles for specific fields (Layer 4 - additive, per-role)
+5. **Attribute update grants ADD capabilities** to specific roles for specific fields (Layer 4 - additive, per-role)
 6. **All 6 actions must be available** - For role-restricted entities, combined roles and grants must provide access to all 6 actions
 7. **User authenticates as ONE role** at a time (for role-restricted entities)
 8. **No magic roles** - all roles follow same rules
@@ -106,9 +106,9 @@ trait Entity extends Role1 with Role2
 - Lists all roles that can access this entity
 - Each role uses their own action access
 
-**Entity grants** (`with updating[Role]`, `with deleting[Role]`):
-- ADD capabilities to specific roles that lack update/delete access
-- **Grants apply to both the entity AND all its attributes** automatically
+**Action grants** (`with updating[Role]`, `with deleting[Role]`):
+- ADD action capabilities to specific roles that lack update/delete access
+- **Action grants apply to both the entity AND all its attributes** automatically
 - Other roles unaffected (purely additive)
 - Can grant to multiple roles: `with updating[(Role1, Role2)]`
 - Granting to roles that already have the access is redundant but allowed
@@ -133,7 +133,7 @@ val attr = oneType                  // All entity roles (baseline)
 val attr = oneType.only[Role]    // ONLY these roles (replacement)
 val attr = oneType.exclude[Role]    // All EXCEPT these roles (subtraction)
 
-// Grants (add capability to specific roles)
+// Update grants (add update capability to specific roles)
 val attr = oneType.updating[Role]   // ADD update capability to this role
 ```
 
@@ -159,36 +159,36 @@ val attr = oneType.updating[Role]   // ADD update capability to this role
 
 ## Interaction Rules
 
-### 1. Entity Grants Apply to Entity AND All Attributes
+### 1. Action Grants Apply to Entity AND All Attributes
 
-Entity-level grants (`with updating[Role]` and `with deleting[Role]`) automatically apply to both the entity itself and all of its attributes. This ensures consistent permission checking during operations like delete-by-ID, which affects all attribute values.
+Entity-level action grants (`with updating[Role]` and `with deleting[Role]`) automatically apply to both the entity itself and all of its attributes. This ensures consistent permission checking during operations like delete-by-ID, which affects all attribute values.
 
 ```scala
 trait Post extends Member with updating[Member] {
-  val title = oneString  // Member can update (entity grant cascades)
-  val bio = oneString    // Member can update (entity grant cascades)
+  val title = oneString  // Member can update (action grant cascades)
+  val bio = oneString    // Member can update (action grant cascades)
 }
 
-// When deleting by ID, the entity grant allows deletion of the entity
+// When deleting by ID, the action grant allows deletion of the entity
 // AND all its attributes:
 Post(id).delete.transact  // ✓ Checks entity + all attribute permissions
 ```
 
-**Rationale:** Deleting an entity by ID removes all attribute values. If entity grants didn't cascade to attributes, users could be granted delete permission on the entity but be blocked from deleting individual attribute values—creating an inconsistent security model.
+**Rationale:** Deleting an entity by ID removes all attribute values. If action grants didn't cascade to attributes, users could be granted delete permission on the entity but be blocked from deleting individual attribute values—creating an inconsistent security model.
 
-### 2. Attribute Grants Are Purely Additive
+### 2. Attribute Update Grants Are Purely Additive
 
 ```scala
 trait Post extends Guest with Member with updating[Member] {
-  val bio = oneString                   // Member can update (entity grant)
-  val notes = oneString.updating[Guest] // Guest ALSO can update (attribute grant)
+  val bio = oneString                   // Member can update (action grant)
+  val notes = oneString.updating[Guest] // Guest ALSO can update (attribute update grant)
 }
 ```
 
 **Result:**
 - BOTH Member and Guest can update notes (additive)
-- Member can update bio (entity grant)
-- Guest cannot update bio (no grant)
+- Member can update bio (action grant)
+- Guest cannot update bio (no action grant)
 
 ### 3. Attribute Restrictions Apply First
 
@@ -200,7 +200,7 @@ trait Post extends Guest with Member with Admin
 }
 ```
 
-**Result:** Member cannot query/save/update secret (restriction blocks everything), even though Member has entity update grant.
+**Result:** Member cannot query/save/update secret (restriction blocks everything), even though Member has action grant for update.
 
 ### 4. Multiple Grants Accumulate
 
@@ -213,8 +213,8 @@ trait Post extends Guest with Member
 ```
 
 **Result:**
-- Member can update all attributes (entity grant)
-- Guest can update tags (attribute grant)
+- Member can update all attributes (action grant)
+- Guest can update tags (attribute update grant)
 - Both have update capability on tags
 
 ### 5. Roles with Action Access Always Use It (Unless Restricted)
@@ -228,7 +228,7 @@ trait Post extends Member with Admin {
 **Result:**
 - Member: query, subscribe, save (from role definition)
 - Admin: all actions (from `all` action)
-- No grants needed for Admin (already has capabilities)
+- No action grants needed for Admin (already has capabilities)
 
 ---
 
@@ -247,15 +247,15 @@ For each operation (query, save, update, delete) on an attribute:
    - Update: needs `update` access
    - Delete: needs `delete` access (entity-level only)
 
-3. **Check entity grants (if role lacks action access):**
+3. **Check action grants (if role lacks action access):**
    - For update: check `with updating[Roles]`
    - For delete: check `with deleting[Roles]`
-   - **Entity grants apply to both entity AND all attributes**
+   - **Action grants apply to both entity AND all attributes**
    - If role in grant: capability added ✓
 
-4. **Check attribute grants (if role lacks action access):**
+4. **Check attribute update grants (if role lacks action access):**
    - For update: check `.updating[Roles]`
-   - Attribute grants only apply to specific attributes
+   - Attribute update grants only apply to specific attributes
    - If role in grant: capability added ✓
 
 5. **Final check:**
@@ -285,18 +285,43 @@ sbt-molecule enforces at compile time:
      // Option 2: Make entity public (no roles)
      trait Post { ... }  // OK: public entities have all actions
 
-     // Option 3: Entity grants don't help (they don't provide save/insert)
+     // Option 3: Action grants don't help (they don't provide save/insert)
      trait Post extends Member
        with updating[Member]
        with deleting[Admin] { ... }  // Still ERROR: save, insert not available
      ```
 2. ✓ At least one role can query (has `query` or `read` access) - Not required for public entities
 3. ✓ At least one role can save (has `save` access) - Not required for public entities
-4. ✓ Entity grants reference roles in entity baseline
-5. ✓ Entity grants only grant to roles lacking the action access (warning if redundant)
+4. ✓ Action grants reference roles in entity baseline
+5. ✓ Action grants only grant to roles lacking the action access (warning if redundant)
 6. ✓ Attribute `.only/.exclude` reference roles in entity baseline
 7. ✓ Attribute `.updating` references roles in entity baseline
 8. ✓ Attribute `.updating` only grants to roles lacking update access (warning if redundant)
+9. ✓ **Action grants must be compatible with attribute restrictions** - Roles granted `updating[R]` or `deleting[R]` must have access to all entity attributes
+   - Validation ensures roles can't update/delete entities with attributes they can't access
+   - Example of invalid entity:
+     ```scala
+     trait Document extends Member with Admin
+       with deleting[(Member, Admin)] {  // ERROR: Member can't access secretNotes
+       val title = oneString
+       val secretNotes = oneString.only[Admin]
+     }
+     ```
+   - Error message guides fix:
+     ```
+     Entity grants deleting to role 'Member' but attribute 'secretNotes' is restricted with .only[Admin]
+     A role cannot delete an entity if it cannot access all attributes
+     ```
+   - Valid alternatives:
+     ```scala
+     // Option 1: Only grant delete to Admin
+     with deleting[Admin]
+     
+     // Option 2: Allow Member to access secretNotes
+     val secretNotes = oneString.only[(Member, Admin)]
+     ```
+10. ✓ **Action grants respect `.exclude[R]` restrictions** - Similar validation for `.exclude[R]`
+   - Ensures roles granted updating/deleting aren't excluded from any attributes
 
 ---
 
@@ -354,7 +379,7 @@ trait Post extends Guest with Member with Admin {
 
 ---
 
-### Layer 2: Role Actions - Entity Action Grants
+### Layer 2: Role Actions - Action Grants at Entity Level
 
 **Example 2a: Entity-Level Update Grant**
 
@@ -369,7 +394,7 @@ trait Comment extends Member
 
 **Permissions:**
 - Member: query, subscribe (from `read`)
-- Member: **update** (from entity grant)
+- Member: **update** (from action grant)
 
 **Example 2b: Entity-Level Delete Grant**
 
@@ -385,10 +410,10 @@ trait Comment extends Moderator with Admin
 
 **Permissions:**
 - Moderator: query, subscribe (from `read`)
-- Moderator: **delete** on entity AND all attributes (from entity grant)
+- Moderator: **delete** on entity AND all attributes (from action grant)
 - Admin: all actions
 
-**Key behavior:** The `with deleting[Moderator]` grant applies to both:
+**Key behavior:** The `with deleting[Moderator]` action grant applies to both:
 1. The Comment entity itself
 2. All attributes (text) within Comment
 
@@ -407,8 +432,8 @@ trait BlogPost extends Member
 ```
 
 **Permissions:**
-- Member: query, subscribe, **update** (from entity grant)
-- Admin: all actions, including **delete** (from entity grant)
+- Member: query, subscribe, **update** (from action grant)
+- Admin: all actions, including **delete** (from action grant)
 
 ---
 
@@ -448,7 +473,7 @@ trait Profile extends Guest with Member {
 
 ---
 
-### Layer 4: Attribute Update - Attribute Update Grant
+### Layer 4: Attribute Update - Attribute Update Grants
 
 **Example 4a: Single Role Update Grant**
 
@@ -463,7 +488,7 @@ trait Draft extends Member {
 
 **Permissions:**
 - Member on content: query, subscribe
-- Member on title: query, subscribe, **update** (from attribute grant)
+- Member on title: query, subscribe, **update** (from attribute update grant)
 
 **Example 4b: Multiple Role Update Grant**
 
@@ -493,18 +518,18 @@ trait Member extends Role with read
 trait Admin extends Role with all
 
 trait BlogPost extends Guest with Member with Admin    // Layer 1: Multiple roles
-  with updating[Member]                                // Layer 2: Entity grant
-  with deleting[Admin] {                               // Layer 2: Entity grant
+  with updating[Member]                                // Layer 2: Action grant
+  with deleting[Admin] {                               // Layer 2: Action grant
 
   val title = oneString                                // All roles
 
-  val content = oneString                              // Layer 2: Member gets entity update
+  val content = oneString                              // Layer 2: Member gets action grant
     .exclude[Guest]                                    // Layer 3: No Guest
 
   val viewCount = oneLong                              // All roles
     .updating[Guest]                                   // Layer 4: Guest can update
 
-  val internal = oneString                             // Only Admin, gets entity update + delete
+  val internal = oneString                             // Only Admin, gets action grant
     .only[Admin]                                       // Layer 3
 }
 ```
@@ -514,18 +539,18 @@ trait BlogPost extends Guest with Member with Admin    // Layer 1: Multiple role
 **Guest:**
 - title: query ✓
 - content: blocked (exclude) ✗
-- viewCount: query, **update** (attribute grant) ✓
+- viewCount: query, **update** (attribute update grant) ✓
 - internal: blocked (only Admin) ✗
 
 **Member:**
-- title: query, subscribe, **update** (entity grant) ✓
-- content: query, subscribe, **update** (entity grant) ✓
+- title: query, subscribe, **update** (action grant) ✓
+- content: query, subscribe, **update** (action grant) ✓
 - viewCount: query, subscribe ✓
 - internal: blocked (only Admin) ✗
 
 **Admin:**
 - All attributes: all actions ✓
-- Can **delete** BlogPost (entity grant) ✓
+- Can **delete** BlogPost (action grant) ✓
 
 ---
 
@@ -564,20 +589,20 @@ trait BlogPost extends Guest with Member with Moderator with Admin
 **Guest:**
 - title, views: query ✓
 - content: blocked (exclude) ✗
-- draft: query, **update** (attribute grant) ✓
+- draft: query, **update** (attribute update grant) ✓
 - flagged, featured: blocked (require) ✗
 
 **Member:**
 - title, views, content: query, subscribe, save ✓
-- title, views, content: **update** (entity grant) ✓
-- draft: query, subscribe, save, **update** (entity grant) ✓
+- title, views, content: **update** (action grant) ✓
+- draft: query, subscribe, save, **update** (action grant) ✓
 - flagged, featured: blocked (.only restriction) ✗
-- Cannot delete (no delete access, no grant) ✗
+- Cannot delete (no delete access, no action grant) ✗
 
 **Moderator:**
 - title, views, content, draft, flagged: all actions (has `write` access) ✓
 - featured: blocked (.only[Admin]) ✗
-- Can delete posts (entity grant - redundant since has delete access) ✓
+- Can delete posts (action grant - redundant since has delete access) ✓
 
 **Admin:**
 - All attributes: all actions (has `all` access) ✓
@@ -617,21 +642,21 @@ trait SharedDocument extends Viewer with Contributor with Collaborator with Owne
 
 **Viewer:**
 - title: query ✓
-- subtitle: query, **update** (attribute grant) ✓
+- subtitle: query, **update** (attribute update grant) ✓
 - content: blocked (exclude) ✗
-- tags: query, **update** (attribute grant) ✓
+- tags: query, **update** (attribute update grant) ✓
 - metadata: blocked (require) ✗
 
 **Contributor:**
-- title: query, subscribe, save, **update** (entity grant) ✓
-- subtitle: query, subscribe, save, **update** (entity grant) ✓
-- content: query, subscribe, save, **update** (entity grant) ✓
-- tags: query, subscribe, save, **update** (entity grant) ✓
+- title: query, subscribe, save, **update** (action grant) ✓
+- subtitle: query, subscribe, save, **update** (action grant) ✓
+- content: query, subscribe, save, **update** (action grant) ✓
+- tags: query, subscribe, save, **update** (action grant) ✓
 - metadata: blocked (require) ✗
 
 **Collaborator:**
 - All accessible fields: query, subscribe, save, **update** (has trait) ✓
-- tags: **update** (attribute grant - redundant) ✓
+- tags: **update** (attribute update grant - redundant) ✓
 - metadata: blocked (require) ✗
 
 **Owner:**
@@ -688,27 +713,27 @@ trait Post extends Member                           // Cannot update
 
 **Accumulation:** Multiple grants can apply:
 ```scala
-with updating[Member]              // Entity grant
-val tags = oneString.updating[Guest]  // Attribute grant
+with updating[Member]                 // Action grant
+val tags = oneString.updating[Guest]  // Attribute update grant
 // Both Member and Guest can update tags
 ```
 
 ### Why Separate Entity and Attribute Grants?
 
-**Entity grants:** Coarse-grained control that applies to entity AND all attributes
+**Action grants:** Coarse-grained control that applies to entity AND all attributes
 ```scala
 with updating[Member]  // Member can update entity + all attributes
 with deleting[Moderator]  // Moderator can delete entity + all attributes
 ```
 
-**Attribute grants:** Fine-grained control per specific field
+**Attribute update grants:** Fine-grained control per specific field
 ```scala
 val email = oneString.updating[Admin]  // Only Admin can update this specific field
 ```
 
 **Key difference:**
-- Entity grants cascade to ALL attributes automatically
-- Attribute grants apply only to the specific attribute they're attached to
+- Action grants cascade to ALL attributes automatically
+- Attribute update grants apply only to the specific attribute they're attached to
 
 ### Why Not Override Semantics?
 
@@ -720,19 +745,19 @@ val tags = oneString.updating[Guest]  // Does this mean ONLY Guest? Or Guest als
 
 **Additive is clear:**
 ```scala
-with updating[Member]              // Member can update all
+with updating[Member]                 // Member can update all
 val tags = oneString.updating[Guest]  // Guest can ALSO update tags
 ```
 
 ### Why Restrictions Are Not Grants?
 
 **Different semantics:**
-- **Grants:** Add capabilities (expanding)
+- **Action grants:** Add action capabilities (expanding)
 - **Restrictions:** Remove access (narrowing)
 
 **Example:**
 ```scala
-val secret = oneString.only[Admin]  // ONLY Admin (restrictive)
+val secret = oneString.only[Admin]     // ONLY Admin (restrictive)
 val tags = oneString.updating[Guest]   // Guest can ALSO update (additive)
 ```
 
@@ -743,15 +768,15 @@ val tags = oneString.updating[Guest]   // Guest can ALSO update (additive)
 ### The 4 Authorization Layers
 
 1. **Layer 1: Roles** - Define which roles have access to entities and what baseline actions they can perform
-2. **Layer 2: Role Actions** - Grant additional actions (updating/deleting) to roles at entity level
-3. **Layer 3: Attribute Roles** - Restrict which roles can access specific attributes (only/exclude)
-4. **Layer 4: Attribute Update** - Grant update permission to roles at attribute level
+2. **Layer 2: Role Actions** - Action grants (updating/deleting) at entity level
+3. **Layer 3: Attribute Roles** - Attribute role restrictions (only/exclude)
+4. **Layer 4: Attribute Update** - Attribute update grants at attribute level
 
 ### The Model in Four Concepts
 
 1. **Roles have action access** (what they CAN do - Layer 1)
 2. **Entities extend roles** (who CAN access - Layer 1)
-3. **Grants add capabilities** (additive, per-role - Layers 2 & 4)
+3. **Action grants add capabilities** (additive, per-role - Layers 2 & 4)
 4. **Restrictions remove access** (subtractive - Layer 3)
 
 ### Key Behaviors

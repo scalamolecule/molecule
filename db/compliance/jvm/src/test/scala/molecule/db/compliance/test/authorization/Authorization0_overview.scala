@@ -3,6 +3,7 @@ package molecule.db.compliance.test.authorization
 import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
+import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.spi.{Conn, Spi_async}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.SocialApp0_overview.*
@@ -33,7 +34,7 @@ case class Authorization0_overview(
   // ============================================================================
 
   "Layer 1 - Public entity (anyone can access)" - social0 {
-    val conn = summon[Conn]
+    val conn = summon[Conn].asInstanceOf[JdbcConn_JVM]
     for {
       _ <- Article.title("Public Article").save.transact(using conn)
       _ <- Article.title.query.get(using conn).map(_ ==> List("Public Article"))
@@ -41,7 +42,7 @@ case class Authorization0_overview(
   }
 
   "Layer 1 - Single role entity (only Member)" - social0 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn  = baseConn.withAuth("u1", "Admin")
     val memberConn = baseConn.withAuth("u2", "Member")
     for {
@@ -58,24 +59,24 @@ case class Authorization0_overview(
 
 
   // ============================================================================
-  // Layer 2: Role Actions - Entity action grants
+  // Layer 2: Role Actions - Action grants at entity level
   // ============================================================================
 
   "Layer 2 - Entity-level update grant" - social0 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn  = baseConn.withAuth("u1", "Admin")
     val memberConn = baseConn.withAuth("u2", "Member")
     for {
       id <- Comment.text("Original").save.transact(using adminConn).map(_.id)
 
-      // Member can update (entity grant)
+      // Member can update (action grant)
       _ <- Comment(id).text("Updated").update.transact(using memberConn)
       _ <- Comment.text.query.get(using memberConn).map(_ ==> List("Updated"))
     } yield ()
   }
 
   "Layer 2 - Entity-level delete grant" - social0 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val memberConn = baseConn.withAuth("u1", "Member")
     val adminConn  = baseConn.withAuth("u2", "Admin")
     for {
@@ -87,7 +88,7 @@ case class Authorization0_overview(
           err ==> "Access denied: Role 'Member' cannot delete entity 'Log'"
         }
 
-      // Admin can delete (entity grant)
+      // Admin can delete (action grant)
       _ <- Log(id).delete.transact(using adminConn)
     } yield ()
   }
@@ -98,7 +99,7 @@ case class Authorization0_overview(
   // ============================================================================
 
   "Layer 3 - Using .only[R]" - social0 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val memberConn = baseConn.withAuth("u1", "Member")
     val adminConn  = baseConn.withAuth("u2", "Admin")
     for {
@@ -119,7 +120,7 @@ case class Authorization0_overview(
   }
 
   "Layer 3 - Using .exclude[R]" - social0 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val guestConn  = baseConn.withAuth("u1", "Guest")
     val memberConn = baseConn.withAuth("u2", "Member")
     val adminConn  = baseConn.withAuth("u3", "Admin")
@@ -142,17 +143,17 @@ case class Authorization0_overview(
 
 
   // ============================================================================
-  // Layer 4: Attribute Update - Attribute update grant
+  // Layer 4: Attribute Update - Attribute update grants
   // ============================================================================
 
   "Layer 4 - Attribute-level update grant" - social0 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn  = baseConn.withAuth("u1", "Admin")
     val memberConn = baseConn.withAuth("u2", "Member")
     for {
       id <- Draft.content("Draft content").title("Draft title").save.transact(using adminConn).map(_.id)
 
-      // Member can update title (attribute grant)
+      // Member can update title (attribute update grant)
       _ <- Draft(id).title("Updated title").update.transact(using memberConn)
       _ <- Draft.title.query.get(using memberConn).map(_ ==> List("Updated title"))
 
@@ -170,7 +171,7 @@ case class Authorization0_overview(
   // ============================================================================
 
   "Composed - All layers together" - social0 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val guestConn  = baseConn.withAuth("u1", "Guest")
     val memberConn = baseConn.withAuth("u2", "Member")
     val adminConn  = baseConn.withAuth("u3", "Admin")
@@ -189,7 +190,7 @@ case class Authorization0_overview(
           err ==> "Access denied: Role 'Guest' cannot query attribute 'BlogPost.content'"
         }
 
-      // Guest can update viewCount (attribute grant)
+      // Guest can update viewCount (attribute update grant)
       _ <- BlogPost(id).viewCount(1L).update.transact(using guestConn)
       _ <- BlogPost.viewCount.query.get(using adminConn).map(_ ==> List(1L))
 
@@ -199,7 +200,7 @@ case class Authorization0_overview(
           err ==> "Access denied: Role 'Guest' cannot query attribute 'BlogPost.internal'"
         }
 
-      // Member can query and update content (entity grant)
+      // Member can query and update content (action grant)
       _ <- BlogPost.content.query.get(using memberConn).map(_ ==> List("Blog Content"))
       _ <- BlogPost(id).content("Updated Content").update.transact(using memberConn)
       _ <- BlogPost.content.query.get(using memberConn).map(_ ==> List("Updated Content"))
@@ -210,7 +211,7 @@ case class Authorization0_overview(
           err ==> "Access denied: Role 'Member' cannot query attribute 'BlogPost.internal'"
         }
 
-      // Member cannot delete (only Admin has delete grant)
+      // Member cannot delete (only Admin has action grant for delete)
       _ <- BlogPost(id).delete.transact(using memberConn)
         .map(_ ==> "Should fail").recover { case ModelError(err) =>
           err ==> "Access denied: Role 'Member' cannot delete entity 'BlogPost'"

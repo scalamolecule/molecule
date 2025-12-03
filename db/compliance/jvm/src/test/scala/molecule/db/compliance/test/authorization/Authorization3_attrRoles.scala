@@ -3,6 +3,7 @@ package molecule.db.compliance.test.authorization
 import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
+import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.spi.{Conn, Spi_async}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.SocialApp3_attr_roles.*
@@ -32,7 +33,7 @@ case class Authorization3_attrRoles(
   // ============================================================================
 
   "Attribute .only[R] - single role" - social3 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val memberConn = baseConn.withAuth("u1", "Member")
     val adminConn  = baseConn.withAuth("u2", "Admin")
     for {
@@ -56,7 +57,7 @@ case class Authorization3_attrRoles(
   }
 
   "Attribute .only[R] - tuple of roles" - social3 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val guestConn  = baseConn.withAuth("u1", "Guest")
     val memberConn = baseConn.withAuth("u2", "Member")
     val adminConn  = baseConn.withAuth("u3", "Admin")
@@ -81,7 +82,7 @@ case class Authorization3_attrRoles(
   // ============================================================================
 
   "Attribute .exclude[R] - single role" - social3 {
-    val baseConn      = summon[Conn]
+    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val guestConn     = baseConn.withAuth("u1", "Guest")
     val memberConn    = baseConn.withAuth("u2", "Member")
     val moderatorConn = baseConn.withAuth("u3", "Moderator")
@@ -104,7 +105,7 @@ case class Authorization3_attrRoles(
   }
 
   "Attribute .exclude[R] - tuple of roles" - social3 {
-    val baseConn      = summon[Conn]
+    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val guestConn     = baseConn.withAuth("u1", "Guest")
     val memberConn    = baseConn.withAuth("u2", "Member")
     val moderatorConn = baseConn.withAuth("u3", "Moderator")
@@ -140,7 +141,7 @@ case class Authorization3_attrRoles(
   // ============================================================================
 
   "Multiple attributes with different restrictions" - social3 {
-    val baseConn      = summon[Conn]
+    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val guestConn     = baseConn.withAuth("u1", "Guest")
     val memberConn    = baseConn.withAuth("u2", "Member")
     val moderatorConn = baseConn.withAuth("u3", "Moderator")
@@ -186,7 +187,7 @@ case class Authorization3_attrRoles(
   // ============================================================================
 
   "Progressive disclosure example" - social3 {
-    val baseConn      = summon[Conn]
+    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val memberConn    = baseConn.withAuth("u1", "Member")
     val moderatorConn = baseConn.withAuth("u2", "Moderator")
     val adminConn     = baseConn.withAuth("u3", "Admin")
@@ -222,7 +223,7 @@ case class Authorization3_attrRoles(
   // ============================================================================
 
   "Restrictions affect save" - social3 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val memberConn = baseConn.withAuth("u1", "Member")
     val adminConn  = baseConn.withAuth("u2", "Admin")
     for {
@@ -241,7 +242,7 @@ case class Authorization3_attrRoles(
   }
 
   "Restrictions affect update" - social3 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val memberConn = baseConn.withAuth("u1", "Member")
     val adminConn  = baseConn.withAuth("u2", "Admin")
     for {

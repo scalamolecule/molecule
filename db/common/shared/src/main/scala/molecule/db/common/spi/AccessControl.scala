@@ -265,17 +265,6 @@ trait AccessControl {
           }
 
           checkPermission(entityPermissions, roleMask, conn.proxy.mode, roleName, roleIdx, action, "entity", entityName, conn)
-
-          // If entity is public (-1) or role has entity permission, still need to check ALL attributes
-          // This prevents circumventing attribute protection by deleting the whole entity
-
-          // Use coordinate-based lookup for O(1) access
-          val attrIndices = conn.proxy.metaDb.entityAttributesNoId(entityIndex)
-          attrIndices.foreach { attrIndex =>
-            val attrPermissions = attrAccessGetter(attrIndex)
-            val attrName = conn.proxy.metaDb.attrNames(attrIndex)
-            checkPermission(attrPermissions, roleMask, conn.proxy.mode, roleName, roleIdx, action, "attribute", attrName, conn)
-          }
         }
       }
     }

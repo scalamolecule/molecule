@@ -3,6 +3,7 @@ package molecule.db.compliance.test.authorization
 import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
+import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.spi.{Conn, Spi_async}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.SocialApp1_roles.*
@@ -33,7 +34,7 @@ case class Authorization1_roles(
   // ============================================================================
 
   "Public entity - unauthenticated can access" - social1 {
-    val conn = summon[Conn]
+    val conn = summon[Conn].asInstanceOf[JdbcConn_JVM]
     for {
       _ <- Article.title("Public").preview("Preview").save.transact(using conn)
       _ <- Article.title.query.get(using conn).map(_ ==> List("Public"))
@@ -42,7 +43,7 @@ case class Authorization1_roles(
   }
 
   "Public entity - all roles can access" - social1 {
-    val baseConn = summon[Conn]
+    val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
     for {
       _ <- Article.title("Article").preview("Preview").save.transact(using baseConn)
 
@@ -59,9 +60,9 @@ case class Authorization1_roles(
   // ============================================================================
 
   "Single role entity - Member can query" - social1 {
-    val baseConn   = summon[Conn]
-    val adminConn  = baseConn.withAuth("u1", "Admin")
-    val memberConn = baseConn.withAuth("u2", "Member")
+    val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
+    val adminConn              = baseConn.withAuth("u1", "Admin")
+    val memberConn             = baseConn.withAuth("u2", "Member")
     for {
       _ <- UserProfile.displayName("Alice").bio("Bio").save.transact(using adminConn)
       _ <- UserProfile.displayName.query.get(using memberConn).map(_ ==> List("Alice"))
@@ -69,7 +70,7 @@ case class Authorization1_roles(
   }
 
   "Single role entity - Admin can save" - social1 {
-    val adminConn = summon[Conn].withAuth("u1", "Admin")
+    val adminConn = summon[Conn].asInstanceOf[JdbcConn_JVM].withAuth("u1", "Admin")
     for {
       _ <- UserProfile.displayName("Bob").bio("Bio").save.transact(using adminConn)
       _ <- UserProfile.displayName.query.get(using adminConn).map(_ ==> List("Bob"))
@@ -77,8 +78,8 @@ case class Authorization1_roles(
   }
 
   "Single role entity - other roles denied" - social1 {
-    val baseConn  = summon[Conn]
-    val adminConn = baseConn.withAuth("u1", "Admin")
+    val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
+    val adminConn              = baseConn.withAuth("u1", "Admin")
     for {
       _ <- UserProfile.displayName("Alice").bio("Bio").save.transact(using adminConn)
 
@@ -108,9 +109,9 @@ case class Authorization1_roles(
   // ============================================================================
 
   "Multiple role entity - Member can access" - social1 {
-    val baseConn   = summon[Conn]
-    val adminConn  = baseConn.withAuth("u1", "Admin")
-    val memberConn = baseConn.withAuth("u2", "Member")
+    val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
+    val adminConn              = baseConn.withAuth("u1", "Admin")
+    val memberConn             = baseConn.withAuth("u2", "Member")
     for {
       _ <- Post.content("Post content").author("Alice").save.transact(using adminConn)
       _ <- Post.content.query.get(using memberConn).map(_ ==> List("Post content"))
@@ -118,9 +119,9 @@ case class Authorization1_roles(
   }
 
   "Multiple role entity - Moderator can access" - social1 {
-    val baseConn      = summon[Conn]
-    val adminConn     = baseConn.withAuth("u1", "Admin")
-    val moderatorConn = baseConn.withAuth("u2", "Moderator")
+    val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
+    val adminConn              = baseConn.withAuth("u1", "Admin")
+    val moderatorConn          = baseConn.withAuth("u2", "Moderator")
     for {
       _ <- Post.content("Post content").author("Alice").save.transact(using adminConn)
       _ <- Post.content.query.get(using moderatorConn).map(_ ==> List("Post content"))
@@ -128,8 +129,8 @@ case class Authorization1_roles(
   }
 
   "Multiple role entity - other roles denied" - social1 {
-    val baseConn  = summon[Conn]
-    val adminConn = baseConn.withAuth("u1", "Admin")
+    val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
+    val adminConn              = baseConn.withAuth("u1", "Admin")
     for {
       _ <- Post.content("Post content").author("Alice").save.transact(using adminConn)
 
@@ -153,8 +154,8 @@ case class Authorization1_roles(
   // ============================================================================
 
   "Role with query - can query only" - social1 {
-    val baseConn  = summon[Conn]
-    val guestConn = baseConn.withAuth("u1", "Guest")
+    val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
+    val guestConn              = baseConn.withAuth("u1", "Guest")
     for {
       // Setup by unauthenticated (Article is public)
       _ <- Article.title("Title").preview("Preview").save.transact(using baseConn)
@@ -171,9 +172,9 @@ case class Authorization1_roles(
   }
 
   "Role with read - can query and subscribe" - social1 {
-    val baseConn   = summon[Conn]
-    val adminConn  = baseConn.withAuth("u1", "Admin")
-    val memberConn = baseConn.withAuth("u2", "Member")
+    val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
+    val adminConn              = baseConn.withAuth("u1", "Admin")
+    val memberConn             = baseConn.withAuth("u2", "Member")
     for {
       _ <- UserProfile.displayName("Alice").bio("Bio").save.transact(using adminConn)
 
@@ -183,8 +184,8 @@ case class Authorization1_roles(
   }
 
   "Role with all - can do everything" - social1 {
-    val baseConn  = summon[Conn]
-    val adminConn = baseConn.withAuth("u1", "Admin")
+    val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
+    val adminConn              = baseConn.withAuth("u1", "Admin")
     for {
       // Admin can save
       id <- UserProfile.displayName("Admin User").bio("Bio").save.transact(using adminConn).map(_.id)

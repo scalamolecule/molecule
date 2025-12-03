@@ -9,6 +9,7 @@ import cats.effect.IO
 import molecule.core.error.MoleculeError
 import molecule.core.util.MoleculeLogging
 import molecule.db.common.api.Savepoint
+import molecule.db.common.authentication.AuthContext
 import molecule.db.common.javaSql.{ResultSetImpl, ResultSetInterface}
 import molecule.db.common.marshalling.JdbcProxy
 import molecule.db.common.spi.{Conn, TxReport}
@@ -19,7 +20,7 @@ import zio.ZIO
 case class JdbcConn_JVM(
   override val proxy: JdbcProxy,
   private val sqlConn0: sql.Connection,
-  override val authContext: Option[molecule.db.common.api.AuthContext] = None
+  override val authContext: Option[AuthContext] = None
 ) extends Conn(proxy, authContext)
   with AutoCloseable
   with CachedConnection
@@ -29,8 +30,16 @@ case class JdbcConn_JVM(
   val sqlConn: Connection = sqlConn0
 
   /** Create a new connection with the specified authentication context */
-  override def withAuthContext(authCtx: molecule.db.common.api.AuthContext): Conn =
+  override def withAuthContext(authCtx: AuthContext): Conn =
     copy(authContext = Some(authCtx))
+
+  /** Convenience method: Create a new connection with userId and role (JVM only)
+   *
+   * This method is only available on JVM. It provides a convenient way to
+   * create authenticated connections for testing and development.
+   */
+  def withAuth(userId: String, role: String): Conn =
+    withAuthContext(AuthContext(userId, role, Map.empty[String, Any]))
 
   /** Create a new connection without authentication (public access only) */
   override def clearAuth: Conn =

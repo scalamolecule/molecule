@@ -86,20 +86,25 @@ object SocialApp0_overview extends DomainStructure {
   // ============================================================================
   // Composed Example - All layers working together
   // ============================================================================
+  // Demonstrates how attribute restrictions (Layer 3) can prevent entity-level
+  // grants (Layer 2) from being applied to certain roles, requiring attribute-level
+  // grants (Layer 4) for fine-grained control.
 
   trait BlogPost extends Guest with Member with Admin
-    with updating[Member]           // Layer 2: Entity grant
-    with deleting[Admin] {          // Layer 2: Entity grant
+    with updating[Admin]            // Layer 2: Entity grant (redundant for Admin who has update, but shows intent)
+    with deleting[Admin] {          // Layer 2: Entity grant (redundant for Admin who has delete, but shows intent)
+                                    // Note: Can't grant updating/deleting to Member due to internal.only[Admin]
 
-    val title = oneString           // All roles
+    val title = oneString           // All roles can access
 
-    val content = oneString         // All roles, Member gets entity update
-      .exclude[Guest]               // Layer 3: No Guest
+    val content = oneString         // Member and Admin can access
+      .exclude[Guest]               // Layer 3: Guest excluded
+      .updating[Member]             // Layer 4: Member gets update via attribute grant (since no entity grant)
 
-    val viewCount = oneLong         // All roles
-      .updating[Guest]              // Layer 4: Guest can update
+    val viewCount = oneLong         // All roles can access
+      .updating[Guest]              // Layer 4: Guest gets update via attribute grant
 
-    val internal = oneString        // Only Admin, gets entity update + delete
-      .only[Admin]                  // Layer 3
+    val internal = oneString        // Only Admin can access (blocks entity grants to other roles)
+      .only[Admin]                  // Layer 3: Restricts to Admin only
   }
 }

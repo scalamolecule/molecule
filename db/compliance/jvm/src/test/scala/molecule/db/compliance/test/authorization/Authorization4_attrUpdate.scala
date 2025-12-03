@@ -3,6 +3,7 @@ package molecule.db.compliance.test.authorization
 import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
+import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.spi.{Conn, Spi_async}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.SocialApp4_attr_update.*
@@ -18,12 +19,12 @@ case class Authorization4_attrUpdate(
 
 
   // ============================================================================
-  // Layer 4: Attribute Update - Which roles can update specific attributes
+  // Layer 4: Attribute Update - Attribute update grants
   // ============================================================================
   // Demonstrates:
-  // - `.updating[R]` - grant update permission at attribute level
+  // - `.updating[R]` - attribute update grant at attribute level
   // - Fine-grained control per attribute
-  // - Grants to tuple of roles
+  // - Attribute update grants to tuple of roles
   // - Special cases like Guest updating specific fields
   // ============================================================================
 
@@ -33,7 +34,7 @@ case class Authorization4_attrUpdate(
   // ============================================================================
 
   "Attribute update grant - Member can update specific attribute" - social4 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn  = baseConn.withAuth("u1", "Admin")
     val memberConn = baseConn.withAuth("u2", "Member")
     for {
@@ -52,14 +53,14 @@ case class Authorization4_attrUpdate(
   }
 
   "Attribute update grant - role without update action" - social4 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn  = baseConn.withAuth("u1", "Admin")
     val memberConn = baseConn.withAuth("u2", "Member")
     for {
       // Member has read (query + subscribe), not update action
       id <- Post.content("Content").title("Title").save.transact(using adminConn).map(_.id)
 
-      // But Member gets update on title via attribute grant
+      // But Member gets update on title via attribute update grant
       _ <- Post(id).title("Updated").update.transact(using memberConn)
       _ <- Post.title.query.get(using memberConn).map(_ ==> List("Updated"))
     } yield ()
@@ -71,7 +72,7 @@ case class Authorization4_attrUpdate(
   // ============================================================================
 
   "Attribute update grant - tuple of roles" - social4 {
-    val baseConn      = summon[Conn]
+    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn     = baseConn.withAuth("u1", "Admin")
     val memberConn    = baseConn.withAuth("u2", "Member")
     val moderatorConn = baseConn.withAuth("u3", "Moderator")
@@ -93,7 +94,7 @@ case class Authorization4_attrUpdate(
   // ============================================================================
 
   "Multiple attributes with different update grants" - social4 {
-    val baseConn      = summon[Conn]
+    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn     = baseConn.withAuth("u1", "Admin")
     val memberConn    = baseConn.withAuth("u2", "Member")
     val moderatorConn = baseConn.withAuth("u3", "Moderator")
@@ -132,7 +133,7 @@ case class Authorization4_attrUpdate(
   // ============================================================================
 
   "Guest can update specific attribute" - social4 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn  = baseConn.withAuth("u1", "Admin")
     val guestConn  = baseConn.withAuth("u2", "Guest")
     val memberConn = baseConn.withAuth("u3", "Member")
@@ -160,7 +161,7 @@ case class Authorization4_attrUpdate(
   // ============================================================================
 
   "Multiple roles with different attribute grants" - social4 {
-    val baseConn      = summon[Conn]
+    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn     = baseConn.withAuth("u1", "Admin")
     val memberConn    = baseConn.withAuth("u2", "Member")
     val moderatorConn = baseConn.withAuth("u3", "Moderator")
@@ -188,15 +189,15 @@ case class Authorization4_attrUpdate(
   // Attribute Update vs Entity Update
   // ============================================================================
 
-  "Attribute grant is independent of entity grant" - social4 {
-    val baseConn   = summon[Conn]
+  "Attribute update grant is independent of action grant" - social4 {
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn  = baseConn.withAuth("u1", "Admin")
     val memberConn = baseConn.withAuth("u2", "Member")
     for {
-      // Post entity has no entity-level update grant
+      // Post entity has no entity-level action grant
       id <- Post.content("Content").title("Title").save.transact(using adminConn).map(_.id)
 
-      // Member still gets update on title via attribute grant
+      // Member still gets update on title via attribute update grant
       _ <- Post(id).title("Updated").update.transact(using memberConn)
 
       // But not on content (no grant at all)
@@ -213,7 +214,7 @@ case class Authorization4_attrUpdate(
   // ============================================================================
 
   "Attribute update with attribute restriction" - social4 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val memberConn = baseConn.withAuth("u1", "Member")
     val adminConn  = baseConn.withAuth("u2", "Admin")
     for {
@@ -221,10 +222,10 @@ case class Authorization4_attrUpdate(
         .displayName("Alice").bio("Bio").verified(false)
         .save.transact(using adminConn).map(_.id)
 
-      // Member can update attributes they have grants for
+      // Member can update attributes they have attribute update grants for
       _ <- UserProfile(id).displayName("Updated").update.transact(using memberConn)
 
-      // Admin can update verified (has update grant)
+      // Admin can update verified (has attribute update grant)
       _ <- UserProfile(id).verified(true).update.transact(using adminConn)
       _ <- UserProfile.verified.query.get(using adminConn).map(_ ==> List(true))
     } yield ()
@@ -236,7 +237,7 @@ case class Authorization4_attrUpdate(
   // ============================================================================
 
   "Can query but not update without grant" - social4 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn  = baseConn.withAuth("u1", "Admin")
     val memberConn = baseConn.withAuth("u2", "Member")
     for {
@@ -254,7 +255,7 @@ case class Authorization4_attrUpdate(
   }
 
   "Can update only with grant" - social4 {
-    val baseConn   = summon[Conn]
+    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn  = baseConn.withAuth("u1", "Admin")
     val memberConn = baseConn.withAuth("u2", "Member")
     for {
@@ -263,7 +264,7 @@ case class Authorization4_attrUpdate(
       // Member can query title
       _ <- Post.title.query.get(using memberConn).map(_ ==> List("Title"))
 
-      // Member can update title (has attribute grant)
+      // Member can update title (has attribute update grant)
       _ <- Post(id).title("Updated Title").update.transact(using memberConn)
       _ <- Post.title.query.get(using memberConn).map(_ ==> List("Updated Title"))
     } yield ()

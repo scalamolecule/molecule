@@ -4,7 +4,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import cats.effect.IO
 import molecule.core.dataModel.DataModel
 import molecule.core.error.{ExecutionError, MoleculeError}
-import molecule.db.common.api.{AuthContext, Savepoint}
+import molecule.db.common.authentication.AuthContext
+import molecule.db.common.api.Savepoint
 import molecule.db.common.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.db.common.util.ModelUtils
 import zio.ZIO
@@ -28,17 +29,17 @@ abstract class Conn(
     * None means unauthenticated (public access only)
     *
     * IMMUTABLE: To change auth context, create a new connection with:
-    * - conn.withAuth(userId, role)
-    * - conn.withAuthContext(authContext)
-    * - conn.clearAuth
+    * - conn.withAuthContext(authContext) (available on all platforms)
+    * - conn.withAuth(userId, role) (JVM only - convenience method)
+    * - conn.clearAuth (available on all platforms)
     */
 
-  /** Create a new connection with the specified authentication context */
+  /** Create a new connection with the specified authentication context
+    *
+    * This method is available on both JVM and JS platforms but should only
+    * be called with AuthContext instances created on the backend.
+    */
   def withAuthContext(authCtx: AuthContext): Conn
-
-  /** Create a new connection with the specified userId and role */
-  def withAuth(userId: String, role: String): Conn =
-    withAuthContext(AuthContext(userId, role))
 
   /** Create a new connection without authentication (public access only) */
   def clearAuth: Conn
