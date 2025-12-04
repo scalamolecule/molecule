@@ -10,17 +10,18 @@ import molecule.DomainStructure
  *
  * 1. ROLE DEFINITIONS & ACTION PERMISSIONS
  *    - Parse Role traits that extend `Role` with action mixins
- *    - Available action mixins: query, read, save, all
+ *    - Available action mixins: query, save, insert, update, delete
  *    - Action mappings:
  *      * query = query only (bit 0)
- *      * read = query + subscribe (bits 0-1)
- *      * save = query + subscribe + save + insert + update + delete (all 6 bits)
- *      * all = query + subscribe + save + insert + update + delete (all 6 bits)
+ *      * save = save only (bit 1)
+ *      * insert = insert only (bit 2)
+ *      * update = update only (bit 3)
+ *      * delete = delete only (bit 4)
  *    - Store each role's action bitmask for later use
  *
  * 2. ENTITY ACCESS CONTROL
  *    - PUBLIC ENTITIES (no Role extensions):
- *      * Anyone can access with authenticated actions (query + subscribe = bits 0-1)
+ *      * Anyone can access with all actions (query + save + insert + update + delete = all 5 bits)
  *      * Generate meta with public flag
  *      * Example: `trait Article` (no roles) → public entity
  *
@@ -32,7 +33,7 @@ import molecule.DomainStructure
  *        → combine Member actions | Moderator actions | Admin actions
  *
  * 3. ACTION BITMASK VALIDATION
- *    - Verify that at least one role provides all 6 actions (full bitmask)
+ *    - Verify that at least one role provides all 5 actions (full bitmask)
  *    - This ensures entity can support complete CRUD operations when needed
  *    - Typically an Admin or Owner role provides this
  *
@@ -50,9 +51,9 @@ object SocialApp1_roles extends DomainStructure {
 
   // Role definitions with base action permissions
   trait Guest extends Role with query           // Can only query (read-only)
-  trait Member extends Role with read           // Can query + subscribe
-  trait Moderator extends Role with read        // Can query + subscribe
-  trait Admin extends Role with all             // Can query + subscribe + save + insert + update + delete
+  trait Member extends Role with query          // Can only query
+  trait Moderator extends Role with query       // Can only query
+  trait Admin extends Role with query with save with insert with update with delete  // Can do all actions
 
 
   // PUBLIC ENTITY - No roles = anyone can access
@@ -62,14 +63,14 @@ object SocialApp1_roles extends DomainStructure {
   }
 
   // SINGLE ROLE ENTITY - Member and Admin can access
-  // Admin provides all 6 actions (requirement: all actions must be available)
+  // Admin provides all 5 actions (requirement: all actions must be available)
   trait UserProfile extends Member with Admin {
     val displayName = oneString
     val bio         = oneString
   }
 
   // MULTIPLE ROLES ENTITY - Member, Moderator, and Admin can access
-  // Admin provides all 6 actions (requirement: all actions must be available)
+  // Admin provides all 5 actions (requirement: all actions must be available)
   trait Post extends Member with Moderator with Admin {
     val content = oneString
     val author  = oneString

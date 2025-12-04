@@ -38,7 +38,7 @@ case class Authorization2_roleActions(
     val adminConn  = baseConn.withAuth("u1", "Admin")
     val memberConn = baseConn.withAuth("u2", "Member")
     for {
-      // Member has read (query + subscribe) from role definition
+      // Member has query from role definition
       id <- Post.content("Original").title("Title").save.transact(using adminConn).map(_.id)
 
       // Member can update (action grant)
@@ -182,16 +182,16 @@ case class Authorization2_roleActions(
   // Role Actions vs Action Grants
   // ============================================================================
 
-  "Role with all actions - no grant needed" - social2 {
+  "Role with all 5 actions - no grant needed" - social2 {
     val adminConn = summon[Conn].asInstanceOf[JdbcConn_JVM].withAuth("u1", "Admin")
     for {
-      // Admin has `all` action - includes update
+      // Admin has all 5 actions - includes update
       id <- UserProfile.displayName("Admin User").bio("Bio").save.transact(using adminConn).map(_.id)
 
       // Admin can update (has update action, doesn't need action grant)
       _ <- UserProfile(id).displayName("Updated").update.transact(using adminConn)
 
-      // Admin can delete (action grant is redundant for Admin who has all actions)
+      // Admin can delete (action grant is redundant for Admin who has all 5 actions)
       _ <- UserProfile(id).delete.transact(using adminConn)
     } yield ()
   }
@@ -201,7 +201,7 @@ case class Authorization2_roleActions(
     val adminConn  = baseConn.withAuth("u1", "Admin")
     val memberConn = baseConn.withAuth("u2", "Member")
     for {
-      // Member has read (query + subscribe), not update
+      // Member has query, not update
       id <- Post.content("Content").title("Title").save.transact(using adminConn).map(_.id)
 
       // Without action grant, Member cannot update

@@ -142,8 +142,8 @@ trait SpiBaseJVM_sync
                                    (using conn0: Conn): Unit = {
     val conn           = conn0.asInstanceOf[JdbcConn_JVM]
 
-    // Check subscribe access based on authenticated role
-    checkSubscribeAccess(query.dataModel.elements, conn)
+    // Check query access based on authenticated role
+    checkQueryAccess(query.dataModel.elements, conn)
 
     val elements       = keywordsSuffixed(query.dataModel.elements, conn.proxy)
     val cleanDataModel = query.dataModel.copy(elements = elements)
@@ -156,8 +156,8 @@ trait SpiBaseJVM_sync
   }
 
   override def query_unsubscribe[Tpl](query: Query[Tpl])(using conn: Conn): Unit = {
-    // Check subscribe access based on authenticated role
-    checkSubscribeAccess(query.dataModel.elements, conn)
+    // Check query access based on authenticated role
+    checkQueryAccess(query.dataModel.elements, conn)
     conn.removeCallback(query.dataModel)
   }
 
@@ -235,6 +235,10 @@ trait SpiBaseJVM_sync
 
   override def save_inspect(save: Save)(using conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
+
+    // Check save access based on authenticated role
+    checkSaveAccess(save.dataModel.elements, conn)
+
     tryInspect("save", save.dataModel) {
       val (_, _, tableInserts) = prepareSave(save, conn)
       val inserts              = tableInserts.map(_.sql).mkString("\n\n")
@@ -244,6 +248,9 @@ trait SpiBaseJVM_sync
 
 
   override def save_validate(save: Save)(using conn: Conn): Map[String, Seq[String]] = {
+    // Check save access based on authenticated role
+    checkSaveAccess(save.dataModel.elements, conn)
+
     if (save.doValidate) {
       TxModelValidation(conn.proxy.metaDb, "save").validate(save.dataModel.elements)
     } else {
@@ -506,6 +513,10 @@ trait SpiBaseJVM_sync
 
   override def insert_inspect(insert: Insert)(using conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
+
+    // Check insert access based on authenticated role
+    checkInsertAccess(insert.dataModel.elements, conn)
+
     tryInspect("insert", insert.dataModel) {
       val (_, _, partitions, dataPartitions) = prepareInsert(insert, conn)
 
@@ -519,6 +530,9 @@ trait SpiBaseJVM_sync
 
 
   override def insert_validate(insert: Insert)(using conn: Conn): Seq[(Int, Seq[InsertError])] = {
+    // Check insert access based on authenticated role
+    checkInsertAccess(insert.dataModel.elements, conn)
+
     if (insert.doValidate) {
       InsertValidation.validate(conn, insert.dataModel.elements, insert.tpls)
     } else {
@@ -614,6 +628,10 @@ trait SpiBaseJVM_sync
 
   override def update_inspect(update: Update)(using conn0: Conn): String = {
     val conn   = conn0.asInstanceOf[JdbcConn_JVM]
+
+    // Check update access based on authenticated role
+    checkUpdateAccess(update.dataModel.elements, conn)
+
     val action = if (update.isUpsert) "UPSERT" else "UPDATE"
     tryInspect(action, update.dataModel) {
       val (_, tableUpdates, idsQuery) = prepareUpdate(update, conn)
@@ -627,6 +645,9 @@ trait SpiBaseJVM_sync
   override def update_validate(
     update: Update
   )(using conn0: Conn): Map[String, Seq[String]] = {
+    // Check update access based on authenticated role
+    checkUpdateAccess(update.dataModel.elements, conn0)
+
     if (update.doValidate) {
       val conn            = conn0.asInstanceOf[JdbcConn_JVM]
       val query2resultSet = (query: String) => {
@@ -673,6 +694,10 @@ trait SpiBaseJVM_sync
 
   override def delete_inspect(delete: Delete)(using conn0: Conn): String = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
+
+    // Check delete access based on authenticated role
+    checkDeleteAccess(delete.dataModel.elements, conn)
+
     tryInspect("delete", delete.dataModel) {
       val (_, tableDelete) = prepareDelete(delete, conn)
       val deleteSql        = tableDelete.sql(getModel2SqlQuery(Nil))
@@ -712,7 +737,11 @@ trait SpiBaseJVM_sync
     stmt: String,
     doPrint: Boolean = false
   )(using conn0: Conn): TxReport = {
-    val conn  = conn0.asInstanceOf[JdbcConn_JVM]
+    val conn = conn0.asInstanceOf[JdbcConn_JVM]
+
+    // Check rawTransact access based on authenticated role
+    checkRawTransactAccess(conn)
+
     val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
     debug("\n=============================================================================")
     debug(stmt)
@@ -738,6 +767,9 @@ trait SpiBaseJVM_sync
     query: String,
     debug: Boolean = false,
   )(using conn: Conn): List[List[Any]] = {
+    // Check rawQuery access based on authenticated role
+    checkRawQueryAccess(conn)
+
     val c            = conn.asInstanceOf[JdbcConn_JVM].sqlConn
     val statement    = c.createStatement()
     val resultSet    = statement.executeQuery(query)

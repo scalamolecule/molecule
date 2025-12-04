@@ -22,7 +22,7 @@ case class Authorization1_roles(
   // Layer 1: Roles - Which roles have access to entities
   // ============================================================================
   // Demonstrates:
-  // - Role definitions with action permissions (query, read, all)
+  // - Role definitions with action permissions (query, save, insert, update, delete)
   // - Public entities (no roles)
   // - Single role entities
   // - Multiple role entities
@@ -171,19 +171,19 @@ case class Authorization1_roles(
     } yield ()
   }
 
-  "Role with read - can query and subscribe" - social1 {
+  "Role with query - can query" - social1 {
     val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn              = baseConn.withAuth("u1", "Admin")
     val memberConn             = baseConn.withAuth("u2", "Member")
     for {
       _ <- UserProfile.displayName("Alice").bio("Bio").save.transact(using adminConn)
 
-      // Member can query (has read = query + subscribe)
+      // Member can query (has query action)
       _ <- UserProfile.displayName.query.get(using memberConn).map(_ ==> List("Alice"))
     } yield ()
   }
 
-  "Role with all - can do everything" - social1 {
+  "Role with all 5 actions - can do everything" - social1 {
     val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
     val adminConn              = baseConn.withAuth("u1", "Admin")
     for {

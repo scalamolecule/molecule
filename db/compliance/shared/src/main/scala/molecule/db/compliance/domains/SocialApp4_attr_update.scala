@@ -15,15 +15,15 @@ import molecule.DomainStructure
 object SocialApp4_attr_update extends DomainStructure {
 
   trait Guest extends Role with query
-  trait Member extends Role with read
-  trait Moderator extends Role with read
-  trait Admin extends Role with all
+  trait Member extends Role with query
+  trait Moderator extends Role with query
+  trait Admin extends Role with query with save with insert with update with delete
 
 
   // Grant update to single role on specific attribute
-  // Admin provides all 6 actions (requirement: all actions must be available)
+  // Admin provides all 5 actions (requirement: all actions must be available)
   trait Post extends Member with Admin {
-    val content = oneString // Member can read (query + subscribe)
+    val content = oneString // Member can query
 
     // Member can also update this specific attribute
     val title = oneString.updating[Member]
@@ -31,7 +31,7 @@ object SocialApp4_attr_update extends DomainStructure {
 
 
   // Grant update to multiple roles on specific attribute
-  // Admin provides all 6 actions (requirement: all actions must be available)
+  // Admin provides all 5 actions (requirement: all actions must be available)
   trait Article extends Member with Moderator with Admin {
     val preview = oneString
 
@@ -41,9 +41,9 @@ object SocialApp4_attr_update extends DomainStructure {
 
 
   // Different attributes with different update grants
-  // Admin provides all 6 actions (requirement: all actions must be available)
+  // Admin provides all 5 actions (requirement: all actions must be available)
   trait UserProfile extends Member with Moderator with Admin {
-    // Member can only read these
+    // Member can only query these
     val username = oneString
     val email    = oneString
 
@@ -59,9 +59,9 @@ object SocialApp4_attr_update extends DomainStructure {
 
 
   // Guest getting update permission on specific attribute
-  // Admin provides all 6 actions (requirement: all actions must be available)
+  // Admin provides all 5 actions (requirement: all actions must be available)
   trait Reaction extends Guest with Member with Admin {
-    val emoji = oneString // Guest can query, Member can read
+    val emoji = oneString // Guest and Member can query
 
     // Guest can update count (special case - like incrementing likes)
     val count = oneInt.updating[Guest]
@@ -69,7 +69,7 @@ object SocialApp4_attr_update extends DomainStructure {
 
 
   // Combining multiple attribute-level grants
-  // Admin provides all 6 actions (requirement: all actions must be available)
+  // Admin provides all 5 actions (requirement: all actions must be available)
   trait Comment extends Member with Moderator with Admin {
     val text = oneString
 

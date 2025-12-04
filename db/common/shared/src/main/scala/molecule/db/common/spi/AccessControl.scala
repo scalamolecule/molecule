@@ -35,13 +35,12 @@ trait AccessControl {
       //
       // Check if this role has this specific action by looking at role action bitmasks
       val roleHasAction = action match {
-        case a if a.contains("query")     => (conn.proxy.metaDb.roleQueryAction & roleMask) != 0
-        case a if a.contains("subscribe") => (conn.proxy.metaDb.roleSubscribeAction & roleMask) != 0
-        case a if a.contains("save")      => (conn.proxy.metaDb.roleSaveAction & roleMask) != 0
-        case a if a.contains("insert")    => (conn.proxy.metaDb.roleInsertAction & roleMask) != 0
-        case a if a.contains("update")    => (conn.proxy.metaDb.roleUpdateAction & roleMask) != 0
-        case a if a.contains("delete")    => (conn.proxy.metaDb.roleDeleteAction & roleMask) != 0
-        case _                            => false
+        case a if a.contains("query")  => (conn.proxy.metaDb.roleQueryAction & roleMask) != 0
+        case a if a.contains("save")   => (conn.proxy.metaDb.roleSaveAction & roleMask) != 0
+        case a if a.contains("insert") => (conn.proxy.metaDb.roleInsertAction & roleMask) != 0
+        case a if a.contains("update") => (conn.proxy.metaDb.roleUpdateAction & roleMask) != 0
+        case a if a.contains("delete") => (conn.proxy.metaDb.roleDeleteAction & roleMask) != 0
+        case _                         => false
       }
 
       if (!roleHasAction) {
@@ -304,15 +303,6 @@ trait AccessControl {
     )
   }
 
-  protected def checkSubscribeAccess(elements: List[Element], conn: Conn): Unit = {
-    checkAccess(
-      elements,
-      conn,
-      "subscribe to",
-      conn.proxy.metaDb.subscribeAccessEntities,
-      conn.proxy.metaDb.subscribeAccessAttributes
-    )
-  }
 
   protected def checkSaveAccess(elements: List[Element], conn: Conn): Unit = {
     checkAccess(
@@ -381,6 +371,74 @@ trait AccessControl {
           conn.proxy.metaDb.deleteAccessEntities,
           conn.proxy.metaDb.deleteAccessAttributes
         )
+    }
+  }
+
+  protected def checkRawQueryAccess(conn: Conn): Unit = {
+    // Skip access control if no roles are defined in the domain
+    if (conn.proxy.metaDb.roleIndex.isEmpty) {
+      return
+    }
+
+    conn.authContext match {
+      case None =>
+        // No authentication context - raw queries always require authentication
+        throw ModelError(
+          "Access denied: Raw SQL queries require authentication. " +
+            "Please authenticate with a role that has rawQuery access."
+        )
+
+      case Some(authCtx) =>
+        val roleIndex = conn.proxy.metaDb.roleIndex.get(authCtx.role) match {
+          case Some(index) => index
+          case None        =>
+            throw ModelError(s"Access denied: Unknown role '${authCtx.role}'")
+        }
+
+        // Check if role has rawQuery action by checking the role action bitmask
+        val roleMask = 1 << roleIndex
+        val hasRawQueryAccess = (conn.proxy.metaDb.roleRawQueryAction & roleMask) != 0
+
+        if (!hasRawQueryAccess) {
+          throw ModelError(
+            s"Access denied: Role '${authCtx.role}' does not have rawQuery access. " +
+              "Raw SQL queries require explicit rawQuery permission."
+          )
+        }
+    }
+  }
+
+  protected def checkRawTransactAccess(conn: Conn): Unit = {
+    // Skip access control if no roles are defined in the domain
+    if (conn.proxy.metaDb.roleIndex.isEmpty) {
+      return
+    }
+
+    conn.authContext match {
+      case None =>
+        // No authentication context - raw transactions always require authentication
+        throw ModelError(
+          "Access denied: Raw SQL transactions require authentication. " +
+            "Please authenticate with a role that has rawTransact access."
+        )
+
+      case Some(authCtx) =>
+        val roleIndex = conn.proxy.metaDb.roleIndex.get(authCtx.role) match {
+          case Some(index) => index
+          case None        =>
+            throw ModelError(s"Access denied: Unknown role '${authCtx.role}'")
+        }
+
+        // Check if role has rawTransact action by checking the role action bitmask
+        val roleMask = 1 << roleIndex
+        val hasRawTransactAccess = (conn.proxy.metaDb.roleRawTransactAction & roleMask) != 0
+
+        if (!hasRawTransactAccess) {
+          throw ModelError(
+            s"Access denied: Role '${authCtx.role}' does not have rawTransact access. " +
+              "Raw SQL transactions require explicit rawTransact permission."
+          )
+        }
     }
   }
 }

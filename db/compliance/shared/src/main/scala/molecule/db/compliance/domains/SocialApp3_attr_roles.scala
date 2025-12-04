@@ -15,9 +15,9 @@ import molecule.DomainStructure
 object SocialApp3_attr_roles extends DomainStructure {
 
   trait Guest extends Role with query
-  trait Member extends Role with read
-  trait Moderator extends Role with read
-  trait Admin extends Role with all
+  trait Member extends Role with query
+  trait Moderator extends Role with query
+  trait Admin extends Role with query with save with insert with update with delete
 
 
   // Using .only[R] to restrict to specific role(s)

@@ -12,12 +12,12 @@ import molecule.DomainStructure
  * After understanding each layer individually, see the composed example
  * at the end showing how they all work together.
  */
-object SocialApp0_overview extends DomainStructure {
+object SocialApp_overview extends DomainStructure {
 
   // Role definitions
   trait Guest extends Role with query
-  trait Member extends Role with read
-  trait Admin extends Role with all
+  trait Member extends Role with query
+  trait Admin extends Role with query with save with insert with update with delete
 
 
   // ============================================================================
@@ -29,7 +29,7 @@ object SocialApp0_overview extends DomainStructure {
     val title = oneString
   }
 
-  // Single role entity (Admin provides all 6 actions)
+  // Single role entity (Admin provides all 5 actions)
   trait Post extends Member with Admin {
     val content = oneString
   }
@@ -39,7 +39,7 @@ object SocialApp0_overview extends DomainStructure {
   // Layer 2: Entity Action Grants
   // ============================================================================
 
-  // Entity-level update grant (Admin provides all 6 actions)
+  // Entity-level update grant (Admin provides all 5 actions)
   trait Comment extends Member with Admin
     with updating[Member] {
     val text = oneString
@@ -63,7 +63,7 @@ object SocialApp0_overview extends DomainStructure {
     val apiKey = oneString.only[Admin]
   }
 
-  // Using .exclude[R] (Admin provides all 6 actions)
+  // Using .exclude[R] (Admin provides all 5 actions)
   trait Profile extends Guest with Member with Admin {
     val username = oneString
 
@@ -75,7 +75,7 @@ object SocialApp0_overview extends DomainStructure {
   // Layer 4: Attribute Update Grant
   // ============================================================================
 
-  // Admin provides all 6 actions
+  // Admin provides all 5 actions
   trait Draft extends Member with Admin {
     val content = oneString
 

@@ -50,7 +50,7 @@ trait Post extends Guest with Member with Admin {
 |--------|-------------------|----------|
 | **Validation** | Runtime | Compile-time ✓ |
 | **Type safety** | Schema-level only | Full Scala type system ✓ |
-| **Action granularity** | Custom resolver logic | Built-in 6 actions ✓ |
+| **Action granularity** | Custom resolver logic | Built-in 5 actions ✓ |
 | **Boilerplate** | Middleware per resolver | Zero ✓ |
 | **Expressiveness** | Limited to directives | Rich trait composition ✓ |
 | **Error messages** | Generic | Specific attribute/entity ✓ |
@@ -332,8 +332,8 @@ p, admin, post.secret, write
 **Molecule equivalent:**
 ```scala
 trait Guest extends Role with query
-trait Member extends Role with read with save
-trait Admin extends Role with all
+trait Member extends Role with query with save
+trait Admin extends Role with query with save with insert with update with delete
 
 trait Post extends Guest with Member with Admin
   with updating[Member]
@@ -398,8 +398,8 @@ if (ability.can('update', post, 'content')) {
 **Molecule equivalent:**
 ```scala
 trait Guest extends Role with query
-trait Member extends Role with read with save
-trait Admin extends Role with all
+trait Member extends Role with query with save
+trait Admin extends Role with query with save with insert with update with delete
 
 trait Post extends Guest with Member with Admin
   with updating[Member]
@@ -454,9 +454,9 @@ Post(id).content("new").update.transact  // Automatically enforced
 ### Molecule
 ```scala
 trait Guest extends Role with query
-trait Member extends Role with read with save
-trait Moderator extends Role with read with write
-trait Admin extends Role with all
+trait Member extends Role with query with save
+trait Moderator extends Role with query with save with insert with update with delete
+trait Admin extends Role with query with save with insert with update with delete
 
 trait BlogPost extends Guest with Member with Moderator with Admin
   with updating[Member]      // Members can edit their posts

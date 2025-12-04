@@ -6,10 +6,10 @@ import molecule.db.common.api.Api_async
 import molecule.db.common.facade.JdbcConn_JVM
 import molecule.db.common.spi.{Conn, Spi_async}
 import molecule.db.common.util.Executor.*
-import molecule.db.compliance.domains.dsl.SocialApp0_overview.*
+import molecule.db.compliance.domains.dsl.SocialApp_overview.*
 import molecule.db.compliance.setup.DbProviders
 
-case class Authorization0_overview(
+case class Authorization_overview(
   suite: MUnit,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
@@ -25,7 +25,7 @@ case class Authorization0_overview(
   // layer in isolation, followed by a composed example showing how they work
   // together.
   //
-  // These examples align with AUTHORIZATION_MODEL.md and SocialApp0_overview.scala
+  // These examples align with AUTHORIZATION_MODEL.md and SocialApp_overview.scala
   // ============================================================================
 
 

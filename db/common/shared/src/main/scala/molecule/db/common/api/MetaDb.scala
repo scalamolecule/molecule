@@ -40,17 +40,15 @@ trait MetaDb {
    * Used to check authenticated user's permissions on public entities
    */
   val roleQueryAction: Int = 0
-  val roleSubscribeAction: Int = 0
   val roleSaveAction: Int = 0
   val roleInsertAction: Int = 0
   val roleUpdateAction: Int = 0
   val roleDeleteAction: Int = 0
+  val roleRawQueryAction: Int = 0
+  val roleRawTransactAction: Int = 0
 
   val queryAccessEntities  : IArray[Int] = IArray.empty[Int]
   val queryAccessAttributes: IArray[Int] = IArray.empty[Int]
-
-  val subscribeAccessEntities  : IArray[Int] = IArray.empty[Int]
-  val subscribeAccessAttributes: IArray[Int] = IArray.empty[Int]
 
   val saveAccessEntities  : IArray[Int] = IArray.empty[Int]
   val saveAccessAttributes: IArray[Int] = IArray.empty[Int]
@@ -63,6 +61,12 @@ trait MetaDb {
 
   val deleteAccessEntities  : IArray[Int] = IArray.empty[Int]
   val deleteAccessAttributes: IArray[Int] = IArray.empty[Int]
+
+  val rawQueryAccessEntities  : IArray[Int] = IArray.empty[Int]
+  val rawQueryAccessAttributes: IArray[Int] = IArray.empty[Int]
+
+  val rawTransactAccessEntities  : IArray[Int] = IArray.empty[Int]
+  val rawTransactAccessAttributes: IArray[Int] = IArray.empty[Int]
 }
 
 trait MetaDb_h2 extends MetaDb

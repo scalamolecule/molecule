@@ -16,13 +16,13 @@ import molecule.DomainStructure
 object SocialApp2_role_actions extends DomainStructure {
 
   trait Guest extends Role with query
-  trait Member extends Role with read
-  trait Moderator extends Role with read
-  trait Admin extends Role with all
+  trait Member extends Role with query
+  trait Moderator extends Role with query
+  trait Admin extends Role with query with save with insert with update with delete
 
 
   // Entity-level update grant to single role
-  // Base: Member has read, Admin has all (all 6 actions covered)
+  // Base: Member has query, Admin has all (all 5 actions covered)
   // Grant: Member can also update all attributes
   trait Post extends Member with Admin
     with updating[Member] {
@@ -32,7 +32,7 @@ object SocialApp2_role_actions extends DomainStructure {
 
 
   // Entity-level delete grant to single role
-  // Base: Moderator has read, Admin has all (all 6 actions covered)
+  // Base: Moderator has query, Admin has all (all 5 actions covered)
   // Grant: Moderator can also delete
   trait Comment extends Moderator with Admin
     with deleting[Moderator] {

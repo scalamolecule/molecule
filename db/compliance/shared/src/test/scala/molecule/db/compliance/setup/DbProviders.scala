@@ -16,5 +16,6 @@ trait DbProviders { self: DbConnection & Platform =>
   def social2(test: Conn ?=> Any): Any = ???
   def social3(test: Conn ?=> Any): Any = ???
   def social4(test: Conn ?=> Any): Any = ???
+  def rawAccess(test: Conn ?=> Any): Any = ???
   def segments(test: Conn ?=> Any): Any = ???
 }

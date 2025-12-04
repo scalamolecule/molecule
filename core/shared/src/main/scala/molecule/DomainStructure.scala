@@ -269,21 +269,14 @@ abstract class DomainStructure {
   // User-defined roles need to extend this
   trait Role
 
-  // Entity-level authentication requirement
-  trait Authenticated
-
   sealed trait Action
   trait query extends Action
-  trait subscribe extends Action
   trait save extends Action
   trait insert extends Action
   trait update extends Action
   trait delete extends Action
-
-  // Convenience action collections
-  trait read extends query with subscribe
-  trait write extends save with insert with update with delete
-  trait all extends read with write
+  trait rawQuery extends Action    // Raw SQL SELECT queries (read-only)
+  trait rawTransact extends Action // Raw SQL mutations (dangerous!)
 
   /** Evidence that A is either a single Role or tuple of Roles */
   trait RolesOnly[A]

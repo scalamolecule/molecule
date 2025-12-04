@@ -17,16 +17,18 @@ Authorization in Molecule is built on 4 distinct concepts that work together:
 
 These layers build on each other, providing progressively finer control.
 
+**Note:** Raw SQL actions (rawQuery, rawTransact) operate **outside** these 4 layers and only check role-level permissions.
+
 ---
 
 ## Core Principles
 
-1. **Public entities (no roles) are unrestricted** - Entities with no roles can be accessed by anyone with all 6 actions (query, subscribe, save, insert, update, delete) without authentication
+1. **Public entities (no roles) are unrestricted** - Entities with no roles can be accessed by anyone with all 5 actions (query, save, insert, update, delete) without authentication
 2. **Roles define baseline capabilities** via action traits (Layer 1)
 3. **Action grants ADD capabilities** to specific roles (Layer 2 - additive, per-role)
 4. **Attribute restrictions NARROW access** from entity baseline (Layer 3 - restrictive)
 5. **Attribute update grants ADD capabilities** to specific roles for specific fields (Layer 4 - additive, per-role)
-6. **All 6 actions must be available** - For role-restricted entities, combined roles and grants must provide access to all 6 actions
+6. **All 5 actions must be available** - For role-restricted entities, combined roles and grants must provide access to all 5 actions
 7. **User authenticates as ONE role** at a time (for role-restricted entities)
 8. **No magic roles** - all roles follow same rules
 9. **One entity = one database table** (no entity variations)
@@ -35,24 +37,42 @@ These layers build on each other, providing progressively finer control.
 
 ## Action Traits
 
-### Atomic Actions
+### Core Actions (CRUD)
 
 ```scala
 trait query extends Action      // Read data via queries
-trait subscribe extends Action  // Reactive queries
 trait save extends Action       // Create single entity
 trait insert extends Action     // Batch insert multiple entities
 trait update extends Action     // Modify existing data
 trait delete extends Action     // Remove data
 ```
 
-### Convenience Collections
+### Raw SQL Actions (Advanced/Dangerous)
 
 ```scala
-trait read extends query with subscribe
-trait write extends save with insert with update with delete
-trait all extends read with write  // All 6 actions
+trait rawQuery extends Action    // Raw SQL SELECT queries (read-only)
+trait rawTransact extends Action // Raw SQL mutations (dangerous!)
 ```
+
+The raw SQL actions provide escape hatches for advanced use cases not covered by Molecule's query API. They operate **outside** the 4-layer authorization model and should be granted sparingly:
+
+- **rawQuery** - Allows running arbitrary SELECT queries. Useful for:
+  - Complex analytics (window functions, subqueries, aggregations)
+  - Database-specific features not supported by Molecule
+  - Custom reporting queries
+  - Read-only, so safer than rawTransact
+  - **Warning:** Can read ANY data in the database, bypassing all entity/attribute restrictions
+
+- **rawTransact** - Allows running arbitrary SQL mutations (INSERT, UPDATE, DELETE, DDL). Extremely dangerous because:
+  - Bypasses ALL entity/attribute-level authorization
+  - Can modify any table in the database
+  - Can escalate privileges (e.g., change user roles)
+  - Can perform DDL operations (ALTER, DROP tables)
+  - Should only be granted to trusted admin/DBA roles
+
+**Key Difference from Core Actions:**
+- Core actions (query, save, insert, update, delete) check entity and attribute permissions
+- Raw SQL actions check ONLY the role's action permissions - no entity/attribute restrictions apply
 
 ---
 
@@ -68,9 +88,11 @@ trait RoleName extends Role with action1 with action2 ...
 
 ```scala
 trait Guest extends Role with query
-trait Member extends Role with read with save  // query + subscribe + save
-trait Moderator extends Role with read with write  // All 6 actions
-trait Admin extends Role with all  // All 6 actions
+trait Member extends Role with query with save
+trait Moderator extends Role with query with save with insert with update with delete
+trait Admin extends Role with query with save with insert with update with delete
+trait Analyst extends Role with query with rawQuery  // Can run custom analytics queries
+trait DBA extends Role with query with save with insert with update with delete with rawQuery with rawTransact  // Full access
 ```
 
 **Limit:** Up to 32 different roles per domain.
@@ -99,7 +121,7 @@ trait Entity extends Role1 with Role2
 **Public entities** (no roles):
 - Entities that don't extend any roles are public
 - Anyone can access without authentication
-- All 6 actions available (query, subscribe, save, insert, update, delete)
+- All 5 actions available (query, save, insert, update, delete)
 - Cannot use authorization features (grants, restrictions) on public entities
 
 **Entity baseline** (`extends Role1 with Role2 ...`):
@@ -226,8 +248,8 @@ trait Post extends Member with Admin {
 ```
 
 **Result:**
-- Member: query, subscribe, save (from role definition)
-- Admin: all actions (from `all` action)
+- Member: query, save (from role definition)
+- Admin: all actions (from role definition)
 - No action grants needed for Admin (already has capabilities)
 
 ---
@@ -268,18 +290,18 @@ For each operation (query, save, update, delete) on an attribute:
 
 sbt-molecule enforces at compile time:
 
-1. ✓ **All 6 actions must be available** - For role-restricted entities, the combined roles (and their action grants) must provide access to all 6 actions: query, subscribe, save, insert, update, delete
+1. ✓ **All 5 actions must be available** - For role-restricted entities, the combined roles (and their action grants) must provide access to all 5 actions: query, save, insert, update, delete
    - Public entities (no roles) automatically satisfy this requirement
    - This prevents deadlock scenarios where data can be created but not read, or read but not created
    - Example of invalid entity:
      ```scala
-     trait Member extends Role with read  // Only query + subscribe
+     trait Member extends Role with query  // Only query
      trait Post extends Member { ... }    // ERROR: save, insert, update, delete not available
      ```
    - Valid alternatives:
      ```scala
      // Option 1: Add role with missing actions
-     trait Admin extends Role with all
+     trait Admin extends Role with query with save with insert with update with delete
      trait Post extends Member with Admin { ... }  // OK: all actions covered
 
      // Option 2: Make entity public (no roles)
@@ -290,7 +312,7 @@ sbt-molecule enforces at compile time:
        with updating[Member]
        with deleting[Admin] { ... }  // Still ERROR: save, insert not available
      ```
-2. ✓ At least one role can query (has `query` or `read` access) - Not required for public entities
+2. ✓ At least one role can query (has `query` access) - Not required for public entities
 3. ✓ At least one role can save (has `save` access) - Not required for public entities
 4. ✓ Action grants reference roles in entity baseline
 5. ✓ Action grants only grant to roles lacking the action access (warning if redundant)
@@ -339,7 +361,7 @@ trait Article {
 
 **Permissions:**
 - Public entity (no roles)
-- **Unauthenticated users**: All 6 actions available (query, subscribe, save, insert, update, delete)
+- **Unauthenticated users**: All 5 actions available (query, save, insert, update, delete)
 - **Authenticated users**: Must follow their role's action permissions
   - Rationale: Aligns with industry standards (AWS, GCP, PostgreSQL, GitHub)
   - Security: Prevents privilege escalation attacks
@@ -349,7 +371,7 @@ trait Article {
 **Example 1b: Single Role Entity**
 
 ```scala
-trait Member extends Role with read
+trait Member extends Role with query
 
 trait Post extends Member {
   val content = oneString
@@ -358,14 +380,14 @@ trait Post extends Member {
 
 **Permissions:**
 - Only Member can access
-- Member: query, subscribe (from `read`)
+- Member: query
 
 **Example 1c: Multiple Role Entity**
 
 ```scala
 trait Guest extends Role with query
-trait Member extends Role with read
-trait Admin extends Role with all
+trait Member extends Role with query with save
+trait Admin extends Role with query with save with insert with update with delete
 
 trait Post extends Guest with Member with Admin {
   val title = oneString
@@ -374,7 +396,7 @@ trait Post extends Guest with Member with Admin {
 
 **Permissions:**
 - Guest: query
-- Member: query, subscribe
+- Member: query, save
 - Admin: all actions
 
 ---
@@ -384,7 +406,7 @@ trait Post extends Guest with Member with Admin {
 **Example 2a: Entity-Level Update Grant**
 
 ```scala
-trait Member extends Role with read
+trait Member extends Role with query
 
 trait Comment extends Member
   with updating[Member] {
@@ -393,14 +415,14 @@ trait Comment extends Member
 ```
 
 **Permissions:**
-- Member: query, subscribe (from `read`)
+- Member: query
 - Member: **update** (from action grant)
 
 **Example 2b: Entity-Level Delete Grant**
 
 ```scala
-trait Moderator extends Role with read
-trait Admin extends Role with all
+trait Moderator extends Role with query
+trait Admin extends Role with query with save with insert with update with delete
 
 trait Comment extends Moderator with Admin
   with deleting[Moderator] {
@@ -409,7 +431,7 @@ trait Comment extends Moderator with Admin
 ```
 
 **Permissions:**
-- Moderator: query, subscribe (from `read`)
+- Moderator: query
 - Moderator: **delete** on entity AND all attributes (from action grant)
 - Admin: all actions
 
@@ -422,9 +444,10 @@ This ensures that `Comment(id).delete.transact` succeeds, as the system checks b
 **Example 2c: Combining Both Grants**
 
 ```scala
-trait Member extends Role with read
+trait Member extends Role with query
+trait Admin extends Role with query with save with insert with update with delete
 
-trait BlogPost extends Member
+trait BlogPost extends Member with Admin
   with updating[Member]
   with deleting[Admin] {
   val content = oneString
@@ -432,7 +455,7 @@ trait BlogPost extends Member
 ```
 
 **Permissions:**
-- Member: query, subscribe, **update** (from action grant)
+- Member: query, **update** (from action grant)
 - Admin: all actions, including **delete** (from action grant)
 
 ---
@@ -442,8 +465,8 @@ trait BlogPost extends Member
 **Example 3a: Using .only[R]**
 
 ```scala
-trait Member extends Role with read
-trait Admin extends Role with all
+trait Member extends Role with query
+trait Admin extends Role with query with save with insert with update with delete
 
 trait Settings extends Member with Admin {
   val theme = oneString              // Both roles
@@ -459,7 +482,7 @@ trait Settings extends Member with Admin {
 
 ```scala
 trait Guest extends Role with query
-trait Member extends Role with read
+trait Member extends Role with query with save
 
 trait Profile extends Guest with Member {
   val username = oneString              // Both roles
@@ -478,7 +501,7 @@ trait Profile extends Guest with Member {
 **Example 4a: Single Role Update Grant**
 
 ```scala
-trait Member extends Role with read
+trait Member extends Role with query
 
 trait Draft extends Member {
   val content = oneString                // Member can read
@@ -487,14 +510,14 @@ trait Draft extends Member {
 ```
 
 **Permissions:**
-- Member on content: query, subscribe
-- Member on title: query, subscribe, **update** (from attribute update grant)
+- Member on content: query
+- Member on title: query, **update** (from attribute update grant)
 
 **Example 4b: Multiple Role Update Grant**
 
 ```scala
-trait Member extends Role with read
-trait Moderator extends Role with read
+trait Member extends Role with query
+trait Moderator extends Role with query
 
 trait Page extends Member with Moderator {
   val body = oneString
@@ -503,8 +526,8 @@ trait Page extends Member with Moderator {
 ```
 
 **Permissions:**
-- Member: query, subscribe on all, **update** on tags
-- Moderator: query, subscribe on all, **update** on tags
+- Member: query on all, **update** on tags
+- Moderator: query on all, **update** on tags
 
 ---
 
@@ -514,8 +537,8 @@ This example demonstrates how all 4 layers work together in a single entity:
 
 ```scala
 trait Guest extends Role with query
-trait Member extends Role with read
-trait Admin extends Role with all
+trait Member extends Role with query with save
+trait Admin extends Role with query with save with insert with update with delete
 
 trait BlogPost extends Guest with Member with Admin    // Layer 1: Multiple roles
   with updating[Member]                                // Layer 2: Action grant
@@ -543,9 +566,9 @@ trait BlogPost extends Guest with Member with Admin    // Layer 1: Multiple role
 - internal: blocked (only Admin) ✗
 
 **Member:**
-- title: query, subscribe, **update** (action grant) ✓
-- content: query, subscribe, **update** (action grant) ✓
-- viewCount: query, subscribe ✓
+- title: query, save, **update** (action grant) ✓
+- content: query, save, **update** (action grant) ✓
+- viewCount: query, save ✓
 - internal: blocked (only Admin) ✗
 
 **Admin:**
@@ -558,9 +581,9 @@ trait BlogPost extends Guest with Member with Admin    // Layer 1: Multiple role
 
 ```scala
 trait Guest extends Role with query
-trait Member extends Role with read with save
-trait Moderator extends Role with read with write  // All actions
-trait Admin extends Role with all
+trait Member extends Role with query with save
+trait Moderator extends Role with query with save with insert with update with delete
+trait Admin extends Role with query with save with insert with update with delete
 
 trait BlogPost extends Guest with Member with Moderator with Admin
   with updating[Member]    // Members can edit
@@ -593,19 +616,19 @@ trait BlogPost extends Guest with Member with Moderator with Admin
 - flagged, featured: blocked (require) ✗
 
 **Member:**
-- title, views, content: query, subscribe, save ✓
+- title, views, content: query, save ✓
 - title, views, content: **update** (action grant) ✓
-- draft: query, subscribe, save, **update** (action grant) ✓
+- draft: query, save, **update** (action grant) ✓
 - flagged, featured: blocked (.only restriction) ✗
 - Cannot delete (no delete access, no action grant) ✗
 
 **Moderator:**
-- title, views, content, draft, flagged: all actions (has `write` access) ✓
+- title, views, content, draft, flagged: all actions ✓
 - featured: blocked (.only[Admin]) ✗
 - Can delete posts (action grant - redundant since has delete access) ✓
 
 **Admin:**
-- All attributes: all actions (has `all` access) ✓
+- All attributes: all actions ✓
 
 ---
 
@@ -613,9 +636,9 @@ trait BlogPost extends Guest with Member with Moderator with Admin
 
 ```scala
 trait Viewer extends Role with query
-trait Contributor extends Role with read with save
-trait Collaborator extends Role with read with save with update
-trait Owner extends Role with read with write
+trait Contributor extends Role with query with save
+trait Collaborator extends Role with query with save with update
+trait Owner extends Role with query with save with insert with update with delete
 
 trait SharedDocument extends Viewer with Contributor with Collaborator with Owner
   with updating[Contributor]  // Contributors can update
@@ -648,19 +671,19 @@ trait SharedDocument extends Viewer with Contributor with Collaborator with Owne
 - metadata: blocked (require) ✗
 
 **Contributor:**
-- title: query, subscribe, save, **update** (action grant) ✓
-- subtitle: query, subscribe, save, **update** (action grant) ✓
-- content: query, subscribe, save, **update** (action grant) ✓
-- tags: query, subscribe, save, **update** (action grant) ✓
+- title: query, save, **update** (action grant) ✓
+- subtitle: query, save, **update** (action grant) ✓
+- content: query, save, **update** (action grant) ✓
+- tags: query, save, **update** (action grant) ✓
 - metadata: blocked (require) ✗
 
 **Collaborator:**
-- All accessible fields: query, subscribe, save, **update** (has trait) ✓
+- All accessible fields: query, save, **update** (has trait) ✓
 - tags: **update** (attribute update grant - redundant) ✓
 - metadata: blocked (require) ✗
 
 **Owner:**
-- All attributes: all actions (has `write` access) ✓
+- All attributes: all actions ✓
 
 ---
 
@@ -683,6 +706,26 @@ Post(id).title("New").update.transact     // ✓ or ✗ based on role
 Post(id).delete.transact                  // ✓ or ✗ based on role
 ```
 
+### Raw SQL Access
+
+```scala
+// Raw query (read-only) - checks ONLY role permissions
+conn.rawQuery(
+  "SELECT * FROM Post WHERE created > ?",
+  List(timestamp)
+)
+// ✓ if role has rawQuery action
+// ✗ otherwise
+
+// Raw transact (dangerous!) - checks ONLY role permissions
+conn.rawTransact(
+  "UPDATE Person SET accessRole = 'Admin' WHERE id = ?"
+)
+// ✓ if role has rawTransact action
+// ✗ otherwise
+// Warning: Bypasses ALL entity/attribute restrictions!
+```
+
 ### Error Messages
 
 When authorization fails:
@@ -697,6 +740,11 @@ Post(id).delete.transact
 
 // If Member lacks delete capability:
 // ModelError: Access denied: Role 'Member' cannot delete entity 'Post'
+
+conn.rawQuery("SELECT * FROM Post")
+
+// If Guest lacks rawQuery capability:
+// ModelError: Access denied: Role 'Guest' cannot execute raw queries
 ```
 
 ---
@@ -765,12 +813,13 @@ val tags = oneString.updating[Guest]   // Guest can ALSO update (additive)
 
 ## Summary
 
-### The 4 Authorization Layers
+### The 4 Authorization Layers (+ Raw SQL)
 
 1. **Layer 1: Roles** - Define which roles have access to entities and what baseline actions they can perform
 2. **Layer 2: Role Actions** - Action grants (updating/deleting) at entity level
 3. **Layer 3: Attribute Roles** - Attribute role restrictions (only/exclude)
 4. **Layer 4: Attribute Update** - Attribute update grants at attribute level
+5. **Raw SQL Actions** - Escape hatch actions (rawQuery/rawTransact) that operate outside the 4-layer model
 
 ### The Model in Four Concepts
 
@@ -778,6 +827,7 @@ val tags = oneString.updating[Guest]   // Guest can ALSO update (additive)
 2. **Entities extend roles** (who CAN access - Layer 1)
 3. **Action grants add capabilities** (additive, per-role - Layers 2 & 4)
 4. **Restrictions remove access** (subtractive - Layer 3)
+5. **Raw SQL bypasses all** (role-level only - no entity/attribute checks)
 
 ### Key Behaviors
 
@@ -786,6 +836,7 @@ val tags = oneString.updating[Guest]   // Guest can ALSO update (additive)
 - **Roles with action access can always use it** (unless restricted)
 - **Only grant to roles that lack the action access** (otherwise redundant)
 - **Restrictions checked first, then grants applied**
+- **Raw SQL actions check ONLY role permissions** - all entity/attribute restrictions are bypassed
 
 ### Advantages
 
@@ -795,3 +846,5 @@ val tags = oneString.updating[Guest]   // Guest can ALSO update (additive)
 - ✓ **Flexible** - additive grants allow fine-grained control
 - ✓ **Natural syntax** - reads like English
 - ✓ **Type-safe** - full Scala type system backing
+- ✓ **Escape hatches** - raw SQL access for advanced use cases
+- ✓ **Escape hatches** - raw SQL access for advanced use cases
