@@ -3,7 +3,7 @@ package molecule.db.compliance.test.authorization
 import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
-import molecule.db.common.facade.JdbcConn_JVM
+
 import molecule.db.common.spi.{Conn, Spi_async}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.SocialApp3_attr_roles.*
@@ -33,10 +33,10 @@ case class Authorization3_attrRoles(
   // ============================================================================
 
   "Attribute .only[R] - single role" - social3 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val memberConn = baseConn.withAuth("u1", "Member")
-    val adminConn  = baseConn.withAuth("u2", "Admin")
+    val baseConn   = summon[Conn]
     for {
+      memberConn <- baseConn.withAuth("u1", "Member")
+      adminConn  <- baseConn.withAuth("u2", "Admin")
       _ <- Post.title("Title").content("Content").secret("Secret").save.transact(using adminConn)
 
       // Member can access title (all entity roles)
@@ -57,11 +57,11 @@ case class Authorization3_attrRoles(
   }
 
   "Attribute .only[R] - tuple of roles" - social3 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val guestConn  = baseConn.withAuth("u1", "Guest")
-    val memberConn = baseConn.withAuth("u2", "Member")
-    val adminConn  = baseConn.withAuth("u3", "Admin")
+    val baseConn   = summon[Conn]
     for {
+      guestConn  <- baseConn.withAuth("u1", "Guest")
+      memberConn <- baseConn.withAuth("u2", "Member")
+      adminConn  <- baseConn.withAuth("u3", "Admin")
       _ <- Post.title("Title").content("Content").secret("Secret").save.transact(using adminConn)
 
       // content is .only[(Member, Admin)]
@@ -82,12 +82,12 @@ case class Authorization3_attrRoles(
   // ============================================================================
 
   "Attribute .exclude[R] - single role" - social3 {
-    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val guestConn     = baseConn.withAuth("u1", "Guest")
-    val memberConn    = baseConn.withAuth("u2", "Member")
-    val moderatorConn = baseConn.withAuth("u3", "Moderator")
-    val adminConn     = baseConn.withAuth("u4", "Admin")
+    val baseConn      = summon[Conn]
     for {
+      guestConn     <- baseConn.withAuth("u1", "Guest")
+      memberConn    <- baseConn.withAuth("u2", "Member")
+      moderatorConn <- baseConn.withAuth("u3", "Moderator")
+      adminConn     <- baseConn.withAuth("u4", "Admin")
       _ <- Article.title("Title").fullText("Full text").editHistory("History")
         .save.transact(using adminConn)
 
@@ -105,12 +105,12 @@ case class Authorization3_attrRoles(
   }
 
   "Attribute .exclude[R] - tuple of roles" - social3 {
-    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val guestConn     = baseConn.withAuth("u1", "Guest")
-    val memberConn    = baseConn.withAuth("u2", "Member")
-    val moderatorConn = baseConn.withAuth("u3", "Moderator")
-    val adminConn     = baseConn.withAuth("u4", "Admin")
+    val baseConn      = summon[Conn]
     for {
+      guestConn     <- baseConn.withAuth("u1", "Guest")
+      memberConn    <- baseConn.withAuth("u2", "Member")
+      moderatorConn <- baseConn.withAuth("u3", "Moderator")
+      adminConn     <- baseConn.withAuth("u4", "Admin")
       _ <- Article.title("Title").fullText("Full text").editHistory("History")
         .save.transact(using adminConn)
 
@@ -141,12 +141,12 @@ case class Authorization3_attrRoles(
   // ============================================================================
 
   "Multiple attributes with different restrictions" - social3 {
-    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val guestConn     = baseConn.withAuth("u1", "Guest")
-    val memberConn    = baseConn.withAuth("u2", "Member")
-    val moderatorConn = baseConn.withAuth("u3", "Moderator")
-    val adminConn     = baseConn.withAuth("u4", "Admin")
+    val baseConn      = summon[Conn]
     for {
+      guestConn     <- baseConn.withAuth("u1", "Guest")
+      memberConn    <- baseConn.withAuth("u2", "Member")
+      moderatorConn <- baseConn.withAuth("u3", "Moderator")
+      adminConn     <- baseConn.withAuth("u4", "Admin")
       _ <- ModerationLog.action("Action").details("Details").audit("Audit")
         .sensitiveData("Sensitive").save.transact(using adminConn)
 
@@ -187,11 +187,11 @@ case class Authorization3_attrRoles(
   // ============================================================================
 
   "Progressive disclosure example" - social3 {
-    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val memberConn    = baseConn.withAuth("u1", "Member")
-    val moderatorConn = baseConn.withAuth("u2", "Moderator")
-    val adminConn     = baseConn.withAuth("u3", "Admin")
+    val baseConn      = summon[Conn]
     for {
+      memberConn    <- baseConn.withAuth("u1", "Member")
+      moderatorConn <- baseConn.withAuth("u2", "Moderator")
+      adminConn     <- baseConn.withAuth("u3", "Admin")
       _ <- UserProfile.displayName("Alice").email("alice@example.com")
         .ipAddress("192.168.1.1").save.transact(using adminConn)
 
@@ -223,10 +223,10 @@ case class Authorization3_attrRoles(
   // ============================================================================
 
   "Restrictions affect save" - social3 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val memberConn = baseConn.withAuth("u1", "Member")
-    val adminConn  = baseConn.withAuth("u2", "Admin")
+    val baseConn   = summon[Conn]
     for {
+      memberConn <- baseConn.withAuth("u1", "Member")
+      adminConn  <- baseConn.withAuth("u2", "Admin")
       // Member cannot save with secret attribute (.only[Admin])
       _ <- Post.title("Title").content("Content").secret("Secret").save.transact(using memberConn)
         .map(_ ==> "Should fail").recover { case ModelError(err) =>
@@ -242,10 +242,10 @@ case class Authorization3_attrRoles(
   }
 
   "Restrictions affect update" - social3 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val memberConn = baseConn.withAuth("u1", "Member")
-    val adminConn  = baseConn.withAuth("u2", "Admin")
+    val baseConn   = summon[Conn]
     for {
+      memberConn <- baseConn.withAuth("u1", "Member")
+      adminConn  <- baseConn.withAuth("u2", "Admin")
       id <- Post.title("Title").content("Content").secret("Secret").save.transact(using adminConn).map(_.id)
 
       // Member cannot update secret (.only[Admin])

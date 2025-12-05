@@ -30,7 +30,7 @@ abstract class Conn(
     *
     * IMMUTABLE: To change auth context, create a new connection with:
     * - conn.withAuthContext(authContext) (available on all platforms)
-    * - conn.withAuth(userId, role) (JVM only - convenience method)
+    * - conn.withAuth(userId, role) (available on all platforms for testing)
     * - conn.clearAuth (available on all platforms)
     */
 
@@ -40,6 +40,17 @@ abstract class Conn(
     * be called with AuthContext instances created on the backend.
     */
   def withAuthContext(authCtx: AuthContext): Conn
+
+  /** Convenience method: Create a new connection with userId and role
+    *
+    * Platform implementations:
+    * - JVM: Creates auth directly in the connection (returns completed Future)
+    * - JS: Calls backend endpoint to set auth in server-side session cache
+    *
+    * This is designed for testing authorization from both JVM and JS.
+    * Returns a Future to support async authentication on JS platform.
+    */
+  private[molecule] def withAuth(userId: String, role: String): Future[Conn]
 
   /** Create a new connection without authentication (public access only) */
   def clearAuth: Conn

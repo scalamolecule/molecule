@@ -17,11 +17,7 @@ class Authorization4 extends MUnit {
   Authorization4_attrUpdate(this, Api_h2_async)
 }
 
-
 class AuthorizationOverview extends MUnit {
   Authorization_overview(this, Api_h2_async)
-}
-class AuthorizationRaw extends MUnit {
-  Authorization_raw_access(this, Api_h2_async)
 }
 

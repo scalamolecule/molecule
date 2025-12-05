@@ -4,11 +4,13 @@ import java.util.UUID
 import molecule.core.util.BaseHelpers
 import molecule.db.common.api.MetaDb
 
-enum Mode:
-  case Dev    // Permissive auth, verbose errors (development)
-  case Test   // Strict auth, verbose errors (testing auth rules)
-  case Stage  // Strict auth, verbose errors (pre-production)
-  case Prod   // Strict auth, sanitized errors (production)
+sealed trait EnvMode
+object EnvMode {
+  case object Dev extends EnvMode    // Permissive auth, verbose errors (development)
+  case object Test extends EnvMode   // Strict auth, verbose errors (testing auth rules)
+  case object Stage extends EnvMode  // Strict auth, verbose errors (pre-production)
+  case object Prod extends EnvMode   // Strict auth, sanitized errors (production)
+}
 
 sealed trait ConnProxy {
 
@@ -22,7 +24,7 @@ sealed trait ConnProxy {
   val initSql: String
 
   /** Environment mode (Dev allows more permissive behavior, Prod is strict) */
-  val mode: Mode
+  val envMode: EnvMode
 }
 
 
@@ -31,7 +33,7 @@ case class JdbcProxy(
   override val uuid: UUID,
   override val metaDb: MetaDb,
   override val initSql: String = "",
-  override val mode: Mode = Mode.Prod,  // Secure by default
+  override val envMode: EnvMode = EnvMode.Prod, // Secure by default
 ) extends ConnProxy
 
 
@@ -41,7 +43,7 @@ object JdbcProxy extends BaseHelpers {
     UUID.randomUUID(),
     metaDb,
     "",
-    Mode.Prod
+    EnvMode.Prod
   )
 
   def apply(url: String, metaDb: MetaDb, initSql: String): JdbcProxy = JdbcProxy(
@@ -49,10 +51,10 @@ object JdbcProxy extends BaseHelpers {
     UUID.randomUUID(),
     metaDb,
     initSql,
-    Mode.Prod
+    EnvMode.Prod
   )
 
-  def apply(url: String, metaDb: MetaDb, mode: Mode): JdbcProxy = JdbcProxy(
+  def apply(url: String, metaDb: MetaDb, mode: EnvMode): JdbcProxy = JdbcProxy(
     url,
     UUID.randomUUID(),
     metaDb,
@@ -60,7 +62,7 @@ object JdbcProxy extends BaseHelpers {
     mode
   )
 
-  def apply(url: String, metaDb: MetaDb, initSql: String, mode: Mode): JdbcProxy = JdbcProxy(
+  def apply(url: String, metaDb: MetaDb, initSql: String, mode: EnvMode): JdbcProxy = JdbcProxy(
     url,
     UUID.randomUUID(),
     metaDb,

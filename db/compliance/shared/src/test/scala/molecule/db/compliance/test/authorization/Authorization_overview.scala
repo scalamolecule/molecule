@@ -3,7 +3,7 @@ package molecule.db.compliance.test.authorization
 import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
-import molecule.db.common.facade.JdbcConn_JVM
+
 import molecule.db.common.spi.{Conn, Spi_async}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.SocialApp_overview.*
@@ -34,7 +34,7 @@ case class Authorization_overview(
   // ============================================================================
 
   "Layer 1 - Public entity (anyone can access)" - social0 {
-    val conn = summon[Conn].asInstanceOf[JdbcConn_JVM]
+    val conn = summon[Conn]
     for {
       _ <- Article.title("Public Article").save.transact(using conn)
       _ <- Article.title.query.get(using conn).map(_ ==> List("Public Article"))
@@ -42,15 +42,16 @@ case class Authorization_overview(
   }
 
   "Layer 1 - Single role entity (only Member)" - social0 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn  = baseConn.withAuth("u1", "Admin")
-    val memberConn = baseConn.withAuth("u2", "Member")
+    val baseConn   = summon[Conn]
     for {
+      adminConn  <- baseConn.withAuth("u1", "Admin")
+      memberConn <- baseConn.withAuth("u2", "Member")
       _ <- Post.content("Member content").save.transact(using adminConn)
       _ <- Post.content.query.get(using memberConn).map(_ ==> List("Member content"))
 
       // Guest cannot access
-      _ <- Post.content.query.get(using baseConn.withAuth("u3", "Guest"))
+      guestConn <- baseConn.withAuth("u3", "Guest")
+      _ <- Post.content.query.get(using guestConn)
         .map(_ ==> "Should fail").recover { case ModelError(err) =>
           err ==> "Access denied: Role 'Guest' cannot query entity 'Post'"
         }
@@ -63,10 +64,10 @@ case class Authorization_overview(
   // ============================================================================
 
   "Layer 2 - Entity-level update grant" - social0 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn  = baseConn.withAuth("u1", "Admin")
-    val memberConn = baseConn.withAuth("u2", "Member")
+    val baseConn   = summon[Conn]
     for {
+      adminConn  <- baseConn.withAuth("u1", "Admin")
+      memberConn <- baseConn.withAuth("u2", "Member")
       id <- Comment.text("Original").save.transact(using adminConn).map(_.id)
 
       // Member can update (action grant)
@@ -76,10 +77,10 @@ case class Authorization_overview(
   }
 
   "Layer 2 - Entity-level delete grant" - social0 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val memberConn = baseConn.withAuth("u1", "Member")
-    val adminConn  = baseConn.withAuth("u2", "Admin")
+    val baseConn   = summon[Conn]
     for {
+      memberConn <- baseConn.withAuth("u1", "Member")
+      adminConn  <- baseConn.withAuth("u2", "Admin")
       id <- Log.entry("Log entry").save.transact(using adminConn).map(_.id)
 
       // Member cannot delete (no grant)
@@ -99,10 +100,10 @@ case class Authorization_overview(
   // ============================================================================
 
   "Layer 3 - Using .only[R]" - social0 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val memberConn = baseConn.withAuth("u1", "Member")
-    val adminConn  = baseConn.withAuth("u2", "Admin")
+    val baseConn   = summon[Conn]
     for {
+      memberConn <- baseConn.withAuth("u1", "Member")
+      adminConn  <- baseConn.withAuth("u2", "Admin")
       _ <- Settings.theme("dark").apiKey("secret").save.transact(using adminConn)
 
       // Member can access theme
@@ -120,11 +121,11 @@ case class Authorization_overview(
   }
 
   "Layer 3 - Using .exclude[R]" - social0 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val guestConn  = baseConn.withAuth("u1", "Guest")
-    val memberConn = baseConn.withAuth("u2", "Member")
-    val adminConn  = baseConn.withAuth("u3", "Admin")
+    val baseConn   = summon[Conn]
     for {
+      guestConn  <- baseConn.withAuth("u1", "Guest")
+      memberConn <- baseConn.withAuth("u2", "Member")
+      adminConn  <- baseConn.withAuth("u3", "Admin")
       _ <- Profile.username("alice").email("alice@example.com").save.transact(using adminConn)
 
       // Guest can access username
@@ -147,10 +148,10 @@ case class Authorization_overview(
   // ============================================================================
 
   "Layer 4 - Attribute-level update grant" - social0 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn  = baseConn.withAuth("u1", "Admin")
-    val memberConn = baseConn.withAuth("u2", "Member")
+    val baseConn   = summon[Conn]
     for {
+      adminConn  <- baseConn.withAuth("u1", "Admin")
+      memberConn <- baseConn.withAuth("u2", "Member")
       id <- Draft.content("Draft content").title("Draft title").save.transact(using adminConn).map(_.id)
 
       // Member can update title (attribute update grant)
@@ -171,11 +172,11 @@ case class Authorization_overview(
   // ============================================================================
 
   "Composed - All layers together" - social0 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val guestConn  = baseConn.withAuth("u1", "Guest")
-    val memberConn = baseConn.withAuth("u2", "Member")
-    val adminConn  = baseConn.withAuth("u3", "Admin")
+    val baseConn   = summon[Conn]
     for {
+      guestConn  <- baseConn.withAuth("u1", "Guest")
+      memberConn <- baseConn.withAuth("u2", "Member")
+      adminConn  <- baseConn.withAuth("u3", "Admin")
       // Setup: Admin creates a blog post
       id <- BlogPost.title("Blog Title").content("Blog Content")
         .viewCount(0L).internal("Internal notes")

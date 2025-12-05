@@ -2,7 +2,7 @@ package molecule.db.common.spi
 
 import molecule.core.dataModel.{Attr, Element, Nested, OptEntity, OptNested, OptRef, Ref}
 import molecule.core.error.ModelError
-import molecule.db.common.marshalling.{ConnProxy, Mode}
+import molecule.db.common.marshalling.{ConnProxy, EnvMode}
 
 trait AccessControl {
 
@@ -15,7 +15,7 @@ trait AccessControl {
   private def checkPermission(
     permissions: Int,
     roleMask: Int,
-    mode: Mode,
+    mode: EnvMode,
     roleName: String,
     roleIdx: Int,
     action: String,
@@ -82,11 +82,11 @@ trait AccessControl {
     conn.authContext match {
       case None =>
         // No authentication context
-        conn.proxy.mode match {
-          case Mode.Dev                           =>
+        conn.proxy.envMode match {
+          case EnvMode.Dev                                   =>
             // Dev mode: Allow access for convenience (local development)
             ()
-          case Mode.Test | Mode.Stage | Mode.Prod =>
+          case EnvMode.Test | EnvMode.Stage | EnvMode.Prod =>
             // Test/Stage/Prod: Check if accessing non-public resources
             checkUnauthenticatedAccess(elements, entityAccessGetter, attrAccessGetter)
         }
@@ -215,10 +215,10 @@ trait AccessControl {
         // Check access based on whether attribute has override
         if (hasAttrOverride) {
           // Attribute has its own permissions - check attribute access only
-          checkPermission(attrPermissions, roleMask, conn.proxy.mode, roleName, roleIdx, action, "attribute", s"${a.ent}.${a.attr}", conn)
+          checkPermission(attrPermissions, roleMask, conn.proxy.envMode, roleName, roleIdx, action, "attribute", s"${a.ent}.${a.attr}", conn)
         } else {
           // Attribute inherits entity permissions - report entity-level error
-          checkPermission(entityPermissions, roleMask, conn.proxy.mode, roleName, roleIdx, action, "entity", a.ent, conn)
+          checkPermission(entityPermissions, roleMask, conn.proxy.envMode, roleName, roleIdx, action, "entity", a.ent, conn)
         }
     }
   }
@@ -263,14 +263,14 @@ trait AccessControl {
             case _                    => "Unknown"
           }
 
-          checkPermission(entityPermissions, roleMask, conn.proxy.mode, roleName, roleIdx, action, "entity", entityName, conn)
+          checkPermission(entityPermissions, roleMask, conn.proxy.envMode, roleName, roleIdx, action, "entity", entityName, conn)
         }
       }
     }
   }
 
   private def formatErrorMessage(
-    mode: Mode,
+    mode: EnvMode,
     roleName: String,
     roleIdx: Int,
     roleMask: Int,
@@ -280,11 +280,11 @@ trait AccessControl {
     permissions: Int
   ): String = {
     mode match {
-      case Mode.Dev | Mode.Test | Mode.Stage =>
+      case EnvMode.Dev | EnvMode.Test | EnvMode.Stage =>
         // Verbose error for debugging
         s"Access denied: Role '$roleName' (index $roleIdx, mask ${roleMask.toBinaryString}) " +
           s"cannot $action $resourceType '$resourceName' (permissions ${permissions.toBinaryString})"
-      case Mode.Prod                         =>
+      case EnvMode.Prod                                 =>
         // Sanitized error for production
         s"Access denied: Role '$roleName' cannot $action $resourceType '$resourceName'"
     }
@@ -348,11 +348,11 @@ trait AccessControl {
     conn.authContext match {
       case None =>
         // No authentication context
-        conn.proxy.mode match {
-          case Mode.Dev                           =>
+        conn.proxy.envMode match {
+          case EnvMode.Dev                                   =>
             // Dev mode: Allow access for convenience (local development)
             ()
-          case Mode.Test | Mode.Stage | Mode.Prod =>
+          case EnvMode.Test | EnvMode.Stage | EnvMode.Prod =>
             // Test/Stage/Prod: Check if accessing non-public resources
             checkUnauthenticatedAccessForDelete(
               elements,

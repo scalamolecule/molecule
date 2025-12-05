@@ -26,7 +26,7 @@ case class MoleculeFrontend(host: String, port: Int, protocol: String)
     with FutureUtils {
 
   // Use Tapir endpoints to make request to backend
-  private def fetch[T](
+  private[molecule] def fetch[T](
     endpoint: PublicEndpoint[ByteBuffer, MoleculeError, ByteBuffer, Any],
     args: ByteBuffer,
     unpickle: ByteBuffer => T,

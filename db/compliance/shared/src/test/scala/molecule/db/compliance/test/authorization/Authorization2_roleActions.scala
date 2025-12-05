@@ -3,7 +3,7 @@ package molecule.db.compliance.test.authorization
 import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
-import molecule.db.common.facade.JdbcConn_JVM
+
 import molecule.db.common.spi.{Conn, Spi_async}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.SocialApp2_role_actions.*
@@ -34,10 +34,10 @@ case class Authorization2_roleActions(
   // ============================================================================
 
   "Entity update grant - Member can update" - social2 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn  = baseConn.withAuth("u1", "Admin")
-    val memberConn = baseConn.withAuth("u2", "Member")
+    val baseConn   = summon[Conn]
     for {
+      adminConn  <- baseConn.withAuth("u1", "Admin")
+      memberConn <- baseConn.withAuth("u2", "Member")
       // Member has query from role definition
       id <- Post.content("Original").title("Title").save.transact(using adminConn).map(_.id)
 
@@ -48,10 +48,10 @@ case class Authorization2_roleActions(
   }
 
   "Entity update grant - applies to all attributes" - social2 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn  = baseConn.withAuth("u1", "Admin")
-    val memberConn = baseConn.withAuth("u2", "Member")
+    val baseConn   = summon[Conn]
     for {
+      adminConn  <- baseConn.withAuth("u1", "Admin")
+      memberConn <- baseConn.withAuth("u2", "Member")
       id <- Post.content("Content").title("Title").save.transact(using adminConn).map(_.id)
 
       // Action grant applies to all attributes
@@ -61,10 +61,10 @@ case class Authorization2_roleActions(
   }
 
   "Entity update grant - other roles lack access" - social2 {
-    val baseConn  = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn = baseConn.withAuth("u1", "Admin")
-    val guestConn = baseConn.withAuth("u2", "Guest")
+    val baseConn  = summon[Conn]
     for {
+      adminConn <- baseConn.withAuth("u1", "Admin")
+      guestConn <- baseConn.withAuth("u2", "Guest")
       id <- Post.content("Content").title("Title").save.transact(using adminConn).map(_.id)
 
       // Guest cannot access entity
@@ -81,10 +81,10 @@ case class Authorization2_roleActions(
   // ============================================================================
 
   "Entity delete grant - Moderator can delete" - social2 {
-    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn     = baseConn.withAuth("u1", "Admin")
-    val moderatorConn = baseConn.withAuth("u2", "Moderator")
+    val baseConn      = summon[Conn]
     for {
+      adminConn     <- baseConn.withAuth("u1", "Admin")
+      moderatorConn <- baseConn.withAuth("u2", "Moderator")
       id <- Comment.text("Comment").save.transact(using adminConn).map(_.id)
 
       // Moderator can delete (action grant)
@@ -94,11 +94,11 @@ case class Authorization2_roleActions(
   }
 
   "Entity delete grant - other roles cannot delete" - social2 {
-    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn     = baseConn.withAuth("u1", "Admin")
-    val moderatorConn = baseConn.withAuth("u2", "Moderator")
-    val guestConn     = baseConn.withAuth("u3", "Guest")
+    val baseConn      = summon[Conn]
     for {
+      adminConn     <- baseConn.withAuth("u1", "Admin")
+      moderatorConn <- baseConn.withAuth("u2", "Moderator")
+      guestConn     <- baseConn.withAuth("u3", "Guest")
       id <- Comment.text("Comment").save.transact(using adminConn).map(_.id)
 
       // Guest cannot access entity
@@ -115,11 +115,11 @@ case class Authorization2_roleActions(
   // ============================================================================
 
   "Entity grant - tuple of roles (Member, Moderator)" - social2 {
-    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn     = baseConn.withAuth("u1", "Admin")
-    val memberConn    = baseConn.withAuth("u2", "Member")
-    val moderatorConn = baseConn.withAuth("u3", "Moderator")
+    val baseConn      = summon[Conn]
     for {
+      adminConn     <- baseConn.withAuth("u1", "Admin")
+      memberConn    <- baseConn.withAuth("u2", "Member")
+      moderatorConn <- baseConn.withAuth("u3", "Moderator")
       id1 <- Article.title("Article 1").content("Content 1").save.transact(using adminConn).map(_.id)
       id2 <- Article.title("Article 2").content("Content 2").save.transact(using adminConn).map(_.id)
 
@@ -137,10 +137,10 @@ case class Authorization2_roleActions(
   // ============================================================================
 
   "Combining updating and deleting grants" - social2 {
-    val baseConn      = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val moderatorConn = baseConn.withAuth("u1", "Moderator")
-    val adminConn     = baseConn.withAuth("u2", "Admin")
+    val baseConn      = summon[Conn]
     for {
+      moderatorConn <- baseConn.withAuth("u1", "Moderator")
+      adminConn     <- baseConn.withAuth("u2", "Admin")
       id <- ModLog.action("Action").timestamp(123L).save.transact(using adminConn).map(_.id)
 
       // Moderator can update (action grant)
@@ -157,10 +157,10 @@ case class Authorization2_roleActions(
   }
 
   "Different roles with different grants" - social2 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val memberConn = baseConn.withAuth("u1", "Member")
-    val adminConn  = baseConn.withAuth("u2", "Admin")
+    val baseConn   = summon[Conn]
     for {
+      memberConn <- baseConn.withAuth("u1", "Member")
+      adminConn  <- baseConn.withAuth("u2", "Admin")
       id <- UserProfile.displayName("User").bio("Bio").save.transact(using adminConn).map(_.id)
 
       // Member can update (action grant)
@@ -183,8 +183,8 @@ case class Authorization2_roleActions(
   // ============================================================================
 
   "Role with all 5 actions - no grant needed" - social2 {
-    val adminConn = summon[Conn].asInstanceOf[JdbcConn_JVM].withAuth("u1", "Admin")
     for {
+      adminConn <- summon[Conn].withAuth("u1", "Admin")
       // Admin has all 5 actions - includes update
       id <- UserProfile.displayName("Admin User").bio("Bio").save.transact(using adminConn).map(_.id)
 
@@ -197,10 +197,10 @@ case class Authorization2_roleActions(
   }
 
   "Role without action - needs grant" - social2 {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn  = baseConn.withAuth("u1", "Admin")
-    val memberConn = baseConn.withAuth("u2", "Member")
+    val baseConn   = summon[Conn]
     for {
+      adminConn  <- baseConn.withAuth("u1", "Admin")
+      memberConn <- baseConn.withAuth("u2", "Member")
       // Member has query, not update
       id <- Post.content("Content").title("Title").save.transact(using adminConn).map(_.id)
 

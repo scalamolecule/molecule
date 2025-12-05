@@ -741,6 +741,13 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleMetaDb_postgres: CompositePickler[MetaDb_postgresql] = compositePickler[MetaDb_postgresql]
   implicit val pickleMetaDb_sqlite  : CompositePickler[MetaDb_sqlite]     = compositePickler[MetaDb_sqlite]
 
+  implicit val pickleEnvMode: CompositePickler[EnvMode] =
+    compositePickler[EnvMode]
+      .addConcreteType[EnvMode.Dev.type]
+      .addConcreteType[EnvMode.Test.type]
+      .addConcreteType[EnvMode.Stage.type]
+      .addConcreteType[EnvMode.Prod.type]
+
   implicit val pickleConnProxy: CompositePickler[ConnProxy] =
     compositePickler[ConnProxy]
       .addConcreteType[JdbcProxy]

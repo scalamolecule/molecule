@@ -269,6 +269,7 @@ abstract class DomainStructure {
   // User-defined roles need to extend this
   trait Role
 
+  // Possible actions that Roles can extend to define their allowed capabilities
   sealed trait Action
   trait query extends Action
   trait save extends Action
@@ -278,28 +279,20 @@ abstract class DomainStructure {
   trait rawQuery extends Action    // Raw SQL SELECT queries (read-only)
   trait rawTransact extends Action // Raw SQL mutations (dangerous!)
 
-  /** Evidence that A is either a single Role or tuple of Roles */
+  /** Allow Role and (Role1, Role1, RoleN..) as parameter to access control methods and types
+   * Evidence that A is either a single Role or tuple of Roles */
   trait RolesOnly[A]
   object RolesOnly:
     given single[R <: Role]: RolesOnly[R] = new RolesOnly[R] {}
     given empty: RolesOnly[EmptyTuple] = new RolesOnly[EmptyTuple] {}
-    given tuple[H <: Role, T <: Tuple](using RolesOnly[T]): RolesOnly[H *: T] =
-      new RolesOnly[H *: T] {}
-
-  /** Evidence that A is either a single Action or tuple of Actions */
-  trait ActionsOnly[A]
-  object ActionsOnly:
-    given single[A <: Action]: ActionsOnly[A] = new ActionsOnly[A] {}
-    given empty: ActionsOnly[EmptyTuple] = new ActionsOnly[EmptyTuple] {}
-    given tuple[H <: Action, T <: Tuple](using ActionsOnly[T]): ActionsOnly[H *: T] =
-      new ActionsOnly[H *: T] {}
-
+    given tuple[H <: Role, T <: Tuple](using RolesOnly[T]): RolesOnly[H *: T] = new RolesOnly[H *: T] {}
 
   // used for entity-level grant only
   trait deleting[R](using RolesOnly[R])
 
   // used for both entity- and attribute-level grants
   trait updating[R](using RolesOnly[R])
+
 
   // Enums .....................................................................
 
@@ -377,7 +370,8 @@ abstract class DomainStructure {
 
     lazy val mandatory: Self = ???
 
-    // Tupled attributes
+    // Require other attribute(s) to be present
+    // Useful for enforcing tuple data like X-Y coordinates etc.
     def require(attrs: Requierable*): Self = ???
 
     // Value accessor for validation code

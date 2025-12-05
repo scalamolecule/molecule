@@ -3,7 +3,7 @@ package molecule.db.compliance.test.authorization
 import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
 import molecule.db.common.api.Api_async
-import molecule.db.common.facade.JdbcConn_JVM
+
 import molecule.db.common.spi.{Conn, Spi_async}
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.SocialApp_raw_access.*
@@ -34,7 +34,8 @@ case class Authorization_raw_access(
   // Setup: Create test data
   // ============================================================================
 
-  def setupTestData()(using conn: JdbcConn_JVM) = {
+//  def setupTestData()(using conn: JdbcConn_JVM) = {
+  def setupTestData()(using conn: Conn) = {
     for {
       // Insert sales data in one go
       _ <- Sale.saleDate.customerId.amount.region.insert(List(
@@ -53,10 +54,11 @@ case class Authorization_raw_access(
       )).transact
 
       // Insert accounts with restricted attributes (need Admin role)
+      adminConn <- conn.withAuth("admin", "Admin")
       _ <- Account.username.publicProfile.privateNotes.internalStatus.insert(List(
         ("alice123", "Public bio", "Admin only notes", "active"),
         ("bob456", "Another bio", "Secret info", "review"),
-      )).transact(using conn.withAuth("admin", "Admin"))
+      )).transact(using adminConn)
     } yield ()
   }
 
@@ -66,10 +68,10 @@ case class Authorization_raw_access(
   // ============================================================================
 
   "Guest cannot use rawQuery" - rawAccess {
-    val baseConn  = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val guestConn = baseConn.withAuth("guest1", "Guest")
+    val baseConn  = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
+      guestConn <- baseConn.withAuth("guest1", "Guest")
 
       _ <- fallback_rawQuery(
         "SELECT * FROM sale"
@@ -83,10 +85,10 @@ case class Authorization_raw_access(
   }
 
   "Analyst cannot use rawTransact" - rawAccess {
-    val baseConn    = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val analystConn = baseConn.withAuth("analyst1", "Analyst")
+    val baseConn    = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
+      analystConn <- baseConn.withAuth("analyst1", "Analyst")
 
       _ <- fallback_rawTransact(
         "UPDATE Sale SET region = 'West' WHERE id = 1"
@@ -100,7 +102,7 @@ case class Authorization_raw_access(
   }
 
   "Unauthenticated cannot use rawQuery" - rawAccess {
-    val baseConn = summon[Conn].asInstanceOf[JdbcConn_JVM]
+    val baseConn = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
 
@@ -121,10 +123,10 @@ case class Authorization_raw_access(
   // ============================================================================
 
   "Analyst can use rawQuery - window function (running total)" - rawAccess {
-    val baseConn    = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val analystConn = baseConn.withAuth("analyst1", "Analyst")
+    val baseConn    = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
+      analystConn <- baseConn.withAuth("analyst1", "Analyst")
 
       // Use window function to calculate running total
       // This is a legitimate use case where Molecule doesn't have built-in support
@@ -165,10 +167,10 @@ case class Authorization_raw_access(
   // ============================================================================
 
   "Admin can use rawTransact - bulk operation with complex logic" - rawAccess {
-    val baseConn  = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn = baseConn.withAuth("admin1", "Admin")
+    val baseConn  = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
+      adminConn <- baseConn.withAuth("admin1", "Admin")
 
       // Data before
       _ <- Sale.region.a1.amount.d2.query.get(using adminConn).map(_ ==> List(
@@ -207,11 +209,11 @@ case class Authorization_raw_access(
   }
 
   "Admin rawTransact DANGER - bypasses attribute restrictions" - rawAccess {
-    val baseConn   = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn  = baseConn.withAuth("admin1", "Admin")
-    val memberConn = baseConn.withAuth("member1", "Member")
+    val baseConn   = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
+      adminConn  <- baseConn.withAuth("admin1", "Admin")
+      memberConn <- baseConn.withAuth("member1", "Member")
 
       // Data before
       _ <- Account.username_("alice123").privateNotes.query.get(using adminConn)
@@ -242,10 +244,10 @@ case class Authorization_raw_access(
   }
 
   "Admin rawTransact DANGER - can escalate privileges" - rawAccess {
-    val baseConn  = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn = baseConn.withAuth("admin1", "Admin")
+    val baseConn  = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
+      adminConn <- baseConn.withAuth("admin1", "Admin")
 
       // Data before
       _ <- Person.name_("Charlie").accessRole.query.get(using adminConn)
@@ -268,10 +270,10 @@ case class Authorization_raw_access(
   }
 
   "Admin rawTransact DANGER - can modify any data regardless of entity roles" - rawAccess {
-    val baseConn  = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn = baseConn.withAuth("admin1", "Admin")
+    val baseConn  = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
+      adminConn <- baseConn.withAuth("admin1", "Admin")
 
       // Data before
       _ <- Account.internalStatus.a1.query.get(using adminConn).map(_ ==> List("active", "review"))
@@ -293,10 +295,10 @@ case class Authorization_raw_access(
   }
 
   "Admin rawTransact DANGER - can corrupt data across multiple tables" - rawAccess {
-    val baseConn  = summon[Conn].asInstanceOf[JdbcConn_JVM]
-    val adminConn = baseConn.withAuth("admin1", "Admin")
+    val baseConn  = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
+      adminConn <- baseConn.withAuth("admin1", "Admin")
 
       // Data before
       _ <- Sale.customerId.a1.query.get(using adminConn)

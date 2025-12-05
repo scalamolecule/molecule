@@ -112,7 +112,7 @@ Molecule supports:
 - H2
 - (more can easily be added...)
 
-All Molecule queries behave identically across these databases. Each backend passes the same SPI compliance test suite with ~2000 tests.
+All Molecule queries behave identically across these databases. Each backend passes the same SPI compliance test suite with +2000 tests.
 
 
 ## Features
@@ -313,7 +313,7 @@ Use `%%%` instead of `%%` for Scala.js.
 
 ## Explore code
 
-The `dbCompliance` module in this repo has several domain structure definitions and ~2000 tests that show all details of
+The `dbCompliance` module in this repo has several domain structure definitions and +2000 tests that show all details of
 how molecule can be used. This forms the tests that each database implementation needs to comply with
 in order to offer all functionality of Molecule and be a compliant implementation.
 
@@ -374,7 +374,7 @@ Press ENTER to stop the server.
 ```
 Now we have a backend running on ScalaJVM ready to take care of your molecule queries from ScalaJS using the H2 database!
 
-In another process you can then run one of the following commands to run the coreTests on ScalaJS with the database of your choice:
+In another process you can then run one of the following commands to run the compliance tests on ScalaJS with the database of your choice:
 
 ```
 sbt dbH2JS/test
@@ -384,6 +384,14 @@ sbt dbPostgreSQLJS/test
 sbt dbSQliteJS/test
 ```
 The tests are then automatically fetching data from the running backend - Molecule takes care of marshalling and fetching transparently with boopickle binary serialization!
+
+You can also run single tests with:
+
+```
+sbt
+project dbH2JS
+testOnly molecule.db.h2.Adhoc_h2_js_async
+```
 
 
 ## Author

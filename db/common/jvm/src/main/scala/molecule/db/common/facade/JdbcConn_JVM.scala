@@ -35,11 +35,23 @@ case class JdbcConn_JVM(
 
   /** Convenience method: Create a new connection with userId and role (JVM only)
    *
+   * ⚠️  TESTING ONLY - DO NOT USE IN PRODUCTION ⚠️
+   *
+   * SECURITY WARNING:
+   * This method bypasses normal authentication and allows any userId/role to be claimed
+   * without validation. It is restricted to molecule package for internal testing only.
+   *
+   * In production:
+   * - Use proper authentication mechanisms to validate user credentials
+   * - Only create AuthContext after successful authentication
+   * - Never allow user-controlled input to directly set userId/role
+   *
    * This method is only available on JVM. It provides a convenient way to
    * create authenticated connections for testing and development.
+   * Returns a completed Future for API consistency with JS platform.
    */
-  def withAuth(userId: String, role: String): Conn =
-    withAuthContext(AuthContext(userId, role, Map.empty[String, Any]))
+  private[molecule] override def withAuth(userId: String, role: String): Future[Conn] =
+    Future.successful(withAuthContext(AuthContext(userId, role, Map.empty[String, Any])))
 
   /** Create a new connection without authentication (public access only) */
   override def clearAuth: Conn =
