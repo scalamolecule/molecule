@@ -72,7 +72,6 @@ And then molecule:
 
 Sonatype doesn't allow missing library dependencies. So we need to be careful to publish in the right order since we have a circular reference between molecule and sbt-molecule.
 
-
 1. Set non-snapshot sbt-molecule version in sbt-molecule and publish it:
 
 ```

@@ -1,14 +1,14 @@
 
 
 
-- realationship re-design
-- soft relationships
-- tacit attribute sorting
 - custom column SQL definition
+- migration
+- tacit attribute sorting
+- soft relationships
 - index/uniqueIndex (how to drop them then?)
 
 
-Possible additions
+Possible database additions
 
 - ClickHouse
 - RethinkDb
@@ -19,4 +19,4 @@ Possible additions
 - YugabyteDB
 
 
-Northwind database sample tutorial
+Use the Northwind database sample tutorial?

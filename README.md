@@ -2,47 +2,56 @@
 
 
 
-Molecule is a Scala 3 library for querying and updating SQL databases using a type-safe DSL — not one for SQL, but one generated from your own domain structure.
+Molecule is a Scala 3 library that lets you query and mutate SQL databases using type-inferred code written with the words of your domain.
 
-Most libraries offer a DSL to express _their_ concepts — like SQL or JSON. Molecule inverts that: it builds a DSL directly from your domain structure, letting you model and query data in your own terms.
-
-After defining your domain structure, Molecule generates boilerplate code for your custom DSL. You can then declare *what* data you want using this DSL, and Molecule handles *how* to retrieve or modify it.
-
-Instead of stitching SQL by hand, you compose molecules — immutable, type-safe data models that intuitively describe the structure of the data you’re working with - using the words or your domain.
-
-For instance, get name, age and street address of persons with this molecule
+Here's a query across two tables:
 ```scala
-// Query in your domain terms
 Person.name.age.Address.street
 ```
-instead of writing
+
+No SQL strings, no join syntax, no mapping boilerplate. Just your domain concepts composed together. The compiler ensures you only write valid queries, and you get back typed data:
+
+```scala
+val persons: List[(String, Int, String)] =
+  Person.name.age.Address.street.query.get
+```
+
+You express intent; Molecule translates it into optimized SQL queries and handles the execution.
+
+<details>
+<summary>See generated SQL</summary>
+
 ```sql
--- Equivalent SQL
 SELECT
   Person.name,
   Person.age,
   Address.street
 FROM Person
-  JOIN Address 
-    ON Person.address = Address.id;
+  INNER JOIN Address
+    ON Person.address = Address.id
+WHERE
+  Person.name IS NOT NULL AND
+  Person.age  IS NOT NULL;
 ```
-
-The molecule then gets data back with full static typing:
-```scala
-val persons: List[(String, Int, String)] =
-  Person.name.age.Address.street.query.get
-```
-Data can also be fetched asynchronously in a `Future`, cats `IO` or `ZIO`.
+</details>
 
 
 ## Why Molecule?
 
 - Type-safe from end to end — no string queries, no surprises
 - Write in your own domain language — not SQL
+- Built-in authorization — move the security boundary to the data layer, not scattered across endpoints
 - Declarative, not imperative — express intent, not mechanics
 - Composable and immutable — functional by design
 - Cross-platform — JVM and Scala.js with built-in RPC and serialization
 - Same behavior across backends — Postgres, MySQL, MariaDB, SQLite, H2
+- No macros
+- No complex type class implicit hierarchies
+
+
+## Documentation
+
+Full documentation at [scalamolecule.org](https://www.scalamolecule.org)
 
 
 ## Quick start
@@ -115,22 +124,21 @@ Molecule supports:
 All Molecule queries behave identically across these databases. Each backend passes the same SPI compliance test suite with +2000 tests.
 
 
-## Features
+## Key Features
 
-- Scala 3.7.3 support (JVM + Scala.js)
-- Type-safe and composable molecules
-- Synchronous and asynchronous APIs:
-    - `Future`, `cats.effect.IO`, `ZIO`
-- Rich query capabilities:
-    - Filtering and aggregation
-    - Sorting and pagination (offset/cursor)
-    - Optional/nested relationships
-    - Validation
-    - Subscriptions
-- No macros
-- No complex type class implicit hierarchies
-- Maximum IDE type inference
-- No JSON setup for Scala.js — fully automatic binary serialization via [Boopickle](https://github.com/suzaku-io/boopickle)
+**Authorization** — Built-in RBAC (Role-Based Access Control) at the attribute level. Define roles and permissions in your domain structure, and Molecule enforces them automatically in all queries and transactions. No need to scatter security logic across endpoints and business code.
+
+**Validation** — Validate data at insertion and update time with built-in validators or custom validation functions. Molecule ensures data integrity before it reaches the database.
+
+**Filtering and Aggregations** — Filter data with intuitive operators and aggregate with functions like `count`, `sum`, `avg`, `min`, and `max`. Compose complex queries without leaving your domain language.
+
+**Sorting and Pagination** — Sort results by any attribute in ascending or descending order. Paginate with offset-based or cursor-based pagination for efficient data loading.
+
+**Optional and Nested Data** — Query optional attributes/relationships and traverse nested relationships naturally. Unlike other SQL libraries that return flat data, Molecule can return hierarchical nested data structures (up to 7 levels deep), eliminating the need to manually group and format results in your application code.
+
+**Transaction Management** — Full transaction support with `unitOfWork` for composing multiple operations, `savepoint` for nested transactions, and `rollback` for fine-grained control. Execute complex transactional workflows with confidence.
+
+**Subscriptions** — Subscribe to data changes and receive real-time updates when your queries match new or modified data. Keep your application state synchronized with the database.
 
 
 ## Examples
@@ -237,6 +245,9 @@ WHERE
   Person.name IS NOT NULL AND
   Person.age  IS NOT NULL;
 ```
+
+There's also a shorthand alternative `i` that you can add like in `query.i.get` in order to both inspect and perform the query. You can use it on the mutations too, but be aware that the mutation will still perform! `inspect` is more safe to use on mutations since it only inspects.
+
 This way you can always inspect and see what will be sent to the database. And if you want to tweak a query or mutation, Molecule offers fallback alternatives too:
 
 
@@ -274,22 +285,30 @@ Note that only static input values are supported.
 Most of the time you'll likely have enough expressiveness with Molecule without having to resort to manual SQL writing.
 
 
-#### Quick inspect
+## What Molecule is Not
 
-There's also a shorthand alternative `i` that you can add like in `query.i.get` in order to both inspect and perform the query. You can use it on the mutations too, but be aware that the mutation will still perform! `inspect` is more safe to use on mutations since it only inspects.
+Molecule is not a complete database facade or SQL replacement. It focuses on type-safe queries and transactions from your domain model. Outside its scope:
 
+- Administrative operations (creating indexes, connection pooling)
+- Advanced SQL features (subqueries, window functions, CTEs)
+- Database migrations and schema management
+- Direct JDBC operations
+
+For administrative tasks, use other SQL libraries or JDBC directly alongside Molecule. For advanced SQL features, Molecule provides fallback `rawQuery` and `rawTransact` methods that let you execute raw SQL when needed—you just lose type safety for those specific queries.
 
 
 ## SBT Setup
 
+Molecule is available for Scala 3.7.4+ on JVM and Scala.js. You can add it to your project with sbt:
+
 `project/build.properties`:
 ```
-sbt.version = 1.11.6
+sbt.version = 1.11.7
 ```
 
 `project/plugins.sbt`:
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.21.1")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.22.0")
 ```
 
 `build.sbt`:
@@ -299,11 +318,11 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // import database(s) that you need
-      "org.scalamolecule" %% "molecule-db-h2" % "0.26.0",
-      "org.scalamolecule" %% "molecule-db-mariadb" % "0.26.0",
-      "org.scalamolecule" %% "molecule-db-mysql" % "0.26.0",
-      "org.scalamolecule" %% "molecule-db-postgresql" % "0.26.0",
-      "org.scalamolecule" %% "molecule-db-sqlite" % "0.26.0",
+      "org.scalamolecule" %% "molecule-db-h2" % "0.27.0",
+      "org.scalamolecule" %% "molecule-db-mariadb" % "0.27.0",
+      "org.scalamolecule" %% "molecule-db-mysql" % "0.27.0",
+      "org.scalamolecule" %% "molecule-db-postgresql" % "0.27.0",
+      "org.scalamolecule" %% "molecule-db-sqlite" % "0.27.0",
     )
   )
 ```
@@ -311,7 +330,7 @@ lazy val yourProject = project.in(file("app"))
 Use `%%%` instead of `%%` for Scala.js.
 
 
-## Explore code
+## Contributing / Running Tests
 
 The `dbCompliance` module in this repo has several domain structure definitions and +2000 tests that show all details of
 how molecule can be used. This forms the tests that each database implementation needs to comply with
