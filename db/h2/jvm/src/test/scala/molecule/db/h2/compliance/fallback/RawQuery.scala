@@ -70,7 +70,7 @@ class RawQuery extends MUnit with DbProviders_h2 with TestUtils {
       _ <- rawQuery(q("double")).map(_.head ==> List(double1))
       _ <- rawQuery(q("boolean")).map(_.head ==> List(boolean1))
       _ <- rawQuery(q("bigInt")).map(_.head ==> List(new java.math.BigDecimal(bigInt1.bigInteger))) // Java BigDecimal
-      _ <- rawQuery(q("bigDecimal")).map(_.head ==> List(bigDecimal1.bigDecimal.setScale(38))) // Java BigDecimal
+      _ <- rawQuery(q("bigDecimal")).map(_.head ==> List(bigDecimal1.bigDecimal.setScale(30))) // Java BigDecimal
       _ <- rawQuery(q("date")).map(_.head ==> List(date1.getTime))
       _ <- rawQuery(q("duration")).map(_.head ==> List(duration1.toString))
       _ <- rawQuery(q("instant")).map(_.head ==> List(instant1.toString))

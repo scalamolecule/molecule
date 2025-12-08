@@ -34,7 +34,7 @@ case class Authorization_raw_access(
   // Setup: Create test data
   // ============================================================================
 
-//  def setupTestData()(using conn: JdbcConn_JVM) = {
+  //  def setupTestData()(using conn: JdbcConn_JVM) = {
   def setupTestData()(using conn: Conn) = {
     for {
       // Insert sales data in one go
@@ -46,18 +46,18 @@ case class Authorization_raw_access(
         (LocalDate.of(2024, 1, 5), 102L, 300.0, "South"),
       )).transact
 
-      // Insert people
-      _ <- Person.name.email.accessRole.insert(List(
-        ("Alice", "alice@example.com", "Member"),
-        ("Bob", "bob@example.com", "Member"),
-        ("Charlie", "charlie@example.com", "Guest"),
+      // Insert staff members
+      _ <- StaffMember.fullName.email.accessRole.insert(List(
+        ("Alice Smith", "alice@example.com", "Member"),
+        ("Bob Jones", "bob@example.com", "Member"),
+        ("Charlie Brown", "charlie@example.com", "Guest"),
       )).transact
 
-      // Insert accounts with restricted attributes (need Admin role)
+      // Insert products with restricted attributes (need Admin role)
       adminConn <- conn.withAuth("admin", "Admin")
-      _ <- Account.username.publicProfile.privateNotes.internalStatus.insert(List(
-        ("alice123", "Public bio", "Admin only notes", "active"),
-        ("bob456", "Another bio", "Secret info", "review"),
+      _ <- Product.productCode.description.costPrice.inventoryNotes.insert(List(
+        ("WIDGET-001", "Standard widget", 45.50, "Supplier: Acme Corp"),
+        ("GADGET-202", "Premium gadget", 120.00, "Supplier: TechCo"),
       )).transact(using adminConn)
     } yield ()
   }
@@ -68,12 +68,12 @@ case class Authorization_raw_access(
   // ============================================================================
 
   "Guest cannot use rawQuery" - rawAccess {
-    val baseConn  = summon[Conn]
+    val baseConn = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
       guestConn <- baseConn.withAuth("guest1", "Guest")
 
-      _ <- fallback_rawQuery(
+      _ <- rawQuery(
         "SELECT * FROM sale"
       )(using guestConn)
         .map(_ ==> "Should have failed")
@@ -85,12 +85,12 @@ case class Authorization_raw_access(
   }
 
   "Analyst cannot use rawTransact" - rawAccess {
-    val baseConn    = summon[Conn]
+    val baseConn = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
       analystConn <- baseConn.withAuth("analyst1", "Analyst")
 
-      _ <- fallback_rawTransact(
+      _ <- rawTransact(
         "UPDATE Sale SET region = 'West' WHERE id = 1"
       )(using analystConn)
         .map(_ ==> "Should have failed")
@@ -106,7 +106,7 @@ case class Authorization_raw_access(
     for {
       _ <- setupTestData()(using baseConn)
 
-      _ <- fallback_rawQuery(
+      _ <- rawQuery(
         "SELECT * FROM Sale"
       )(using baseConn)
         .map(_ ==> "Should have failed")
@@ -123,14 +123,14 @@ case class Authorization_raw_access(
   // ============================================================================
 
   "Analyst can use rawQuery - window function (running total)" - rawAccess {
-    val baseConn    = summon[Conn]
+    val baseConn = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
       analystConn <- baseConn.withAuth("analyst1", "Analyst")
 
       // Use window function to calculate running total
       // This is a legitimate use case where Molecule doesn't have built-in support
-      results <- fallback_rawQuery(
+      results <- rawQuery(
         """
           |SELECT
           |  saleDate,
@@ -167,7 +167,7 @@ case class Authorization_raw_access(
   // ============================================================================
 
   "Admin can use rawTransact - bulk operation with complex logic" - rawAccess {
-    val baseConn  = summon[Conn]
+    val baseConn = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
       adminConn <- baseConn.withAuth("admin1", "Admin")
@@ -184,7 +184,7 @@ case class Authorization_raw_access(
       // Legitimate use: Complex bulk update with CASE logic
       // Calculate and apply region-specific discounts based on multiple conditions
       // This level of conditional logic is difficult to express in Molecule
-      _ <- fallback_rawTransact(
+      _ <- rawTransact(
         """
           |UPDATE Sale
           |SET amount = CASE
@@ -209,33 +209,33 @@ case class Authorization_raw_access(
   }
 
   "Admin rawTransact DANGER - bypasses attribute restrictions" - rawAccess {
-    val baseConn   = summon[Conn]
+    val baseConn = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
-      adminConn  <- baseConn.withAuth("admin1", "Admin")
+      adminConn <- baseConn.withAuth("admin1", "Admin")
       memberConn <- baseConn.withAuth("member1", "Member")
 
       // Data before
-      _ <- Account.username_("alice123").privateNotes.query.get(using adminConn)
-        .map(_.head ==> "Admin only notes")
+      _ <- Product.productCode_("WIDGET-001").inventoryNotes.query.get(using adminConn)
+        .map(_.head ==> "Supplier: Acme Corp")
 
       // DANGER: Admin can use raw SQL to bypass attribute-level restrictions!
-      // The Account entity has privateNotes.only[Admin], but raw SQL bypasses this:
-      _ <- fallback_rawTransact(
+      // The Product entity has inventoryNotes.only[Admin], but raw SQL bypasses this:
+      _ <- rawTransact(
         """
-          |UPDATE Account
-          |SET privateNotes = 'HACKED! Raw SQL bypasses authorization'
-          |WHERE username = 'alice123'
+          |UPDATE Product
+          |SET inventoryNotes = 'HACKED! Raw SQL bypasses authorization'
+          |WHERE productCode = 'WIDGET-001'
         """.stripMargin
       )(using adminConn)
 
       // Data after
       // Verify the dangerous update worked (bypassed .only[Admin] restriction)
-      _ <- Account.username_("alice123").privateNotes.query.get(using adminConn)
+      _ <- Product.productCode_("WIDGET-001").inventoryNotes.query.get(using adminConn)
         .map(_.head ==> "HACKED! Raw SQL bypasses authorization")
 
       // Member still cannot access via normal Molecule API (authorization works)
-      _ <- Account.username.privateNotes.query.get(using memberConn)
+      _ <- Product.productCode.inventoryNotes.query.get(using memberConn)
         .map(_ ==> "Should have failed")
         .recover { case ModelError(err) =>
           assert(err.contains("Access denied"))
@@ -244,58 +244,58 @@ case class Authorization_raw_access(
   }
 
   "Admin rawTransact DANGER - can escalate privileges" - rawAccess {
-    val baseConn  = summon[Conn]
+    val baseConn = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
       adminConn <- baseConn.withAuth("admin1", "Admin")
 
       // Data before
-      _ <- Person.name_("Charlie").accessRole.query.get(using adminConn)
+      _ <- StaffMember.fullName_("Charlie Brown").accessRole.query.get(using adminConn)
         .map(_.head ==> "Guest")
 
       // EXTREME DANGER: Raw SQL can escalate user privileges!
       // This completely bypasses the authorization model
-      _ <- fallback_rawTransact(
+      _ <- rawTransact(
         """
-          |UPDATE Person
+          |UPDATE StaffMember
           |SET accessRole = 'Admin'
-          |WHERE name = 'Charlie'
+          |WHERE fullName = 'Charlie Brown'
         """.stripMargin
       )(using adminConn)
 
       // Data after - Charlie is now an Admin (extremely dangerous!)
-      _ <- Person.name_("Charlie").accessRole.query.get(using adminConn)
+      _ <- StaffMember.fullName_("Charlie Brown").accessRole.query.get(using adminConn)
         .map(_.head ==> "Admin")
     } yield ()
   }
 
   "Admin rawTransact DANGER - can modify any data regardless of entity roles" - rawAccess {
-    val baseConn  = summon[Conn]
+    val baseConn = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
       adminConn <- baseConn.withAuth("admin1", "Admin")
 
       // Data before
-      _ <- Account.internalStatus.a1.query.get(using adminConn).map(_ ==> List("active", "review"))
+      _ <- Product.costPrice.a1.query.get(using adminConn).map(_ ==> List(45.50, 120.00))
 
       // Direct SQL update that bypasses all authorization checks
       // DANGER: Can directly manipulate data that should be restricted
       // Even if an entity has only Member access, raw SQL bypasses it
-      _ <- fallback_rawTransact(
+      _ <- rawTransact(
         """
-          |UPDATE Account
-          |SET internalStatus = 'suspended'
-          |WHERE internalStatus = 'active'
+          |UPDATE Product
+          |SET costPrice = costPrice * 0.5
+          |WHERE costPrice > 100
         """.stripMargin
       )(using adminConn)
 
       // Data after - Raw SQL modified restricted data
-      _ <- Account.internalStatus.a1.query.get(using adminConn).map(_ ==> List("review", "suspended"))
+      _ <- Product.costPrice.a1.query.get(using adminConn).map(_ ==> List(45.50, 60.00))
     } yield ()
   }
 
   "Admin rawTransact DANGER - can corrupt data across multiple tables" - rawAccess {
-    val baseConn  = summon[Conn]
+    val baseConn = summon[Conn]
     for {
       _ <- setupTestData()(using baseConn)
       adminConn <- baseConn.withAuth("admin1", "Admin")
@@ -306,7 +306,7 @@ case class Authorization_raw_access(
 
       // DANGER: Raw SQL can make changes that violate business logic
       // Set all customer IDs to the same value (corrupts relational integrity)
-      _ <- fallback_rawTransact(
+      _ <- rawTransact(
         """
           |UPDATE Sale
           |SET customerId = 999

@@ -45,17 +45,17 @@ object SocialApp_raw_access extends DomainStructure {
     val region     = oneString
   }
 
-  trait Person {
-    val name       = oneString
+  trait StaffMember {
+    val fullName   = oneString
     val email      = oneString
     val accessRole = oneString  // Shows danger: rawTransact could escalate privileges!
   }
 
   // Entity for demonstrating attribute-level restrictions that raw SQL bypasses
-  trait Account extends Member with Admin {
-    val username       = oneString
-    val publicProfile  = oneString
-    val privateNotes   = oneString.only[Admin]  // Only Admin should see this
-    val internalStatus = oneString.only[Admin]  // Only Admin should modify this
+  trait Product extends Member with Admin {
+    val productCode    = oneString
+    val description    = oneString
+    val costPrice      = oneDouble.only[Admin]  // Only Admin should see this
+    val inventoryNotes = oneString.only[Admin]  // Only Admin should modify this
   }
 }

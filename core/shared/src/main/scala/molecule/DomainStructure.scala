@@ -85,28 +85,29 @@ abstract class DomainStructure {
   object oneShort extends oneShort
   object oneChar extends oneChar
 
-  trait oneString extends stringOptions[oneString, String] with Validations[oneString, String]
-  trait oneInt extends AttrOptions[oneInt, Int, Int] with Validations[oneInt, Int]
-  trait oneLong extends AttrOptions[oneLong, Long, Long] with Validations[oneLong, Long]
-  trait oneFloat extends AttrOptions[oneFloat, Float, Float] with Validations[oneFloat, Float]
-  trait oneDouble extends AttrOptions[oneDouble, Double, Double] with Validations[oneDouble, Double]
-  trait oneBoolean extends AttrOptions[oneBoolean, Boolean, Boolean] with Validations[oneBoolean, Boolean]
-  trait oneBigInt extends AttrOptions[oneBigInt, BigInt, BigInt] with Validations[oneBigInt, BigInt]
-  trait oneBigDecimal extends AttrOptions[oneBigDecimal, BigDecimal, BigDecimal] with Validations[oneBigDecimal, BigDecimal]
-  trait oneDate extends AttrOptions[oneDate, Date, Date] with Validations[oneDate, Date]
-  trait oneDuration extends AttrOptions[oneDuration, Duration, Duration] with Validations[oneDuration, Duration]
-  trait oneInstant extends AttrOptions[oneInstant, Instant, Instant] with Validations[oneInstant, Instant]
-  trait oneLocalDate extends AttrOptions[oneLocalDate, LocalDate, LocalDate] with Validations[oneLocalDate, LocalDate]
-  trait oneLocalTime extends AttrOptions[oneLocalTime, LocalTime, LocalTime] with Validations[oneLocalTime, LocalTime]
-  trait oneLocalDateTime extends AttrOptions[oneLocalDateTime, LocalDateTime, LocalDateTime] with Validations[oneLocalDateTime, LocalDateTime]
-  trait oneOffsetTime extends AttrOptions[oneOffsetTime, OffsetTime, OffsetTime] with Validations[oneOffsetTime, OffsetTime]
-  trait oneOffsetDateTime extends AttrOptions[oneOffsetDateTime, OffsetDateTime, OffsetDateTime] with Validations[oneOffsetDateTime, OffsetDateTime]
-  trait oneZonedDateTime extends AttrOptions[oneZonedDateTime, ZonedDateTime, ZonedDateTime] with Validations[oneZonedDateTime, ZonedDateTime]
-  trait oneUUID extends AttrOptions[oneUUID, UUID, UUID] with Validations[oneUUID, UUID]
-  trait oneURI extends AttrOptions[oneURI, URI, URI] with Validations[oneURI, URI]
-  trait oneByte extends AttrOptions[oneByte, Byte, Byte] with Validations[oneByte, Byte]
-  trait oneShort extends AttrOptions[oneShort, Short, Short] with Validations[oneShort, Short]
-  trait oneChar extends AttrOptions[oneChar, Char, Char] with Validations[oneChar, Char]
+  trait OneType
+  trait oneString extends stringOptions[oneString, String] with Validations[oneString, String] with OneType
+  trait oneInt extends AttrOptions[oneInt, Int, Int] with Validations[oneInt, Int] with OneType
+  trait oneLong extends AttrOptions[oneLong, Long, Long] with Validations[oneLong, Long] with OneType
+  trait oneFloat extends AttrOptions[oneFloat, Float, Float] with Validations[oneFloat, Float] with OneType
+  trait oneDouble extends AttrOptions[oneDouble, Double, Double] with Validations[oneDouble, Double] with OneType
+  trait oneBoolean extends AttrOptions[oneBoolean, Boolean, Boolean] with Validations[oneBoolean, Boolean] with OneType
+  trait oneBigInt extends AttrOptions[oneBigInt, BigInt, BigInt] with Validations[oneBigInt, BigInt] with OneType
+  trait oneBigDecimal extends AttrOptions[oneBigDecimal, BigDecimal, BigDecimal] with Validations[oneBigDecimal, BigDecimal] with OneType
+  trait oneDate extends AttrOptions[oneDate, Date, Date] with Validations[oneDate, Date] with OneType
+  trait oneDuration extends AttrOptions[oneDuration, Duration, Duration] with Validations[oneDuration, Duration] with OneType
+  trait oneInstant extends AttrOptions[oneInstant, Instant, Instant] with Validations[oneInstant, Instant] with OneType
+  trait oneLocalDate extends AttrOptions[oneLocalDate, LocalDate, LocalDate] with Validations[oneLocalDate, LocalDate] with OneType
+  trait oneLocalTime extends AttrOptions[oneLocalTime, LocalTime, LocalTime] with Validations[oneLocalTime, LocalTime] with OneType
+  trait oneLocalDateTime extends AttrOptions[oneLocalDateTime, LocalDateTime, LocalDateTime] with Validations[oneLocalDateTime, LocalDateTime] with OneType
+  trait oneOffsetTime extends AttrOptions[oneOffsetTime, OffsetTime, OffsetTime] with Validations[oneOffsetTime, OffsetTime] with OneType
+  trait oneOffsetDateTime extends AttrOptions[oneOffsetDateTime, OffsetDateTime, OffsetDateTime] with Validations[oneOffsetDateTime, OffsetDateTime] with OneType
+  trait oneZonedDateTime extends AttrOptions[oneZonedDateTime, ZonedDateTime, ZonedDateTime] with Validations[oneZonedDateTime, ZonedDateTime] with OneType
+  trait oneUUID extends AttrOptions[oneUUID, UUID, UUID] with Validations[oneUUID, UUID] with OneType
+  trait oneURI extends AttrOptions[oneURI, URI, URI] with Validations[oneURI, URI] with OneType
+  trait oneByte extends AttrOptions[oneByte, Byte, Byte] with Validations[oneByte, Byte] with OneType
+  trait oneShort extends AttrOptions[oneShort, Short, Short] with Validations[oneShort, Short] with OneType
+  trait oneChar extends AttrOptions[oneChar, Char, Char] with Validations[oneChar, Char] with OneType
 
 
   object setString extends setString
@@ -256,7 +257,17 @@ abstract class DomainStructure {
   trait mapChar extends AttrOptions[mapChar, Map[String, Char], Char]
 
 
-  // ManyToOne relationship ....................................................
+  trait Db
+  object Db extends Db {
+    object H2 extends Db
+    object MariaDb extends Db
+    object MySQL extends Db
+    object PostgreSQL extends Db
+    object SQLite extends Db
+  }
+
+
+  // Relationships ..................................................
 
   object manyToOne extends manyToOne
   trait manyToOne extends refOptions[manyToOne] with Validations[oneLong, Long]
@@ -382,13 +393,71 @@ abstract class DomainStructure {
     def exclude[R](using RolesOnly[R]): Self = ???
     def only[R](using RolesOnly[R]): Self = ???
     def updating[R](using RolesOnly[R]): Self = ???
+
+    /** Custom database column properties for a single attribute.
+     *
+     * Allows customization of the database column type definition for specific databases.
+     * Common use cases include:
+     * - Size constraints for storage optimization (e.g., VARCHAR(20) instead of LONGVARCHAR)
+     * - Database-specific types for performance (e.g., TINYINT instead of INT)
+     * - Collation/encoding for text fields
+     * - Precision/scale for numeric types (e.g., DECIMAL(10,2))
+     *
+     * WARNING: Column properties must be compatible with the attribute's base JDBC type.
+     * Incorrect type definitions will cause runtime errors during schema generation or query execution.
+     *
+     * Example usage:
+     * {{{
+     *   val shortName = oneString.dbColumnProperties(Db.H2 -> "VARCHAR(20)")
+     *
+     *   val price = oneDouble.dbColumnProperties(
+     *     Db.H2 -> "DECIMAL(10,2)",
+     *     Db.SQLite -> "DECIMAL(10,2)"
+     *   )
+     * }}}
+     *
+     * @param props Tuples of (Database, ColumnTypeDefinition) for each target database
+     */
+    def dbColumnProperties(props: (Db, String)*): Self = ???
   }
+
+  /** Custom database column properties for all matching base types in a domain structure.
+   *
+   * Defines default column type overrides that apply to all attributes of matching types
+   * within the domain structure. Attribute-specific settings (via `.dbColumnProperties()`)
+   * take precedence over these general settings.
+   *
+   * Only scalar OneTypes are supported (oneString, oneInt, etc.). Set/Seq/Map types
+   * have database-specific implementations and cannot be customized this way.
+   *
+   * WARNING: Column properties must be compatible with the attribute's base JDBC type.
+   * Incorrect type definitions will cause runtime errors during schema generation or query execution.
+   *
+   * Example usage:
+   * {{{
+   *   generalDbColumnProperties(
+   *     Db.H2 -> Set(
+   *       oneString -> "VARCHAR(100)",
+   *       oneInt -> "BIGINT"
+   *     ),
+   *     Db.SQLite -> Set(
+   *       oneString -> "NVARCHAR(150)",
+   *       oneInt -> "BIGINT"
+   *     )
+   *   )
+   * }}}
+   *
+   * @param props Tuples of (Database, Set[(OneType, ColumnTypeDefinition)]) for each target database
+   */
+  def generalDbColumnProperties(props: (Db, Set[(OneType, String)])*): Unit = ()
+
 
   trait Validated
   trait Validations[Self, BaseTpe] {
     def validate(predicate: BaseTpe => Boolean, errorMsg: String = ""): Self & Validated = ???
     def validate(err2msg: PartialFunction[BaseTpe, String]): Self & Validated = ???
   }
+
 
   trait stringOptions[Self, Tpe] extends AttrOptions[Self, Tpe, String] {
     // Validation

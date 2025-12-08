@@ -81,7 +81,11 @@ trait Spi_sqlite_sync extends SpiBaseJVM_sync {
     stmt: String,
     doPrint: Boolean = false
   )(using conn0: Conn): TxReport = {
-    val conn  = conn0.asInstanceOf[JdbcConn_JVM]
+    val conn = conn0.asInstanceOf[JdbcConn_JVM]
+
+    // Check rawTransact access based on authenticated role
+    checkRawTransactAccess(conn)
+
     val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
     debug("\n=============================================================================")
     debug(stmt)
