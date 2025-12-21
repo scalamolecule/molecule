@@ -308,7 +308,7 @@ sbt.version = 1.11.7
 
 `project/plugins.sbt`:
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.24.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.24.1")
 ```
 
 `build.sbt`:
