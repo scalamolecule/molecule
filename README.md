@@ -69,7 +69,7 @@ git clone https://github.com/scalamolecule/molecule-samples.git
 First, define the entities and attributes of your domain. This structure allows Molecule to generate a minimal and precise DSL tailored to your domain. Here's an example:
 
 ```scala
-object MyDomain extends DomainStructure { 
+trait MyDomain extends DomainStructure { 
 
   trait Person {
     val name     = oneString
