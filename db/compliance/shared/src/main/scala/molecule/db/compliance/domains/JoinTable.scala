@@ -2,7 +2,7 @@ package molecule.db.compliance.domains
 
 import molecule.DomainStructure
 
-object JoinTable extends DomainStructure {
+trait JoinTable extends DomainStructure {
 
   trait A {
     val i = oneInt

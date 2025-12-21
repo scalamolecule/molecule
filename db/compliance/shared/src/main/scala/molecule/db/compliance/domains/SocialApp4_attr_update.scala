@@ -12,7 +12,7 @@ import molecule.DomainStructure
  * Unlike entity-level grants, this applies only to the specific attribute.
  * Useful for fine-grained control where only some attributes are updatable.
  */
-object SocialApp4_attr_update extends DomainStructure {
+trait SocialApp4_attr_update extends DomainStructure {
 
   trait Guest extends Role with query
   trait Member extends Role with query

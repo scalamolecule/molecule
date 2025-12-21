@@ -28,7 +28,7 @@ import molecule.DomainStructure
  * - Access check verifies: user authenticated + role has the action
  * - No entity/attribute checking needed (raw SQL bypasses the model)
  */
-object SocialApp_raw_access extends DomainStructure {
+trait SocialApp_raw_access extends DomainStructure {
 
   // Role definitions with different raw access levels
   trait Guest extends Role with query                   // Can only query (no raw access)

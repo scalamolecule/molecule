@@ -47,7 +47,7 @@ import molecule.DomainStructure
  *
  * This is the foundation - roles define what actions users can perform.
  */
-object SocialApp1_roles extends DomainStructure {
+trait SocialApp1_roles extends DomainStructure {
 
   // Role definitions with base action permissions
   trait Guest extends Role with query           // Can only query (read-only)

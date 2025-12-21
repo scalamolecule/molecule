@@ -4,7 +4,7 @@ import java.time.*
 import java.util.Date
 import molecule.DomainStructure
 
-object Validation extends DomainStructure {
+trait Validation extends DomainStructure {
 
   enum Color:
     case RED, BLUE, GREEN

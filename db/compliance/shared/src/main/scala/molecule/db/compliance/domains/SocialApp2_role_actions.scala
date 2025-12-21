@@ -13,7 +13,7 @@ import molecule.DomainStructure
  * These grants extend the base permissions defined by role actions.
  * All attributes in the entity inherit these grants.
  */
-object SocialApp2_role_actions extends DomainStructure {
+trait SocialApp2_role_actions extends DomainStructure {
 
   trait Guest extends Role with query
   trait Member extends Role with query

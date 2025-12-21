@@ -2,7 +2,7 @@ package molecule.db.compliance.domains
 
 import molecule.DomainStructure
 
-object Uniques extends DomainStructure {
+trait Uniques extends DomainStructure {
 
   trait Uniques {
     val i = oneInt

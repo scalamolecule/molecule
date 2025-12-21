@@ -12,7 +12,7 @@ import molecule.DomainStructure
  * After understanding each layer individually, see the composed example
  * at the end showing how they all work together.
  */
-object SocialApp_overview extends DomainStructure {
+trait SocialApp_overview extends DomainStructure {
 
   // Role definitions
   trait Guest extends Role with query

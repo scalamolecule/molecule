@@ -29,7 +29,7 @@ import java.util.{Date, UUID}
  * For larger projects, it is recommended to organize the domain structure in
  * segments of related entity traits within objects:
  * {{{
- * object Seattle extends DomainStructure {
+ * trait Seattle extends DomainStructure {
  *
  *   object customer { // "customer" segment
  *     trait Person {
@@ -56,7 +56,7 @@ import java.util.{Date, UUID}
  * }
  * }}}
  */
-abstract class DomainStructure {
+trait DomainStructure {
 
   // Types ..................................................
 
@@ -287,7 +287,7 @@ abstract class DomainStructure {
   trait insert extends Action
   trait update extends Action
   trait delete extends Action
-  trait rawQuery extends Action    // Raw SQL SELECT queries (read-only)
+  trait rawQuery extends Action // Raw SQL SELECT queries (read-only)
   trait rawTransact extends Action // Raw SQL mutations (dangerous!)
 
   /** Allow Role and (Role1, Role1, RoleN..) as parameter to access control methods and types
@@ -303,6 +303,15 @@ abstract class DomainStructure {
 
   // used for both entity- and attribute-level grants
   trait updating[R](using RolesOnly[R])
+
+
+  // Migration .....................................................................
+
+  // Let entity or segment extend this to change name
+  trait Rename(newName: String)
+
+  // Entity or segment can extend this to be marked for removal from schema
+  trait Remove
 
 
   // Enums .....................................................................
@@ -419,6 +428,37 @@ abstract class DomainStructure {
      * @param props Tuples of (Database, ColumnTypeDefinition) for each target database
      */
     def dbColumnProperties(props: (Db, String)*): Self = ???
+
+    /** Migration: Rename this attribute to a new name
+     *
+     * Use when renaming an attribute to preserve existing data.
+     * After migration is applied, rename the attribute in the code.
+     *
+     * Example:
+     * {{{
+     *   // Step 1: Add rename hint
+     *   val name = oneString.rename("fullName")
+     *
+     *   // Step 2: After migration applied, rename attribute
+     *   val fullName = oneString
+     * }}}
+     */
+    def rename(newName: String): Self = ???
+
+    // We can rename any type of attribute
+    def becomes(newAttr: AttrOptions[?, ?, ?]): Self = ???
+
+    /** Migration: Mark this attribute for removal
+     *
+     * Use when removing an attribute from the schema.
+     * The column will be dropped from the database.
+     *
+     * Example:
+     * {{{
+     *   val deprecated = oneString.remove
+     * }}}
+     */
+    def remove: Self = ???
   }
 
   /** Custom database column properties for all matching base types in a domain structure.
@@ -501,5 +541,29 @@ abstract class DomainStructure {
 
     // Tupled attributes
     def require(attrs: Requierable*): Self = ???
+
+    /** Migration: Mark this relationship for removal
+     *
+     * Use when removing a relationship from the schema.
+     * The foreign key column will be dropped from the database.
+     *
+     * Example:
+     * {{{
+     *   val oldCustomer = manyToOne[Customer].remove
+     * }}}
+     */
+    def remove: Self = ???
+
+    /** Migration: Rename this relationship
+     *
+     * Use when renaming a relationship attribute.
+     * The foreign key column will be renamed in the database.
+     *
+     * Example:
+     * {{{
+     *   val customer = manyToOne[Customer].rename("buyer")
+     * }}}
+     */
+    def rename(newName: String): Self = ???
   }
 }

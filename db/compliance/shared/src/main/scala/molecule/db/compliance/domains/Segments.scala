@@ -2,7 +2,7 @@ package molecule.db.compliance.domains
 
 import molecule.DomainStructure
 
-object Segments extends DomainStructure {
+trait Segments extends DomainStructure {
 
   // General segment
   object gen {

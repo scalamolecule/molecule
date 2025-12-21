@@ -12,7 +12,7 @@ import molecule.DomainStructure
  *
  * These restrictions override entity-level permissions for specific attributes.
  */
-object SocialApp3_attr_roles extends DomainStructure {
+trait SocialApp3_attr_roles extends DomainStructure {
 
   trait Guest extends Role with query
   trait Member extends Role with query
