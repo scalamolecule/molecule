@@ -308,7 +308,7 @@ sbt.version = 1.11.7
 
 `project/plugins.sbt`:
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.24.1")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.24.2")
 ```
 
 `build.sbt`:
@@ -420,3 +420,33 @@ Marc Grue
 ## License
 
 Apache License 2.0
+
+
+
+
+val query = CountryLanguage.select
+.join(Country.select.sortBy(_.population).desc.take(2))(_.countryCode === _.code)
+.map { case (language, country) => (language.language, country.name) }
+.sortBy(_._1)
+
+db.renderSql(query) ==> """
+SELECT countrylanguage0.language AS res_0, subquery1.name AS res_1
+FROM countrylanguage countrylanguage0
+JOIN (SELECT
+country1.code AS code,
+country1.name AS name,
+country1.population AS population
+FROM country country1
+ORDER BY population DESC
+LIMIT ?) subquery1
+ON (countrylanguage0.countrycode = subquery1.code)
+ORDER BY res_0
+"""
+
+db.run(query).take(5) ==> Seq(
+("Asami", "India"),
+("Bengali", "India"),
+("Chinese", "China"),
+("Dong", "China"),
+("Gujarati", "India")
+)
