@@ -5,11 +5,11 @@ import scala.util.Random
 import molecule.core.dataModel.{Op, Value}
 import molecule.core.error.ModelError
 import molecule.db.common.javaSql.PrepStmt
-import molecule.db.common.query.{Model2Query, QueryExprOne, SqlQueryBase}
+import molecule.db.common.query.{Model2Query, QueryExprOne, QueryExprRef, SqlQueryBase}
 
 trait QueryExprOne_mysql
   extends QueryExprOne
-    with LambdasOne_mysql { self: Model2Query & SqlQueryBase =>
+    with LambdasOne_mysql { self: Model2Query & QueryExprRef & SqlQueryBase =>
 
   override protected def matches[T](
     col: String,

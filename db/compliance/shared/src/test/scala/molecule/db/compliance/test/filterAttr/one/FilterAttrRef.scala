@@ -24,9 +24,11 @@ case class FilterAttrRef(
       ).transact
 
       // Pointing forwards to B
+      // A.i == B.i
       _ <- A.s.i_(B.i_).B.i_.query.get.map(_ ==> List("b"))
 
       // Same as pointing backwards to A
+      // B.i == A.i
       _ <- A.s.i_.B.i_(A.i_).query.get.map(_ ==> List("b"))
     } yield ()
   }

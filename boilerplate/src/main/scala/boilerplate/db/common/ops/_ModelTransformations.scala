@@ -41,7 +41,7 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |
        |  private def getSortedTacitId(ns: String) = {
        |    // Add sorting by entity id out of range from up to 5 custom sorts
-       |    AttrOneTacID(ns, "id", V, Seq(), None, None, Nil, Nil, None, Some("a6"), false, List(0, 0))
+       |    AttrOneTacID(ns, "id", V, Seq(), None, None, None, Nil, Nil, None, Some("a6"), false, List(0, 0))
        |  }
        |
        |  def addNested(self: Molecule, nestedMolecule: Molecule): DataModel = {
@@ -394,20 +394,6 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |        ${addSort("One", "Opt")}
        |      }
        |
-       |      case a: AttrSetMan => a match {
-       |        ${addSort("Set", "Man")}
-       |      }
-       |      case a: AttrSetOpt => a match {
-       |        ${addSort("Set", "Opt")}
-       |      }
-       |
-       |      case a: AttrSeqMan => a match {
-       |        ${addSort("Seq", "Man")}
-       |      }
-       |      case a: AttrSeqOpt => a match {
-       |        ${addSort("Seq", "Opt")}
-       |      }
-       |
        |      case e => e
        |    }
        |  }
@@ -506,6 +492,27 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
        |      case e       => unexpected(e)
        |    }
        |    dataModel.copy(elements = es.init ++ attrs)
+       |  }
+       |
+       |  def subQueryComparison(dataModel: DataModel, op: Op, subQueryMolecule: Molecule): DataModel = {
+       |    val es       = dataModel.elements
+       |    val subQuery = SubQuery(subQueryMolecule.dataModel.elements)
+       |
+       |    // Get base type from last attribute
+       |    val baseType = es.last match {
+       |      ${getBaseType()}
+       |      case other => unexpected(other)
+       |    }
+       |
+       |    val compareSubOp = CompareSub(baseType, subQuery)
+       |
+       |    val attrWithCompareSub = es.last match {
+       |      case a: AttrOneMan => a match {
+       |        ${liftCompareSub()}
+       |      }
+       |      case other => unexpected(other)
+       |    }
+       |    dataModel.copy(elements = es.init :+ attrWithCompareSub)
        |  }
        |
        |  def reverseTopLevelSorting(es: List[Element]): List[Element] = {
@@ -713,6 +720,25 @@ object _ModelTransformations extends DbCommonBase("ModelTransformations", "/ops"
     baseTypesWithSpaces.map { case (baseTpe, space) =>
       s"case a: Attr$card$mode$baseTpe $space=> a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))"
     }.mkString("\n              ")
+  }
+
+  private def liftOp(card: String): String = {
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
+      s"case a: Attr${card}Man$baseTpe $space=> a.copy(op = op)"
+    }.mkString("\n            ")
+  }
+
+  private def getBaseType(): String = {
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
+      val typeName = if (baseTpe == "ID") "Long" else baseTpe
+      s"case a: AttrOneMan$baseTpe $space=> \"$typeName\""
+    }.mkString("\n      ")
+  }
+
+  private def liftCompareSub(): String = {
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
+      s"case a: AttrOneMan$baseTpe $space=> a.copy(op = compareSubOp)"
+    }.mkString("\n            ")
   }
 
   private def reverseTopLevelSorting(mode: String): String = {

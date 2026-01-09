@@ -12,7 +12,16 @@ class JdbcConnSQlite_JVM(
   override val proxy: JdbcProxy,
   private val sqlConn0: sql.Connection,
   override val authContext: Option[AuthContext] = None
-) extends JdbcConn_JVM(proxy, sqlConn0, authContext) {
+) extends JdbcConn_JVM(
+  proxy,
+  sqlConn0,
+  authContext
+) {
+
+  // SQLite uses custom ResultSetImpl for performance (caching)
+  override def resultSet(underlying: ResultSet): ResultSetInterface = {
+    new ResultSetImpl_sqlite(underlying)
+  }
 
   override def queryStmt(query: String): PreparedStatement = {
     sqlConn.prepareStatement(
@@ -20,10 +29,6 @@ class JdbcConnSQlite_JVM(
       ResultSet.TYPE_FORWARD_ONLY, // only option for sqlite
       ResultSet.CONCUR_READ_ONLY
     )
-  }
-
-  override def resultSet(underlying: ResultSet): ResultSetInterface = {
-    new ResultSetImpl_sqlite(underlying)
   }
 
   override def withAuthContext(authCtx: AuthContext): JdbcConnSQlite_JVM =

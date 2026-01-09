@@ -127,6 +127,8 @@ case class UnpickleTpls[Tpl](
           prevRefs.clear()
           resolveUnpicklers(tail, unpicklers :+ unpickleOptElements(attrs))
 
+        case SubQuery(_) => resolveUnpicklers(tail, unpicklers)
+
         case Nested(_, nestedElements) =>
           prevRefs.clear()
           resolveUnpicklers(tail, unpicklers :+ unpickleNested(nestedElements))
@@ -335,13 +337,13 @@ case class UnpickleTpls[Tpl](
 
   private def unpickleAttrOneMan(a: AttrOneMan): () => Any = {
     a.op match {
-      case Fn(_, kw, _, _, _) => kw match {
+      case AggrFn(_, kw, _, _, _) => kw match {
         case "count" | "countDistinct"                => () => dek.readInt
         case "distinct" | "mins" | "maxs" | "samples" => unpickleAttrOneManSet(a)
         case "avg" | "variance" | "stddev"            => () => dek.readDouble
         case _                                        => unpickleAttrOneManV(a)
       }
-      case _                  => unpickleAttrOneManV(a)
+      case _                      => unpickleAttrOneManV(a)
     }
   }
   private def unpickleAttrOneManV(a: AttrOneMan): () => Any = {

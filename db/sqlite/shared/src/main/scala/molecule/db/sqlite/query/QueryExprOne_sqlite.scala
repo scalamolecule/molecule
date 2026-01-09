@@ -4,11 +4,11 @@ import scala.reflect.ClassTag
 import molecule.core.dataModel.{Op, Value}
 import molecule.core.error.ModelError
 import molecule.db.common.javaSql.PrepStmt
-import molecule.db.common.query.{Model2Query, QueryExprOne, SqlQueryBase}
+import molecule.db.common.query.{Model2Query, QueryExprOne, QueryExprRef, SqlQueryBase}
 
 trait QueryExprOne_sqlite
   extends QueryExprOne
-    with LambdasOne_sqlite { self: Model2Query & SqlQueryBase =>
+    with LambdasOne_sqlite { self: Model2Query & QueryExprRef & SqlQueryBase =>
 
 
   override protected def equal[T](

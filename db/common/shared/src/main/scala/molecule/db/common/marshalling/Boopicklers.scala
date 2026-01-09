@@ -56,7 +56,7 @@ object Boopicklers extends MoleculeLogging {
   pickleOp.addConcreteType[GetV.type]
   pickleOp.addConcreteType[Add.type]
   pickleOp.addConcreteType[Remove.type]
-  pickleOp.addConcreteType[Fn]
+  pickleOp.addConcreteType[AggrFn]
   pickleOp.addConcreteType[AttrOp.Append.type]
   pickleOp.addConcreteType[AttrOp.Prepend.type]
   pickleOp.addConcreteType[AttrOp.SubString]

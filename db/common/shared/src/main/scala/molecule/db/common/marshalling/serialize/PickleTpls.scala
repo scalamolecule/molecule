@@ -153,6 +153,8 @@ case class PickleTpls(
           }
           resolvePicklers(tail, picklers :+ pickler, tplIndex + 1)
 
+        case SubQuery(_) => resolvePicklers(tail, picklers, tplIndex)
+
         case Nested(_, nestedElements) =>
           prevRefs.clear()
           resolvePicklers(tail, picklers :+ pickleNested(tplIndex, nestedElements), tplIndex + 1)
@@ -379,13 +381,13 @@ case class PickleTpls(
 
   private def pickleAttrOneMan(a: AttrOneMan, tplIndex: Int): Product => Unit = {
     a.op match {
-      case Fn(_, kw, _, _, _) => kw match {
+      case AggrFn(_, kw, _, _, _) => kw match {
         case "count" | "countDistinct"                => pickleAttrOneManInt(tplIndex)
         case "distinct" | "mins" | "maxs" | "samples" => pickleAttrOneManSet(a, tplIndex)
         case "avg" | "variance" | "stddev"            => pickleAttrOneManDouble(tplIndex)
         case _                                        => pickleAttrOneManV(a, tplIndex)
       }
-      case _                  => pickleAttrOneManV(a, tplIndex)
+      case _                      => pickleAttrOneManV(a, tplIndex)
     }
   }
   private def pickleAttrOneManInt(tplIndex: Int): Product => Unit = {

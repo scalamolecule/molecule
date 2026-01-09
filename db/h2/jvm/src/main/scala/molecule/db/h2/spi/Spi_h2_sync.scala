@@ -11,7 +11,8 @@ import molecule.db.common.query.{Model2SqlQuery, SqlQueryBase}
 import molecule.db.common.spi.{SpiBaseJVM_sync, TxReport}
 import molecule.db.common.transaction.*
 import molecule.db.common.util.Executor.*
-import molecule.db.h2.query.Model2SqlQuery_h2
+import molecule.db.h2.facade.JdbcConn_JVM_h2
+import molecule.db.h2.query.{Model2SqlQuery_h2, Model2SqlQuery_h2_JVM}
 
 
 object Spi_h2_sync extends Spi_h2_sync
@@ -37,12 +38,18 @@ trait Spi_h2_sync extends SpiBaseJVM_sync {
   }
 
   override def getModel2SqlQuery(elements: List[Element]): Model2SqlQuery & SqlQueryBase =
-    new Model2SqlQuery_h2(elements)
+    new Model2SqlQuery_h2_JVM(elements)
 
   // Creating connection from RPC proxy
   override protected def getJdbcConn(proxy0: ConnProxy): Future[JdbcConn_JVM] = Future {
     val proxy   = proxy0.asInstanceOf[JdbcProxy]
     val sqlConn = DriverManager.getConnection(proxy.url)
-    JdbcHandler_JVM.recreateDb(proxy, sqlConn)
+    sqlConn.setAutoCommit(false)
+    val conn = JdbcConn_JVM_h2(proxy, sqlConn)
+    val stmt = sqlConn.createStatement()
+    stmt.executeUpdate(JdbcHandler_JVM.getSqlInit(proxy))
+    sqlConn.commit()
+    stmt.close()
+    conn
   }
 }

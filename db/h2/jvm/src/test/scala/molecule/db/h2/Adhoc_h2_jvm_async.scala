@@ -8,8 +8,6 @@ import molecule.db.h2.async.*
 import molecule.db.h2.setup.DbProviders_h2
 import org.scalactic.Equality
 import molecule.core.dataModel.*
-import scala.Tuple.:*
-import molecule.db.compliance.domains.dsl.Refs.{A, B, D}
 import molecule.db.common.spi.Conn
 
 class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {

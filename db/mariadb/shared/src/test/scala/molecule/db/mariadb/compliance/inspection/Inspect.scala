@@ -20,8 +20,8 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
         """=== QUERY =====================================
           |DataModel(
           |  List(
-          |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 10)),
-          |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 11))
+          |    AttrOneManString("Entity", "string", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 10)),
+          |    AttrOneManInt("Entity", "int", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 11))
           |  ),
           |  Set(10, 11), 0, 0, Nil
           |)
@@ -45,8 +45,8 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
       // Or get the DataModel
       _ = Entity.string.int.query.dataModel ==> DataModel(
         List(
-          AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 10)),
-          AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 11))
+          AttrOneManString("Entity", "string", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 10)),
+          AttrOneManInt("Entity", "int", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 11))
         ),
         Set(10, 11), 0, 0
       )
@@ -65,8 +65,8 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
           """=== SAVE =====================================
             |DataModel(
             |  List(
-            |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, false, List(0, 10)),
-            |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, false, List(0, 11))
+            |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, None, Nil, Nil, None, None, false, List(0, 10)),
+            |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, None, Nil, Nil, None, None, false, List(0, 11))
             |  ),
             |  Set(10, 11), 0, 0, Nil
             |)
@@ -81,8 +81,8 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
           """=== SAVE =====================================
             |DataModel(
             |  List(
-            |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, Nil, Nil, None, None, false, List(0, 10)),
-            |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, Nil, Nil, None, None, false, List(0, 11))
+            |    AttrOneManString("Entity", "string", Eq, Seq("a"), None, None, None, Nil, Nil, None, None, false, List(0, 10)),
+            |    AttrOneManInt("Entity", "int", Eq, Seq(1), None, None, None, Nil, Nil, None, None, false, List(0, 11))
             |  ),
             |  Set(10, 11), 0, 0, Nil
             |)
@@ -115,8 +115,8 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
           """=== INSERT =====================================
             |DataModel(
             |  List(
-            |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 10)),
-            |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 11))
+            |    AttrOneManString("Entity", "string", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 10)),
+            |    AttrOneManInt("Entity", "int", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 11))
             |  ),
             |  Set(10, 11), 0, 0, Nil
             |)
@@ -134,8 +134,8 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
           """=== INSERT =====================================
             |DataModel(
             |  List(
-            |    AttrOneManString("Entity", "string", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 10)),
-            |    AttrOneManInt("Entity", "int", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 11))
+            |    AttrOneManString("Entity", "string", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 10)),
+            |    AttrOneManInt("Entity", "int", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 11))
             |  ),
             |  Set(10, 11), 0, 0, Nil
             |)
@@ -170,8 +170,8 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
           """=== UPDATE =====================================
             |DataModel(
             |  List(
-            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0)),
-            |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, false, List(0, 10))
+            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, None, Nil, Nil, None, None, false, List(0, 0)),
+            |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, None, Nil, Nil, None, None, false, List(0, 10))
             |  ),
             |  Set(10), 0, 0, Nil
             |)
@@ -195,8 +195,8 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
           """=== UPDATE =====================================
             |DataModel(
             |  List(
-            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0)),
-            |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, false, List(0, 10))
+            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, None, Nil, Nil, None, None, false, List(0, 0)),
+            |    AttrOneManString("Entity", "string", Eq, Seq("ZZZ"), None, None, None, Nil, Nil, None, None, false, List(0, 10))
             |  ),
             |  Set(10), 0, 0, Nil
             |)
@@ -233,7 +233,7 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
           """=== DELETE =====================================
             |DataModel(
             |  List(
-            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0))
+            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, None, Nil, Nil, None, None, false, List(0, 0))
             |  ),
             |  Set(), 0, 0, Nil
             |)
@@ -247,7 +247,7 @@ class Test_Inspect extends MUnit with DbProviders_mariadb with TestUtils {
           """=== DELETE =====================================
             |DataModel(
             |  List(
-            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, false, List(0, 0))
+            |    AttrOneTacID("Entity", "id", Eq, Seq(1L), None, None, None, Nil, Nil, None, None, false, List(0, 0))
             |  ),
             |  Set(), 0, 0, Nil
             |)

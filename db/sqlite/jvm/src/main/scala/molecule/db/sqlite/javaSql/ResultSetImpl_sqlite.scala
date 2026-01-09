@@ -117,7 +117,6 @@ class ResultSetImpl_sqlite(val underlying: ResultSet) extends ResultSetInterface
   override def getArray(columnIndex: Int): ArrayInterface =
     new ArrayImpl(value(columnIndex).asInstanceOf[java.sql.Array])
 
-
   // Cursor/actions -----------------------------------
 
   override def close(): Unit = underlying.close()

@@ -174,4 +174,20 @@ abstract class Model2SqlQuery(elements0: List[Element])
     s"""SELECT COUNT($table.id)
        |FROM $table$joins_$where_$having_;""".stripMargin
   }
+
+  final def renderSubQuery(baseIndent: Int = 2): String = {
+    // Render the subquery using the normal rendering
+    val subquerySql = renderSqlQuery(None, None)
+      .stripSuffix(";")
+      .trim
+
+    // Indent subquery content
+    val contentIndent = "  " * baseIndent
+    val indentedLines = subquerySql.split("\n").map { line =>
+      if (line.trim.isEmpty) line else contentIndent + line
+    }
+
+    // Opening/closing parens at no indent (they're already in the SELECT list which is indented)
+    s"(\n${indentedLines.mkString("\n")}\n  )"
+  }
 }

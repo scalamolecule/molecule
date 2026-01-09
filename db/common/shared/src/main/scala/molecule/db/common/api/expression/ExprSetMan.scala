@@ -4,7 +4,6 @@ import molecule.core.dataModel.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
-
 trait ExprSetMan[T, Entity](entity: DataModel => Entity) extends SetValue { self: Molecule =>
   def apply (                 ) = entity(addSet(dataModel, NoValue, Set.empty[T]   ))
   def apply (set : Set[T]     ) = entity(addSet(dataModel, Eq     , set            ))
@@ -17,8 +16,8 @@ trait ExprSetMan[T, Entity](entity: DataModel => Entity) extends SetValue { self
   def remove(v   : T, vs: T*  ) = entity(addSet(dataModel, Remove , Set(v) ++ vs   ))
   def remove(vs  : Iterable[T]) = entity(addSet(dataModel, Remove , vs.toSet       ))
 
-  def has  (a: Molecule_0 & OneValue) = entity(filterAttr(dataModel, Has  , a))
-  def hasNo(a: Molecule_0 & OneValue) = entity(filterAttr(dataModel, HasNo, a))
+  def has  (m: Molecule) = entity(filterAttr(dataModel, Has  , m))
+  def hasNo(m: Molecule) = entity(filterAttr(dataModel, HasNo, m))
 }
 
 trait ExprSetMan_Enum[T, Entity](entity: DataModel => Entity) extends SetValue { self: Molecule =>

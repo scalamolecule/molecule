@@ -1,7 +1,6 @@
 import org.scalajs.linker.interface.ESVersion
 
-val moleculeVersion = "0.29.0"
-
+val moleculeVersion = "0.30.0-SNAPSHOT"
 val catsVersion              = "3.6.0"
 val tapirVersion             = "1.11.25"
 val pekkoVersion             = "1.1.3"

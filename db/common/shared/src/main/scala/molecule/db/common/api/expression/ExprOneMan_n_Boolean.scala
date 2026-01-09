@@ -6,7 +6,6 @@ import molecule.core.dataModel.Keywords.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
-
 trait ExprOneMan_n_Boolean[T, Tpl <: Tuple, Entity[_ <: Tuple]](
   entity: [tpl <: Tuple] => DataModel => Entity[tpl]
 ) extends OneValue { self: Molecule  =>
@@ -19,8 +18,11 @@ trait ExprOneMan_n_Boolean[T, Tpl <: Tuple, Entity[_ <: Tuple]](
   def apply(v: qm): Entity[Tpl] = entity[Tpl](addOne(dataModel, Eq , Nil, true))
   def not  (v: qm): Entity[Tpl] = entity[Tpl](addOne(dataModel, Neq, Nil, true))
 
-  def apply(a: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Eq , a))
-  def not  (a: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Neq, a))
+  def apply(fa: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Eq , fa))
+  def not  (fa: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Neq, fa))
+
+  def apply(sub: Molecule_1[T] & OneValue): Entity[Tpl] = entity[Tpl](subQueryComparison(dataModel, Eq , sub))
+  def not  (sub: Molecule_1[T] & OneValue): Entity[Tpl] = entity[Tpl](subQueryComparison(dataModel, Neq, sub))
 
   def apply(kw: distinct): Entity[Init[Tpl] :* Set[T]] = entity[Init[Tpl] :* Set[T]](asIs (dataModel, kw))
 

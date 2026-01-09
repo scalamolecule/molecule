@@ -135,6 +135,26 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
   }
 
 
+  override protected def querySubQuery(subElements: List[Element]): Unit = {
+    val wasInsideSubQuery = insideSubQuery
+    insideSubQuery = true
+
+    // Build subquery SQL and get casts from subquery builder
+    val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subElements)
+
+    // Add the subquery as a SELECT expression in the main query
+    select += subquerySql
+
+    // Add the subquery casts to the main query
+    subQueryCasts.foreach(castStrategy.add)
+
+    insideSubQuery = wasInsideSubQuery
+  }
+
+  // To be implemented by database-specific query builders
+  protected def buildSubQuerySqlWithCasts(subElements: List[Element]): (String, List[Cast])
+
+
   override protected def queryNested(
     ref: Ref, nestedElements: List[Element]
   ): Unit = {

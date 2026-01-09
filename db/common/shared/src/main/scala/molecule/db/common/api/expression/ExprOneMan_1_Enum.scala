@@ -5,8 +5,9 @@ import molecule.core.dataModel.Keywords.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
-
-trait ExprOneMan_1_Enum[T, Entity](entity: DataModel => Entity) extends OneValue { self: Molecule  =>
+trait ExprOneMan_1_Enum[T, Entity](
+  entity: DataModel => Entity
+) extends OneValue { self: Molecule  =>
   def apply(             ): Entity = entity(addOne(dataModel, NoValue, Nil                      ))
   def apply(v : T, vs: T*): Entity = entity(addOne(dataModel, Eq     , (v +: vs).map(_.toString)))
   def apply(vs: Seq[T]   ): Entity = entity(addOne(dataModel, Eq     , vs       .map(_.toString)))

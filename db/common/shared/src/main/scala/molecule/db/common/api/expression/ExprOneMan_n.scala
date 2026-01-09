@@ -6,7 +6,6 @@ import molecule.core.dataModel.Keywords.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
-
 trait ExprOneMan_n[T, Tpl <: Tuple, Entity[_ <: Tuple]](
   entity: [tpl <: Tuple] => DataModel => Entity[tpl]
 ) extends OneValue { self: Molecule =>
@@ -27,12 +26,19 @@ trait ExprOneMan_n[T, Tpl <: Tuple, Entity[_ <: Tuple]](
   def >    (lower: qm): Entity[Tpl] = entity[Tpl](addOne(dataModel, Gt , Nil, true))
   def >=   (lower: qm): Entity[Tpl] = entity[Tpl](addOne(dataModel, Ge , Nil, true))
 
-  def apply(a: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Eq , a))
-  def not  (a: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Neq, a))
-  def <    (a: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Lt , a))
-  def <=   (a: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Le , a))
-  def >    (a: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Gt , a))
-  def >=   (a: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Ge , a))
+  def apply(fa: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Eq , fa))
+  def not  (fa: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Neq, fa))
+  def <    (fa: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Lt , fa))
+  def <=   (fa: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Le , fa))
+  def >    (fa: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Gt , fa))
+  def >=   (fa: Molecule_0 & OneValue)(using ec: DummyImplicit): Entity[Tpl] = entity[Tpl](filterAttr(dataModel, Ge , fa))
+
+  def apply(sub: Molecule_1[T] & OneValue): Entity[Tpl] = entity[Tpl](subQueryComparison(dataModel, Eq , sub))
+  def not  (sub: Molecule_1[T] & OneValue): Entity[Tpl] = entity[Tpl](subQueryComparison(dataModel, Neq, sub))
+  def <    (sub: Molecule_1[T] & OneValue): Entity[Tpl] = entity[Tpl](subQueryComparison(dataModel, Lt , sub))
+  def <=   (sub: Molecule_1[T] & OneValue): Entity[Tpl] = entity[Tpl](subQueryComparison(dataModel, Le , sub))
+  def >    (sub: Molecule_1[T] & OneValue): Entity[Tpl] = entity[Tpl](subQueryComparison(dataModel, Gt , sub))
+  def >=   (sub: Molecule_1[T] & OneValue): Entity[Tpl] = entity[Tpl](subQueryComparison(dataModel, Ge , sub))
 
   def apply(kw: mins)    : Entity[Init[Tpl] :* Set[T]] = entity[Init[Tpl] :* Set[T]](asIs (dataModel, kw, Some(kw.n)))
   def apply(kw: maxs)    : Entity[Init[Tpl] :* Set[T]] = entity[Init[Tpl] :* Set[T]](asIs (dataModel, kw, Some(kw.n)))

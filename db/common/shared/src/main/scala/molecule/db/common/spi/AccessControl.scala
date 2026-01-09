@@ -1,6 +1,6 @@
 package molecule.db.common.spi
 
-import molecule.core.dataModel.{Attr, Element, Nested, OptEntity, OptNested, OptRef, Ref}
+import molecule.core.dataModel.{Attr, Element, Nested, OptEntity, OptNested, OptRef, Ref, SubQuery}
 import molecule.core.error.ModelError
 import molecule.db.common.marshalling.{ConnProxy, EnvMode}
 
@@ -62,6 +62,9 @@ trait AccessControl {
     case r: Ref if r.coord.nonEmpty               => Some(r.coord.head)
     case OptRef(r: Ref, _) if r.coord.nonEmpty    => Some(r.coord.head)
     case OptEntity(attrs) if attrs.nonEmpty       => Some(attrs.head.coord.head)
+
+    case SubQuery(subElements) if subElements.nonEmpty => getEntityIndexFromElement(subElements.head)
+
     case Nested(r: Ref, _) if r.coord.nonEmpty    => Some(r.coord.head)
     case OptNested(r: Ref, _) if r.coord.nonEmpty => Some(r.coord.head)
     case _                                        => None
@@ -155,6 +158,13 @@ trait AccessControl {
             case r: Ref               => r.ent
             case OptRef(r: Ref, _)    => r.ent
             case OptEntity(attrs)     => attrs.head.ent
+
+            case SubQuery(subElements) if subElements.nonEmpty => subElements.head match {
+              case a: Attr => a.ent
+              case r: Ref  => r.ent
+              case _       => "Unknown"
+            }
+
             case Nested(r: Ref, _)    => r.ent
             case OptNested(r: Ref, _) => r.ent
             case _                    => "Unknown"
@@ -258,6 +268,13 @@ trait AccessControl {
             case r: Ref               => r.ent
             case OptRef(r: Ref, _)    => r.ent
             case OptEntity(attrs)     => attrs.head.ent
+
+            case SubQuery(subElements) if subElements.nonEmpty => subElements.head match {
+              case a: Attr => a.ent
+              case r: Ref  => r.ent
+              case _       => "Unknown"
+            }
+
             case Nested(r: Ref, _)    => r.ent
             case OptNested(r: Ref, _) => r.ent
             case _                    => "Unknown"

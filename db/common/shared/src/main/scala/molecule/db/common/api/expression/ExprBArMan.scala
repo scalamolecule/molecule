@@ -5,8 +5,9 @@ import molecule.core.dataModel.*
 import molecule.db.common.api.{Molecule, Molecule_0}
 import molecule.db.common.ops.ModelTransformations_.*
 
-
-trait ExprBArMan[T, Entity](entity: DataModel => Entity) extends SeqValue { self: Molecule =>
+trait ExprBArMan[T, Entity](
+  entity: DataModel => Entity
+) extends SeqValue { self: Molecule =>
   def apply(                   ) = entity(addBAr(dataModel, NoValue, Array.empty[Byte].asInstanceOf[Array[T]]))
   def apply(byteArray: Array[T]) = entity(addBAr(dataModel, Eq     , byteArray                               ))
   def not  (byteArray: Array[T]) = entity(addBAr(dataModel, Neq    , byteArray                               ))

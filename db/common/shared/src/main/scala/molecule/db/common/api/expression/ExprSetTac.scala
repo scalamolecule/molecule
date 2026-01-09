@@ -4,7 +4,6 @@ import molecule.core.dataModel.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
-
 trait ExprSetTac[T, Entity](entity: DataModel => Entity) extends SetValue { self: Molecule =>
   def apply(                ) = entity(addSet(dataModel, NoValue, Set.empty[T]   ))
   def apply(set: Set[T]     ) = entity(addSet(dataModel, Eq     , set            ))
@@ -13,8 +12,8 @@ trait ExprSetTac[T, Entity](entity: DataModel => Entity) extends SetValue { self
   def hasNo(v  : T, vs: T*  ) = entity(addSet(dataModel, HasNo  , Set(v) ++ vs   ))
   def hasNo(vs : Iterable[T]) = entity(addSet(dataModel, HasNo  , vs.toSet       ))
 
-  def has  (a: Molecule_0 & OneValue) = entity(filterAttr(dataModel, Has  , a))
-  def hasNo(a: Molecule_0 & OneValue) = entity(filterAttr(dataModel, HasNo, a))
+  def has  (m: Molecule) = entity(filterAttr(dataModel, Has  , m))
+  def hasNo(m: Molecule) = entity(filterAttr(dataModel, HasNo, m))
 }
 
 trait ExprSetTac_Enum[T, Entity](entity: DataModel => Entity) extends SetValue { self: Molecule =>

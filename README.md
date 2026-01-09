@@ -422,31 +422,55 @@ Marc Grue
 Apache License 2.0
 
 
+class Ref_refs_1[T](override val dataModel: DataModel) extends Molecule_1[T] {
+trait OptRefInit { self: Molecule =>
+def ?[OptRefT           ](optRef: Molecule_1[OptRefT  ]) = new Ref_n[(T, Option[OptRefT  ])](addOptRef(self, optRef))
+def ?[OptRefTpl <: Tuple](optRef: Molecule_n[OptRefTpl]) = new Ref_n[(T, Option[OptRefTpl])](addOptRef(self, optRef))
+}
 
+trait NestedInit extends OptRefInit { self: Molecule =>
+def * [NestedT](nested: Molecule_1[NestedT]) = new Ref_n[(T, Seq[NestedT])](addNested(self, nested))
+def *?[NestedT](nested: Molecule_1[NestedT]) = new Ref_n[(T, Seq[NestedT])](addOptNested(self, nested))
 
-val query = CountryLanguage.select
-.join(Country.select.sortBy(_.population).desc.take(2))(_.countryCode === _.code)
-.map { case (language, country) => (language.language, country.name) }
-.sortBy(_._1)
+    def * [NestedTpl <: Tuple](nested: Molecule_n[NestedTpl]) = new Ref_n[(T, Seq[NestedTpl])](addNested(self, nested))
+    def *?[NestedTpl <: Tuple](nested: Molecule_n[NestedTpl]) = new Ref_n[(T, Seq[NestedTpl])](addOptNested(self, nested))
+}
 
-db.renderSql(query) ==> """
-SELECT countrylanguage0.language AS res_0, subquery1.name AS res_1
-FROM countrylanguage countrylanguage0
-JOIN (SELECT
-country1.code AS code,
-country1.name AS name,
-country1.population AS population
-FROM country country1
-ORDER BY population DESC
-LIMIT ?) subquery1
-ON (countrylanguage0.countrycode = subquery1.code)
-ORDER BY res_0
-"""
+def sub[SubT           ](subQuery: Molecule_1[SubT  ]) = new Ref_n[(T, SubT)  ](addSubQuery(this, subQuery))
+def sub[SubTpl <: Tuple](subQuery: Molecule_n[SubTpl]) = new Ref_n[(T, SubTpl)](addSubQuery(this, subQuery))
 
-db.run(query).take(5) ==> Seq(
-("Asami", "India"),
-("Bengali", "India"),
-("Chinese", "China"),
-("Dong", "China"),
-("Gujarati", "India")
-)
+object Entity   extends Entity_1[T](dataModel.add(_dm.Ref("Ref", "entity"  , "Entity", ManyToOne , List(1, 173, 0), Some("Refs")))) with OptRefInit
+object Entities extends Entity_1[T](dataModel.add(_dm.Ref("Ref", "Entities", "Entity", OneToMany , List(1, 174, 0), Some("ref")))) with NestedInit
+
+object _Entity extends Entity_1[T](dataModel.add(_dm.BackRef("Entity", "Ref", List(0, 1))))
+}
+
+```
+SELECT DISTINCT
+  Ref.s,
+  (
+    SELECT
+      COUNT(Entity.id)
+    FROM Entity
+    WHERE
+      Entity.ref = Ref.id
+  )
+FROM Ref
+WHERE
+  Ref.s IS NOT NULL;
+```
+
+```
+SELECT DISTINCT
+  Ref.s,
+  (
+    SELECT
+      COUNT(Entity.id)
+    FROM Entity
+    WHERE
+      Entity.ref = Ref.id
+  )
+FROM Ref
+WHERE
+  Ref.s IS NOT NULL;
+```

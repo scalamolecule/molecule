@@ -98,6 +98,8 @@ trait InsertValidationExtraction
           getValidators(metaDb, tail, validators :+
             addOptRef(metaDb, tplIndex, "Optional", "entity", optRefElements), tplIndex + 1, Nil)
 
+        case SubQuery(_) => throw ModelError("SubQuery not allowed in insert operations")
+
         case Nested(Ref(ent, refAttr, _, _, _, _, _), nestedElements) =>
           curElements = nestedElements
           getValidators(metaDb, tail, validators :+

@@ -3,11 +3,11 @@ package molecule.db.postgresql.query
 import scala.reflect.ClassTag
 import molecule.core.dataModel.*
 import molecule.db.common.javaSql.PrepStmt
-import molecule.db.common.query.{Model2Query, QueryExprOne, SqlQueryBase}
+import molecule.db.common.query.{Model2Query, QueryExprOne, QueryExprRef, SqlQueryBase}
 
 trait QueryExprOne_postgresql
   extends QueryExprOne
-    with LambdasOne_postgresql { self: Model2Query & SqlQueryBase =>
+    with LambdasOne_postgresql { self: Model2Query & QueryExprRef & SqlQueryBase =>
 
   override protected def equal[T](
     col: String,

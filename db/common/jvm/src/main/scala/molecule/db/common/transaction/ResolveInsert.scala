@@ -75,6 +75,8 @@ trait ResolveInsert extends InsertValidators_ { self: SqlInsert =>
         case _: OptRef    => noOptional("ref")
         case _: OptEntity => noOptional("entity")
 
+        case SubQuery(_) => throw ModelError("SubQuery not allowed in insert operations")
+
         case Nested(Ref(_, refAttr, ref, _, _, reverseRefAttr, _), nestedElements) =>
           resolveNested(partitions, nestedElements, refAttr, ref, reverseRefAttr, tableInsert, tplIndex)
 

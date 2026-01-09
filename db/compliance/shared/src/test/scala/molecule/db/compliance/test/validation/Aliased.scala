@@ -28,8 +28,8 @@ case class Aliased(
           s"""=== QUERY =====================================
              |DataModel(
              |  List(
-             |    AttrOneManString("Person", "name", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 1)),
-             |    AttrOneManString("Person", "type", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 2))
+             |    AttrOneManString("Person", "name", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 1)),
+             |    AttrOneManString("Person", "type", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 2))
              |  ),
              |  Set(1, 2), 0, 0, Nil
              |)
@@ -47,8 +47,8 @@ case class Aliased(
           s"""=== QUERY =====================================
              |DataModel(
              |  List(
-             |    AttrOneManString("Person", "name", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 1)),
-             |    AttrOneManString("Person", "type", V, Seq(), None, None, Nil, Nil, None, None, false, List(0, 2))
+             |    AttrOneManString("Person", "name", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 1)),
+             |    AttrOneManString("Person", "type", V, Seq(), None, None, None, Nil, Nil, None, None, false, List(0, 2))
              |  ),
              |  Set(1, 2), 0, 0, Nil
              |)

@@ -17,6 +17,7 @@ trait ModelUtils {
         case _: OptEntity            => count(tail, acc + 1)
         case _: Nested               => count(tail, acc + 1)
         case _: OptNested            => count(tail, acc + 1)
+        case SubQuery(subElements)   => count(subElements ++ tail, acc)
         case _                       => count(tail, acc)
       }
       case Nil       => acc
@@ -33,6 +34,7 @@ trait ModelUtils {
       case r: Ref                                   => r.ent
       case OptRef(Ref(ent, _, _, _, _, _, _), _)    => ent
       case OptEntity(attrs)                         => attrs.head.ent
+      case SubQuery(es)                             => getInitialEntity(es)
       case Nested(Ref(ent, _, _, _, _, _, _), _)    => ent
       case OptNested(Ref(ent, _, _, _, _, _, _), _) => ent
       case other                                    => throw ModelError("Unexpected head element: " + other)
@@ -47,6 +49,7 @@ trait ModelUtils {
       case r: Ref                                   => r.ent
       case OptRef(Ref(ent, _, _, _, _, _, _), _)    => ent
       case OptEntity(attrs)                         => attrs.head.ent
+      case SubQuery(es)                             => getInitialNonGenericEntity(es)
       case Nested(Ref(ent, _, _, _, _, _, _), _)    => ent
       case OptNested(Ref(ent, _, _, _, _, _, _), _) => ent
       case other                                    => throw ModelError("Unexpected head element: " + other)
@@ -92,6 +95,7 @@ trait ModelUtils {
             case b: BackRef   => prepare(tail, acc :+ prepareBackRef(b))
             case r: OptRef    => prepare(tail, acc :+ prepareOptRef(r))
             case e: OptEntity => prepare(tail, acc :+ prepareOptEntity(e))
+            case s: SubQuery  => prepare(tail, acc :+ prepareSubQuery(s))
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
             case n: OptNested => prepare(tail, acc :+ prepareOptNested(n))
           }
@@ -124,6 +128,10 @@ trait ModelUtils {
 
     def prepareOptEntity(optEntity: OptEntity): OptEntity = {
       OptEntity(prepare(optEntity.attrs, Nil).asInstanceOf[List[Attr]])
+    }
+
+    def prepareSubQuery(subQuery: SubQuery): SubQuery = {
+      SubQuery(prepare(subQuery.elements, Nil))
     }
 
     def prepareNested(nested: Nested): Nested = {

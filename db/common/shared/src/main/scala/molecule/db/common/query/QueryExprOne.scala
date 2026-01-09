@@ -10,7 +10,7 @@ import molecule.db.common.javaSql.PrepStmt
  *
  * H2 implementations serve as the outset for the other databases to override
  */
-trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & LambdasOne =>
+trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQueryBase & LambdasOne =>
 
   override protected def queryIdMan(a: AttrOneMan): Unit = queryAttrOneMan(a)
   override protected def queryIdTac(a: AttrOneTac): Unit = queryAttrOneTac(a)
@@ -126,19 +126,52 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
       castStrategy.add(res.sql2one)
     }
     addSort(attr, col)
-    attr.filterAttr.fold {
-      expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res)
-    } { case (dir, filterPath, filterAttr) =>
-      expr2(col, attr.op, filterAttr.name)
+    (attr.filterAttr, attr.subquery) match {
+      case (Some((dir, filterPath, filterAttr)), None) =>
+        expr2(col, attr.op, filterAttr.name)
+      case (None, Some(subQuery)) =>
+        val (subQuerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subQuery.elements)
+        val opStr                        = getAggrOp(Some(attr.op))
+        val alias                        = s"subquery${joins.length}"
+        val colAlias                     = s"col"
+        // Modify subquery to alias its result column
+        // Replace the SELECT part to add AS colAlias to the selected expression
+        val aliasedSubQuery = subQuerySql.replaceFirst("(?s)(SELECT\\s+(?:DISTINCT\\s+)?)(.*?)(\\s+FROM)", s"$$1$$2 AS $colAlias$$3")
+        // Add subquery as CROSS JOIN with table alias
+        joins += (("CROSS JOIN", s"($aliasedSubQuery)", alias, Nil))
+        // Reference the aliased column
+        select += s"$alias.$colAlias"
+        groupByCols += s"$alias.$colAlias"
+        where += ((col, s"$opStr $alias.$colAlias"))
+        subQueryCasts.foreach(castStrategy.add)
+      case (None, None) =>
+        expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res)
+      case _ => throw ModelError(s"Attribute ${attr.name} cannot have both filterAttr and subquery")
     }
   }
 
   protected def tac[T: ClassTag](attr: AttrOne, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: AttrOne)
-    attr.filterAttr.fold {
-      expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res)
-    } { case (dir, filterPath, filterAttr) =>
-      expr2(col, attr.op, getCol(filterAttr, filterPath))
+    (attr.filterAttr, attr.subquery) match {
+      case (Some((dir, filterPath, filterAttr)), None) =>
+        expr2(col, attr.op, getCol(filterAttr, filterPath))
+      case (None, Some(subQuery)) =>
+        val (subQuerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subQuery.elements)
+        val opStr                        = getAggrOp(Some(attr.op))
+        val alias                        = s"subquery${joins.length}"
+        val colAlias                     = s"col"
+        // Modify subquery to alias its result column
+        val aliasedSubQuery = subQuerySql.replaceFirst("(?s)(SELECT\\s+(?:DISTINCT\\s+)?)(.*?)(\\s+FROM)", s"$$1$$2 AS $colAlias$$3")
+        // Add subquery as CROSS JOIN with table alias
+        joins += (("CROSS JOIN", s"($aliasedSubQuery)", alias, Nil))
+        // Reference the aliased column and add to select
+        select += s"$alias.$colAlias"
+        groupByCols += s"$alias.$colAlias"
+        where += ((col, s"$opStr $alias.$colAlias"))
+        subQueryCasts.foreach(castStrategy.add)
+      case (None, None) =>
+        expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res)
+      case _ => throw ModelError(s"Attribute ${attr.name}_ cannot have both filterAttr and subquery")
     }
   }
 
@@ -173,7 +206,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & SqlQueryBase & Lambda
     case Or           => or(col, args.head)
     case Not          => not(col)
 
-    case Fn(baseType, kw, n, aggrOp, aggrOpValue) =>
+    case AggrFn(baseType, kw, n, aggrOp, aggrOpValue) =>
       aggr(baseType, ent, attr, col, kw, n, aggrOp, aggrOpValue, hasSort, res)
 
     case other => unexpectedOp(other)

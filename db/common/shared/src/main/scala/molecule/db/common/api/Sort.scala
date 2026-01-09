@@ -4,7 +4,6 @@ import molecule.core.dataModel.*
 import molecule.core.error.ExecutionError
 import molecule.db.common.ops.ModelTransformations_.*
 
-
 trait Sort[Entity <: Molecule] { self: Molecule =>
 
   def sortEntity: DataModel => Entity

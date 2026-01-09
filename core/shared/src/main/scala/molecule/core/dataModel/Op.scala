@@ -1,5 +1,7 @@
 package molecule.core.dataModel
 
+import molecule.core.util.BaseHelpers.*
+
 sealed trait Op
 case object NoValue extends Op
 case object V extends Op
@@ -17,6 +19,7 @@ case object Remainder extends Op
 case object Even extends Op
 case object Odd extends Op
 
+
 // Cardinality Set
 case object Has extends Op
 case object HasNo extends Op
@@ -24,14 +27,15 @@ case object GetV extends Op
 case object Add extends Op
 case object Remove extends Op
 
-case class Fn(
+case class AggrFn(
   baseType: String,
   fn: String,
   n: Option[Int] = None,
   op: Option[Op] = None,
   v: Option[Value] = None,
-) extends Op
-
+) extends Op {
+  override def toString: String = s"""Fn("$baseType", "$fn", ${opt(n)}, ${opt(op)}, ${opt(v)})"""
+}
 
 sealed trait AttrOp extends Op
 object AttrOp {

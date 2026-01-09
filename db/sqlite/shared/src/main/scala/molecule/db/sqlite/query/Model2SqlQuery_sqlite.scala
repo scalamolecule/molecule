@@ -2,6 +2,7 @@ package molecule.db.sqlite.query
 
 import molecule.core.dataModel.Element
 import molecule.db.common.query.*
+import molecule.db.common.query.casting.strategy.CastTuple
 
 class Model2SqlQuery_sqlite(elements0: List[Element])
   extends Model2SqlQuery(elements0)
@@ -12,6 +13,17 @@ class Model2SqlQuery_sqlite(elements0: List[Element])
     with QueryExprSetRefAttr_sqlite
     with SqlQueryBase {
 
+  override protected def buildSubQuerySqlWithCasts(subElements: List[Element]): (String, List[Cast]) = {
+    val subQueryBuilder = new Model2SqlQuery_sqlite(subElements)
+    subQueryBuilder.insideSubQuery = true
+    subQueryBuilder.resolveElements(subElements)
+    val sql = subQueryBuilder.renderSubQuery(baseIndent = 2)
+    val casts = subQueryBuilder.castStrategy match {
+      case tuple: CastTuple => tuple.getCasts
+      case _                => Nil
+    }
+    (sql, casts)
+  }
 
   override def pagination(
     optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean

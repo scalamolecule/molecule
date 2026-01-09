@@ -4,8 +4,9 @@ import molecule.core.dataModel.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
-
-trait ExprMapMan_1[T, Entity[_]](entity: [t] => DataModel => Entity[t]) extends MapValue { self: Molecule  =>
+trait ExprMapMan_1[T, Entity[_]](
+  entity: [t] => DataModel => Entity[t]
+) extends MapValue { self: Molecule  =>
   def apply (                                       ): Entity[Map[String, T]] = entity[Map[String, T]](addMap  (dataModel, NoValue, Map.empty[String, T] ))
   def apply (map  : Map[String, T]                  ): Entity[Map[String, T]] = entity[Map[String, T]](addMap  (dataModel, Eq     , map                  ))
   def apply (key  : String                          ): Entity[T             ] = entity[T             ](addMapKs(dataModel, Eq     , Seq(key)             ))

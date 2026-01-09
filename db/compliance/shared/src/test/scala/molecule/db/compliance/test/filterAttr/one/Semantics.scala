@@ -30,12 +30,24 @@ case class Semantics(
 
 
   "Only tacit filter attributes allowed" - types {
-    // Tacit filter attribute allowed
-    Entity.i(Entity.int_)
+    for {
+      _ <- Entity.s.i.Ref.i.s.insert(
+        ("a", 1, 2, "x"),
+        ("b", 4, 3, "y"),
+      ).transact
 
-    // Mandatory and optional filter attributes not allowed
-    compileErrors("Entity.i(Entity.int)")
-    compileErrors("Entity.i(Entity.int_?)")
+      _ <- Entity.s.i.>(Ref.i).Ref.i.s
+        .query.i.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Filter attribute Ref.i should be tacit."
+        }
+
+      // Note that when a compared mandatory attribute (Ref.i) points to no outer attribute,
+      // a subquery is build instead with no correlation to the outer query.
+      _ <- Entity.s.i.>(Ref.i).query.get.map(_ ==> List(
+        ("b", 4, 2), // Ref.i == 2
+        ("b", 4, 3), // Ref.i == 3
+      ))
+    } yield ()
   }
 
 

@@ -15,7 +15,7 @@ trait ResolveDelete() {
     elements match {
       case element :: tail => element match {
         case a: Attr                                                          => a match {
-          case AttrOneTacID(_, "id", Eq, ids1, _, _, _, _, _, _, _, _) =>
+          case AttrOneTacID(_, "id", Eq, ids1, _, _, _, _, _, _, _, _, _) =>
             if (!topLevel)
               throw ModelError(
                 s"Can only apply entity ids to be deleted to the initial entity."
@@ -53,6 +53,7 @@ trait ResolveDelete() {
         case br@BackRef(backRef, _, _) =>
           resolve(tail, false, tableDelete.add(br))
 
+        case _: SubQuery  => throw ModelError("SubQuery not allowed in delete operations")
         case _: Nested    => throw ModelError(s"Nested data structure not allowed in delete molecule.")
         case _: OptNested => throw ModelError(s"Optional nested data structure not allowed in delete molecule.")
         case _: OptRef    => throw ModelError(s"Optional ref data structure not allowed in delete molecule.")
