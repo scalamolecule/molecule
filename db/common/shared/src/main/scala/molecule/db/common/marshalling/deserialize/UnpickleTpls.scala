@@ -127,7 +127,7 @@ case class UnpickleTpls[Tpl](
           prevRefs.clear()
           resolveUnpicklers(tail, unpicklers :+ unpickleOptElements(attrs))
 
-        case SubQuery(_) => resolveUnpicklers(tail, unpicklers)
+        case _: SubQuery => resolveUnpicklers(tail, unpicklers)
 
         case Nested(_, nestedElements) =>
           prevRefs.clear()

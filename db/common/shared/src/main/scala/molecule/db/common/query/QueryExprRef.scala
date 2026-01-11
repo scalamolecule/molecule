@@ -135,12 +135,13 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
   }
 
 
-  override protected def querySubQuery(subElements: List[Element]): Unit = {
+  override protected def querySubQuery(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int]): Unit = {
     val wasInsideSubQuery = insideSubQuery
     insideSubQuery = true
 
     // Build subquery SQL and get casts from subquery builder
-    val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subElements)
+    // isImplicit = false for explicit .sub calls (can return multiple columns, no alias needed)
+    val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subElements, subQueryAlias, optLimit, optOffset, isImplicit = false)
 
     // Add the subquery as a SELECT expression in the main query
     select += subquerySql
@@ -152,7 +153,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
   }
 
   // To be implemented by database-specific query builders
-  protected def buildSubQuerySqlWithCasts(subElements: List[Element]): (String, List[Cast])
+  protected def buildSubQuerySqlWithCasts(subElements: List[Element], subQueryAlias: String, optLimit: Option[Int], optOffset: Option[Int], isImplicit: Boolean): (String, List[Cast])
 
 
   override protected def queryNested(
@@ -186,7 +187,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     checkOnlyOptRef()
 
     val Ref(ent, refAttr, ref, relationship, _, optRevRefAttr, _) = r
-    val revRefAttr = optRevRefAttr.get
+    val revRefAttr                                                = optRevRefAttr.get
 
     level += 1
     validateRefEntity(r, nestedElements)

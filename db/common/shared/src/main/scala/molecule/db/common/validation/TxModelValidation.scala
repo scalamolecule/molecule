@@ -96,7 +96,7 @@ case class TxModelValidation(
           validateOptEntity(attrs)
           validate(attrs ++ tail)
 
-        case SubQuery(_) => throw ModelError("SubQuery not allowed in transaction operations")
+        case _: SubQuery => throw ModelError("SubQuery not allowed in transaction operations")
 
         case Nested(r, es) =>
           curElements = es

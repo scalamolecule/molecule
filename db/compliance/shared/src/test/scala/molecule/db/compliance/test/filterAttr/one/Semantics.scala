@@ -42,7 +42,7 @@ case class Semantics(
         }
 
       // Note that when a compared mandatory attribute (Ref.i) points to no outer attribute,
-      // a subquery is build instead with no correlation to the outer query.
+      // a cross join with a subquery is build instead with no correlation to the outer query.
       _ <- Entity.s.i.>(Ref.i).query.get.map(_ ==> List(
         ("b", 4, 2), // Ref.i == 2
         ("b", 4, 3), // Ref.i == 3

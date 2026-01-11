@@ -7,7 +7,7 @@ import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.h2.async.*
 import molecule.db.h2.setup.DbProviders_h2
 
-class subquery_select extends MUnit with DbProviders_h2 with TestUtils {
+class Correlated extends MUnit with DbProviders_h2 with TestUtils {
 
   // SELECT clause subqueries are used when we need correlated scalar aggregations
   // that preserve all outer rows, including those with empty relationships.
@@ -25,7 +25,7 @@ class subquery_select extends MUnit with DbProviders_h2 with TestUtils {
       ).transact
 
       // Subquery returns count for each entity, including 0 for empty relationships
-      _ <- Entity.s.sub(Ref.id(count).entity_(Entity.id_)).query.i.get.map(_ ==> List(
+      _ <- Entity.s.sub(Ref.id(count).entity_(Entity.id_)).query.get.map(_ ==> List(
         ("a", 2),
         ("b", 3),
         ("c", 0), // Important: entity "c" is included with count 0
@@ -405,29 +405,6 @@ class subquery_select extends MUnit with DbProviders_h2 with TestUtils {
           |WHERE
           |  A.s IS NOT NULL;""".stripMargin
       ) ==> true)
-    } yield ()
-  }
-
-
-  "Error: missing correlation attribute" - types {
-    for {
-      _ <- Entity.s.Refs.*(Ref.i).insert(
-        ("a", List(1, 2)),
-        ("b", List(3, 4, 5)),
-      ).transact
-
-      // Subquery without correlation should fail
-      _ <- Entity.s.sub(Ref.id(count)).query.i.get
-        .map(_ ==> "Should fail").recover { case ModelError(err) =>
-          err ==> "Subquery is missing a correlation attribute to relate it to the outer query. " +
-            "Please add a tacit filter attribute like `entity_(OuterEntity.id_)` to correlate the subquery with the outer query."
-        }
-
-      // Mandatory (non-tacit) correlation attribute returns its value in tuple
-      _ <- Entity.s.sub(Ref.id(count).entity(Entity.id_)).query.i.get.map(_ ==> List(
-        ("a", (2, 1)), // (count, entity_id)
-        ("b", (3, 2)),
-      ))
     } yield ()
   }
 

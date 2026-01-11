@@ -153,7 +153,7 @@ case class PickleTpls(
           }
           resolvePicklers(tail, picklers :+ pickler, tplIndex + 1)
 
-        case SubQuery(_) => resolvePicklers(tail, picklers, tplIndex)
+        case _: SubQuery => resolvePicklers(tail, picklers, tplIndex)
 
         case Nested(_, nestedElements) =>
           prevRefs.clear()

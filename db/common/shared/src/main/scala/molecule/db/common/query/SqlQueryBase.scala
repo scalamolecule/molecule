@@ -32,9 +32,12 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   final val groupByCols = new mutable.LinkedHashSet[String]
   final var hardLimit   = 0
 
-  final val binders    = new ListBuffer[PrepStmt => Unit]
-  final var bindIndex  = -1
-  final val bindValues = new ListBuffer[Value]
+  final val binders       = new ListBuffer[PrepStmt => Unit]
+  final var bindIndex     = -1
+  final val bindValues    = new ListBuffer[Value]
+
+  final var subQueryIndex = 0 // Subquery counter for unique subquery aliases
+  def subQueryAlias: String = s"subquery$subQueryIndex"
 
   final var castStrategy: CastStrategy = CastTuple()
 

@@ -58,12 +58,12 @@ trait AccessControl {
   }
 
   private def getEntityIndexFromElement(element: Element): Option[Int] = element match {
-    case a: Attr                                  => Some(a.coord.head)
-    case r: Ref if r.coord.nonEmpty               => Some(r.coord.head)
-    case OptRef(r: Ref, _) if r.coord.nonEmpty    => Some(r.coord.head)
-    case OptEntity(attrs) if attrs.nonEmpty       => Some(attrs.head.coord.head)
+    case a: Attr                               => Some(a.coord.head)
+    case r: Ref if r.coord.nonEmpty            => Some(r.coord.head)
+    case OptRef(r: Ref, _) if r.coord.nonEmpty => Some(r.coord.head)
+    case OptEntity(attrs) if attrs.nonEmpty    => Some(attrs.head.coord.head)
 
-    case SubQuery(subElements) if subElements.nonEmpty => getEntityIndexFromElement(subElements.head)
+    case SubQuery(subElements, _, _) if subElements.nonEmpty => getEntityIndexFromElement(subElements.head)
 
     case Nested(r: Ref, _) if r.coord.nonEmpty    => Some(r.coord.head)
     case OptNested(r: Ref, _) if r.coord.nonEmpty => Some(r.coord.head)
@@ -86,7 +86,7 @@ trait AccessControl {
       case None =>
         // No authentication context
         conn.proxy.envMode match {
-          case EnvMode.Dev                                   =>
+          case EnvMode.Dev                                 =>
             // Dev mode: Allow access for convenience (local development)
             ()
           case EnvMode.Test | EnvMode.Stage | EnvMode.Prod =>
@@ -154,12 +154,12 @@ trait AccessControl {
           // This prevents circumventing attribute protection by deleting the whole entity
           // Extract entity name from element
           val entityName  = element match {
-            case a: Attr              => a.ent
-            case r: Ref               => r.ent
-            case OptRef(r: Ref, _)    => r.ent
-            case OptEntity(attrs)     => attrs.head.ent
+            case a: Attr           => a.ent
+            case r: Ref            => r.ent
+            case OptRef(r: Ref, _) => r.ent
+            case OptEntity(attrs)  => attrs.head.ent
 
-            case SubQuery(subElements) if subElements.nonEmpty => subElements.head match {
+            case SubQuery(subElements, _, _) if subElements.nonEmpty => subElements.head match {
               case a: Attr => a.ent
               case r: Ref  => r.ent
               case _       => "Unknown"
@@ -264,12 +264,12 @@ trait AccessControl {
         getEntityIndexFromElement(element).foreach { entityIndex =>
           val entityPermissions: Int = entityAccessGetter(entityIndex)
           val entityName             = element match {
-            case a: Attr              => a.ent
-            case r: Ref               => r.ent
-            case OptRef(r: Ref, _)    => r.ent
-            case OptEntity(attrs)     => attrs.head.ent
+            case a: Attr           => a.ent
+            case r: Ref            => r.ent
+            case OptRef(r: Ref, _) => r.ent
+            case OptEntity(attrs)  => attrs.head.ent
 
-            case SubQuery(subElements) if subElements.nonEmpty => subElements.head match {
+            case SubQuery(subElements, _, _) if subElements.nonEmpty => subElements.head match {
               case a: Attr => a.ent
               case r: Ref  => r.ent
               case _       => "Unknown"
@@ -301,7 +301,7 @@ trait AccessControl {
         // Verbose error for debugging
         s"Access denied: Role '$roleName' (index $roleIdx, mask ${roleMask.toBinaryString}) " +
           s"cannot $action $resourceType '$resourceName' (permissions ${permissions.toBinaryString})"
-      case EnvMode.Prod                                 =>
+      case EnvMode.Prod                               =>
         // Sanitized error for production
         s"Access denied: Role '$roleName' cannot $action $resourceType '$resourceName'"
     }
@@ -366,7 +366,7 @@ trait AccessControl {
       case None =>
         // No authentication context
         conn.proxy.envMode match {
-          case EnvMode.Dev                                   =>
+          case EnvMode.Dev                                 =>
             // Dev mode: Allow access for convenience (local development)
             ()
           case EnvMode.Test | EnvMode.Stage | EnvMode.Prod =>
@@ -413,7 +413,7 @@ trait AccessControl {
         }
 
         // Check if role has rawQuery action by checking the role action bitmask
-        val roleMask = 1 << roleIndex
+        val roleMask          = 1 << roleIndex
         val hasRawQueryAccess = (conn.proxy.metaDb.roleRawQueryAction & roleMask) != 0
 
         if (!hasRawQueryAccess) {
@@ -447,7 +447,7 @@ trait AccessControl {
         }
 
         // Check if role has rawTransact action by checking the role action bitmask
-        val roleMask = 1 << roleIndex
+        val roleMask             = 1 << roleIndex
         val hasRawTransactAccess = (conn.proxy.metaDb.roleRawTransactAction & roleMask) != 0
 
         if (!hasRawTransactAccess) {

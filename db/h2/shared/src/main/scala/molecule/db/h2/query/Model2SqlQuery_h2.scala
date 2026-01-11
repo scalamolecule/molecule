@@ -13,7 +13,7 @@ class Model2SqlQuery_h2(elements0: List[Element])
     with QueryExprSetRefAttr_h2
     with SqlQueryBase {
 
-  override protected def buildSubQuerySqlWithCasts(subElements: List[Element]): (String, List[Cast]) = {
+  override protected def buildSubQuerySqlWithCasts(subElements: List[Element], subQueryAlias: String, optLimit: Option[Int], optOffset: Option[Int], isImplicit: Boolean): (String, List[Cast]) = {
     // Create a new query builder instance for the subquery
     val subQueryBuilder = new Model2SqlQuery_h2(subElements)
 
@@ -24,7 +24,7 @@ class Model2SqlQuery_h2(elements0: List[Element])
     subQueryBuilder.resolveElements(subElements)
 
     // Get the SQL and casts
-    val sql = subQueryBuilder.renderSubQuery(baseIndent = 2)
+    val sql = subQueryBuilder.renderSubQuery(2, Some(subQueryAlias), optLimit, optOffset, isImplicit)
     val subqueryCasts = subQueryBuilder.castStrategy match {
       case tuple: CastTuple => tuple.getCasts
       case _                => Nil

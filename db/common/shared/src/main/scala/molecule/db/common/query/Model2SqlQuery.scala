@@ -132,11 +132,11 @@ abstract class Model2SqlQuery(elements0: List[Element])
       val orderCols   = if (isBackwards) {
         coordinates.map {
           // Switch sort direction on top level
-          case (0, _, col, "DESC") => col
-          case (0, _, col, _)      => col + " DESC"
+          case (0, _, col, " DESC") => col
+          case (0, _, col, _)       => col + " DESC"
           // Nested sorts stay unchanged
-          case (_, _, col, "DESC") => col + " DESC"
-          case (_, _, col, _)      => col
+          case (_, _, col, " DESC") => col + " DESC"
+          case (_, _, col, _)       => col
         }
       } else {
         coordinates.map {
@@ -148,7 +148,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
   }
 
   def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
-    val limit_ = if (isManNested || isOptNested) {
+    val limit_ = if (!insideSubQuery && (isManNested || isOptNested)) {
       ""
     } else if (hardLimit != 0) {
       s"\nLIMIT $hardLimit"
@@ -156,7 +156,7 @@ abstract class Model2SqlQuery(elements0: List[Element])
       optLimit.fold("")(limit => s"\nLIMIT " + limit.abs)
     }
 
-    val offset_ = if (isManNested || isOptNested) {
+    val offset_ = if (!insideSubQuery && (isManNested || isOptNested)) {
       ""
     } else {
       optOffset.fold("")(offset => s"\nOFFSET " + offset.abs)
@@ -175,9 +175,22 @@ abstract class Model2SqlQuery(elements0: List[Element])
        |FROM $table$joins_$where_$having_;""".stripMargin
   }
 
-  final def renderSubQuery(baseIndent: Int = 2): String = {
+  final def renderSubQuery(
+    baseIndent: Int,
+    subQueryAlias: Option[String],
+    optLimit: Option[Int],
+    optOffset: Option[Int],
+    isImplicit: Boolean
+  ): String = {
+    // Only alias the column as "col" for implicit subqueries (comparison operations with Molecule_1)
+    // Explicit subqueries (.sub) can return multiple columns and shouldn't have the alias
+    if (isImplicit && select.nonEmpty) {
+      val firstCol = select.head
+      select.update(0, s"$firstCol AS col")
+    }
+
     // Render the subquery using the normal rendering
-    val subquerySql = renderSqlQuery(None, None)
+    val subquerySql = renderSqlQuery(optLimit, optOffset)
       .stripSuffix(";")
       .trim
 

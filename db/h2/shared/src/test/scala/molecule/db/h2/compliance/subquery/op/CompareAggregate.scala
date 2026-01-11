@@ -9,7 +9,7 @@ import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.h2.async.*
 import molecule.db.h2.setup.DbProviders_h2
 
-class subquery_where extends MUnit with DbProviders_h2 with TestUtils {
+class CompareAggregate extends MUnit with DbProviders_h2 with TestUtils {
 
   "mandatory 1" - types {
     for {
@@ -43,7 +43,7 @@ class subquery_where extends MUnit with DbProviders_h2 with TestUtils {
     } yield ()
   }
 
-  
+
   "mandatory n" - types {
     for {
       _ <- Entity.s.i.Ref.i.insert(
@@ -52,7 +52,7 @@ class subquery_where extends MUnit with DbProviders_h2 with TestUtils {
         ("c", 4, 1),
       ).transact
 
-      _ <- Entity.s.i(Ref.i(count)).query.i.get.map(_ ==> List(
+      _ <- Entity.s.i(Ref.i(count)).query.get.map(_ ==> List(
         ("b", 3, 3),
       ))
       _ <- Entity.s.i.not(Ref.i(count)).query.get.map(_ ==> List(
@@ -85,7 +85,7 @@ class subquery_where extends MUnit with DbProviders_h2 with TestUtils {
         ("c", 4, 1),
       ).transact
 
-      _ <- Entity.s.i_(Ref.i(count)).query.i.get.map(_ ==> List(
+      _ <- Entity.s.i_(Ref.i(count)).query.get.map(_ ==> List(
         ("b", 3),
       ))
       _ <- Entity.s.i_.not(Ref.i(count)).query.get.map(_ ==> List(
@@ -108,4 +108,25 @@ class subquery_where extends MUnit with DbProviders_h2 with TestUtils {
       ))
     } yield ()
   }
+
+
+  "aggr min max" - types {
+    for {
+      _ <- Entity.s.i.Ref.i.insert(
+        ("a", 1, 1),
+        ("b", 2, 2),
+        ("c", 3, 3),
+      ).transact
+
+      _ <- Entity.s.i_(Ref.i(min)).query.get.map(_ ==> List(
+        ("a", 1),
+      ))
+
+      _ <- Entity.s.i_(Ref.i(max)).query.get.map(_ ==> List(
+        ("c", 3),
+      ))
+    } yield ()
+  }
+
+  // todo: tests for countDistinct, sum, avg, median, variance, stddev
 }

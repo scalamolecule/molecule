@@ -14,11 +14,11 @@ class Model2SqlQuery_mysql(elements0: List[Element])
     with QueryExprSetRefAttr_mysql
     with SqlQueryBase {
 
-  override protected def buildSubQuerySqlWithCasts(subElements: List[Element]): (String, List[Cast]) = {
+  override protected def buildSubQuerySqlWithCasts(subElements: List[Element], subQueryAlias: String, optLimit: Option[Int], optOffset: Option[Int], isImplicit: Boolean): (String, List[Cast]) = {
     val subQueryBuilder = new Model2SqlQuery_mysql(subElements)
     subQueryBuilder.insideSubQuery = true
     subQueryBuilder.resolveElements(subElements)
-    val sql = subQueryBuilder.renderSubQuery(baseIndent = 2)
+    val sql = subQueryBuilder.renderSubQuery(2, Some(subQueryAlias), optLimit, optOffset, isImplicit)
     val casts = subQueryBuilder.castStrategy match {
       case tuple: CastTuple => tuple.getCasts
       case _                => Nil
@@ -51,7 +51,7 @@ class Model2SqlQuery_mysql(elements0: List[Element])
     optOffset: Option[Int],
     isBackwards: Boolean
   ): String = {
-    if (isManNested || isOptNested) {
+    if (!insideSubQuery && (isManNested || isOptNested)) {
       ""
     } else if (hardLimit == 0) {
       if (!isBackwards) {

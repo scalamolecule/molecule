@@ -9,6 +9,7 @@ import molecule.core.dataModel.*
 import molecule.core.dataModel.Keywords.*
 import molecule.core.error.ModelError
 import molecule.db.common.api.Molecule
+import molecule.db.common.crud.*
 import molecule.db.common.util.ModelUtils
 
 object ModelTransformations_ extends ModelTransformations_
@@ -32,14 +33,32 @@ trait ModelTransformations_ extends ModelUtils {
     )
   }
 
-  def addSubQuery(self: Molecule, subQuery: Molecule): DataModel = {
-    val dataModel         = self.dataModel
-    val subQueryDataModel = subQuery.dataModel
+
+  def addSubMolecule(self: Molecule, subMolecule: Molecule): DataModel = {
+    val dataModel    = self.dataModel
+    val subDataModel = subMolecule.dataModel
     DataModel(
-      //      dataModel.elements.init :+ SubQuery(subQueryDataModel.elements),
-      dataModel.elements :+ SubQuery(subQueryDataModel.elements),
-      dataModel.attrIndexes ++ subQueryDataModel.attrIndexes,
-      binds = dataModel.binds + subQueryDataModel.binds
+      dataModel.elements :+ SubQuery(subDataModel.elements, None, None),
+      dataModel.attrIndexes ++ subDataModel.attrIndexes,
+      binds = dataModel.binds + subDataModel.binds
+    )
+  }
+  def addSubQuery[Tpl](self: Molecule, subQuery: Query[Tpl]): DataModel = {
+    val dataModel    = self.dataModel
+    val subDataModel = subQuery.dataModel
+    DataModel(
+      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, None),
+      dataModel.attrIndexes ++ subDataModel.attrIndexes,
+      binds = dataModel.binds + subDataModel.binds
+    )
+  }
+  def addSubQueryOffset[Tpl](self: Molecule, subQuery: QueryOffset[Tpl]): DataModel = {
+    val dataModel    = self.dataModel
+    val subDataModel = subQuery.dataModel
+    DataModel(
+      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, Some(subQuery.offset)),
+      dataModel.attrIndexes ++ subDataModel.attrIndexes,
+      binds = dataModel.binds + subDataModel.binds
     )
   }
 
@@ -3147,7 +3166,7 @@ trait ModelTransformations_ extends ModelUtils {
 
   def subQueryComparison(dataModel: DataModel, op: Op, subQueryMolecule: Molecule): DataModel = {
     val es       = dataModel.elements
-    val subQuery = SubQuery(subQueryMolecule.dataModel.elements)
+    val subQuery = SubQuery(subQueryMolecule.dataModel.elements, None, None)
 
     val attrWithSubQuery = es.last match {
       case a: AttrOneMan => a match {
@@ -3272,33 +3291,31 @@ trait ModelTransformations_ extends ModelUtils {
     elements match {
       case Nil       => count
       case e :: tail => e match {
-        case a: AttrOne   => a match {
+        case a: AttrOne       => a match {
           case _: AttrOneMan => topLevelAttrCount(tail, count + 1)
           case _: AttrOneOpt => topLevelAttrCount(tail, count + 1)
           case _             => topLevelAttrCount(tail, count)
         }
-        case a: AttrSet   => a match {
+        case a: AttrSet       => a match {
           case _: AttrSetMan => topLevelAttrCount(tail, count + 1)
           case _: AttrSetOpt => topLevelAttrCount(tail, count + 1)
           case _             => topLevelAttrCount(tail, count)
         }
-        case a: AttrSeq   => a match {
+        case a: AttrSeq       => a match {
           case _: AttrSeqMan => topLevelAttrCount(tail, count + 1)
           case _: AttrSeqOpt => topLevelAttrCount(tail, count + 1)
           case _             => topLevelAttrCount(tail, count)
         }
-        case a: AttrMap   => a match {
+        case a: AttrMap       => a match {
           case _: AttrMapMan => topLevelAttrCount(tail, count + 1)
           case _: AttrMapOpt => topLevelAttrCount(tail, count + 1)
           case _             => topLevelAttrCount(tail, count)
         }
-        case _: Ref       => topLevelAttrCount(tail, count)
-        case _: OptRef    => topLevelAttrCount(tail, count)
-        case _: OptEntity => topLevelAttrCount(tail, count)
-        case _: BackRef   => topLevelAttrCount(tail, count)
-
-        case SubQuery(_) => topLevelAttrCount(tail, count)
-
+        case _: Ref           => topLevelAttrCount(tail, count)
+        case _: OptRef        => topLevelAttrCount(tail, count)
+        case _: OptEntity     => topLevelAttrCount(tail, count)
+        case _: BackRef       => topLevelAttrCount(tail, count)
+        case _: SubQuery      => topLevelAttrCount(tail, count)
         case Nested(_, es)    => topLevelAttrCount(tail, count + countNested(es))
         case OptNested(_, es) => topLevelAttrCount(tail, count + countNested(es))
       }

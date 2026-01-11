@@ -106,16 +106,6 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     }
   }
 
-  protected def addSort(attr: AttrOne, col: String): Unit = {
-    attr.sort.foreach { sort =>
-      val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
-      dir match {
-        case 'a' => orderBy += ((level, arity, col, ""))
-        case 'd' => orderBy += ((level, arity, col, " DESC"))
-      }
-    }
-  }
-
   protected def man[T: ClassTag](attr: AttrOne, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: AttrOne)
     select += col
@@ -129,24 +119,11 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     (attr.filterAttr, attr.subquery) match {
       case (Some((dir, filterPath, filterAttr)), None) =>
         expr2(col, attr.op, filterAttr.name)
-      case (None, Some(subQuery)) =>
-        val (subQuerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subQuery.elements)
-        val opStr                        = getAggrOp(Some(attr.op))
-        val alias                        = s"subquery${joins.length}"
-        val colAlias                     = s"col"
-        // Modify subquery to alias its result column
-        // Replace the SELECT part to add AS colAlias to the selected expression
-        val aliasedSubQuery = subQuerySql.replaceFirst("(?s)(SELECT\\s+(?:DISTINCT\\s+)?)(.*?)(\\s+FROM)", s"$$1$$2 AS $colAlias$$3")
-        // Add subquery as CROSS JOIN with table alias
-        joins += (("CROSS JOIN", s"($aliasedSubQuery)", alias, Nil))
-        // Reference the aliased column
-        select += s"$alias.$colAlias"
-        groupByCols += s"$alias.$colAlias"
-        where += ((col, s"$opStr $alias.$colAlias"))
-        subQueryCasts.foreach(castStrategy.add)
-      case (None, None) =>
+      case (None, Some(subQuery))                      =>
+        handleSubQuery(subQuery, col, attr)
+      case (None, None)                                =>
         expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res)
-      case _ => throw ModelError(s"Attribute ${attr.name} cannot have both filterAttr and subquery")
+      case _                                           => throw ModelError(s"Attribute ${attr.name} cannot have both filterAttr and subquery")
     }
   }
 
@@ -155,23 +132,43 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     (attr.filterAttr, attr.subquery) match {
       case (Some((dir, filterPath, filterAttr)), None) =>
         expr2(col, attr.op, getCol(filterAttr, filterPath))
-      case (None, Some(subQuery)) =>
-        val (subQuerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subQuery.elements)
-        val opStr                        = getAggrOp(Some(attr.op))
-        val alias                        = s"subquery${joins.length}"
-        val colAlias                     = s"col"
-        // Modify subquery to alias its result column
-        val aliasedSubQuery = subQuerySql.replaceFirst("(?s)(SELECT\\s+(?:DISTINCT\\s+)?)(.*?)(\\s+FROM)", s"$$1$$2 AS $colAlias$$3")
-        // Add subquery as CROSS JOIN with table alias
-        joins += (("CROSS JOIN", s"($aliasedSubQuery)", alias, Nil))
-        // Reference the aliased column and add to select
-        select += s"$alias.$colAlias"
-        groupByCols += s"$alias.$colAlias"
-        where += ((col, s"$opStr $alias.$colAlias"))
-        subQueryCasts.foreach(castStrategy.add)
-      case (None, None) =>
+      case (None, Some(subQuery))                      =>
+        handleSubQuery(subQuery, col, attr)
+      case (None, None)                                =>
         expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res)
-      case _ => throw ModelError(s"Attribute ${attr.name}_ cannot have both filterAttr and subquery")
+      case _                                           => throw ModelError(s"Attribute ${attr.name}_ cannot have both filterAttr and subquery")
+    }
+  }
+
+  protected def opt[T](
+    attr: AttrOne,
+    optArgs: Option[Seq[T]],
+    resOpt: ResOneOpt[T],
+  ): Unit = {
+    val col = getCol(attr: AttrOne)
+    select += col
+    groupByCols += col // if we later need to group by non-aggregated columns
+    castStrategy.add(resOpt.sql2oneOpt)
+    addSort(attr, col)
+    attr.op match {
+      case V     => () // selected col can already be a value or null
+      case Eq    => optEqual(col, optArgs, resOpt.one2sql)
+      case Neq   => optNeq(col, optArgs, resOpt.one2sql)
+      case Lt    => optCompare(col, optArgs, "<", resOpt.one2sql)
+      case Gt    => optCompare(col, optArgs, ">", resOpt.one2sql)
+      case Le    => optCompare(col, optArgs, "<=", resOpt.one2sql)
+      case Ge    => optCompare(col, optArgs, ">=", resOpt.one2sql)
+      case other => unexpectedOp(other)
+    }
+  }
+
+  protected def addSort(attr: AttrOne, col: String): Unit = {
+    attr.sort.foreach { sort =>
+      val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
+      dir match {
+        case 'a' => orderBy += ((level, arity, col, ""))
+        case 'd' => orderBy += ((level, arity, col, " DESC"))
+      }
     }
   }
 
@@ -226,26 +223,17 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     case other => unexpectedOp(other)
   }
 
-  protected def opt[T](
-    attr: AttrOne,
-    optArgs: Option[Seq[T]],
-    resOpt: ResOneOpt[T],
-  ): Unit = {
-    val col = getCol(attr: AttrOne)
-    select += col
-    groupByCols += col // if we later need to group by non-aggregated columns
-    castStrategy.add(resOpt.sql2oneOpt)
-    addSort(attr, col)
-    attr.op match {
-      case V     => () // selected col can already be a value or null
-      case Eq    => optEqual(col, optArgs, resOpt.one2sql)
-      case Neq   => optNeq(col, optArgs, resOpt.one2sql)
-      case Lt    => optCompare(col, optArgs, "<", resOpt.one2sql)
-      case Gt    => optCompare(col, optArgs, ">", resOpt.one2sql)
-      case Le    => optCompare(col, optArgs, "<=", resOpt.one2sql)
-      case Ge    => optCompare(col, optArgs, ">=", resOpt.one2sql)
-      case other => unexpectedOp(other)
-    }
+  protected def handleSubQuery(subQuery: SubQuery, col: String, attr: AttrOne): Unit = {
+    subQueryIndex += 1
+    val alias                        = subQueryAlias
+    // isImplicit = true for comparison operations (always Molecule_1, needs "col" alias)
+    val (subQuerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subQuery.elements, alias, subQuery.optLimit, subQuery.optOffset, isImplicit = true)
+    val opStr                        = getAggrOp(Some(attr.op))
+    joins += (("CROSS JOIN", subQuerySql, alias, Nil))
+    select += s"$alias.col"
+    groupByCols += s"$alias.col"
+    where += ((col, s"$opStr $alias.col"))
+    subQueryCasts.foreach(castStrategy.add)
   }
 
 

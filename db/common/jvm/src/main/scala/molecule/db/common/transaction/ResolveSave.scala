@@ -95,7 +95,7 @@ trait ResolveSave { self: SqlSave =>
           "Optional entity not allowed in save molecule. Please use mandatory entity instead."
         )
 
-        case SubQuery(_) => throw ModelError("SubQuery not allowed in save operations")
+        case _: SubQuery => throw ModelError("SubQuery not allowed in save operations")
 
         case _: Nested    => throw ModelError(
           "Nested data structure not allowed in save molecule. Please use insert instead."

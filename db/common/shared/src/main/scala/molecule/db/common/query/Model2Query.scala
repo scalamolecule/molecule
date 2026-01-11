@@ -73,13 +73,13 @@ trait Model2Query extends QueryExpr with ModelUtils {
         case a: AttrMapOpt => queryAttrMapOpt(a); resolve(tail)
       }
 
-      case ref: Ref                             => queryRef(ref, tail); resolve(tail)
-      case backRef: BackRef                     => queryBackRef(backRef, tail); resolve(tail)
-      case OptRef(ref, refElements)             => queryOptRef(ref, refElements); resolve(tail)
-      case OptEntity(refElements)               => queryOptEntity(refElements); resolve(tail)
-      case SubQuery(subElements)                => querySubQuery(subElements); resolve(tail)
-      case Nested(ref, nestedElements)          => queryNested(ref, nestedElements); resolve(tail)
-      case OptNested(nestedRef, nestedElements) => queryOptNested(nestedRef, nestedElements); resolve(tail)
+      case ref: Ref                                   => queryRef(ref, tail); resolve(tail)
+      case backRef: BackRef                           => queryBackRef(backRef, tail); resolve(tail)
+      case OptRef(ref, refElements)                   => queryOptRef(ref, refElements); resolve(tail)
+      case OptEntity(refElements)                     => queryOptEntity(refElements); resolve(tail)
+      case SubQuery(subElements, optLimit, optOffset) => querySubQuery(subElements, optLimit, optOffset); resolve(tail)
+      case Nested(ref, nestedElements)                => queryNested(ref, nestedElements); resolve(tail)
+      case OptNested(nestedRef, nestedElements)       => queryOptNested(nestedRef, nestedElements); resolve(tail)
     }
     case Nil             => ()
   }
@@ -127,18 +127,9 @@ trait Model2Query extends QueryExpr with ModelUtils {
                     )
                   validate(validateOptEntity(attrs) ++ tail, prevElements)
 
-                case SubQuery(es) =>
-                  // Check that subquery has a correlation attribute
-                  val hasCorrelation = es.exists {
-                    case a: Attr if a.filterAttr.nonEmpty => true
-                    case _                                => false
-                  }
-                  if (!hasCorrelation) {
-                    throw ModelError(
-                      "Subquery is missing a correlation attribute to relate it to the outer query. " +
-                        "Please add a tacit filter attribute like `entity_(OuterEntity.id_)` to correlate the subquery with the outer query."
-                    )
-                  }
+                case SubQuery(es, _, _) =>
+                  // Subqueries can be either correlated (with filter attributes) or uncorrelated (CROSS JOIN)
+                  // Both are valid use cases, so no validation needed here
                   validate(es ++ tail, prevElements)
 
                 case Nested(r, es) =>
@@ -288,28 +279,28 @@ trait Model2Query extends QueryExpr with ModelUtils {
     initialEnt: String,
     addFilterAttr: Option[(List[String], Attr) => Unit]
   ): List[Element] = {
-    val entAttrPaths   = mutable.Map.empty[String, List[List[String]]]
-    val qualifiedPaths      = mutable.Map.empty[List[String], List[List[String]]]
-    val directions          = ListBuffer.empty[List[String]]
-    val compareSubsToCheck  = ListBuffer.empty[SubQuery]
-    var path                = List(initialEnt)
-    var qualifiedPath       = List(initialEnt)
-    var filterAttrVars      = Map.empty[List[String], String]
-    var level               = 0
+    val entAttrPaths       = mutable.Map.empty[String, List[List[String]]]
+    val qualifiedPaths     = mutable.Map.empty[List[String], List[List[String]]]
+    val directions         = ListBuffer.empty[List[String]]
+    val compareSubsToCheck = ListBuffer.empty[SubQuery]
+    var path               = List(initialEnt)
+    var qualifiedPath      = List(initialEnt)
+    var filterAttrVars     = Map.empty[List[String], String]
+    var level              = 0
 
     @tailrec
     def check(elements: List[Element]): Unit = {
       elements match {
         case element :: tail =>
           element match {
-            case a: Attr       => checkAttr(a); check(tail)
-            case r: Ref        => handleRef(r); check(tail)
-            case _: BackRef    => handleBackRef(); check(tail)
-            case _: OptRef     => ???
-            case _: OptEntity  => ???
-            case s: SubQuery   => checkExplicitSubQuery(s); check(tail)
-            case n: Nested     => handleNested(n.ref); check(n.elements ++ tail)
-            case n: OptNested  => handleNested(n.ref); check(n.elements ++ tail)
+            case a: Attr      => checkAttr(a); check(tail)
+            case r: Ref       => handleRef(r); check(tail)
+            case _: BackRef   => handleBackRef(); check(tail)
+            case _: OptRef    => ???
+            case _: OptEntity => ???
+            case s: SubQuery  => checkExplicitSubQuery(s); check(tail)
+            case n: Nested    => handleNested(n.ref); check(n.elements ++ tail)
+            case n: OptNested => handleNested(n.ref); check(n.elements ++ tail)
           }
         case Nil             => ()
       }
@@ -325,24 +316,17 @@ trait Model2Query extends QueryExpr with ModelUtils {
               s"Filter attribute ${a.cleanName} should be tacit."
             )
           }
-        case _ => ()
+        case _       => ()
       }
     }
 
     def checkExplicitSubQuery(s: SubQuery): Unit = {
-      // Check that explicit subquery (from .sub()) has a correlation attribute
-      val hasCorrelation = s.elements.exists {
-        case a: Attr if a.filterAttr.nonEmpty => true
-        case _                                => false
-      }
-      if (!hasCorrelation) {
-        throw ModelError(
-          "Subquery is missing a correlation attribute to relate it to the outer query. " +
-            "Please add a tacit filter attribute like `entity_(OuterEntity.id_)` to correlate the subquery with the outer query."
-        )
-      }
+      // Explicit subqueries (from .sub()) can be either:
+      // - Correlated (with filter attributes linking to outer query)
+      // - Uncorrelated (CROSS JOIN - cartesian product)
+      // Both are valid use cases
 
-      // Also validate that subquery attributes don't conflict with outer query attributes
+      // Validate that subquery attributes don't conflict with outer query attributes
       s.elements.foreach {
         case a: Attr =>
           if (entAttrPaths.contains(a.cleanName)) {
@@ -350,7 +334,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
               s"Filter attribute ${a.cleanName} should be tacit."
             )
           }
-        case _ => ()
+        case _       => ()
       }
     }
 
@@ -448,7 +432,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
     def prepareSubQuery(subQuery: SubQuery): SubQuery = {
       val wasInsideSubQuery = insideSubQuery
       insideSubQuery = true
-      val result = SubQuery(prepare(subQuery.elements, Nil))
+      val result = SubQuery(prepare(subQuery.elements, Nil), subQuery.optLimit, subQuery.optOffset)
       insideSubQuery = wasInsideSubQuery
       result
     }
