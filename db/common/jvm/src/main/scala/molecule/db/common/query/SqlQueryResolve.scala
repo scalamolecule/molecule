@@ -67,10 +67,29 @@ abstract class SqlQueryResolve[Tpl](
 
   protected def castTuples(rs2row: RS => Any, sortedRows: RS, forward: Boolean): List[Tpl] = {
     val tuples = ListBuffer.empty[Tpl]
-    while (sortedRows.next()) {
-      tuples += rs2row(sortedRows).asInstanceOf[Tpl]
+    // Only check for subquery nulls if we have mandatory subquery attributes
+    if (m2q.hasManSubQueryAttr) {
+      while (sortedRows.next()) {
+        val row = rs2row(sortedRows)
+        // Filter out rows where mandatory subquery attributes returned NULL (no match)
+        // Check top-level tuple elements only (no nested subquery support)
+        if (!containsNull(row)) {
+          tuples += row.asInstanceOf[Tpl]
+        }
+      }
+    } else {
+      // Fast path: no subquery null checking needed
+      while (sortedRows.next()) {
+        tuples += rs2row(sortedRows).asInstanceOf[Tpl]
+      }
     }
     if (forward) tuples.toList else tuples.toList.reverse
+  }
+
+  private def containsNull(row: Any): Boolean = row match {
+    case null       => true
+    case t: Product => t.productIterator.contains(null)
+    case _          => false
   }
 
   protected def handleNested(

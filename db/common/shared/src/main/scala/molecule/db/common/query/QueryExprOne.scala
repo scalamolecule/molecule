@@ -110,11 +110,28 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     val col = getCol(attr: AttrOne)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
-    if (isOptNested) {
-      castStrategy.add(res.sql2oneOrNull)
-    } else {
-      castStrategy.add(res.sql2one)
+
+    // Choose cast strategy based on context from DataModel
+    (isOptNested, insideSubQuery, attr.op.isInstanceOf[AggrFn]) match {
+      case (true, _, _) =>
+        // Optional nested: use sql2oneOrNull (allows NULL for optional values)
+        castStrategy.add(res.sql2oneOrNull)
+
+      case (_, true, true) =>
+        // Aggregate in subquery: will be replaced by aggr(), which handles NULL→0 conversion
+        // For now, use sql2one (will be replaced anyway)
+        castStrategy.add(res.sql2one)
+
+      case (_, true, false) =>
+        // Non-aggregate mandatory attr in subquery: NULL means no match, exclude row
+        castStrategy.add(res.sql2oneOrNull)
+        hasManSubQueryAttr = true
+
+      case _ =>
+        // Regular mandatory attribute
+        castStrategy.add(res.sql2one)
     }
+
     addSort(attr, col)
     (attr.filterAttr, attr.subquery) match {
       case (Some((dir, filterPath, filterAttr)), None) =>
@@ -566,35 +583,53 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
         selectWithOrder(col, "SUM", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"SUM($col)")
+        castStrategy.replace(subQueryAggrCast(res))
 
       case "median" =>
         aggregate = true
         selectWithOrder(col, "MEDIAN", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"MEDIAN($col)")
+        castStrategy.replace(subQueryAggrCast(res))
 
       case "avg" =>
         aggregate = true
         selectWithOrder(col, "AVG", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"AVG($col)")
+        castStrategy.replace(subQueryAggrCast(res))
 
       case "variance" =>
         aggregate = true
         selectWithOrder(col, "VAR_POP", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"VAR_POP($col)")
+        castStrategy.replace(subQueryAggrCast(res))
 
       case "stddev" =>
         aggregate = true
         selectWithOrder(col, "STDDEV_POP", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"STDDEV_POP($col)")
+        castStrategy.replace(subQueryAggrCast(res))
 
       case other => unexpectedKw(other)
     }
   }
 
+  // Helper to wrap aggregate casts in subqueries to convert NULL to typed zero
+  private def subQueryAggrCast[T](res: ResOne[T]): Cast = {
+    if (!insideSubQuery) {
+      res.sql2one
+    } else {
+      // In subqueries, aggregates may return NULL - convert to typed zero
+      (row: RS, paramIndex: Int) => {
+        val v = res.sql2oneOrNull(row, paramIndex)
+        // sql2oneOrNull returns null for NULL, use typed zero from json converter
+        if (v == null) res.json2tpe("0") else v
+      }
+    }
+  }
 
   // filter attribute filters --------------------------------------------------
 

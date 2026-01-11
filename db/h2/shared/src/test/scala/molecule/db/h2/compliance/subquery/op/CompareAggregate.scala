@@ -110,23 +110,118 @@ class CompareAggregate extends MUnit with DbProviders_h2 with TestUtils {
   }
 
 
-  "aggr min max" - types {
+  "count, countDistinct" - types {
     for {
-      _ <- Entity.s.i.Ref.i.insert(
-        ("a", 1, 1),
-        ("b", 2, 2),
-        ("c", 3, 3),
+      _ <- Entity.i.Ref.i.insert(
+        (1, 1),
+        (2, 1),
+        (3, 1),
       ).transact
 
-      _ <- Entity.s.i_(Ref.i(min)).query.get.map(_ ==> List(
-        ("a", 1),
+      _ <- Entity.i(Ref.i(count)).query.i.get.map(_ ==> List(
+        (3, 3),
       ))
 
-      _ <- Entity.s.i_(Ref.i(max)).query.get.map(_ ==> List(
-        ("c", 3),
+      _ <- Ref.i(countDistinct).query.i.get.map(_ ==> List(1))
+      _ <- Entity.i(Ref.i(countDistinct)).query.i.get.map(_ ==> List(
+        (1, 1),
       ))
     } yield ()
   }
 
-  // todo: tests for countDistinct, sum, avg, median, variance, stddev
+
+  "min max" - types {
+    for {
+      _ <- Entity.i.Ref.i.insert(
+        (1, 1),
+        (2, 2),
+        (3, 3),
+      ).transact
+
+      _ <- Entity.i(Ref.i(min)).query.get.map(_ ==> List(
+        (1, 1),
+      ))
+
+      _ <- Entity.i(Ref.i(max)).query.get.map(_ ==> List(
+        (3, 3),
+      ))
+    } yield ()
+  }
+
+
+  "sum" - types {
+    for {
+      _ <- Entity.i.Ref.i.insert(
+        (2, 1),
+        (4, 2),
+        (6, 3),
+      ).transact
+
+      _ <- Entity.i(Ref.i(sum)).query.get.map(_ ==> List(
+        (6, 6),
+      ))
+    } yield ()
+  }
+
+
+  "avg" - types {
+    for {
+      _ <- Entity.double.Ref.i.insert(
+        (1.0, 1),
+        (2.0, 2),
+        (3.0, 3),
+      ).transact
+
+      _ <- Entity.double(Ref.i(avg)).query.get.map(_ ==> List(
+        (2, 2),
+      ))
+    } yield ()
+  }
+
+
+  "median" - types {
+    for {
+      _ <- Entity.double.Ref.i.insert(
+        (1.0, 1),
+        (2.0, 2),
+        (3.0, 3),
+      ).transact
+
+      _ <- Entity.double(Ref.i(median)).query.get.map(_ ==> List(
+        (2, 2),
+      ))
+    } yield ()
+  }
+
+
+  "variance" - types {
+    for {
+      _ <- Entity.double.Ref.i.insert(
+        (0.5, 1),
+        (0.7, 2),
+        (0.9, 3),
+      ).transact
+
+      _ <- Ref.i(variance).query.get.map(_ ==> List(2.0/3))
+      _ <- Entity.double.<(Ref.i(variance)).query.get.map(_ ==> List(
+        (0.5, 2.0/3),
+      ))
+    } yield ()
+  }
+
+
+  "stddev" - types {
+    for {
+      _ <- Entity.double.Ref.i.insert(
+        (0.5, 1),
+        (0.7, 2),
+        (0.9, 3),
+      ).transact
+
+      _ <- Ref.i(stddev).query.get.map(_ ==> List(0.816496580927726))
+      _ <- Entity.double.>(Ref.i(stddev)).query.get.map(_ ==> List(
+        (0.9, 0.816496580927726),
+      ))
+    } yield ()
+  }
 }

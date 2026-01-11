@@ -23,6 +23,11 @@ class Model2SqlQuery_h2(elements0: List[Element])
     // Resolve the subquery elements
     subQueryBuilder.resolveElements(subElements)
 
+    // Propagate the flag back to main query if subquery has mandatory attributes
+    if (subQueryBuilder.hasManSubQueryAttr) {
+      hasManSubQueryAttr = true
+    }
+
     // Get the SQL and casts
     val sql = subQueryBuilder.renderSubQuery(2, Some(subQueryAlias), optLimit, optOffset, isImplicit)
     val subqueryCasts = subQueryBuilder.castStrategy match {

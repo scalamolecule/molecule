@@ -18,6 +18,9 @@ class Model2SqlQuery_mariadb(elements0: List[Element])
     val subQueryBuilder = new Model2SqlQuery_mariadb(subElements)
     subQueryBuilder.insideSubQuery = true
     subQueryBuilder.resolveElements(subElements)
+    if (subQueryBuilder.hasManSubQueryAttr) {
+      hasManSubQueryAttr = true
+    }
     val sql = subQueryBuilder.renderSubQuery(2, Some(subQueryAlias), optLimit, optOffset, isImplicit)
     val casts = subQueryBuilder.castStrategy match {
       case tuple: CastTuple => tuple.getCasts
