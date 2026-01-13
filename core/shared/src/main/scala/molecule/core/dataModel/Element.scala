@@ -96,13 +96,14 @@ case class OptRef(ref: Ref, elements: List[Element]) extends Element {
 case class SubQuery(
   elements: List[Element],
   optLimit: Option[Int],
-  optOffset: Option[Int]
+  optOffset: Option[Int],
+  isJoin: Boolean  // true for .join(), false for .select()
 ) extends Element {
   override def render(i: Int): String = {
     val indent = "  " * i
     s"""|${indent}SubQuery(
         |${indent}  List(
-        |${renders(elements, i + 2)}), ${opt(optLimit)}, ${opt(optOffset)})""".stripMargin
+        |${renders(elements, i + 2)}), ${opt(optLimit)}, ${opt(optOffset)}, $isJoin)""".stripMargin
   }
   override def toString: String = render(0)
 }

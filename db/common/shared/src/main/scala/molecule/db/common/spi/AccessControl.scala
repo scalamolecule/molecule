@@ -58,16 +58,14 @@ trait AccessControl {
   }
 
   private def getEntityIndexFromElement(element: Element): Option[Int] = element match {
-    case a: Attr                               => Some(a.coord.head)
-    case r: Ref if r.coord.nonEmpty            => Some(r.coord.head)
-    case OptRef(r: Ref, _) if r.coord.nonEmpty => Some(r.coord.head)
-    case OptEntity(attrs) if attrs.nonEmpty    => Some(attrs.head.coord.head)
-
-    case SubQuery(subElements, _, _) if subElements.nonEmpty => getEntityIndexFromElement(subElements.head)
-
-    case Nested(r: Ref, _) if r.coord.nonEmpty    => Some(r.coord.head)
-    case OptNested(r: Ref, _) if r.coord.nonEmpty => Some(r.coord.head)
-    case _                                        => None
+    case a: Attr                                                => Some(a.coord.head)
+    case r: Ref if r.coord.nonEmpty                             => Some(r.coord.head)
+    case OptRef(r: Ref, _) if r.coord.nonEmpty                  => Some(r.coord.head)
+    case OptEntity(attrs) if attrs.nonEmpty                     => Some(attrs.head.coord.head)
+    case SubQuery(subElements, _, _, _) if subElements.nonEmpty => getEntityIndexFromElement(subElements.head)
+    case Nested(r: Ref, _) if r.coord.nonEmpty                  => Some(r.coord.head)
+    case OptNested(r: Ref, _) if r.coord.nonEmpty               => Some(r.coord.head)
+    case _                                                      => None
   }
 
   private def checkAccess(
@@ -159,7 +157,7 @@ trait AccessControl {
             case OptRef(r: Ref, _) => r.ent
             case OptEntity(attrs)  => attrs.head.ent
 
-            case SubQuery(subElements, _, _) if subElements.nonEmpty => subElements.head match {
+            case SubQuery(subElements, _, _, _) if subElements.nonEmpty => subElements.head match {
               case a: Attr => a.ent
               case r: Ref  => r.ent
               case _       => "Unknown"
@@ -269,7 +267,7 @@ trait AccessControl {
             case OptRef(r: Ref, _) => r.ent
             case OptEntity(attrs)  => attrs.head.ent
 
-            case SubQuery(subElements, _, _) if subElements.nonEmpty => subElements.head match {
+            case SubQuery(subElements, _, _, _) if subElements.nonEmpty => subElements.head match {
               case a: Attr => a.ent
               case r: Ref  => r.ent
               case _       => "Unknown"

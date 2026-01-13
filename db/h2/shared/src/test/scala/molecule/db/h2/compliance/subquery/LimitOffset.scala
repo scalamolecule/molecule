@@ -1,9 +1,6 @@
-package molecule.db.h2.compliance.subquery.op
+package molecule.db.h2.compliance.subquery
 
-import scala.concurrent.Future
-import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.common.spi.Conn
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.h2.async.*
@@ -19,7 +16,7 @@ class LimitOffset extends MUnit with DbProviders_h2 with TestUtils {
         (3, 6),
       ).transact
 
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(1)).query.inspect.map(_.contains(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(1)).query.inspect.map(_.contains(
         """SELECT DISTINCT
           |  Entity.i,
           |  (
@@ -33,16 +30,17 @@ class LimitOffset extends MUnit with DbProviders_h2 with TestUtils {
           |  )
           |FROM Entity
           |WHERE
-          |  Entity.i IS NOT NULL""".stripMargin
+          |  Entity.i IS NOT NULL
+          |ORDER BY 2;""".stripMargin
       ) ==> true)
 
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
 
-      _ <- Entity.i.sub(Ref.i.d1.query.limit(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.d1.query.limit(1)).query.get.map(_ ==> List(
         (1, 6),
         (2, 6),
         (3, 6),
@@ -59,7 +57,7 @@ class LimitOffset extends MUnit with DbProviders_h2 with TestUtils {
         (3, 6),
       ).transact
 
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(1).offset(2)).query.inspect.map(_.contains(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(1).offset(2)).query.inspect.map(_.contains(
         """SELECT DISTINCT
           |  Entity.i,
           |  (
@@ -78,39 +76,39 @@ class LimitOffset extends MUnit with DbProviders_h2 with TestUtils {
       ) ==> true)
 
       // Ascending
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(1).offset(0)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(1).offset(0)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(1).offset(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(1).offset(1)).query.get.map(_ ==> List(
         (1, 5),
         (2, 5),
         (3, 5),
       ))
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(1).offset(2)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(1).offset(2)).query.get.map(_ ==> List(
         (1, 6),
         (2, 6),
         (3, 6),
       ))
 
       // Descending
-      _ <- Entity.i.sub(Ref.i.d1.query.limit(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.d1.query.limit(1)).query.get.map(_ ==> List(
         (1, 6),
         (2, 6),
         (3, 6),
       ))
-      _ <- Entity.i.sub(Ref.i.d1.query.limit(1).offset(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.d1.query.limit(1).offset(1)).query.get.map(_ ==> List(
         (1, 5),
         (2, 5),
         (3, 5),
       ))
-      _ <- Entity.i.sub(Ref.i.d1.query.limit(1).offset(2)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.d1.query.limit(1).offset(2)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
@@ -128,7 +126,7 @@ class LimitOffset extends MUnit with DbProviders_h2 with TestUtils {
       ).transact
 
       // When "going backwards" by using a negative limit ("from the end"), orderings are reversed
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(-1)).query.inspect.map(_.contains(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(-1)).query.inspect.map(_.contains(
         """SELECT DISTINCT
           |  Entity.i,
           |  (
@@ -146,50 +144,48 @@ class LimitOffset extends MUnit with DbProviders_h2 with TestUtils {
       ) ==> true)
 
       // Ascending
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(1)).query.i.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(-1).offset(0)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(-1).offset(0)).query.get.map(_ ==> List(
         (1, 6),
         (2, 6),
         (3, 6),
       ))
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(-1).offset(-1)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(-1).offset(-1)).query.get.map(_ ==> List(
         (1, 5),
         (2, 5),
         (3, 5),
       ))
-      _ <- Entity.i.sub(Ref.i.a1.query.limit(-1).offset(-2)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.a1.query.limit(-1).offset(-2)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
 
       // Descending
-      _ <- Entity.i.sub(Ref.i.d1.query.limit(-1)).query.i.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.d1.query.limit(-1)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
-      _ <- Entity.i.sub(Ref.i.d1.query.limit(-1).offset(0)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.d1.query.limit(-1).offset(0)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
-      _ <- Entity.i.sub(Ref.i.d1.query.limit(-1).offset(-1)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.d1.query.limit(-1).offset(-1)).query.get.map(_ ==> List(
         (1, 5),
         (2, 5),
         (3, 5),
       ))
-      _ <- Entity.i.sub(Ref.i.d1.query.limit(-1).offset(-2)).query.get.map(_ ==> List(
+      _ <- Entity.i.select(Ref.i.d1.query.limit(-1).offset(-2)).query.get.map(_ ==> List(
         (1, 6),
         (2, 6),
         (3, 6),
       ))
     } yield ()
   }
-
-
 }

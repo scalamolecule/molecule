@@ -13,12 +13,15 @@ class Model2SqlQuery_h2(elements0: List[Element])
     with QueryExprSetRefAttr_h2
     with SqlQueryBase {
 
-  override protected def buildSubQuerySqlWithCasts(subElements: List[Element], subQueryAlias: String, optLimit: Option[Int], optOffset: Option[Int], isImplicit: Boolean): (String, List[Cast]) = {
+  override protected def buildSubQuerySqlWithCasts(subElements: List[Element], subQueryAlias: String, optLimit: Option[Int], optOffset: Option[Int], isImplicit: Boolean, isJoin: Boolean): (String, List[Cast]) = {
     // Create a new query builder instance for the subquery
     val subQueryBuilder = new Model2SqlQuery_h2(subElements)
 
     // Mark that we're inside a subquery (to allow ID filter attributes)
     subQueryBuilder.insideSubQuery = true
+
+    // Mark if this is a JOIN subquery (affects correlation handling)
+    subQueryBuilder.insideJoinSubQuery = isJoin
 
     // Resolve the subquery elements
     subQueryBuilder.resolveElements(subElements)
@@ -28,6 +31,13 @@ class Model2SqlQuery_h2(elements0: List[Element])
       hasManSubQueryAttr = true
     }
 
+    // For SELECT clause subqueries (correlated, scalar), clear ORDER BY from subquery
+    // UNLESS there's a LIMIT/OFFSET (ORDER BY determines which rows are selected)
+    // The ordering will be applied to the outer query instead
+    if (!isJoin && optLimit.isEmpty && optOffset.isEmpty) {
+      subQueryBuilder.orderBy.clear()
+    }
+
     // Get the SQL and casts
     val sql = subQueryBuilder.renderSubQuery(2, Some(subQueryAlias), optLimit, optOffset, isImplicit)
     val subqueryCasts = subQueryBuilder.castStrategy match {
@@ -35,10 +45,15 @@ class Model2SqlQuery_h2(elements0: List[Element])
       case _                => Nil
     }
 
-    // If subquery has multiple values, H2 returns them as a ROW type
-    // Wrap casts in ROW handler to extract values from the ROW
+    // Handle casts differently for JOIN vs SELECT subqueries
     val casts = if (subqueryCasts.length > 1) {
-      List(castSubqueryRow(subqueryCasts))
+      if (isJoin) {
+        // JOIN: columns are separate in result set, group into tuple manually
+        List(castJoinSubqueryTuple(subqueryCasts))
+      } else {
+        // SELECT: H2 returns ROW type, extract values from ROW
+        List(castSubqueryRow(subqueryCasts))
+      }
     } else {
       subqueryCasts
     }
@@ -46,12 +61,22 @@ class Model2SqlQuery_h2(elements0: List[Element])
     (sql, casts)
   }
 
-  // Cast function to handle multi-value subquery ROWs
+  // Cast function to handle multi-value SELECT subquery ROWs (H2 returns ROW type)
   // This will be overridden in the JVM-specific implementation
   protected def castSubqueryRow(rowCasts: List[Cast]): Cast = {
     throw new UnsupportedOperationException(
       "Subquery with multiple columns not yet supported on this platform. " +
       "Override castSubqueryRow in platform-specific implementation."
+    )
+  }
+
+  // Cast function to handle multi-column JOIN subqueries (columns are separate)
+  // Groups individual column values into a tuple
+  // This will be overridden in the JVM-specific implementation
+  protected def castJoinSubqueryTuple(columnCasts: List[Cast]): Cast = {
+    throw new UnsupportedOperationException(
+      "JOIN subquery with multiple columns not yet supported on this platform. " +
+      "Override castJoinSubqueryTuple in platform-specific implementation."
     )
   }
 

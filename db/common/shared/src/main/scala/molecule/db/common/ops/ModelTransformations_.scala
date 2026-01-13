@@ -34,33 +34,67 @@ trait ModelTransformations_ extends ModelUtils {
   }
 
 
-  def addSubMolecule(self: Molecule, subMolecule: Molecule): DataModel = {
+  // select
+
+  def selectSubMolecule(self: Molecule, subMolecule: Molecule): DataModel = {
     val dataModel    = self.dataModel
     val subDataModel = subMolecule.dataModel
     DataModel(
-      dataModel.elements :+ SubQuery(subDataModel.elements, None, None),
+      dataModel.elements :+ SubQuery(subDataModel.elements, None, None, false),
       dataModel.attrIndexes ++ subDataModel.attrIndexes,
       binds = dataModel.binds + subDataModel.binds
     )
   }
-  def addSubQuery[Tpl](self: Molecule, subQuery: Query[Tpl]): DataModel = {
+  def selectSubQuery[Tpl](self: Molecule, subQuery: Query[Tpl]): DataModel = {
     val dataModel    = self.dataModel
     val subDataModel = subQuery.dataModel
     DataModel(
-      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, None),
+      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, None, false),
       dataModel.attrIndexes ++ subDataModel.attrIndexes,
       binds = dataModel.binds + subDataModel.binds
     )
   }
-  def addSubQueryOffset[Tpl](self: Molecule, subQuery: QueryOffset[Tpl]): DataModel = {
+  def selectSubQueryOffset[Tpl](self: Molecule, subQuery: QueryOffset[Tpl]): DataModel = {
     val dataModel    = self.dataModel
     val subDataModel = subQuery.dataModel
     DataModel(
-      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, Some(subQuery.offset)),
+      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, Some(subQuery.offset), false),
       dataModel.attrIndexes ++ subDataModel.attrIndexes,
       binds = dataModel.binds + subDataModel.binds
     )
   }
+
+
+  // join
+
+  def joinSubMolecule(self: Molecule, subMolecule: Molecule): DataModel = {
+    val dataModel    = self.dataModel
+    val subDataModel = subMolecule.dataModel
+    DataModel(
+      dataModel.elements :+ SubQuery(subDataModel.elements, None, None, true),
+      dataModel.attrIndexes ++ subDataModel.attrIndexes,
+      binds = dataModel.binds + subDataModel.binds
+    )
+  }
+  def joinSubQuery[Tpl](self: Molecule, subQuery: Query[Tpl]): DataModel = {
+    val dataModel    = self.dataModel
+    val subDataModel = subQuery.dataModel
+    DataModel(
+      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, None, true),
+      dataModel.attrIndexes ++ subDataModel.attrIndexes,
+      binds = dataModel.binds + subDataModel.binds
+    )
+  }
+  def joinSubQueryOffset[Tpl](self: Molecule, subQuery: QueryOffset[Tpl]): DataModel = {
+    val dataModel    = self.dataModel
+    val subDataModel = subQuery.dataModel
+    DataModel(
+      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, Some(subQuery.offset), true),
+      dataModel.attrIndexes ++ subDataModel.attrIndexes,
+      binds = dataModel.binds + subDataModel.binds
+    )
+  }
+
 
   private def getSortedTacitId(ns: String) = {
     // Add sorting by entity id out of range from up to 5 custom sorts
@@ -3166,7 +3200,7 @@ trait ModelTransformations_ extends ModelUtils {
 
   def subQueryComparison(dataModel: DataModel, op: Op, subQueryMolecule: Molecule): DataModel = {
     val es       = dataModel.elements
-    val subQuery = SubQuery(subQueryMolecule.dataModel.elements, None, None)
+    val subQuery = SubQuery(subQueryMolecule.dataModel.elements, None, None, false)
 
     val attrWithSubQuery = es.last match {
       case a: AttrOneMan => a match {

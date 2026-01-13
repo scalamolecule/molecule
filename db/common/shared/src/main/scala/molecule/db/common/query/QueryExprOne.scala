@@ -137,7 +137,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
       case (Some((dir, filterPath, filterAttr)), None) =>
         expr2(col, attr.op, filterAttr.name)
       case (None, Some(subQuery))                      =>
-        handleSubQuery(subQuery, col, attr)
+        selectSubQuery(subQuery, col, attr)
       case (None, None)                                =>
         expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res)
       case _                                           => throw ModelError(s"Attribute ${attr.name} cannot have both filterAttr and subquery")
@@ -148,9 +148,18 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     val col = getCol(attr: AttrOne)
     (attr.filterAttr, attr.subquery) match {
       case (Some((dir, filterPath, filterAttr)), None) =>
+        // For JOIN subqueries, include filter attribute in SELECT for JOIN ON clause
+        // but don't add cast (it's not part of the result, just used for correlation)
+        if (insideJoinSubQuery) {
+          select += col
+          // If this is a JOIN subquery with aggregates, add correlation column to GROUP BY
+          if (aggregate) {
+            groupBy += col
+          }
+        }
         expr2(col, attr.op, getCol(filterAttr, filterPath))
       case (None, Some(subQuery))                      =>
-        handleSubQuery(subQuery, col, attr)
+        selectSubQuery(subQuery, col, attr)
       case (None, None)                                =>
         expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res)
       case _                                           => throw ModelError(s"Attribute ${attr.name}_ cannot have both filterAttr and subquery")
@@ -240,11 +249,15 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     case other => unexpectedOp(other)
   }
 
-  protected def handleSubQuery(subQuery: SubQuery, col: String, attr: AttrOne): Unit = {
+  protected def selectSubQuery(subQuery: SubQuery, col: String, attr: AttrOne): Unit = {
     subQueryIndex += 1
     val alias                        = subQueryAlias
     // isImplicit = true for comparison operations (always Molecule_1, needs "col" alias)
-    val (subQuerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subQuery.elements, alias, subQuery.optLimit, subQuery.optOffset, isImplicit = true)
+    val (subQuerySql, subQueryCasts) = buildSubQuerySqlWithCasts(
+      subQuery.elements, alias, subQuery.optLimit, subQuery.optOffset,
+      isImplicit = true,
+      isJoin = false
+    )
     val opStr                        = getAggrOp(Some(attr.op))
     joins += (("CROSS JOIN", subQuerySql, alias, Nil))
     select += s"$alias.col"
@@ -503,8 +516,19 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
 
       case "min" =>
         aggregate = true
-        select += s"MIN($col)"
+        if (insideJoinSubQuery) {
+          val alias = col.replace('.', '_') + "_min"
+          select += s"MIN($col) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"MIN($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
+        castStrategy.replace(subQueryAggrCast(res))
         havingOp(s"MIN($col)")
 
       case "mins" =>
@@ -523,8 +547,19 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
 
       case "max" =>
         aggregate = true
-        select += s"MAX($col)"
+        if (insideJoinSubQuery) {
+          val alias = col.replace('.', '_') + "_max"
+          select += s"MAX($col) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"MAX($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
+        castStrategy.replace(subQueryAggrCast(res))
         havingOp(s"MAX($col)")
 
       case "maxs" =>
@@ -573,7 +608,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
       case "countDistinct" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT", hasSort)
+        selectWithOrder(col, "COUNT", hasSort, aliasSuffix = Some("countDistinct"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
@@ -601,14 +636,14 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
 
       case "variance" =>
         aggregate = true
-        selectWithOrder(col, "VAR_POP", hasSort, "")
+        selectWithOrder(col, "VAR_POP", hasSort, "", "", "", "", Some("variance"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"VAR_POP($col)")
         castStrategy.replace(subQueryAggrCast(res))
 
       case "stddev" =>
         aggregate = true
-        selectWithOrder(col, "STDDEV_POP", hasSort, "")
+        selectWithOrder(col, "STDDEV_POP", hasSort, "", "", "", "", Some("stddev"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"STDDEV_POP($col)")
         castStrategy.replace(subQueryAggrCast(res))
@@ -625,8 +660,13 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
       // In subqueries, aggregates may return NULL - convert to typed zero
       (row: RS, paramIndex: Int) => {
         val v = res.sql2oneOrNull(row, paramIndex)
-        // sql2oneOrNull returns null for NULL, use typed zero from json converter
-        if (v == null) res.json2tpe("0") else v
+        // sql2oneOrNull returns null for NULL, use typed zero based on type
+        if (v == null) {
+          res.tpe match {
+            case "String" => res.json2tpe("\"\"")  // Empty string as JSON
+            case _        => res.json2tpe("0")     // Numeric zero
+          }
+        } else v
       }
     }
   }
@@ -634,15 +674,22 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
   // filter attribute filters --------------------------------------------------
 
   protected def equal2(col: String, filterAttr: String): Unit = {
-    where += ((col, "= " + filterAttr))
+    if (!insideJoinSubQuery) {
+      where += ((col, "= " + filterAttr))
+    }
+    // For JOIN subqueries, skip WHERE correlation - will be extracted for JOIN ON
   }
 
   protected def neq2(col: String, filterAttr: String): Unit = {
-    where += ((col, " != " + filterAttr))
+    if (!insideJoinSubQuery) {
+      where += ((col, " != " + filterAttr))
+    }
   }
 
   protected def compare2(col: String, op: String, filterAttr: String): Unit = {
-    where += ((col, op + " " + filterAttr))
+    if (!insideJoinSubQuery) {
+      where += ((col, op + " " + filterAttr))
+    }
   }
 
 
@@ -655,15 +702,18 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     distinct: String = "DISTINCT ",
     cast: String = "",
     prefix: String = "",
-    suffix: String = ""
+    suffix: String = "",
+    aliasSuffix: Option[String] = None
   ): Unit = {
-    if (hasSort) {
-      // order by aggregate alias instead
-      val alias = col.replace('.', '_') + "_" + fn.toLowerCase
-      select += s"$prefix$fn($distinct$col$cast)$suffix $alias"
-      val (level, _, _, dir) = orderBy.last
-      orderBy.remove(orderBy.size - 1)
-      orderBy += ((level, 1, alias, dir))
+    if (hasSort || insideJoinSubQuery) {
+      // order by aggregate alias OR inside JOIN subquery (needs alias for outer query reference)
+      val alias = col.replace('.', '_') + "_" + aliasSuffix.getOrElse(fn.toLowerCase)
+      select += s"$prefix$fn($distinct$col$cast)$suffix AS $alias"
+      if (hasSort) {
+        val (level, _, _, dir) = orderBy.last
+        orderBy.remove(orderBy.size - 1)
+        orderBy += ((level, 1, alias, dir))
+      }
     } else {
       select += s"$prefix$fn($distinct$col$cast)$suffix"
     }

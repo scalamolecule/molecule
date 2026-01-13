@@ -231,13 +231,13 @@ trait QueryExprOne_postgresql
 
       case "variance" =>
         aggregate = true
-        selectWithOrder(col, "VAR_POP", hasSort, "", "", "ROUND(", s"$castAggrOpV, 10)")
+        selectWithOrder(col, "VAR_POP", hasSort, "", "", "ROUND(", s"$castAggrOpV, 10)", Some("variance"))
         if (!select.contains(col)) groupByCols -= col
         addHaving(baseType, fn, s"ROUND(VAR_POP($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case "stddev" =>
         aggregate = true
-        selectWithOrder(col, "STDDEV_POP", hasSort, "")
+        selectWithOrder(col, "STDDEV_POP", hasSort, "", "", "", "", Some("stddev"))
         if (!select.contains(col)) groupByCols -= col
         addHaving(baseType, fn, s"ROUND(STDDEV_POP($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 

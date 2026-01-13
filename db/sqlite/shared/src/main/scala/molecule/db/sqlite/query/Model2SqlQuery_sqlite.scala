@@ -13,12 +13,22 @@ class Model2SqlQuery_sqlite(elements0: List[Element])
     with QueryExprSetRefAttr_sqlite
     with SqlQueryBase {
 
-  override protected def buildSubQuerySqlWithCasts(subElements: List[Element], subQueryAlias: String, optLimit: Option[Int], optOffset: Option[Int], isImplicit: Boolean): (String, List[Cast]) = {
+  override protected def buildSubQuerySqlWithCasts(
+    subElements: List[Element], subQueryAlias: String, optLimit: Option[Int], optOffset: Option[Int],
+    isImplicit: Boolean, isJoin: Boolean
+  ): (String, List[Cast]) = {
     val subQueryBuilder = new Model2SqlQuery_sqlite(subElements)
     subQueryBuilder.insideSubQuery = true
+    subQueryBuilder.insideJoinSubQuery = isJoin
     subQueryBuilder.resolveElements(subElements)
     if (subQueryBuilder.hasManSubQueryAttr) {
       hasManSubQueryAttr = true
+    }
+    // For SELECT clause subqueries (correlated, scalar), clear ORDER BY from subquery
+    // UNLESS there's a LIMIT/OFFSET (ORDER BY determines which rows are selected)
+    // The ordering will be applied to the outer query instead
+    if (!isJoin && optLimit.isEmpty && optOffset.isEmpty) {
+      subQueryBuilder.orderBy.clear()
     }
     val sql = subQueryBuilder.renderSubQuery(2, Some(subQueryAlias), optLimit, optOffset, isImplicit)
     val casts = subQueryBuilder.castStrategy match {

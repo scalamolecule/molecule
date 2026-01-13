@@ -1,0 +1,152 @@
+# Molecule Project - Claude Code Configuration
+# This file helps Claude Code understand the project context automatically
+
+## Context Documents
+# ALWAYS read these on conversation start for optimal performance
+- docs/claude-context/00-quick-reference.md
+- docs/claude-context/README.md (if orientation needed)
+
+## Project-Specific Instructions
+
+### Understanding Molecule
+When starting ANY conversation about Molecule:
+1. Read `docs/claude-context/00-quick-reference.md` first (6KB, essential orientation)
+2. Based on question type, read relevant detailed docs:
+   - Features/capabilities → `compliance-test-taxonomy.md`
+   - DSL syntax/usage → `boilerplate-dsl-generation.md`
+   - Implementation/how it works → `compilation-pipeline.md`
+   - Code generation → `sbt-molecule-codegen.md`
+   - Database differences → `database-backends.md`
+   - File locations → `01-project-structure.md`
+
+### Key Facts
+- **Platform**: Scala 3.7.4, JVM + Scala.js
+- **Databases**: H2, PostgreSQL, MySQL, MariaDB, SQLite
+- **Test Suite**: 346 files in `db/compliance/shared/src/test/`
+- **Generated Code**: `db/compliance/jvm/target/scala-3.7.4/src_managed/main/moleculeGen/`
+- **sbt-molecule Plugin**: `/Users/mg/molecule/sbt/sbt-molecule/src/` (external repo)
+
+### Critical Corrections
+- ✅ Optional attributes use `attr_?` notation (NOT `attr$` - that's old Scala 2)
+- ✅ Tuple arity is UNLIMITED (Scala 3), NOT limited to 22
+- ✅ Bindings ARE limited to max 22 parameters
+- ✅ Types: 25+ supported (not "23 types")
+
+### Testing
+- All compliance tests inherit from shared base classes
+- Tests run on all 5 databases automatically
+- Test domains: Types (main), Refs (relationships), JoinTable (many-to-many), Validation, etc.
+
+### Code Generation
+- Schema definition: `trait Entity extends Entity { val attr = oneString }`
+- SBT task: `moleculeGen` triggers code generation
+- Generated DSL enables: `Entity.attr("value").query.get`
+
+### Query Compilation
+- DSL → DataModel Elements → Model2Query → Model2SqlQuery → SQL
+- Elements: Attr, Ref, BackRef, Nested, OptNested, SubQuery
+- Cardinality: One, Set, Seq, Map
+- Mode: Mandatory, Optional, Tacit
+
+### Common Patterns
+```scala
+// Simple query
+Entity.attr.query.get
+
+// Filtered (tacit attribute)
+Entity.attr.otherAttr_(> 42).query.get
+
+// Aggregation
+Entity.attr(count).query.get
+
+// Relationship
+Entity.attr.RefEntity.refAttr.query.get
+
+// Nested pull
+Entity.attr.RefEntity.*(RefEntity.refAttr).query.get
+```
+
+### Development Workflow
+1. Modify schema → `src/main/scala/domain/schema/`
+2. Generate code → `sbt moleculeGen`
+3. Write tests → `db/compliance/shared/src/test/`
+4. Run tests → `sbt test` (all DBs) or `sbt "project h2-jvm" test`
+
+**IMPORTANT**: User prefers to compile and test themselves (it's faster). Do NOT run `sbt test` or `sbt compile` commands unless explicitly requested.
+
+## Token Optimization
+
+### Strategy
+- Reading context docs (~10-20K tokens) is MUCH cheaper than exploring codebase (100K+ tokens)
+- Always prefer reading curated docs over file exploration
+- Use file paths in docs to jump directly to relevant code
+
+### When to Read Source
+- After reading relevant context doc
+- When specific implementation detail needed
+- When doc references specific file:line
+
+### When NOT to Read Source
+- ❌ General "how does X work" questions → read context docs first
+- ❌ "What features exist" → `compliance-test-taxonomy.md`
+- ❌ "Where is X" → `01-project-structure.md`
+
+## Important Notes
+
+### Don't Forget
+- This is a database library, not an ORM
+- Type safety is paramount (compile-time query validation)
+- Cross-platform (JVM + JS) with identical API
+- Compliance tests define semantics across all databases
+
+### Ask Before
+- Creating new files (prefer editing existing)
+- Changing generated code (edit schema instead)
+- Major refactoring (discuss approach first)
+
+### Current Work
+- Subqueries feature in development
+- Location: `db/h2/jvm/src/test/scala/molecule/db/h2/subquery/`
+- Status: WHERE clause done, SELECT/FROM clause in progress
+
+## File Patterns
+
+### Generated Code (DON'T EDIT DIRECTLY)
+- `target/scala-3.7.4/src_managed/**/*.scala`
+- Edit schema definition instead, then run `sbt moleculeGen`
+
+### Test Files
+- Pattern: `db/compliance/shared/src/test/scala/**/Test*.scala`
+- Inherit from base test classes with database-specific providers
+
+### Database Implementations
+- Query: `db/{database}/shared/src/main/scala/molecule/db/{database}/query/Model2SqlQuery_{database}.scala`
+- SPI: `db/{database}/jvm/src/main/scala/molecule/db/{database}/spi/Spi_{database}_{sync|async|io|zio}.scala`
+
+## Performance Tips
+
+### For Claude Code
+1. Always read quick reference first
+2. Batch file reads when possible
+3. Use context docs to avoid redundant exploration
+4. Trust the documentation (it's comprehensive)
+
+### For User (Cost Optimization)
+- Context index pays for itself after ~3-4 conversations
+- Per-question savings: ~15-20K tokens
+- One-time setup cost: ~50K tokens (already done)
+- Long-term: Massive token savings
+
+## Maintenance
+
+### Update Context Docs When
+- New features added
+- Schema syntax changes
+- Query compilation changes
+- New database supported
+- Project reorganization
+
+### Check Context Freshness
+- Last updated: 2026-01-04
+- Molecule version: v0.29.0
+- If major version jump, review docs for accuracy

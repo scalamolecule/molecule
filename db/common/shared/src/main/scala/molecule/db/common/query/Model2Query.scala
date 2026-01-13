@@ -19,14 +19,15 @@ trait Model2Query extends QueryExpr with ModelUtils {
   protected val expectedFilterAttrs = mutable.Set.empty[String]
   protected var optNestedLeafIsSet  = Option.empty[Boolean]
 
-  final var nestedOptRef        = false
-  final var hasOptRef           = false
-  final var hasOptEntityAttrs   = false
+  final var nestedOptRef       = false
+  final var hasOptRef          = false
+  final var hasOptEntityAttrs  = false
   final var isNested            = false
   final var isManNested         = false
   final var isOptNested         = false
   final var insideOptEntity     = false
   final var insideSubQuery      = false
+  final var insideJoinSubQuery  = false  // true when building JOIN subquery
   final var hasManSubQueryAttr  = false
 
 
@@ -74,13 +75,13 @@ trait Model2Query extends QueryExpr with ModelUtils {
         case a: AttrMapOpt => queryAttrMapOpt(a); resolve(tail)
       }
 
-      case ref: Ref                                   => queryRef(ref, tail); resolve(tail)
-      case backRef: BackRef                           => queryBackRef(backRef, tail); resolve(tail)
-      case OptRef(ref, refElements)                   => queryOptRef(ref, refElements); resolve(tail)
-      case OptEntity(refElements)                     => queryOptEntity(refElements); resolve(tail)
-      case SubQuery(subElements, optLimit, optOffset) => querySubQuery(subElements, optLimit, optOffset); resolve(tail)
-      case Nested(ref, nestedElements)                => queryNested(ref, nestedElements); resolve(tail)
-      case OptNested(nestedRef, nestedElements)       => queryOptNested(nestedRef, nestedElements); resolve(tail)
+      case ref: Ref                                           => queryRef(ref, tail); resolve(tail)
+      case backRef: BackRef                                   => queryBackRef(backRef, tail); resolve(tail)
+      case OptRef(ref, refElements)                           => queryOptRef(ref, refElements); resolve(tail)
+      case OptEntity(refElements)                             => queryOptEntity(refElements); resolve(tail)
+      case SubQuery(subElements, optLimit, optOffset, isJoin) => querySubQuery(subElements, optLimit, optOffset, isJoin); resolve(tail)
+      case Nested(ref, nestedElements)                        => queryNested(ref, nestedElements); resolve(tail)
+      case OptNested(nestedRef, nestedElements)               => queryOptNested(nestedRef, nestedElements); resolve(tail)
     }
     case Nil             => ()
   }
@@ -128,9 +129,12 @@ trait Model2Query extends QueryExpr with ModelUtils {
                     )
                   validate(validateOptEntity(attrs) ++ tail, prevElements)
 
-                case SubQuery(es, _, _) =>
-                  // Subqueries can be either correlated (with filter attributes) or uncorrelated (CROSS JOIN)
+                case SubQuery(es, _, _, _) =>
+                  // Subqueries can be either:
+                  // - .select(): SELECT clause correlated subquery
+                  // - .join(): FROM clause join to subquery
                   // Both are valid use cases, so no validation needed here
+                  validateSubQuery()
                   validate(es ++ tail, prevElements)
 
                 case Nested(r, es) =>
@@ -202,6 +206,11 @@ trait Model2Query extends QueryExpr with ModelUtils {
         "Only attributes of initial entity allowed in optional entity. Found:\n" + other
       )
     }
+  }
+
+  private def validateSubQuery(): Unit = {
+    level += 1
+    sortsPerLevel += level -> Nil
   }
 
   private def validateNested(): Unit = {
@@ -433,7 +442,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
     def prepareSubQuery(subQuery: SubQuery): SubQuery = {
       val wasInsideSubQuery = insideSubQuery
       insideSubQuery = true
-      val result = SubQuery(prepare(subQuery.elements, Nil), subQuery.optLimit, subQuery.optOffset)
+      val result = SubQuery(prepare(subQuery.elements, Nil), subQuery.optLimit, subQuery.optOffset, subQuery.isJoin)
       insideSubQuery = wasInsideSubQuery
       result
     }
@@ -456,13 +465,28 @@ trait Model2Query extends QueryExpr with ModelUtils {
         } { case (_, filterPath, filterAttr) =>
           if (filterAttr.cleanAttr == "id") {
             if (insideSubQuery) {
-              // Inside subquery, treat ID filter attributes as regular attributes
+              // Inside subquery, treat ID filter attributes as correlation attributes
               prevWasFilterCallee = false
               qualifiedPath = Nil
+              /* todo
+              Non local returns are no longer supported; use `boundary` and `boundary.break` in `scala.util` instead
+              return List(a)
+               */
               return List(a)
             } else {
               noIdFiltering()
             }
+          }
+
+          // Inside subquery, allow filter attributes to reference outer query attributes for correlation
+          if (insideSubQuery) {
+            prevWasFilterCallee = false
+            qualifiedPath = Nil
+            /* todo
+                          Non local returns are no longer supported; use `boundary` and `boundary.break` in `scala.util` instead
+                          return List(a)
+                           */
+            return List(a)
           }
 
           prevWasFilterCallee = true

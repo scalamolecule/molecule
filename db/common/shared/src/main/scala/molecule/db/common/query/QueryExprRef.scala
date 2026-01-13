@@ -135,25 +135,149 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
   }
 
 
-  override protected def querySubQuery(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int]): Unit = {
+  override protected def querySubQuery(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int], isJoin: Boolean): Unit = {
+    subQueryIndex += 1
+    val alias = subQueryAlias
+
+    // Validate: cannot aggregate IDs on related entities in subqueries
+    validateNoRelatedIdAggregates(subElements)
+
     val wasInsideSubQuery = insideSubQuery
     insideSubQuery = true
 
     // Build subquery SQL and get casts from subquery builder
-    // isImplicit = false for explicit .sub calls (can return multiple columns, no alias needed)
-    val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subElements, subQueryAlias, optLimit, optOffset, isImplicit = false)
+    // isImplicit = false for explicit .select/.join calls (can return multiple columns, no alias needed)
+    val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subElements, alias, optLimit, optOffset, isImplicit = false, isJoin)
 
-    // Add the subquery as a SELECT expression in the main query
-    select += subquerySql
-
-    // Add the subquery casts to the main query
-    subQueryCasts.foreach(castStrategy.add)
+    if (isJoin) {
+      // .join() - Add as FROM clause join
+      joinSubQuery(subquerySql, subQueryCasts, subElements, alias)
+    } else {
+      // .select() - Add as SELECT clause subquery (correlated)
+      selectSubQuery(subquerySql, subQueryCasts, subElements)
+    }
 
     insideSubQuery = wasInsideSubQuery
   }
 
+  private def selectSubQuery(subquerySql: String, subQueryCasts: List[Cast], subElements: List[Element]): Unit = {
+    val selectIndex = select.length
+    select += subquerySql
+    subQueryCasts.foreach(castStrategy.add)
+
+    // Validate: Can only sort by first column in multi-column .select() subqueries
+    // (SQL ROW types sort by their first field when used in ORDER BY)
+    val nonTacitAttrs = subElements.collect { case a: Attr if !isTacit(a) => a }
+    val sortedAttrs = subElements.collect { case a: Attr if a.sort.isDefined && !isTacit(a) => a }
+
+    if (nonTacitAttrs.length > 1 && sortedAttrs.nonEmpty) {
+      // Multi-column .select() subquery with sorting - only first attribute can be sorted
+      val firstAttr = nonTacitAttrs.head
+      if (sortedAttrs.head != firstAttr) {
+        throw ModelError(
+          "Can only sort by first attribute in .select() subqueries having multiple columns. " +
+          s"Move sorted attribute '${sortedAttrs.head.attr}' to be first, before '${firstAttr.attr}'. " +
+          "Alternatively, use .join() which allows sorting by any column."
+        )
+      }
+    }
+
+    // Propagate sorting from subquery attributes to outer query
+    // For SELECT subqueries, we use column position to reference the subquery result
+    subElements.foreach {
+      case a: Attr if a.sort.isDefined =>
+        val (dir, arity) = (a.sort.get.head, a.sort.get.substring(1, 2).toInt)
+        val sortDir = if (dir == 'a') "" else " DESC"
+        // Reference the SELECT clause position (1-based index in SQL)
+        val selectPosition = (selectIndex + 1).toString
+        orderBy += ((level, arity, selectPosition, sortDir))
+      case _ => ()
+    }
+  }
+
+  private def joinSubQuery(subquerySql: String, subQueryCasts: List[Cast], subElements: List[Element], alias: String): Unit = {
+
+    // Extract join conditions from filter attributes in subElements
+    val joinConditions = extractJoinConditions(subElements, alias)
+
+    if (joinConditions.nonEmpty) {
+      // INNER JOIN with ON clause
+      val onClause = joinConditions.mkString(" AND ")
+      from += s" INNER JOIN $subquerySql $alias ON $onClause"
+    } else {
+      // No join conditions found, use CROSS JOIN
+      from += s" CROSS JOIN $subquerySql $alias"
+    }
+
+    // Add subquery columns to outer SELECT (listed individually, not as ROW)
+    // The cast strategy will group them into a tuple for the result
+    subElements.foreach {
+      case a: Attr if !isTacit(a) =>
+        // Add mandatory/returned attributes to outer SELECT (skip all tacit attributes)
+        // For aggregates, use the alias (e.g., Ref_id_count)
+        // For regular attributes, use the attribute name (e.g., entity)
+        val columnRef = getSubqueryColumnRef(a, alias)
+        select += columnRef
+
+        // Propagate sorting from subquery attributes to outer query
+        // This ensures that JOIN subquery results are sorted in the outer query
+        a.sort.foreach { sort =>
+          val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
+          val sortDir = if (dir == 'a') "" else " DESC"
+          orderBy += ((level, arity, columnRef, sortDir))
+        }
+      case _ => ()
+    }
+
+    // Add subquery column casts (will be wrapped in ROW handler for tuple result)
+    subQueryCasts.foreach(castStrategy.add)
+  }
+
+  private def isTacit(attr: Attr): Boolean = attr match {
+    case _: Tacit => true
+    case _        => false
+  }
+
+  private def getSubqueryColumnRef(attr: Attr, subqueryAlias: String): String = {
+    attr.op match {
+      case AggrFn(_, fn, _, _, _) =>
+        // For aggregates, reference the alias: subquery.Ent_attr_fn
+        val col = s"${attr.ent}.${attr.attr}"
+        val alias = col.replace('.', '_') + "_" + fn.toLowerCase
+        s"$subqueryAlias.$alias"
+      case _ =>
+        // For regular attributes, reference the column name: subquery.attr
+        s"$subqueryAlias.${attr.attr}"
+    }
+  }
+
+  private def extractJoinConditions(elements: List[Element], subqueryAlias: String): List[String] = {
+    elements.flatMap {
+      case a: Attr if a.filterAttr.isDefined =>
+        a.filterAttr.map {
+          case (_, filterPath, filterAttr) =>
+            // For JOIN subqueries, correlation is:
+            // outer_table.outer_column = subquery_alias.subquery_column
+            // The subquery column is the attribute in the subquery (a.attr)
+            // The outer column is what it's being filtered by (filterAttr.attr)
+            val outerTable = filterPath.lastOption.getOrElse(filterAttr.ent)
+            val outerCol = filterAttr.attr
+            val subqueryCol = a.attr
+            s"$outerTable.$outerCol = $subqueryAlias.$subqueryCol"
+        }
+      case _ => None
+    }
+  }
+
   // To be implemented by database-specific query builders
-  protected def buildSubQuerySqlWithCasts(subElements: List[Element], subQueryAlias: String, optLimit: Option[Int], optOffset: Option[Int], isImplicit: Boolean): (String, List[Cast])
+  protected def buildSubQuerySqlWithCasts(
+    subElements: List[Element],
+    subQueryAlias: String,
+    optLimit: Option[Int],
+    optOffset: Option[Int],
+    isImplicit: Boolean,
+    isJoin: Boolean
+  ): (String, List[Cast])
 
 
   override protected def queryNested(
@@ -206,5 +330,48 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
     castStrategy = castStrategy.nest
     resolve(nestedElements)
+  }
+
+  private def validateNoRelatedIdAggregates(elements: List[Element]): Unit = {
+    var hasRef = false
+    var currentEntity = ""
+    var idAggregateEntities = Set.empty[String]
+
+    def checkElements(elems: List[Element]): Unit = {
+      elems.foreach {
+        case r: Ref =>
+          hasRef = true
+          currentEntity = r.ref
+
+        case a: Attr if a.attr == "id" && isAggregate(a.op) =>
+          if (currentEntity.nonEmpty) {
+            idAggregateEntities += currentEntity
+          } else {
+            // First entity (before any Ref)
+            idAggregateEntities += a.ent
+          }
+          currentEntity = a.ent
+
+        case _ => ()
+      }
+    }
+
+    checkElements(elements)
+
+    // If we have a ref and multiple entities with ID aggregates, that's the problem
+    if (hasRef && idAggregateEntities.size > 1) {
+      throw ModelError(
+        s"Cannot aggregate IDs on related entities in subqueries. " +
+        s"Found ID aggregates on: ${idAggregateEntities.mkString(", ")}"
+      )
+    }
+  }
+
+  private def isAggregate(op: Op): Boolean = op match {
+    case AggrFn(_, fn, _, _, _) =>
+      fn == "count" || fn == "countDistinct" || fn == "sum" ||
+      fn == "avg" || fn == "median" || fn == "variance" ||
+      fn == "stddev" || fn == "min" || fn == "max"
+    case _ => false
   }
 }

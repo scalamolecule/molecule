@@ -11,14 +11,14 @@ trait ModelUtils {
   private def count(es: List[Element], acc: Int): Int = {
     es match {
       case e :: tail => e match {
-        case _: Mandatory @unchecked     => count(tail, acc + 1)
-        case _: Optional @unchecked      => count(tail, acc + 1)
-        case _: OptRef                   => count(tail, acc + 1)
-        case _: OptEntity                => count(tail, acc + 1)
-        case _: Nested                   => count(tail, acc + 1)
-        case _: OptNested                => count(tail, acc + 1)
-        case SubQuery(subElements, _, _) => count(subElements ++ tail, acc)
-        case _                           => count(tail, acc)
+        case _: Mandatory @unchecked        => count(tail, acc + 1)
+        case _: Optional @unchecked         => count(tail, acc + 1)
+        case _: OptRef                      => count(tail, acc + 1)
+        case _: OptEntity                   => count(tail, acc + 1)
+        case _: Nested                      => count(tail, acc + 1)
+        case _: OptNested                   => count(tail, acc + 1)
+        case SubQuery(subElements, _, _, _) => count(subElements ++ tail, acc)
+        case _                              => count(tail, acc)
       }
       case Nil       => acc
     }
@@ -34,7 +34,7 @@ trait ModelUtils {
       case r: Ref                                   => r.ent
       case OptRef(Ref(ent, _, _, _, _, _, _), _)    => ent
       case OptEntity(attrs)                         => attrs.head.ent
-      case SubQuery(es, _, _)                       => getInitialEntity(es)
+      case SubQuery(es, _, _, _)                    => getInitialEntity(es)
       case Nested(Ref(ent, _, _, _, _, _, _), _)    => ent
       case OptNested(Ref(ent, _, _, _, _, _, _), _) => ent
       case other                                    => throw ModelError("Unexpected head element: " + other)
@@ -49,7 +49,7 @@ trait ModelUtils {
       case r: Ref                                   => r.ent
       case OptRef(Ref(ent, _, _, _, _, _, _), _)    => ent
       case OptEntity(attrs)                         => attrs.head.ent
-      case SubQuery(es, _, _)                       => getInitialNonGenericEntity(es)
+      case SubQuery(es, _, _, _)                    => getInitialNonGenericEntity(es)
       case Nested(Ref(ent, _, _, _, _, _, _), _)    => ent
       case OptNested(Ref(ent, _, _, _, _, _, _), _) => ent
       case other                                    => throw ModelError("Unexpected head element: " + other)
@@ -131,7 +131,7 @@ trait ModelUtils {
     }
 
     def prepareSubQuery(subQuery: SubQuery): SubQuery = {
-      SubQuery(prepare(subQuery.elements, Nil), subQuery.optLimit, subQuery.optOffset)
+      SubQuery(prepare(subQuery.elements, Nil), subQuery.optLimit, subQuery.optOffset, subQuery.isJoin)
     }
 
     def prepareNested(nested: Nested): Nested = {
