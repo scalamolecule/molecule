@@ -108,7 +108,7 @@ case class Aggregates(
       ).transact
 
       // .select() - separate subqueries for min and max
-      _ <- Entity.s.a1.select(Ref.i(min).i(max).entity_(Entity.id_)).query.get.map(_ ==> List(
+      _ <- Entity.s.a1.select(Ref.i(min).i(max).entity_(Entity.id_)).query.i.get.map(_ ==> List(
         ("a", (10, 30)),
         ("b", (5, 35)),
         ("c", (0, 0)), // Default values
@@ -395,26 +395,25 @@ case class Aggregates(
       _ <- Entity.i.insert(1, 2, 3).transact
       // No Ref entities at all!
 
-      _ <- Entity.i.select(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i(count)).query.get.map(_ ==> List(
         (1, 0),
         (2, 0),
         (3, 0),
       ))
-      _ <- Entity.i.select(Ref.i(avg)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i(avg)).query.get.map(_ ==> List(
         (1, 0),
         (2, 0),
         (3, 0),
       ))
 
       // .join() with global aggregate on empty table
-      // Question: What should happen? CROSS JOIN with empty subquery = no results?
-      _ <- Entity.i.join(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.join(Ref.i(count)).query.get.map(_ ==> List(
         (1, 0),
         (2, 0),
         (3, 0),
       ))
 
-      _ <- Entity.i.join(Ref.i(avg)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.join(Ref.i(avg)).query.get.map(_ ==> List(
         (1, 0),
         (2, 0),
         (3, 0),

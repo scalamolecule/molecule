@@ -37,7 +37,7 @@ case class Semantics(
 
       // Note that when a compared mandatory attribute (Ref.i) points to no outer attribute,
       // a cross join with a subquery is build instead with no correlation to the outer query.
-      _ <- Entity.s.i.>(Ref.i).query.get.map(_ ==> List(
+      _ <- Entity.s.i.>(Ref.i).a1.query.get.map(_ ==> List(
         ("b", 4, 2), // Ref.i == 2
         ("b", 4, 3), // Ref.i == 3
       ))
@@ -158,12 +158,12 @@ case class Semantics(
           |    WHERE
           |      Entity.string IS NOT NULL AND
           |      Entity.i      IS NOT NULL
-          |    ORDER BY Entity.i DESC
+          |    ORDER BY Entity.i DESC NULLS LAST
           |    LIMIT 2
           |  ) subquery1 ON Ref.s = subquery1.s
           |WHERE
           |  Ref.string IS NOT NULL
-          |ORDER BY Ref.string, subquery1.i DESC;""".stripMargin
+          |ORDER BY Ref.string NULLS FIRST, subquery1.i DESC;""".stripMargin
       ) ==> true)
     } yield ()
   }

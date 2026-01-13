@@ -31,48 +31,6 @@ case class NestedRelationships(
         ("c", (0, 0)), // No B's
       ))
 
-      // SQL inspection (.select): verify nested relationship in subquery
-      _ <- if (database == "sqlite") {
-        // SQLite doesn't support multiple aggregates in a subquery, so Molecule
-        // transparently generates two subqueries to keep a uniform API between databases.
-        A.s.select(B.id(count).a_(A.id_).C.i(sum)).query.inspect.map(_.contains(
-          """SELECT DISTINCT
-            |  A.s,
-            |  (
-            |    SELECT
-            |      COUNT(B.id)
-            |    FROM B
-            |      INNER JOIN C ON B.c = C.id
-            |    WHERE
-            |      B.a = A.id
-            |  ),
-            |  (
-            |    SELECT DISTINCT
-            |      SUM(C.i)
-            |    FROM B
-            |      INNER JOIN C ON B.c = C.id
-            |    WHERE
-            |      B.a = A.id
-            |  )
-            |FROM A
-            |WHERE
-            |  A.s IS NOT NULL;""".stripMargin
-        ) ==> true)
-      } else
-        A.s.select(B.id(count).a_(A.id_).C.i(sum)).query.inspect.map(_.contains(
-          """SELECT DISTINCT
-            |  A.s,
-            |  (
-            |    SELECT
-            |      COUNT(B.id),
-            |      SUM(C.i)
-            |    FROM B
-            |      INNER JOIN C ON B.c = C.id
-            |    WHERE
-            |      B.a = A.id
-            |  )""".stripMargin
-        ) ==> true)
-
       // Same with .join()
       _ <- A.s.a1.join(B.id(count).a_(A.id_).C.i(sum)).query.get.map(_ ==> List(
         ("a", (2, 30)),

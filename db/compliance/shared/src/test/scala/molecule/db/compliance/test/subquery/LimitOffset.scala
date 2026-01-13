@@ -32,7 +32,7 @@ case class LimitOffset(
           |    FROM Ref
           |    WHERE
           |      Ref.i IS NOT NULL
-          |    ORDER BY Ref.i
+          |    ORDER BY Ref.i NULLS FIRST
           |    LIMIT 1
           |  )
           |FROM Entity
@@ -41,13 +41,13 @@ case class LimitOffset(
           |ORDER BY 2;""".stripMargin
       ) ==> true)
 
-      _ <- Entity.i.select(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
 
-      _ <- Entity.i.select(Ref.i.d1.query.limit(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.d1.query.limit(1)).query.get.map(_ ==> List(
         (1, 6),
         (2, 6),
         (3, 6),
@@ -73,7 +73,7 @@ case class LimitOffset(
           |    FROM Ref
           |    WHERE
           |      Ref.i IS NOT NULL
-          |    ORDER BY Ref.i
+          |    ORDER BY Ref.i NULLS FIRST
           |    LIMIT 1
           |    OFFSET 2
           |  )
@@ -83,39 +83,44 @@ case class LimitOffset(
       ) ==> true)
 
       // Ascending
-      _ <- Entity.i.select(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
-      _ <- Entity.i.select(Ref.i.a1.query.limit(1).offset(0)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.a1.query.limit(1).offset(0)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
-      _ <- Entity.i.select(Ref.i.a1.query.limit(1).offset(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.a1.query.limit(1).offset(1)).query.get.map(_ ==> List(
         (1, 5),
         (2, 5),
         (3, 5),
       ))
-      _ <- Entity.i.select(Ref.i.a1.query.limit(1).offset(2)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.a1.query.limit(1).offset(2)).query.get.map(_ ==> List(
         (1, 6),
         (2, 6),
         (3, 6),
       ))
 
       // Descending
-      _ <- Entity.i.select(Ref.i.d1.query.limit(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.d1.query.limit(1)).query.get.map(_ ==> List(
         (1, 6),
         (2, 6),
         (3, 6),
       ))
-      _ <- Entity.i.select(Ref.i.d1.query.limit(1).offset(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.d1.query.limit(1).offset(0)).query.get.map(_ ==> List(
+        (1, 6),
+        (2, 6),
+        (3, 6),
+      ))
+      _ <- Entity.i.a1.select(Ref.i.d1.query.limit(1).offset(1)).query.get.map(_ ==> List(
         (1, 5),
         (2, 5),
         (3, 5),
       ))
-      _ <- Entity.i.select(Ref.i.d1.query.limit(1).offset(2)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.d1.query.limit(1).offset(2)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
@@ -147,51 +152,52 @@ case class LimitOffset(
           |  )
           |FROM Entity
           |WHERE
-          |  Entity.i IS NOT NULL""".stripMargin
+          |  Entity.i IS NOT NULL
+          |ORDER BY 2;""".stripMargin
       ) ==> true)
 
       // Ascending
-      _ <- Entity.i.select(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
-      _ <- Entity.i.select(Ref.i.a1.query.limit(-1).offset(0)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.a1.query.limit(-1).offset(0)).query.get.map(_ ==> List(
         (1, 6),
         (2, 6),
         (3, 6),
       ))
-      _ <- Entity.i.select(Ref.i.a1.query.limit(-1).offset(-1)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.a1.query.limit(-1).offset(-1)).query.get.map(_ ==> List(
         (1, 5),
         (2, 5),
         (3, 5),
       ))
-      _ <- Entity.i.select(Ref.i.a1.query.limit(-1).offset(-2)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.a1.query.limit(-1).offset(-2)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),
       ))
 
       // Descending
-      _ <- Entity.i.select(Ref.i.d1.query.limit(-1)).query.get.map(_ ==> List(
-        (1, 4),
-        (2, 4),
-        (3, 4),
+      _ <- Entity.i.a1.select(Ref.i.d1.query.limit(-1)).query.i.get.map(_ ==> List(
+        (1, 6),
+        (2, 6),
+        (3, 6),
       ))
-      _ <- Entity.i.select(Ref.i.d1.query.limit(-1).offset(0)).query.get.map(_ ==> List(
-        (1, 4),
-        (2, 4),
-        (3, 4),
+      _ <- Entity.i.a1.select(Ref.i.d1.query.limit(-1).offset(0)).query.get.map(_ ==> List(
+        (1, 6),
+        (2, 6),
+        (3, 6),
       ))
-      _ <- Entity.i.select(Ref.i.d1.query.limit(-1).offset(-1)).query.get.map(_ ==> List(
+      _ <- Entity.i.a1.select(Ref.i.d1.query.limit(-1).offset(-1)).query.get.map(_ ==> List(
         (1, 5),
         (2, 5),
         (3, 5),
       ))
-      _ <- Entity.i.select(Ref.i.d1.query.limit(-1).offset(-2)).query.get.map(_ ==> List(
-        (1, 6),
-        (2, 6),
-        (3, 6),
+      _ <- Entity.i.a1.select(Ref.i.d1.query.limit(-1).offset(-2)).query.get.map(_ ==> List(
+        (1, 4),
+        (2, 4),
+        (3, 4),
       ))
     } yield ()
   }

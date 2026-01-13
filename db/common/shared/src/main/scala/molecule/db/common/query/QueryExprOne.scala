@@ -192,8 +192,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     attr.sort.foreach { sort =>
       val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
       dir match {
-        case 'a' => orderBy += ((level, arity, col, ""))
-        case 'd' => orderBy += ((level, arity, col, " DESC"))
+        case 'a' => orderBy += ((level, arity, col, " NULLS FIRST"))
+        case 'd' => orderBy += ((level, arity, col, " DESC NULLS LAST"))
       }
     }
   }

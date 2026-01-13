@@ -19,16 +19,17 @@ class Model2SqlQuery_postgresql(elements0: List[Element])
     if (!isJoin) {
       val nonTacitAttrs = subElements.collect { case a: Attr if !isTacit(a) => a }
 
-      // Check if we're aggregating on any ID attributes
-      val hasIdAggregation = nonTacitAttrs.exists { attr =>
-        attr.name == "id" && attr.op.isInstanceOf[AggrFn]
-//        attr.name == "id" && attr.op.exists(_.startsWith("aggr"))
+      // Check if we have any aggregation
+      val hasAggregation = nonTacitAttrs.exists { attr =>
+        attr.op.isInstanceOf[AggrFn]
       }
 
       // Check if any attribute has sorting
       val hasSorting = nonTacitAttrs.exists(_.sort.isDefined)
 
-      if (nonTacitAttrs.length > 1 && (hasIdAggregation || hasSorting)) {
+      // PostgreSQL requires subqueries to return only one column
+      // Split into separate scalar subqueries when we have multiple columns with aggregation or sorting
+      if (nonTacitAttrs.length > 1 && (hasAggregation || hasSorting)) {
         // Split into separate scalar subqueries when aggregating IDs
         val allCasts = scala.collection.mutable.ListBuffer.empty[Cast]
         val otherElements = subElements.filter {

@@ -91,16 +91,6 @@ trait QueryExprOne_postgresql
     }
   }
 
-  override protected def addSort(attr: AttrOne, col: String): Unit = {
-    attr.sort.foreach { sort =>
-      val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
-      dir match {
-        case 'a' => orderBy += ((level, arity, col, " NULLS FIRST"))
-        case 'd' => orderBy += ((level, arity, col, " DESC NULLS LAST"))
-      }
-    }
-  }
-
   override protected def aggr[T: ClassTag](
     baseType: String,
     ent: String,

@@ -33,21 +33,21 @@ case class ComparisonOperators(
       _ <- Entity.i(Ref.i(count)).query.get.map(_ ==> List(
         (3, 3),
       ))
-      _ <- Entity.i.not(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.i.not(Ref.i(count)).a1.query.get.map(_ ==> List(
         (2, 3),
         (4, 3),
       ))
       _ <- Entity.i.<(Ref.i(count)).query.get.map(_ ==> List(
         (2, 3),
       ))
-      _ <- Entity.i.<=(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.i.<=(Ref.i(count)).a1.query.get.map(_ ==> List(
         (2, 3),
         (3, 3),
       ))
       _ <- Entity.i.>(Ref.i(count)).query.get.map(_ ==> List(
         (4, 3),
       ))
-      _ <- Entity.i.>=(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.i.>=(Ref.i(count)).a1.query.get.map(_ ==> List(
         (3, 3),
         (4, 3),
       ))
@@ -67,21 +67,21 @@ case class ComparisonOperators(
       _ <- Entity.s.i(Ref.i(count)).query.get.map(_ ==> List(
         ("b", 3, 3),
       ))
-      _ <- Entity.s.i.not(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.s.a1.i.not(Ref.i(count)).query.get.map(_ ==> List(
         ("a", 2, 3),
         ("c", 4, 3),
       ))
       _ <- Entity.s.i.<(Ref.i(count)).query.get.map(_ ==> List(
         ("a", 2, 3),
       ))
-      _ <- Entity.s.i.<=(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.s.a1.i.<=(Ref.i(count)).query.get.map(_ ==> List(
         ("a", 2, 3),
         ("b", 3, 3),
       ))
       _ <- Entity.s.i.>(Ref.i(count)).query.get.map(_ ==> List(
         ("c", 4, 3),
       ))
-      _ <- Entity.s.i.>=(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.s.a1.i.>=(Ref.i(count)).query.get.map(_ ==> List(
         ("b", 3, 3),
         ("c", 4, 3),
       ))
@@ -101,21 +101,21 @@ case class ComparisonOperators(
       _ <- Entity.s.i_(Ref.i(count)).query.get.map(_ ==> List(
         ("b", 3),
       ))
-      _ <- Entity.s.i_.not(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.s.a1.i_.not(Ref.i(count)).query.get.map(_ ==> List(
         ("a", 3),
         ("c", 3),
       ))
       _ <- Entity.s.i_.<(Ref.i(count)).query.get.map(_ ==> List(
         ("a", 3),
       ))
-      _ <- Entity.s.i_.<=(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.s.a1.i_.<=(Ref.i(count)).query.get.map(_ ==> List(
         ("a", 3),
         ("b", 3),
       ))
       _ <- Entity.s.i_.>(Ref.i(count)).query.get.map(_ ==> List(
         ("c", 3),
       ))
-      _ <- Entity.s.i_.>=(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.s.a1.i_.>=(Ref.i(count)).query.get.map(_ ==> List(
         ("b", 3),
         ("c", 3),
       ))
@@ -202,7 +202,7 @@ case class ComparisonOperators(
 
       // Cross join semantics: each Entity.i paired with each Ref.i where they're not equal
       // Returns all combinations where Entity.i ≠ Ref.i
-      _ <- Entity.s.i.not(Ref.i).query.get.map(_ ==> List(
+      _ <- Entity.s.a1.i.not(Ref.i).a2.query.get.map(_ ==> List(
         ("a", 1, 2), // 1 ≠ 2
         ("b", 2, 1), // 2 ≠ 1
         ("c", 3, 1), // 3 ≠ 1
@@ -333,6 +333,7 @@ case class ComparisonOperators(
 
 
   "variance" - types {
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.double.Ref.i.insert(
         (0.5, 1),
@@ -340,14 +341,14 @@ case class ComparisonOperators(
         (0.9, 3),
       ).transact
 
-      _ <- Ref.i(variance).query.get.map(_ ==> List(2.0 / 3))
+      _ <- Ref.i(variance).query.get.map(_ ==~ List(2.0 / 3))
       _ <- if (database == "sqlite")
         Entity.double.<(Ref.i(variance)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
             err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
           }
       else
-        Entity.double.<(Ref.i(variance)).query.get.map(_ ==> List(
+        Entity.double.<(Ref.i(variance)).query.get.map(_ ==~ List(
           (0.5, 2.0 / 3), // 0.5 < variance
         ))
     } yield ()
@@ -355,6 +356,7 @@ case class ComparisonOperators(
 
 
   "stddev" - types {
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       _ <- Entity.double.Ref.i.insert(
         (0.5, 1),
@@ -362,14 +364,14 @@ case class ComparisonOperators(
         (0.9, 3),
       ).transact
 
-      _ <- Ref.i(stddev).query.get.map(_ ==> List(0.816496580927726))
+      _ <- Ref.i(stddev).query.get.map(_ ==~ List(0.816496580927726))
       _ <- if (database == "sqlite")
         Entity.double.>(Ref.i(stddev)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
             err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
           }
       else
-        Entity.double.>(Ref.i(stddev)).query.get.map(_ ==> List(
+        Entity.double.>(Ref.i(stddev)).query.get.map(_ ==~ List(
           (0.9, 0.816496580927726), // 0.9 > stddev
         ))
     } yield ()
