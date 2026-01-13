@@ -99,6 +99,9 @@ trait QueryExprOne_sqlite
     }
   }
 
+  private val noStatisticalFunctionsInSubquerySelect =
+    "Median, variance and stddev in .select() subqueries not supported for SQLite."
+
   override protected def aggr[T: ClassTag](
     baseType: String,
     ent: String,
@@ -119,10 +122,13 @@ trait QueryExprOne_sqlite
     select -= col
 
     def jsonArray2doubles(json: String): Seq[Double] = {
-      if (json.startsWith("[\""))
+      if (json == "[]" || json.isEmpty) {
+        Seq.empty[Double]
+      } else if (json.startsWith("[\"")) {
         json.substring(2, json.length - 2).split("\",\"").map(_.toDouble).toSeq
-      else
+      } else {
         json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq
+      }
     }
 
     fn match {
@@ -136,7 +142,22 @@ trait QueryExprOne_sqlite
 
       case "min" =>
         aggregate = true
-        select += s"MIN($col)"
+        if (hasSort || insideJoinSubQuery) {
+          // Use COALESCE to treat NULL appropriately for proper sorting
+          val defaultValue = res.tpe match {
+            case "String" => "''"
+            case _        => "0"
+          }
+          val alias = col.replace('.', '_') + "_min"
+          select += s"COALESCE(MIN($col), $defaultValue) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"MIN($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"MIN($col)")
 
@@ -152,7 +173,22 @@ trait QueryExprOne_sqlite
 
       case "max" =>
         aggregate = true
-        select += s"MAX($col)"
+        if (hasSort || insideJoinSubQuery) {
+          // Use COALESCE to treat NULL appropriately for proper sorting
+          val defaultValue = res.tpe match {
+            case "String" => "''"
+            case _        => "0"
+          }
+          val alias = col.replace('.', '_') + "_max"
+          select += s"COALESCE(MAX($col), $defaultValue) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"MAX($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"MAX($col)")
 
@@ -192,7 +228,7 @@ trait QueryExprOne_sqlite
       case "countDistinct" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT", hasSort)
+        selectWithOrder(col, "COUNT", hasSort, aliasSuffix = Some("countDistinct"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
@@ -202,15 +238,45 @@ trait QueryExprOne_sqlite
         if (!select.contains(col)) groupByCols -= col
         res.tpe match {
           case "BigInt" =>
-            selectWithOrder(col, "SUM", hasSort, "")
+            if (hasSort || insideJoinSubQuery) {
+              val alias = col.replace('.', '_') + "_sum"
+              select += s"COALESCE(SUM($col), 0) AS $alias"
+              if (hasSort) {
+                val (level, _, _, dir) = orderBy.last
+                orderBy.remove(orderBy.size - 1)
+                orderBy += ((level, 1, alias, dir))
+              }
+            } else {
+              select += s"SUM($col)"
+            }
             addHaving(baseType, fn, s"SUM($col)", aggrOp, aggrOpValue, res, "CAST(", " AS BIGINT)")
 
           case "BigDecimal" | "Double" =>
-            selectWithOrder(col, "SUM", hasSort, "", "", "ROUND(", ", 10)")
+            if (hasSort || insideJoinSubQuery) {
+              val alias = col.replace('.', '_') + "_sum"
+              select += s"COALESCE(ROUND(SUM($col), 10), 0) AS $alias"
+              if (hasSort) {
+                val (level, _, _, dir) = orderBy.last
+                orderBy.remove(orderBy.size - 1)
+                orderBy += ((level, 1, alias, dir))
+              }
+            } else {
+              select += s"ROUND(SUM($col), 10)"
+            }
             addHaving(baseType, fn, s"ROUND(SUM($col), 10)", aggrOp, aggrOpValue, res, "CAST(", " AS REAL)")
 
           case _ =>
-            selectWithOrder(col, "SUM", hasSort, "")
+            if (hasSort || insideJoinSubQuery) {
+              val alias = col.replace('.', '_') + "_sum"
+              select += s"COALESCE(SUM($col), 0) AS $alias"
+              if (hasSort) {
+                val (level, _, _, dir) = orderBy.last
+                orderBy.remove(orderBy.size - 1)
+                orderBy += ((level, 1, alias, dir))
+              }
+            } else {
+              select += s"SUM($col)"
+            }
             havingOp(s"SUM($col)")
         }
 
@@ -239,18 +305,40 @@ trait QueryExprOne_sqlite
         if (aggrOp.isDefined) {
           throw ModelError("Operations on median not implemented for this database.")
         }
+        // Check if used in WHERE clause comparison (implicit subquery)
+        if (insideSubQuery && !insideJoinSubQuery) {
+          throw ModelError(noStatisticalFunctionsInSubquerySelect)
+        }
         aggregate = true
         // Falling back on calculating the median for each returned json array of values
-        select += s"json_group_array($col)"
+        if (insideJoinSubQuery) {
+          val alias = col.replace('.', '_') + "_median"
+          select += s"json_group_array($col) AS $alias"
+        } else {
+          select += s"json_group_array($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(
-          (row: RS, paramIndex: Int) =>
-            getMedian(jsonArray2doubles(row.getString(paramIndex)))
+          (row: RS, paramIndex: Int) => {
+            val values = jsonArray2doubles(row.getString(paramIndex))
+            if (values.isEmpty) 0.0 else getMedian(values)
+          }
         )
 
       case "avg" =>
         aggregate = true
-        selectWithOrder(col, "AVG", hasSort, "", "", "ROUND(", ", 10)")
+        if (hasSort || insideJoinSubQuery) {
+          // Use COALESCE to treat NULL as 0.0 for proper sorting
+          val alias = col.replace('.', '_') + "_avg"
+          select += s"COALESCE(ROUND(AVG($col), 10), 0.0) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"ROUND(AVG($col), 10)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"ROUND(AVG($col), 10)")
 
@@ -262,14 +350,25 @@ trait QueryExprOne_sqlite
         if (aggrOp.isDefined) {
           throw ModelError("Operations on variance not implemented for this database.")
         }
+        // Check if used in WHERE clause comparison (implicit subquery)
+        if (insideSubQuery && !insideJoinSubQuery) {
+          throw ModelError(noStatisticalFunctionsInSubquerySelect)
+        }
         aggregate = true
-        // Falling back on calculating the median for each returned json array of values
-        select += s"json_group_array($col)"
+        // Falling back on calculating the variance for each returned json array of values
+        if (insideJoinSubQuery) {
+          val alias = col.replace('.', '_') + "_variance"
+          select += s"json_group_array($col) AS $alias"
+        } else {
+          select += s"json_group_array($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"VAR_POP($col)")
         castStrategy.replace(
-          (row: RS, paramIndex: Int) =>
-            varianceOf(jsonArray2doubles(row.getString(paramIndex)))
+          (row: RS, paramIndex: Int) => {
+            val values = jsonArray2doubles(row.getString(paramIndex))
+            if (values.isEmpty) 0.0 else varianceOf(values)
+          }
         )
 
       case "stddev" =>
@@ -279,13 +378,24 @@ trait QueryExprOne_sqlite
         if (aggrOp.isDefined) {
           throw ModelError("Operations on stddev not implemented for this database.")
         }
+        // Check if used in WHERE clause comparison (implicit subquery)
+        if (insideSubQuery && !insideJoinSubQuery) {
+          throw ModelError(noStatisticalFunctionsInSubquerySelect)
+        }
         aggregate = true
-        select += s"json_group_array($col)"
+        if (insideJoinSubQuery) {
+          val alias = col.replace('.', '_') + "_stddev"
+          select += s"json_group_array($col) AS $alias"
+        } else {
+          select += s"json_group_array($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"STDDEV_POP($col)")
         castStrategy.replace(
-          (row: RS, paramIndex: Int) =>
-            stdDevOf(jsonArray2doubles(row.getString(paramIndex)))
+          (row: RS, paramIndex: Int) => {
+            val values = jsonArray2doubles(row.getString(paramIndex))
+            if (values.isEmpty) 0.0 else stdDevOf(values)
+          }
         )
 
       case other => unexpectedKw(other)

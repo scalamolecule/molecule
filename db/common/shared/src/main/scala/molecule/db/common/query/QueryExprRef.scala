@@ -139,9 +139,6 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     subQueryIndex += 1
     val alias = subQueryAlias
 
-    // Validate: cannot aggregate IDs on related entities in subqueries
-    validateNoRelatedIdAggregates(subElements)
-
     val wasInsideSubQuery = insideSubQuery
     insideSubQuery = true
 
@@ -229,8 +226,47 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
       case _ => ()
     }
 
-    // Add subquery column casts (will be wrapped in ROW handler for tuple result)
-    subQueryCasts.foreach(castStrategy.add)
+    // Add subquery column casts
+    // For multiple columns, wrap them into a nested tuple
+    if (subQueryCasts.length > 1) {
+      val tupleCast = wrapCastsInTuple(subQueryCasts)
+      castStrategy.add(tupleCast)
+    } else {
+      subQueryCasts.foreach(castStrategy.add)
+    }
+  }
+
+  private def wrapCastsInTuple(casts: List[Cast]): Cast = {
+    val n = casts.length
+    (row: RS, baseIndex: Int) => {
+      val values = casts.zipWithIndex.map { case (cast, i) =>
+        cast(row, baseIndex + i)
+      }
+      n match {
+        case 2  => (values(0), values(1))
+        case 3  => (values(0), values(1), values(2))
+        case 4  => (values(0), values(1), values(2), values(3))
+        case 5  => (values(0), values(1), values(2), values(3), values(4))
+        case 6  => (values(0), values(1), values(2), values(3), values(4), values(5))
+        case 7  => (values(0), values(1), values(2), values(3), values(4), values(5), values(6))
+        case 8  => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7))
+        case 9  => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8))
+        case 10 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9))
+        case 11 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10))
+        case 12 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11))
+        case 13 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12))
+        case 14 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13))
+        case 15 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14))
+        case 16 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15))
+        case 17 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16))
+        case 18 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17))
+        case 19 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18))
+        case 20 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18), values(19))
+        case 21 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18), values(19), values(20))
+        case 22 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18), values(19), values(20), values(21))
+        case _  => throw new IllegalArgumentException(s"Unsupported tuple arity: $n")
+      }
+    }
   }
 
   private def isTacit(attr: Attr): Boolean = attr match {
@@ -332,46 +368,4 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     resolve(nestedElements)
   }
 
-  private def validateNoRelatedIdAggregates(elements: List[Element]): Unit = {
-    var hasRef = false
-    var currentEntity = ""
-    var idAggregateEntities = Set.empty[String]
-
-    def checkElements(elems: List[Element]): Unit = {
-      elems.foreach {
-        case r: Ref =>
-          hasRef = true
-          currentEntity = r.ref
-
-        case a: Attr if a.attr == "id" && isAggregate(a.op) =>
-          if (currentEntity.nonEmpty) {
-            idAggregateEntities += currentEntity
-          } else {
-            // First entity (before any Ref)
-            idAggregateEntities += a.ent
-          }
-          currentEntity = a.ent
-
-        case _ => ()
-      }
-    }
-
-    checkElements(elements)
-
-    // If we have a ref and multiple entities with ID aggregates, that's the problem
-    if (hasRef && idAggregateEntities.size > 1) {
-      throw ModelError(
-        s"Cannot aggregate IDs on related entities in subqueries. " +
-        s"Found ID aggregates on: ${idAggregateEntities.mkString(", ")}"
-      )
-    }
-  }
-
-  private def isAggregate(op: Op): Boolean = op match {
-    case AggrFn(_, fn, _, _, _) =>
-      fn == "count" || fn == "countDistinct" || fn == "sum" ||
-      fn == "avg" || fn == "median" || fn == "variance" ||
-      fn == "stddev" || fn == "min" || fn == "max"
-    case _ => false
-  }
 }

@@ -109,6 +109,21 @@ Entity.attr.RefEntity.*(RefEntity.refAttr).query.get
 - Location: `db/h2/jvm/src/test/scala/molecule/db/h2/subquery/`
 - Status: WHERE clause done, SELECT/FROM clause in progress
 
+### Code Style
+- **Query formatting**:
+  - If a complete molecule query (including `.query.map(_ ==> List(`) fits within 120 characters, keep it on a single line. Don't split into multiple lines.
+    - Example: `_ <- Entity.s.select(Ref.i(sum).d1.entity_(Entity.id_)).query.get.map(_ ==> List(("c", 14), ("b", 10)))`
+  - If the query doesn't fit in 120 characters, put expected data on a new line with each tuple on its own line:
+    ```scala
+    _ <- Entity.s.select(Ref.s(min).a1.entity_(Entity.id_)).query.i.get.map(_ ==> List(
+      ("d", ""), // Default empty string for no refs
+      ("c", "a"),
+      ("b", "m"),
+      ("a", "x"),
+    ))
+    ```
+  - Apply this to all tests in `db/compliance/shared/src/test/scala/molecule/db/compliance/test/`
+
 ## File Patterns
 
 ### Generated Code (DON'T EDIT DIRECTLY)

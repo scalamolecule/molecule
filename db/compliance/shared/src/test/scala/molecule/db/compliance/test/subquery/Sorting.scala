@@ -1,13 +1,21 @@
-package molecule.db.h2.compliance.subquery
+package molecule.db.compliance.test.subquery
 
 import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
+import molecule.db.common.api.Api_async
+import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.h2.async.*
-import molecule.db.h2.setup.DbProviders_h2
+import molecule.db.compliance.setup.DbProviders
+import org.scalactic.Equality
 
-class Sorting extends MUnit with DbProviders_h2 with TestUtils {
+case class Sorting(
+  suite: MUnit,
+  api: Api_async & Spi_async & DbProviders
+) extends TestUtils {
+
+  import api.*
+  import suite.*
 
   "by aggregate - ascending" - types {
     for {
@@ -198,7 +206,7 @@ class Sorting extends MUnit with DbProviders_h2 with TestUtils {
   }
 
 
-  "multiple independent aggregates" - types {
+  "multiple aggregates" - types {
     for {
       _ <- Entity.s.Refs.*(Ref.i).insert(
         ("a", List(5, 5, 5)), // count=3, avg=5
@@ -207,31 +215,7 @@ class Sorting extends MUnit with DbProviders_h2 with TestUtils {
         ("d", List()),
       ).transact
 
-
-      // Sort by first aggregate (count) descending (.select)
-      // Multiple .select() calls - each is independent
-      _ <- Entity.s
-        .select(Ref.id(count).d1.entity_(Entity.id_))
-        .select(Ref.i(avg).entity_(Entity.id_))
-        .query.get.map(_ ==> List(
-          ("c", 4, 2.5),
-          ("a", 3, 5.0),
-          ("b", 1, 10.0),
-          ("d", 0, 0.0),
-        ))
-
-      // Sort by second aggregate (avg) descending (.select)
-      _ <- Entity.s
-        .select(Ref.id(count).entity_(Entity.id_))
-        .select(Ref.i(avg).d1.entity_(Entity.id_))
-        .query.get.map(_ ==> List(
-          ("b", 1, 10.0),
-          ("a", 3, 5.0),
-          ("c", 4, 2.5),
-          ("d", 0, 0.0),
-        ))
-
-      _ <- Entity.s.select(Ref.id(count).a1.i(avg).entity_(Entity.id_)).query.i.get.map(_ ==> List(
+      _ <- Entity.s.select(Ref.id(count).a1.i(avg).entity_(Entity.id_)).query.get.map(_ ==> List(
         ("d", (0, 0.0)),
         ("b", (1, 10.0)),
         ("a", (3, 5.0)),
@@ -244,25 +228,17 @@ class Sorting extends MUnit with DbProviders_h2 with TestUtils {
         ("d", (0, 0.0)),
       ))
 
-      // We can only sort by the first value in subqueries
-      _ <- Entity.s.select(Ref.id(count).i(avg).d1.entity_(Entity.id_)).query.get
-        .map(_ ==> "Should fail").recover { case ModelError(err) =>
-          err ==> "Can only sort by first attribute in .select() subqueries having multiple columns. " +
-            "Move sorted attribute 'i' to be first, before 'id'. " +
-            "Alternatively, use .join() which allows sorting by any column."
-        }
-      // Solution: move the attribute to be sorted first:
-      _ <- Entity.s.select(Ref.i(avg).a1.id(count).entity_(Entity.id_)).query.i.get.map(_ ==> List(
-        ("d", (0.0, 0)),
-        ("c", (2.5, 4)),
-        ("a", (5.0, 3)),
-        ("b", (10.0, 1)),
+      _ <- Entity.s.select(Ref.id(count).i(avg).a1.entity_(Entity.id_)).query.get.map(_ ==> List(
+        ("d", (0, 0.0)),
+        ("c", (4, 2.5)),
+        ("a", (3, 5.0)),
+        ("b", (1, 10.0)),
       ))
-      _ <- Entity.s.select(Ref.i(avg).d1.id(count).entity_(Entity.id_)).query.i.get.map(_ ==> List(
-        ("b", (10.0, 1)),
-        ("a", (5.0, 3)),
-        ("c", (2.5, 4)),
-        ("d", (0.0, 0)),
+      _ <- Entity.s.select(Ref.id(count).i(avg).d1.entity_(Entity.id_)).query.get.map(_ ==> List(
+        ("b", (1, 10.0)),
+        ("a", (3, 5.0)),
+        ("c", (4, 2.5)),
+        ("d", (0, 0.0)),
       ))
 
 
@@ -304,14 +280,12 @@ class Sorting extends MUnit with DbProviders_h2 with TestUtils {
       ).transact
 
       // Sort by min string ascending (.select)
-      _ <- Entity.s
-        .select(Ref.s(min).a1.entity_(Entity.id_))
-        .query.get.map(_ ==> List(
-          ("d", ""), // Default empty string for no refs
-          ("c", "a"),
-          ("b", "m"),
-          ("a", "x"),
-        ))
+      _ <- Entity.s.select(Ref.s(min).a1.entity_(Entity.id_)).query.i.get.map(_ ==> List(
+        ("d", ""), // Default empty string for no refs
+        ("c", "a"),
+        ("b", "m"),
+        ("a", "x"),
+      ))
 
       // Sort by max string descending (.join)
       _ <- Entity.s
@@ -320,6 +294,184 @@ class Sorting extends MUnit with DbProviders_h2 with TestUtils {
           ("a", "z"),
           ("b", "n"),
           ("c", "c"),
+          // "d" excluded
+        ))
+    } yield ()
+  }
+
+
+  "by countDistinct" - types {
+    for {
+      _ <- Entity.s.Refs.*(Ref.i).insert(
+        ("a", List(1, 1, 2)), // 2 distinct
+        ("b", List(5, 5, 5, 5)), // 1 distinct
+        ("c", List(1, 2, 3, 4)), // 4 distinct
+        ("d", List()),
+      ).transact
+
+      // Sort by countDistinct ascending (.select)
+      _ <- Entity.s.select(Ref.i(countDistinct).a1.entity_(Entity.id_)).query.get.map(_ ==> List(
+        ("d", 0),
+        ("b", 1),
+        ("a", 2),
+        ("c", 4),
+      ))
+
+      // Sort by countDistinct descending (.join)
+      _ <- Entity.s.join(Ref.i(countDistinct).d1.entity_(Entity.id_)).query.get.map(_ ==> List(
+        ("c", 4),
+        ("a", 2),
+        ("b", 1),
+        // "d" excluded
+      ))
+    } yield ()
+  }
+
+
+  "by avg" - types {
+    for {
+      _ <- Entity.s.Refs.*(Ref.i).insert(
+        ("a", List(2, 4, 6)), // avg = 4.0
+        ("b", List(10, 20)), // avg = 15.0
+        ("c", List(1, 1, 1)), // avg = 1.0
+        ("d", List()),
+      ).transact
+
+      // Sort by avg ascending (.select)
+      _ <- Entity.s.select(Ref.i(avg).a1.entity_(Entity.id_)).query.get.map(_ ==> List(
+        ("d", 0.0),
+        ("c", 1.0),
+        ("a", 4.0),
+        ("b", 15.0),
+      ))
+
+      // Sort by avg descending (.join)
+      _ <- Entity.s.join(Ref.i(avg).d1.entity_(Entity.id_)).query.get.map(_ ==> List(
+        ("b", 15.0),
+        ("a", 4.0),
+        ("c", 1.0),
+        // "d" excluded
+      ))
+    } yield ()
+  }
+
+
+  "by median" - types {
+    for {
+      _ <- Entity.s.Refs.*(Ref.i).insert(
+        ("a", List(1, 2, 3)), // median = 2.0
+        ("b", List(10, 20, 30, 40)), // median = 25.0
+        ("c", List(5)), // median = 5.0
+        ("d", List()),
+      ).transact
+
+      // Sort by median ascending (.select)
+      _ <- if (database == "sqlite")
+        Entity.s.select(Ref.i(median).a1.entity_(Entity.id_)).query.i.get
+          .map(_ ==> "Should fail").recover { case ModelError(err) =>
+            err ==> "Sorting by median not implemented for this database."
+          }
+      else
+        Entity.s.select(Ref.i(median).a1.entity_(Entity.id_)).query.get.map(_ ==> List(
+          ("d", 0.0),
+          ("a", 2.0),
+          ("c", 5.0),
+          ("b", 25.0),
+        ))
+
+      // Sort by median descending (.join)
+      _ <- if (database == "sqlite")
+        Entity.s.join(Ref.i(median).d1.entity_(Entity.id_)).query.i.get
+          .map(_ ==> "Should fail").recover { case ModelError(err) =>
+            err ==> "Sorting by median not implemented for this database."
+          }
+      else
+        Entity.s.join(Ref.i(median).d1.entity_(Entity.id_)).query.get.map(_ ==> List(
+          ("b", 25.0),
+          ("c", 5.0),
+          ("a", 2.0),
+          // "d" excluded
+        ))
+    } yield ()
+  }
+
+
+  "by variance" - types {
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+    for {
+      _ <- Entity.s.Refs.*(Ref.i).insert(
+        ("a", List(2, 4, 6)), // variance = 2.6666666667 (mean=4, deviations: 4,0,4)
+        ("b", List(1, 5, 9)), // variance = 10.6666666667 (mean=5, deviations: 16,0,16)
+        ("c", List(10, 12)), // variance = 1.0 (mean=11, deviations: 1,1)
+        ("d", List()),
+      ).transact
+
+      // Sort by variance ascending (.select)
+      _ <- if (database == "sqlite")
+        Entity.s.select(Ref.i(variance).a1.entity_(Entity.id_)).query.i.get
+          .map(_ ==> "Should fail").recover { case ModelError(err) =>
+            err ==> "Sorting by variance not implemented for this database."
+          }
+      else
+        Entity.s.select(Ref.i(variance).a1.entity_(Entity.id_)).query.get.map(_ ==~ List(
+          ("d", 0.0),
+          ("c", 1.0),
+          ("a", 2.6666666667),
+          ("b", 10.6666666667),
+        ))
+
+      // Sort by variance descending (.join)
+      _ <- if (database == "sqlite")
+        Entity.s.join(Ref.i(variance).d1.entity_(Entity.id_)).query.i.get
+          .map(_ ==> "Should fail").recover { case ModelError(err) =>
+            err ==> "Sorting by variance not implemented for this database."
+          }
+      else
+        Entity.s.join(Ref.i(variance).d1.entity_(Entity.id_)).query.get.map(_ ==~ List(
+          ("b", 10.6666666667),
+          ("a", 2.6666666667),
+          ("c", 1.0),
+          // "d" excluded
+        ))
+    } yield ()
+  }
+
+
+  "by stddev" - types {
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+    for {
+      _ <- Entity.s.Refs.*(Ref.i).insert(
+        ("a", List(2, 4, 6)), // stddev ≈ 1.633 (variance = 2.667)
+        ("b", List(10, 20, 30)), // stddev ≈ 8.165 (variance = 66.667)
+        ("c", List(10, 12)), // stddev = 1.0 (variance = 1.0)
+        ("d", List()),
+      ).transact
+
+      // Sort by stddev ascending (.select)
+      _ <- if (database == "sqlite")
+        Entity.s.select(Ref.i(stddev).a1.entity_(Entity.id_)).query.i.get
+          .map(_ ==> "Should fail").recover { case ModelError(err) =>
+            err ==> "Sorting by standard deviation not implemented for this database."
+          }
+      else
+        Entity.s.select(Ref.i(stddev).a1.entity_(Entity.id_)).query.get.map(_ ==~ List(
+          ("d", 0.0),
+          ("c", 1.0),
+          ("a", 1.6329931619),
+          ("b", 8.1649658093),
+        ))
+
+      // Sort by stddev descending (.join)
+      _ <- if (database == "sqlite")
+        Entity.s.join(Ref.i(stddev).d1.entity_(Entity.id_)).query.i.get
+          .map(_ ==> "Should fail").recover { case ModelError(err) =>
+            err ==> "Sorting by standard deviation not implemented for this database."
+          }
+      else
+        Entity.s.join(Ref.i(stddev).d1.entity_(Entity.id_)).query.get.map(_ ==~ List(
+          ("b", 8.1649658093),
+          ("a", 1.6329931619),
+          ("c", 1.0),
           // "d" excluded
         ))
     } yield ()

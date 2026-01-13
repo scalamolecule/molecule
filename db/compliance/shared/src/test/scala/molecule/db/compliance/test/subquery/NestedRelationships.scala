@@ -1,0 +1,109 @@
+package molecule.db.compliance.test.subquery
+
+import molecule.core.error.ModelError
+import molecule.core.setup.{MUnit, TestUtils}
+import molecule.db.common.api.Api_async
+import molecule.db.common.spi.Spi_async
+import molecule.db.common.util.Executor.*
+import molecule.db.compliance.domains.dsl.Refs.*
+import molecule.db.compliance.setup.DbProviders
+
+case class NestedRelationships(
+  suite: MUnit,
+  api: Api_async & Spi_async & DbProviders
+) extends TestUtils {
+
+  import api.*
+  import suite.*
+
+  "Aggregating attribute values across relationships" - refs {
+    for {
+      _ <- A.s.Bb.*(B.i.C.i).insert(
+        ("a", List((1, 10), (2, 20))),
+        ("b", List((3, 30), (4, 40), (5, 50))),
+        ("c", List()),
+      ).transact
+
+      // Subquery can aggregate attribute values from nested relationships (.select)
+      _ <- A.s.a1.select(B.id(count).a_(A.id_).C.i(sum)).query.get.map(_ ==> List(
+        ("a", (2, 30)), // 2 B's, sum of C.i = 10+20
+        ("b", (3, 120)), // 3 B's, sum of C.i = 30+40+50
+        ("c", (0, 0)), // No B's
+      ))
+
+      // SQL inspection (.select): verify nested relationship in subquery
+      _ <- if (database == "sqlite") {
+        // SQLite doesn't support multiple aggregates in a subquery, so Molecule
+        // transparently generates two subqueries to keep a uniform API between databases.
+        A.s.select(B.id(count).a_(A.id_).C.i(sum)).query.inspect.map(_.contains(
+          """SELECT DISTINCT
+            |  A.s,
+            |  (
+            |    SELECT
+            |      COUNT(B.id)
+            |    FROM B
+            |      INNER JOIN C ON B.c = C.id
+            |    WHERE
+            |      B.a = A.id
+            |  ),
+            |  (
+            |    SELECT DISTINCT
+            |      SUM(C.i)
+            |    FROM B
+            |      INNER JOIN C ON B.c = C.id
+            |    WHERE
+            |      B.a = A.id
+            |  )
+            |FROM A
+            |WHERE
+            |  A.s IS NOT NULL;""".stripMargin
+        ) ==> true)
+      } else
+        A.s.select(B.id(count).a_(A.id_).C.i(sum)).query.inspect.map(_.contains(
+          """SELECT DISTINCT
+            |  A.s,
+            |  (
+            |    SELECT
+            |      COUNT(B.id),
+            |      SUM(C.i)
+            |    FROM B
+            |      INNER JOIN C ON B.c = C.id
+            |    WHERE
+            |      B.a = A.id
+            |  )""".stripMargin
+        ) ==> true)
+
+      // Same with .join()
+      _ <- A.s.a1.join(B.id(count).a_(A.id_).C.i(sum)).query.get.map(_ ==> List(
+        ("a", (2, 30)),
+        ("b", (3, 120)),
+        // "c" excluded
+      ))
+    } yield ()
+  }
+
+
+  "Aggregate IDs on related entities (regression test of specially handled edge case)" - refs {
+    for {
+      _ <- A.s.Bb.*(B.i.C.i).insert(
+        ("a", List((1, 10), (2, 20))),
+        ("b", List((3, 30), (4, 40), (5, 50))),
+        ("c", List()),
+      ).transact
+
+      // Aggregate IDs across relationships
+      _ <- A.s.a1.select(B.id(count).a_(A.id_).C.id(count)).query.get.map(_ ==> List(
+        ("a", (2, 2)),
+        ("b", (3, 3)),
+        ("c", (0, 0)),
+      ))
+
+      // Same with .join()
+      _ <- A.s.a1.join(B.id(count).a_(A.id_).C.id(count)).query.i.get.map(_ ==> List(
+        ("a", (2, 2)),
+        ("b", (3, 3)),
+        // ("c", (0, 0)), // No refs to B
+      ))
+    } yield ()
+  }
+}

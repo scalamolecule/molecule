@@ -134,7 +134,22 @@ trait QueryExprOne_postgresql
 
       case "min" =>
         aggregate = true
-        select += s"MIN($col$castText)"
+        if (hasSort || insideJoinSubQuery) {
+          // Use COALESCE to treat NULL appropriately for proper sorting
+          val defaultValue = res.tpe match {
+            case "String" => "''"
+            case _        => "0"
+          }
+          val alias = col.replace('.', '_') + "_min"
+          select += s"COALESCE(MIN($col$castText), $defaultValue) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"MIN($col$castText)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"MIN($col$castAggrOpV)")
 
@@ -153,7 +168,22 @@ trait QueryExprOne_postgresql
 
       case "max" =>
         aggregate = true
-        select += s"MAX($col$castText)"
+        if (hasSort || insideJoinSubQuery) {
+          // Use COALESCE to treat NULL appropriately for proper sorting
+          val defaultValue = res.tpe match {
+            case "String" => "''"
+            case _        => "0"
+          }
+          val alias = col.replace('.', '_') + "_max"
+          select += s"COALESCE(MAX($col$castText), $defaultValue) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"MAX($col$castText)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"MAX($col$castAggrOpV)")
 
@@ -201,7 +231,7 @@ trait QueryExprOne_postgresql
       case "countDistinct" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT", hasSort)
+        selectWithOrder(col, "COUNT", hasSort, aliasSuffix = Some("countDistinct"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)
@@ -209,35 +239,97 @@ trait QueryExprOne_postgresql
       case "sum" =>
         aggregate = true
         if (!select.contains(col)) groupByCols -= col
-        selectWithOrder(col, "SUM", hasSort, "", "", "ROUND(", s"$castAggrOpV, 10)")
+        if (hasSort || insideJoinSubQuery) {
+          // Use COALESCE to treat NULL as 0 for proper sorting
+          val alias = col.replace('.', '_') + "_sum"
+          select += s"COALESCE(ROUND(SUM($col)$castAggrOpV, 10), 0) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"ROUND(SUM($col)$castAggrOpV, 10)"
+        }
         addHaving(baseType, fn, s"ROUND(SUM($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case "median" =>
         aggregate = true
         if (!select.contains(col)) groupByCols -= col
         aggrOp.fold {
-          selectWithOrder(col, "percentile_cont", hasSort, "0.5) WITHIN GROUP (ORDER BY ")
+          if (hasSort || insideJoinSubQuery) {
+            val alias = col.replace('.', '_') + "_median"
+            select += s"COALESCE(percentile_cont(0.5) WITHIN GROUP (ORDER BY $col), 0) AS $alias"
+            if (hasSort) {
+              val (level, _, _, dir) = orderBy.last
+              orderBy.remove(orderBy.size - 1)
+              orderBy += ((level, 1, alias, dir))
+            }
+          } else {
+            select += s"percentile_cont(0.5) WITHIN GROUP (ORDER BY $col)"
+          }
         } { op =>
-          selectWithOrder(col, "percentile_cont", hasSort, "0.5) WITHIN GROUP (ORDER BY ", "", "ROUND(", s"$castAggrOpV, 10)")
+          if (hasSort || insideJoinSubQuery) {
+            val alias = col.replace('.', '_') + "_median"
+            select += s"COALESCE(ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY $col)$castAggrOpV, 10), 0) AS $alias"
+            if (hasSort) {
+              val (level, _, _, dir) = orderBy.last
+              orderBy.remove(orderBy.size - 1)
+              orderBy += ((level, 1, alias, dir))
+            }
+          } else {
+            select += s"ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY $col)$castAggrOpV, 10)"
+          }
           addHaving(baseType, fn, s"ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY $col)$castAggrOpV, 10)",
             aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
         }
 
       case "avg" =>
         aggregate = true
-        selectWithOrder(col, "AVG", hasSort, "", "", "ROUND(", s"$castAggrOpV, 10)")
+        if (hasSort || insideJoinSubQuery) {
+          // Use COALESCE to treat NULL as 0 for proper sorting
+          val alias = col.replace('.', '_') + "_avg"
+          select += s"COALESCE(ROUND(AVG($col)$castAggrOpV, 10), 0) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"ROUND(AVG($col)$castAggrOpV, 10)"
+        }
         if (!select.contains(col)) groupByCols -= col
         addHaving(baseType, fn, s"ROUND(AVG($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case "variance" =>
         aggregate = true
-        selectWithOrder(col, "VAR_POP", hasSort, "", "", "ROUND(", s"$castAggrOpV, 10)", Some("variance"))
+        if (hasSort || insideJoinSubQuery) {
+          val alias = col.replace('.', '_') + "_variance"
+          select += s"COALESCE(ROUND(VAR_POP($col)$castAggrOpV, 10), 0) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"ROUND(VAR_POP($col)$castAggrOpV, 10)"
+        }
         if (!select.contains(col)) groupByCols -= col
         addHaving(baseType, fn, s"ROUND(VAR_POP($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 
       case "stddev" =>
         aggregate = true
-        selectWithOrder(col, "STDDEV_POP", hasSort, "", "", "", "", Some("stddev"))
+        if (hasSort || insideJoinSubQuery) {
+          val alias = col.replace('.', '_') + "_stddev"
+          select += s"COALESCE(STDDEV_POP($col), 0) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"STDDEV_POP($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         addHaving(baseType, fn, s"ROUND(STDDEV_POP($col)$castAggrOpV, 10)", aggrOp, aggrOpValue, res, "ROUND(", s"$castAggrOpV, 10)")
 

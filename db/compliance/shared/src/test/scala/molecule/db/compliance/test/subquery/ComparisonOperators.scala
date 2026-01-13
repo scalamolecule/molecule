@@ -1,12 +1,21 @@
-package molecule.db.h2.compliance.subquery
+package molecule.db.compliance.test.subquery
 
+import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
+import molecule.db.common.api.Api_async
+import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.h2.async.*
-import molecule.db.h2.setup.DbProviders_h2
+import molecule.db.compliance.setup.DbProviders
+import org.scalactic.Equality
 
-class ComparisonOperators extends MUnit with DbProviders_h2 with TestUtils {
+case class ComparisonOperators(
+  suite: MUnit,
+  api: Api_async & Spi_async & DbProviders
+) extends TestUtils {
+
+  import api.*
+  import suite.*
 
   // Tests for comparing attributes with subquery aggregate results
   // Uses implicit/global subqueries (CROSS JOIN) that return a single value
@@ -310,9 +319,15 @@ class ComparisonOperators extends MUnit with DbProviders_h2 with TestUtils {
         (3.0, 3),
       ).transact
 
-      _ <- Entity.double(Ref.i(median)).query.get.map(_ ==> List(
-        (2, 2), // 2.0 = median(1,2,3)
-      ))
+      _ <- if (database == "sqlite")
+        Entity.double(Ref.i(median)).query.i.get
+          .map(_ ==> "Should fail").recover { case ModelError(err) =>
+            err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
+          }
+      else
+        Entity.double(Ref.i(median)).query.i.get.map(_ ==> List(
+          (2, 2), // 2.0 = median(1,2,3)
+        ))
     } yield ()
   }
 
@@ -325,10 +340,16 @@ class ComparisonOperators extends MUnit with DbProviders_h2 with TestUtils {
         (0.9, 3),
       ).transact
 
-      _ <- Ref.i(variance).query.get.map(_ ==> List(2.0/3))
-      _ <- Entity.double.<(Ref.i(variance)).query.get.map(_ ==> List(
-        (0.5, 2.0/3), // 0.5 < variance
-      ))
+      _ <- Ref.i(variance).query.get.map(_ ==> List(2.0 / 3))
+      _ <- if (database == "sqlite")
+        Entity.double.<(Ref.i(variance)).query.i.get
+          .map(_ ==> "Should fail").recover { case ModelError(err) =>
+            err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
+          }
+      else
+        Entity.double.<(Ref.i(variance)).query.get.map(_ ==> List(
+          (0.5, 2.0 / 3), // 0.5 < variance
+        ))
     } yield ()
   }
 
@@ -342,9 +363,15 @@ class ComparisonOperators extends MUnit with DbProviders_h2 with TestUtils {
       ).transact
 
       _ <- Ref.i(stddev).query.get.map(_ ==> List(0.816496580927726))
-      _ <- Entity.double.>(Ref.i(stddev)).query.get.map(_ ==> List(
-        (0.9, 0.816496580927726), // 0.9 > stddev
-      ))
+      _ <- if (database == "sqlite")
+        Entity.double.>(Ref.i(stddev)).query.i.get
+          .map(_ ==> "Should fail").recover { case ModelError(err) =>
+            err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
+          }
+      else
+        Entity.double.>(Ref.i(stddev)).query.get.map(_ ==> List(
+          (0.9, 0.816496580927726), // 0.9 > stddev
+        ))
     } yield ()
   }
 
@@ -365,32 +392,34 @@ class ComparisonOperators extends MUnit with DbProviders_h2 with TestUtils {
 
       // SQL inspection: two separate global aggregate subqueries
       _ <- Entity.s.i.>(Ref.i(min)).i_.<(Ref.i(max)).query.inspect.map(_.contains(
-          """SELECT DISTINCT
-            |  Entity.s,
-            |  Entity.i,
-            |  subquery1.col,
-            |  subquery2.col
-            |FROM Entity
-            |  CROSS JOIN (
-            |    SELECT DISTINCT
-            |      MIN(Ref.i) AS col
-            |    FROM Ref
-            |  ) subquery1
-            |  CROSS JOIN (
-            |    SELECT DISTINCT
-            |      MAX(Ref.i) AS col
-            |    FROM Ref
-            |  ) subquery2
-            |WHERE
-            |  Entity.s IS NOT NULL AND
-            |  Entity.i > subquery1.col AND
-            |  Entity.i < subquery2.col;""".stripMargin
-        ) ==> true)
+        """SELECT DISTINCT
+          |  Entity.s,
+          |  Entity.i,
+          |  subquery1.col,
+          |  subquery2.col
+          |FROM Entity
+          |  CROSS JOIN (
+          |    SELECT DISTINCT
+          |      MIN(Ref.i) AS col
+          |    FROM Ref
+          |  ) subquery1
+          |  CROSS JOIN (
+          |    SELECT DISTINCT
+          |      MAX(Ref.i) AS col
+          |    FROM Ref
+          |  ) subquery2
+          |WHERE
+          |  Entity.s IS NOT NULL AND
+          |  Entity.i > subquery1.col AND
+          |  Entity.i < subquery2.col;""".stripMargin
+      ) ==> true)
     } yield ()
   }
 
 
   "threshold check" - types {
+    // Tolerance for floating point comparisons
+    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
     for {
       // Sensor readings, with alert threshold
       _ <- Entity.s.double.Ref.double.insert(
@@ -400,9 +429,9 @@ class ComparisonOperators extends MUnit with DbProviders_h2 with TestUtils {
       ).transact
 
       // Find sensors where reading is above average threshold
-      _ <- Entity.s.double.>(Ref.double(avg)).query.get.map(_ ==> List(
-        ("sensor-2", 120.0, 83.33333333333333), // 120 > avg(50,100,100)
-        ("sensor-3", 85.0, 83.33333333333333), // Above threshold
+      _ <- Entity.s.double.>(Ref.double(avg)).query.get.map(_ ==~ List(
+        ("sensor-2", 120.0, 83.3333333333), // 120 > avg(50,100,100)
+        ("sensor-3", 85.0, 83.3333333333), // Above threshold
       ))
 
       // Find sensors where reading is above max threshold (alert!)

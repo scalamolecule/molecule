@@ -1,19 +1,20 @@
-package molecule.db.h2.compliance.subquery
+package molecule.db.compliance.test.subquery
 
+import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
+import molecule.db.common.api.Api_async
+import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.h2.async.*
-import molecule.db.h2.setup.DbProviders_h2
+import molecule.db.compliance.setup.DbProviders
 
-/**
- * Overview of subquery patterns in Molecule.
- *
- * Test 1: Global aggregates - same value from all rows of sub table
- * Test 2: Correlated aggregates - different values per row based on correlation
- * Test 3: Limit patterns - global vs correlated subqueries with limit
- */
-class _Overview extends MUnit with DbProviders_h2 with TestUtils {
+case class _Overview(
+  suite: MUnit,
+  api: Api_async & Spi_async & DbProviders
+) extends TestUtils {
+
+  import api.*
+  import suite.*
 
   "1a. Global aggregate - comparison" - types {
     for {

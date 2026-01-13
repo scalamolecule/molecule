@@ -1,16 +1,20 @@
-package molecule.db.h2.compliance.subquery
+package molecule.db.compliance.test.subquery
 
-import scala.concurrent.Future
 import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
-import molecule.db.common.spi.Conn
+import molecule.db.common.api.Api_async
+import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.h2.async.*
-import molecule.db.h2.setup.DbProviders_h2
+import molecule.db.compliance.setup.DbProviders
 
+case class Semantics(
+  suite: MUnit,
+  api: Api_async & Spi_async & DbProviders
+) extends TestUtils {
 
-class Semantics extends MUnit with DbProviders_h2 with TestUtils {
+  import api.*
+  import suite.*
 
 
   "tacit/mandatory attribute" - types {

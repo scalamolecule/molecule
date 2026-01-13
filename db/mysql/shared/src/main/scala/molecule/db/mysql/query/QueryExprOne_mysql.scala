@@ -119,7 +119,7 @@ trait QueryExprOne_mysql
       case "countDistinct" =>
         aggregate = true
         distinct = false
-        selectWithOrder(col, "COUNT", hasSort)
+        selectWithOrder(col, "COUNT", hasSort, aliasSuffix = Some("countDistinct"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
         castStrategy.replace(toInt)

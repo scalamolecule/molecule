@@ -1,12 +1,19 @@
-package molecule.db.h2.compliance.subquery
+package molecule.db.compliance.test.subquery
 
 import molecule.core.setup.{MUnit, TestUtils}
+import molecule.db.common.api.Api_async
+import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.h2.async.*
-import molecule.db.h2.setup.DbProviders_h2
+import molecule.db.compliance.setup.DbProviders
 
-class LimitOffset extends MUnit with DbProviders_h2 with TestUtils {
+case class LimitOffset(
+  suite: MUnit,
+  api: Api_async & Spi_async & DbProviders
+) extends TestUtils {
+
+  import api.*
+  import suite.*
 
   "limit" - types {
     for {

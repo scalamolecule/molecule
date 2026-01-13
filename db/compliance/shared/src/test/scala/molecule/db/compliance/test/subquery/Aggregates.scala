@@ -1,12 +1,20 @@
-package molecule.db.h2.compliance.subquery
+package molecule.db.compliance.test.subquery
 
+import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
+import molecule.db.common.api.Api_async
+import molecule.db.common.spi.Spi_async
 import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
-import molecule.db.h2.async.*
-import molecule.db.h2.setup.DbProviders_h2
+import molecule.db.compliance.setup.DbProviders
 
-class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
+case class Aggregates(
+  suite: MUnit,
+  api: Api_async & Spi_async & DbProviders
+) extends TestUtils {
+
+  import api.*
+  import suite.*
 
   "count / countDistinct" - types {
     for {
@@ -101,10 +109,10 @@ class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
 
       // .select() - separate subqueries for min and max
       _ <- Entity.s.a1.select(Ref.i(min).i(max).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("a", (10, 30)),
-          ("b", (5, 35)),
-          ("c", (0, 0)), // Default values
-        ))
+        ("a", (10, 30)),
+        ("b", (5, 35)),
+        ("c", (0, 0)), // Default values
+      ))
 
       // We could also use multiple .select() calls (inefficient here though for the same table)
       _ <- Entity.s.a1
@@ -118,10 +126,10 @@ class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
 
       // .join() - single subquery returning tuple
       _ <- Entity.s.a1.join(Ref.i(min).i(max).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("a", (10, 30)),
-          ("b", (5, 35)),
-          // "c" excluded
-        ))
+        ("a", (10, 30)),
+        ("b", (5, 35)),
+        // "c" excluded
+      ))
     } yield ()
   }
 
@@ -136,17 +144,17 @@ class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
 
       // .select()
       _ <- Entity.s.a1.select(Ref.i(sum).i(avg).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("a", (6, 2)),
-          ("b", (100, 25)),
-          ("c", (0, 0)), // Default values
-        ))
+        ("a", (6, 2)),
+        ("b", (100, 25)),
+        ("c", (0, 0)), // Default values
+      ))
 
       // .join()
       _ <- Entity.s.a1.join(Ref.i(sum).i(avg).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("a", (6, 2)),
-          ("b", (100, 25)),
-          // "c" excluded
-        ))
+        ("a", (6, 2)),
+        ("b", (100, 25)),
+        // "c" excluded
+      ))
     } yield ()
   }
 
@@ -160,7 +168,13 @@ class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
       ).transact
 
       // .select()
-      _ <- Entity.s.a1.select(Ref.i(median).entity_(Entity.id_)).query.get.map(_ ==> List(
+      _ <- if (database == "sqlite")
+        Entity.s.a1.select(Ref.i(median).entity_(Entity.id_)).query.i.get
+          .map(_ ==> "Should fail").recover { case ModelError(err) =>
+            err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
+          }
+      else
+        Entity.s.a1.select(Ref.i(median).entity_(Entity.id_)).query.get.map(_ ==> List(
           ("a", 3),
           ("b", 15),
           ("c", 0), // Default
@@ -168,10 +182,10 @@ class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
 
       // .join()
       _ <- Entity.s.a1.join(Ref.i(median).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("a", 3),
-          ("b", 15),
-          // "c" excluded
-        ))
+        ("a", 3),
+        ("b", 15),
+        // "c" excluded
+      ))
     } yield ()
   }
 
@@ -185,7 +199,13 @@ class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
       ).transact
 
       // .select()
-      _ <- Entity.s.a1.select(Ref.i(variance).i(stddev).entity_(Entity.id_)).query.get.map { result =>
+      _ <- if (database == "sqlite")
+        Entity.s.a1.select(Ref.i(variance).i(stddev).entity_(Entity.id_)).query.i.get
+          .map(_ ==> "Should fail").recover { case ModelError(err) =>
+            err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
+          }
+      else
+        Entity.s.a1.select(Ref.i(variance).i(stddev).entity_(Entity.id_)).query.get.map { result =>
           result.size ==> 3
           val (s1, (var1, std1)) = result(0)
           val (s2, (var2, std2)) = result(1)
@@ -202,15 +222,15 @@ class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
 
       // .join()
       _ <- Entity.s.a1.join(Ref.i(variance).i(stddev).entity_(Entity.id_)).query.get.map { result =>
-          result.size ==> 2 // "c" excluded
-          val (s1, (var1, std1)) = result(0)
-          val (s2, (var2, std2)) = result(1)
-          s1 ==> "a"
-          assert(var1 > 0 && std1 > 0)
-          s2 ==> "b"
-          var2 ==> 0.0
-          std2 ==> 0.0
-        }
+        result.size ==> 2 // "c" excluded
+        val (s1, (var1, std1)) = result(0)
+        val (s2, (var2, std2)) = result(1)
+        s1 ==> "a"
+        assert(var1 > 0 && std1 > 0)
+        s2 ==> "b"
+        var2 ==> 0.0
+        std2 ==> 0.0
+      }
     } yield ()
   }
 
@@ -236,17 +256,17 @@ class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
 
       // Single .select() with multiple aggregates - one subquery, returns tuple
       _ <- Entity.s.a1.select(Ref.id(count).i(sum).i(avg).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("a", (3, 6, 2)),
-          ("b", (2, 30, 15)),
-          ("c", (0, 0, 0)), // Tuple of defaults
-        ))
+        ("a", (3, 6, 2)),
+        ("b", (2, 30, 15)),
+        ("c", (0, 0, 0)), // Tuple of defaults
+      ))
 
       // .join() always returns tuple for multiple aggregates
       _ <- Entity.s.a1.join(Ref.id(count).i(sum).i(avg).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("a", (3, 6, 2)),
-          ("b", (2, 30, 15)),
-          // "c" excluded
-        ))
+        ("a", (3, 6, 2)),
+        ("b", (2, 30, 15)),
+        // "c" excluded
+      ))
     } yield ()
   }
 
@@ -261,31 +281,31 @@ class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
 
       // Count all refs (.select)
       _ <- Entity.s.a1.select(Ref.id(count).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("a", 3),
-          ("b", 2),
-          ("c", 0),
-        ))
+        ("a", 3),
+        ("b", 2),
+        ("c", 0),
+      ))
 
       // Count only refs with optional value present (.select)
       _ <- Entity.s.a1.select(Ref.s_.id(count).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("a", 2), // Only 2 refs have s
-          ("b", 2),
-          ("c", 0),
-        ))
+        ("a", 2), // Only 2 refs have s
+        ("b", 2),
+        ("c", 0),
+      ))
 
       // Count all refs (.join)
       _ <- Entity.s.a1.join(Ref.id(count).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("a", 3),
-          ("b", 2),
-          // "c" excluded
-        ))
+        ("a", 3),
+        ("b", 2),
+        // "c" excluded
+      ))
 
       // Count only refs with optional value present (.join)
       _ <- Entity.s.a1.join(Ref.s_.id(count).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("a", 2),
-          ("b", 2),
-          // "c" excluded
-        ))
+        ("a", 2),
+        ("b", 2),
+        // "c" excluded
+      ))
     } yield ()
   }
 
@@ -300,27 +320,27 @@ class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
 
       // Get sum and count, compute average in Scala (.select)
       _ <- Entity.s.a1.select(Ref.i(sum).i(count).entity_(Entity.id_)).query.get.map { results =>
-          results.map { case (s, (sum, count)) =>
-            val avg = if (count > 0) sum / count else 0
-            (s, sum, count, avg)
-          } ==> List(
-            ("a", 6, 3, 2),
-            ("b", 30, 2, 15),
-            ("c", 0, 0, 0),
-          )
-        }
+        results.map { case (s, (sum, count)) =>
+          val avg = if (count > 0) sum / count else 0
+          (s, sum, count, avg)
+        } ==> List(
+          ("a", 6, 3, 2),
+          ("b", 30, 2, 15),
+          ("c", 0, 0, 0),
+        )
+      }
 
       // Same with .join() - no entities with zero refs
       _ <- Entity.s.a1.join(Ref.i(sum).i(count).entity_(Entity.id_)).query.get.map { results =>
-          results.map { case (s, (sum, count)) =>
-            val avg = if (count > 0) sum / count else 0
-            (s, sum, count, avg)
-          } ==> List(
-            ("a", 6, 3, 2),
-            ("b", 30, 2, 15),
-            // "c" excluded
-          )
-        }
+        results.map { case (s, (sum, count)) =>
+          val avg = if (count > 0) sum / count else 0
+          (s, sum, count, avg)
+        } ==> List(
+          ("a", 6, 3, 2),
+          ("b", 30, 2, 15),
+          // "c" excluded
+        )
+      }
     } yield ()
   }
 
@@ -353,20 +373,20 @@ class Aggregates extends MUnit with DbProviders_h2 with TestUtils {
 
       // Dashboard: Show ALL products with review statistics (.select)
       _ <- Entity.s.a1.i.select(Ref
-          .id(count) // review count
-          .i(avg) // average rating
-          .entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("Widget-A", 100, (4, 4.75)),
-          ("Widget-B", 200, (2, 3.5)),
-          ("Widget-C", 150, (0, 0.0)), // Show new product with 0 reviews
-        ))
+        .id(count) // review count
+        .i(avg) // average rating
+        .entity_(Entity.id_)).query.get.map(_ ==> List(
+        ("Widget-A", 100, (4, 4.75)),
+        ("Widget-B", 200, (2, 3.5)),
+        ("Widget-C", 150, (0, 0.0)), // Show new product with 0 reviews
+      ))
 
       // Report: Only products with reviews (.join)
       _ <- Entity.s.a1.i.join(Ref.id(count).i(avg).entity_(Entity.id_)).query.get.map(_ ==> List(
-          ("Widget-A", 100, (4, 4.75)),
-          ("Widget-B", 200, (2, 3.5)),
-          // Widget-C excluded - focus on reviewed products only
-        ))
+        ("Widget-A", 100, (4, 4.75)),
+        ("Widget-B", 200, (2, 3.5)),
+        // Widget-C excluded - focus on reviewed products only
+      ))
     } yield ()
   }
 
