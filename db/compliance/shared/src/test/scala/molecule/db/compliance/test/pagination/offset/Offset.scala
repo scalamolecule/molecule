@@ -7,7 +7,7 @@ import molecule.db.common.util.Executor.*
 import molecule.db.compliance.domains.dsl.Types.*
 import molecule.db.compliance.setup.DbProviders
 
-case class OffsetForward(
+case class Offset(
   suite: MUnit,
   api: Api_async & Spi_async & DbProviders
 ) extends TestUtils {
@@ -26,7 +26,6 @@ case class OffsetForward(
       // Populated
       _ <- Entity.int.insert(1, 2, 3).transact
 
-      _ <- Entity.int.a1.query.limit(0).get.map(_ ==> Nil)
       _ <- Entity.int.a1.query.limit(1).get.map(_ ==> List(1))
       _ <- Entity.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
       _ <- Entity.int.a1.query.limit(3).get.map(_ ==> List(1, 2, 3))
@@ -34,13 +33,11 @@ case class OffsetForward(
       _ <- Entity.int.a1.query.limit(4).get.map(_ ==> List(1, 2, 3))
 
       // When only offset is set, there will be no further rows going forward
-      _ <- Entity.int.a1.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, false))
       _ <- Entity.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
       _ <- Entity.int.a1.query.offset(2).get.map(_ ==> (List(3), 3, false))
       _ <- Entity.int.a1.query.offset(3).get.map(_ ==> (Nil, 3, false))
 
       _ <- Entity.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
-      _ <- Entity.int.a1.query.limit(2).offset(0).get.map(_ ==> (List(1, 2), 3, true)) // one page ahead with 3
       _ <- Entity.int.a1.query.limit(2).offset(1).get.map(_ ==> (List(2, 3), 3, false))
       _ <- Entity.int.a1.query.limit(2).offset(2).get.map(_ ==> (List(3), 3, false))
       _ <- Entity.int.a1.query.limit(2).offset(3).get.map(_ ==> (Nil, 3, false))

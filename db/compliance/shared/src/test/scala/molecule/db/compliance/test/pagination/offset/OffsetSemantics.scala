@@ -20,21 +20,11 @@ case class OffsetSemantics(
   import suite.*
 
   "Negative limit" - types {
-    for {
-      _ <- Entity.int.a1.query.limit(-1).get
-        .map(_ ==> "Unexpected success").recover { case ModelError(msg) =>
-          msg ==> "Limit must be positive."
-        }
-    } yield ()
+    interceptMessage[ModelError]("Limit must be positive.")(Entity.int.query.limit(-1))
   }
 
   "Negative offset" - types {
-    for {
-      _ <- Entity.int.a1.query.offset(-1).get
-        .map(_ ==> "Unexpected success").recover { case ModelError(msg) =>
-          msg ==> "Offset must be positive."
-        }
-    } yield ()
+    interceptMessage[ModelError]("Offset must be positive.")(Entity.int.query.offset(-1))
   }
 
 

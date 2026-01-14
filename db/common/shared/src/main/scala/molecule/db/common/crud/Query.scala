@@ -17,7 +17,7 @@ case class Query[Tpl](
   else
     copy(optLimit = Some(l))
 
-  def offset(o: Int): QueryOffset[Tpl] = if (l < 1)
+  def offset(o: Int): QueryOffset[Tpl] = if (o < 1)
     throw ModelError("Offset must be positive.")
   else
     QueryOffset(dataModel, optLimit, o, printInspect, bindValues)

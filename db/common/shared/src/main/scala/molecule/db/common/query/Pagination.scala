@@ -23,27 +23,7 @@ trait Pagination[Tpl] extends BaseHelpers {
       case (None, Some(l))    => Some((0, l.min(totalCount), l < totalCount))
       case (Some(o), None)    => Some((o.min(totalCount), totalCount, false))
       case (Some(o), Some(l)) => Some((o.min(totalCount), (o + l).min(totalCount), (o + l) < totalCount))
-
-      //      // old
-      //      case (None, Some(l)) if l > 0 => Some((0, l.min(totalCount), l < totalCount))
-      //      case (None, Some(l))          => Some(((totalCount + l).max(0), totalCount, (totalCount + l) > 0))
-      //
-      //      // When only offset is set, there will be no further rows in either directions
-      //      case (Some(o), None) if o > 0 => Some((o.min(totalCount), totalCount, false))
-      //      case (Some(o), None)          => Some((0, (totalCount + o).min(totalCount), false))
-      //
-      //      case (Some(o), Some(l)) if l > 0 => Some((o.min(totalCount), (o + l).min(totalCount), (o + l) < totalCount))
-      //      case (Some(o), Some(l))          => Some(((totalCount + o + l).max(0), (totalCount + o).max(0), (totalCount + o + l).max(0) > 0))
     }
-  }
-
-  protected def paginationCoords(
-    optLimit: Option[Int],
-    optOffset: Option[Int]
-  ): (Boolean, Boolean) = {
-    val isPaginated = optLimit.isDefined || optOffset.isDefined
-    val isForward   = optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0)
-    (isPaginated, isForward)
   }
 
   protected def initialCursor(conn: Conn, elements: List[Element], tpls: List[Tpl]): String = {
@@ -198,13 +178,6 @@ trait Pagination[Tpl] extends BaseHelpers {
     }
     findFrom(identifiers)
     (tuples.toList, more)
-  }
-
-  protected def getCount(limit: Int, forward: Boolean, totalCount: Int) = {
-    if (forward)
-      limit.min(totalCount)
-    else
-      totalCount - (totalCount + limit).max(0)
   }
 
   protected def nextCursorUniques(tpls: List[Tpl], tokens: List[String]): String = {

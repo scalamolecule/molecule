@@ -20,8 +20,7 @@ import molecule.db.common.util.FutureUtils
  * Presumes that the row with the previous unique value hasn't been altered.
  *
  * @param elements Molecule model
- * @param optLimit When going forward from start, use a positive number.
- *                 And vice versa from end with a negative number. Can't be zero.
+ * @param optLimit Optional positive row offset number
  * @param cursor   Base64 encoded cursor meta information, including previous edge values.
  * @tparam Tpl Type of each row
  */
@@ -37,17 +36,11 @@ case class SubUnique[Tpl](
   def getPage(allTokens: List[String], limit: Int)
              (using conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = try {
-    val forward     = limit > 0
     val attrsTokens = allTokens.drop(2).grouped(13).toList.sortBy(_(2))
 
     val (uniqueIndex, uniqueValues) = {
-      val List(_, _, _, tpe, _, _, i, a, b, c, x, y, z) =
-        attrsTokens.find(_.head == "UNIQUE").get
-
-      val uniqueValues = (if (forward)
-        List(z, y, x)
-      else
-        List(a, b, c)).filter(_.nonEmpty).map(decoder(tpe))
+      val List(_, _, _, tpe, _, _, i, a, b, c, x, y, z) = attrsTokens.find(_.head == "UNIQUE").get
+      val uniqueValues                                  = List(z, y, x).filter(_.nonEmpty).map(decoder(tpe))
       (i.toInt, uniqueValues)
     }
 
@@ -57,7 +50,6 @@ case class SubUnique[Tpl](
     paginateFromIdentifiers(
       conn,
       limit,
-      forward,
       allTokens,
       attrsTokens.head,
       uniqueValues,

@@ -20,20 +20,16 @@ case class NoUnique[Tpl](
   def getPage(allTokens: List[String], limit: Int)
              (using conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = try {
-    val forward     = limit > 0
     val attrsTokens = allTokens.drop(2).dropRight(6).grouped(13).toList.sortBy(_(2))
-
-    val rowHashes = {
+    val rowHashes   = {
       val List(a, b, c, x, y, z) = allTokens.takeRight(6)
-      (if (forward) List(z, y, x) else List(a, b, c)).filter(_.nonEmpty).map(_.toInt)
+      List(z, y, x).filter(_.nonEmpty).map(_.toInt)
     }
-
     val identifyTpl = (tpl: Tpl) => tpl.hashCode()
 
     paginateFromIdentifiers(
       conn,
       limit,
-      forward,
       allTokens,
       attrsTokens.head,
       rowHashes,

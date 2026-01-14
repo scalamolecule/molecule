@@ -50,8 +50,7 @@ case class SqlQueryResolveCursor[Tpl](
 
   private def getInitialPage(limit: Int)(using conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = {
-    val forward      = limit > 0
-    val altElements  = if (forward) dataModel.elements else reverseTopLevelSorting(dataModel.elements)
+    val altElements  = dataModel.elements
     val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
     val flatRowCount = m2q.getRowCount(sortedRows)
 
@@ -59,9 +58,9 @@ case class SqlQueryResolveCursor[Tpl](
       (Nil, "", false)
     } else {
       m2q.castStrategy match {
-        case c: CastTuple   => handleTuples(c, limit, forward, sortedRows, conn)
-        case c: CastOptRefs => handleTuples(c, limit, forward, sortedRows, conn)
-        case c: CastNested  => handleNested(c, limit, forward, sortedRows, conn)
+        case c: CastTuple   => handleTuples(c, limit, sortedRows, conn)
+        case c: CastOptRefs => handleTuples(c, limit, sortedRows, conn)
+        case c: CastNested  => handleNested(c, limit, sortedRows, conn)
         case other          => throw ModelError(
           "Un-allowed element for cursor pagination: " + other
         )

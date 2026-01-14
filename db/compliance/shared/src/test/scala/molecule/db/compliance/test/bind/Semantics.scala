@@ -72,22 +72,15 @@ case class Semantics(
     for {
       _ <- Entity.int.insert(1, 2, 3).transact
 
-      _ <- Entity.int.a1.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, false))
       _ <- Entity.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
       _ <- Entity.int.a1.query.offset(2).get.map(_ ==> (List(3), 3, false))
       _ <- Entity.int.a1.query.offset(3).get.map(_ ==> (List(), 3, false))
 
-      offset0gt = Entity.int.>(?).query.offset(0)
-      _ <- offset0gt(0).get.map(_ ==> (List(1, 2, 3), 3, false))
-      _ <- offset0gt(1).get.map(_ ==> (List(2, 3), 2, false))
-      _ <- offset0gt(2).get.map(_ ==> (List(3), 1, false))
-      _ <- offset0gt(3).get.map(_ ==> (List(), 0, false))
-
-      offset1gt = Entity.int.>(?).query.offset(1)
-      _ <- offset1gt(0).get.map(_ ==> (List(2, 3), 3, false))
-      _ <- offset1gt(1).get.map(_ ==> (List(3), 2, false))
-      _ <- offset1gt(2).get.map(_ ==> (List(), 1, false))
-      _ <- offset1gt(3).get.map(_ ==> (List(), 0, false))
+      offsetGT = Entity.int.>(?).query.offset(1)
+      _ <- offsetGT(0).get.map(_ ==> (List(2, 3), 3, false))
+      _ <- offsetGT(1).get.map(_ ==> (List(3), 2, false))
+      _ <- offsetGT(2).get.map(_ ==> (List(), 1, false))
+      _ <- offsetGT(3).get.map(_ ==> (List(), 0, false))
     } yield ()
   }
 

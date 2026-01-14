@@ -19,7 +19,7 @@ class Model2SqlQuery_mysql(elements0: List[Element])
   override protected def querySubQuery(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int], isJoin: Boolean): Unit = {
     if (!isJoin) {
       // Check if we have multiple non-tacit attributes
-      val nonTacitAttrs = subElements.collect { case a: Attr if !isTacit(a) => a }
+      val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
 
       if (nonTacitAttrs.length > 1) {
         // Generate separate scalar subqueries for each attribute
@@ -44,8 +44,8 @@ class Model2SqlQuery_mysql(elements0: List[Element])
           // Propagate sorting if needed (only for first attribute in multi-column subquery)
           if (attr == nonTacitAttrs.head) {
             attr.sort.foreach { sort =>
-              val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
-              val sortDir = if (dir == 'a') "" else " DESC"
+              val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
+              val sortDir        = if (dir == 'a') "" else " DESC"
               val selectPosition = select.length.toString
               orderBy += ((level, arity, selectPosition, sortDir))
             }
@@ -65,11 +65,6 @@ class Model2SqlQuery_mysql(elements0: List[Element])
     super.querySubQuery(subElements, optLimit, optOffset, isJoin)
   }
 
-  private def isTacit(attr: Attr): Boolean = attr match {
-    case _: Tacit => true
-    case _        => false
-  }
-
   override protected def buildSubQuerySqlWithCasts(
     subElements: List[Element], subQueryAlias: String, optLimit: Option[Int], optOffset: Option[Int],
     isImplicit: Boolean, isJoin: Boolean
@@ -87,7 +82,7 @@ class Model2SqlQuery_mysql(elements0: List[Element])
     if (!isJoin && optLimit.isEmpty && optOffset.isEmpty) {
       subQueryBuilder.orderBy.clear()
     }
-    val sql = subQueryBuilder.renderSubQuery(2, Some(subQueryAlias), optLimit, optOffset, isImplicit)
+    val sql           = subQueryBuilder.renderSubQuery(2, Some(subQueryAlias), optLimit, optOffset, isImplicit)
     val subqueryCasts = subQueryBuilder.castStrategy match {
       case tuple: CastTuple => tuple.getCasts
       case _                => Nil
@@ -110,40 +105,6 @@ class Model2SqlQuery_mysql(elements0: List[Element])
     (sql, casts)
   }
 
-  // Cast multiple columns into a tuple (used for JOIN subqueries)
-  private def castMultipleColumns(columnCasts: List[Cast]): Cast = {
-    val n = columnCasts.length
-    (row: RS, baseIndex: Int) => {
-      val values = columnCasts.zipWithIndex.map { case (cast, i) =>
-        cast(row, baseIndex + i)
-      }
-      n match {
-        case 2  => (values(0), values(1))
-        case 3  => (values(0), values(1), values(2))
-        case 4  => (values(0), values(1), values(2), values(3))
-        case 5  => (values(0), values(1), values(2), values(3), values(4))
-        case 6  => (values(0), values(1), values(2), values(3), values(4), values(5))
-        case 7  => (values(0), values(1), values(2), values(3), values(4), values(5), values(6))
-        case 8  => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7))
-        case 9  => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8))
-        case 10 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9))
-        case 11 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10))
-        case 12 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11))
-        case 13 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12))
-        case 14 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13))
-        case 15 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14))
-        case 16 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15))
-        case 17 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16))
-        case 18 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17))
-        case 19 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18))
-        case 20 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18), values(19))
-        case 21 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18), values(19), values(20))
-        case 22 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18), values(19), values(20), values(21))
-        case _  => throw new IllegalArgumentException(s"Unsupported tuple arity: $n")
-      }
-    }
-  }
-
   override def getWhereClauses: ListBuffer[String] = {
     resolveElements(elements0)
     val clauses    = where.map {
@@ -164,35 +125,21 @@ class Model2SqlQuery_mysql(elements0: List[Element])
     clauses ++ joinsExist
   }
 
-  override def pagination(
-    optLimit: Option[Int],
-    optOffset: Option[Int],
-    isBackwards: Boolean
-  ): String = {
+  override def pagination(optLimit: Option[Int], optOffset: Option[Int]): String = {
     if (!insideSubQuery && (isManNested || isOptNested)) {
       ""
     } else if (hardLimit == 0) {
-      if (!isBackwards) {
-        (optOffset, optLimit) match {
-          case (None, None)                => ""
-          case (None, Some(limit))         => s"\nLIMIT 0, $limit"
-          case (Some(offset), None)        => s"\nLIMIT $offset, 18446744073709551615"
-          case (Some(offset), Some(limit)) =>
-            s"\nLIMIT $offset, $limit"
-        }
-      } else {
-        (optOffset, optLimit) match {
-          case (None, None)                => ""
-          case (None, Some(limit))         => s"\nLIMIT 0, ${-limit}"
-          case (Some(offset), None)        => s"\nLIMIT ${-offset}, 18446744073709551615"
-          case (Some(offset), Some(limit)) => s"\nLIMIT ${-offset}, ${-limit}"
-        }
+      (optOffset, optLimit) match {
+        case (None, None)                => ""
+        case (None, Some(limit))         => s"\nLIMIT 0, $limit"
+        case (Some(offset), None)        => s"\nLIMIT $offset, 18446744073709551615"
+        case (Some(offset), Some(limit)) =>
+          s"\nLIMIT $offset, $limit"
       }
     } else {
       optOffset match {
-        case None                        => s"\nLIMIT 0, $hardLimit"
-        case Some(offset) if isBackwards => s"\nLIMIT ${-offset}, $hardLimit"
-        case Some(offset)                => s"\nLIMIT $offset, $hardLimit"
+        case None         => s"\nLIMIT 0, $hardLimit"
+        case Some(offset) => s"\nLIMIT $offset, $hardLimit"
       }
     }
   }

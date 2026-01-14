@@ -19,7 +19,7 @@ case class MutationDelete(
   import api.*
   import suite.*
 
-  "Forward: Delete row before" - unique {
+  "Delete row before" - unique {
     for {
       List(e1, e2, e3, e4) <- Uniques.int.insert(1, 2, 3, 4).transact.map(_.ids)
       c <- query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
@@ -32,7 +32,7 @@ case class MutationDelete(
     } yield ()
   }
 
-  "Forward: Delete row after" - unique {
+  "Delete row after" - unique {
     for {
       List(e1, e2, e3, e4) <- Uniques.int.insert(1, 2, 3, 4).transact.map(_.ids)
       c <- query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
@@ -42,33 +42,6 @@ case class MutationDelete(
 
       // Next page without deleted row
       _ <- query.from(c).limit(2).get.map { case (List(4), _, false) => () }
-    } yield ()
-  }
-
-
-  "Backwards: Delete row before" - unique {
-    for {
-      List(e1, e2, e3, e4) <- Uniques.int.insert(1, 2, 3, 4).transact.map(_.ids)
-      c <- query.from("").limit(-2).get.map { case (List(3, 4), c, true) => c }
-
-      // Delete row before next page (backwards)
-      _ <- Uniques(e3).delete.transact
-
-      // Next page unaffected
-      _ <- query.from(c).limit(-2).get.map { case (List(1, 2), _, false) => () }
-    } yield ()
-  }
-
-  "Backwards: Delete row after" - unique {
-    for {
-      List(e1, e2, e3, e4) <- Uniques.int.insert(1, 2, 3, 4).transact.map(_.ids)
-      c <- query.from("").limit(-2).get.map { case (List(3, 4), c, true) => c }
-
-      // Delete row after this page (backwards)
-      _ <- Uniques(e2).delete.transact
-
-      // Next page without deleted row
-      _ <- query.from(c).limit(-2).get.map { case (List(1), _, false) => () }
     } yield ()
   }
 }

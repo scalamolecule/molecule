@@ -42,8 +42,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
@@ -56,8 +54,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
@@ -70,8 +66,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
@@ -84,8 +78,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
@@ -99,8 +91,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
@@ -113,8 +103,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
@@ -127,8 +115,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
@@ -141,8 +127,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
@@ -156,8 +140,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
@@ -170,8 +152,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
@@ -184,8 +164,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
@@ -198,8 +176,6 @@ case class AttrOrderOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 }

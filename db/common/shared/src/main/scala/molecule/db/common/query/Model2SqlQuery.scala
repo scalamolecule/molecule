@@ -53,8 +53,6 @@ abstract class Model2SqlQuery(elements0: List[Element])
     if (hasOptRef || hasOptEntityAttrs) {
       addPredicatesToLastLeftJoin()
     }
-
-    val isBackwards = optLimit.fold(false)(_ < 0) || optOffset.fold(false)(_ < 0)
     val distinct_   = if (distinct) " DISTINCT" else ""
     val select_     = mkSelect
     val joins_      = mkJoins(1)
@@ -62,8 +60,8 @@ abstract class Model2SqlQuery(elements0: List[Element])
     val where_      = mkWhere
     val groupBy_    = mkGroupBy
     val having_     = mkHaving
-    val orderBy_    = mkOrderBy(isBackwards)
-    val pagination_ = pagination(optLimit, optOffset, isBackwards)
+    val orderBy_    = mkOrderBy
+    val pagination_ = pagination(optLimit, optOffset)
     s"""SELECT$distinct_
        |  $select_
        |FROM $from$joins_$tempTables_$where_$groupBy_$having_$orderBy_$pagination_;""".stripMargin
@@ -124,42 +122,27 @@ abstract class Model2SqlQuery(elements0: List[Element])
     if (having.isEmpty) "" else having.mkString("\nHAVING ", " AND ", "")
   }
 
-  private def mkOrderBy(isBackwards: Boolean): String = {
-    if (orderBy.isEmpty) {
-      ""
-    } else {
+  private def mkOrderBy: String = {
+    if (orderBy.isEmpty) "" else {
       val coordinates = orderBy.sortBy(t => (t._1, t._2))
-      val orderCols   = if (isBackwards) {
-        coordinates.map {
-          // Switch sort direction on top level
-          case (0, _, col, " DESC") => col
-          case (0, _, col, _)       => col + " DESC"
-          // Nested sorts stay unchanged
-          case (_, _, col, " DESC") => col + " DESC"
-          case (_, _, col, _)       => col
-        }
-      } else {
-        coordinates.map {
-          case (_, _, col, dir) => col + dir
-        }
+      val orderCols   = coordinates.map {
+        case (_, _, col, dir) => col + dir
       }
       orderCols.mkString("\nORDER BY ", ", ", "")
     }
   }
 
-  def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
+  def pagination(optLimit: Option[Int], optOffset: Option[Int]): String = {
     val limit_ = if (!insideSubQuery && (isManNested || isOptNested)) {
       ""
     } else if (hardLimit != 0) {
       s"\nLIMIT $hardLimit"
     } else {
-      optLimit.fold("")(limit => s"\nLIMIT " + limit.abs)
+      optLimit.fold("")(limit => s"\nLIMIT " + limit)
     }
 
-    val offset_ = if (!insideSubQuery && (isManNested || isOptNested)) {
-      ""
-    } else {
-      optOffset.fold("")(offset => s"\nOFFSET " + offset.abs)
+    val offset_ = if (!insideSubQuery && (isManNested || isOptNested)) "" else {
+      optOffset.fold("")(offset => s"\nOFFSET " + offset)
     }
 
     s"$limit_$offset_"

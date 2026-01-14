@@ -26,7 +26,7 @@ abstract class SqlQueryResolve[Tpl](
     optLimit: Option[Int],
     optOffset: Option[Int],
   ): ResultSetInterface = {
-    val query  = m2q.getSqlQuery(Nil, optLimit, optOffset, Some(conn.proxy))
+    val query = m2q.getSqlQuery(Nil, optLimit, optOffset, Some(conn.proxy))
     getResultSet(conn, query)
   }
 
@@ -55,17 +55,18 @@ abstract class SqlQueryResolve[Tpl](
   }
 
   protected def handleTuples(
-    c: CastStrategy, limit: Int, forward: Boolean, sortedRows: RS, conn: JdbcConn_JVM
+    c: CastStrategy, limit: Int,
+    sortedRows: RS, conn: JdbcConn_JVM
   ): (List[Tpl], String, Boolean) = {
     val totalCount = getTotalCount(conn)
     val limitAbs   = limit.abs.min(totalCount)
     val hasMore    = limitAbs < totalCount
-    val tpls       = castTuples(c.rs2row, sortedRows, forward)
+    val tpls       = castTuples(c.rs2row, sortedRows)
     val cursor     = initialCursor(conn, dataModel.elements, tpls)
     (tpls, cursor, hasMore)
   }
 
-  protected def castTuples(rs2row: RS => Any, sortedRows: RS, forward: Boolean): List[Tpl] = {
+  protected def castTuples(rs2row: RS => Any, sortedRows: RS): List[Tpl] = {
     val tuples = ListBuffer.empty[Tpl]
     // Only check for subquery nulls if we have mandatory subquery attributes
     if (m2q.hasManSubQueryAttr) {
@@ -83,7 +84,6 @@ abstract class SqlQueryResolve[Tpl](
         tuples += rs2row(sortedRows).asInstanceOf[Tpl]
       }
     }
-//    if (forward) tuples.toList else tuples.toList.reverse
     tuples.toList
   }
 
@@ -94,13 +94,15 @@ abstract class SqlQueryResolve[Tpl](
   }
 
   protected def handleNested(
-    c: CastNested, limit: Int, forward: Boolean, sortedRows: RS, conn: JdbcConn_JVM
+    c: CastNested,
+    limit: Int,
+    sortedRows: RS,
+    conn: JdbcConn_JVM
   ): (List[Tpl], String, Boolean) = {
     val (nestedTpls, topLevelCount) = getNestedTpls(sortedRows, c)
     val limitAbs                    = limit.abs.min(topLevelCount)
     val hasMore                     = limitAbs < topLevelCount
-    val selectedRows                = nestedTpls.take(limitAbs)
-    val tpls                        = if (forward) selectedRows else selectedRows.reverse
+    val tpls                        = nestedTpls.take(limitAbs)
     val cursor                      = initialCursor(conn, dataModel.elements, tpls)
     (tpls, cursor, hasMore)
   }
@@ -108,7 +110,6 @@ abstract class SqlQueryResolve[Tpl](
   def paginateFromIdentifiers(
     conn: JdbcConn_JVM,
     limit: Int,
-    forward: Boolean,
     allTokens: List[String],
     attrTokens: List[String],
     identifiers: List[Any],
@@ -122,12 +123,7 @@ abstract class SqlQueryResolve[Tpl](
       // Filter by most inclusive value
       val first   = List(c, b, a).filter(_.nonEmpty).head
       val last    = List(x, y, z).filter(_.nonEmpty).head
-      val (fn, v) = (forward, dir) match {
-        case (true, "a") => (Ge, last)
-        case (true, _)   => (Le, first)
-        case (_, "a")    => (Le, first)
-        case (_, _)      => (Ge, last)
-      }
+      val (fn, v) = if (dir == "a") (Ge, last) else (Le, first)
       getFilterAttr(tpe, ent, attr, fn, v)
     }
     val altElements  = filterAttr +: dataModel.elements
@@ -138,9 +134,9 @@ abstract class SqlQueryResolve[Tpl](
       (Nil, "", false)
     } else {
       m2q.castStrategy match {
-        case c: CastTuple   => paginateTuples(c, limit, forward, allTokens, identifiers, identifyTpl, nextCursor, sortedRows, conn)
-        case c: CastOptRefs => paginateTuples(c, limit, forward, allTokens, identifiers, identifyTpl, nextCursor, sortedRows, conn)
-        case c: CastNested  => paginateNested(c, limit, forward, allTokens, identifiers, identifyTpl, nextCursor, sortedRows)
+        case c: CastTuple   => paginateTuples(c, limit, allTokens, identifiers, identifyTpl, nextCursor, sortedRows, conn)
+        case c: CastOptRefs => paginateTuples(c, limit, allTokens, identifiers, identifyTpl, nextCursor, sortedRows, conn)
+        case c: CastNested  => paginateNested(c, limit, allTokens, identifiers, identifyTpl, nextCursor, sortedRows)
         case other          => throw ModelError(
           "Un-allowed element for cursor pagination: " + other
         )
@@ -151,7 +147,6 @@ abstract class SqlQueryResolve[Tpl](
   private def paginateTuples(
     c: CastStrategy,
     limit: Int,
-    forward: Boolean,
     allTokens: List[String],
     identifiers: List[Any],
     identifyTpl: Tpl => Any,
@@ -160,15 +155,14 @@ abstract class SqlQueryResolve[Tpl](
     conn: JdbcConn_JVM
   ): (List[Tpl], String, Boolean) = {
     val totalCount = getTotalCount(conn)
-    val nestedTpls = castTuples(c.rs2row, sortedRows, forward)
-    paginatedResult(limit, forward, allTokens, identifiers, identifyTpl, nextCursor, nestedTpls, totalCount)
+    val nestedTpls = castTuples(c.rs2row, sortedRows)
+    paginatedResult(limit, allTokens, identifiers, identifyTpl, nextCursor, nestedTpls, totalCount)
 
   }
 
   private def paginateNested(
     c: CastNested,
     limit: Int,
-    forward: Boolean,
     allTokens: List[String],
     identifiers: List[Any],
     identifyTpl: Tpl => Any,
@@ -176,13 +170,12 @@ abstract class SqlQueryResolve[Tpl](
     sortedRows: RS,
   ): (List[Tpl], String, Boolean) = {
     val (nestedTpls0, totalCount) = getNestedTpls(sortedRows, c)
-    val nestedTpls                = if (forward) nestedTpls0 else nestedTpls0.reverse
-    paginatedResult(limit, forward, allTokens, identifiers, identifyTpl, nextCursor, nestedTpls, totalCount)
+    val nestedTpls                = nestedTpls0
+    paginatedResult(limit, allTokens, identifiers, identifyTpl, nextCursor, nestedTpls, totalCount)
   }
 
   private def paginatedResult(
     limit: Int,
-    forward: Boolean,
     allTokens: List[String],
     identifiers: List[Any],
     identifyTpl: Tpl => Any,
@@ -190,9 +183,9 @@ abstract class SqlQueryResolve[Tpl](
     nestedTpls1: List[Tpl],
     totalCount: Int
   ): (List[Tpl], String, Boolean) = {
-    val count         = getCount(limit, forward, totalCount)
+    val count         = limit.min(totalCount)
     val (tpls0, more) = paginateTpls(count, nestedTpls1, identifiers, identifyTpl)
-    val tpls          = if (forward) tpls0 else tpls0.reverse
+    val tpls          = tpls0
     val cursor        = nextCursor(tpls, allTokens)
     (tpls, cursor, more > 0)
   }

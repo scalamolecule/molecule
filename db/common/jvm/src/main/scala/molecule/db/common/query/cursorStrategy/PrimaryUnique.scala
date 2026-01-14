@@ -16,8 +16,7 @@ import molecule.db.common.util.FutureUtils
  * to skip previously shown data.
  *
  * @param elements Molecule model
- * @param optLimit When going forward from start, use a positive number.
- *                 And vice versa from end with a negative number. Can't be zero.
+ * @param optLimit Optional positive row offset number
  * @param cursor   Base64 encoded cursor meta information
  * @tparam Tpl Type of each row
  */
@@ -34,10 +33,9 @@ case class PrimaryUnique[Tpl](
              (using conn: JdbcConn_JVM): (List[Tpl], String, Boolean) = {
     val List(_, _, tpe, ent, attr, _, a, z) = tokens
 
-    val forward      = limit > 0
-    val (fn, v)      = if (forward) (Gt, z) else (Lt, a)
+    val (fn, v)      = (Gt, z)
     val filterAttr   = getFilterAttr(tpe, ent, attr, fn, v)
-    val altElements  = filterAttr +: (if (forward) dataModel.elements else reverseTopLevelSorting(dataModel.elements))
+    val altElements  = filterAttr +: dataModel.elements
     val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
     val flatRowCount = m2q.getRowCount(sortedRows)
 
@@ -45,9 +43,9 @@ case class PrimaryUnique[Tpl](
       (Nil, "", false)
     } else {
       m2q.castStrategy match {
-        case c: CastTuple   => handleTuples(c, limit, forward, sortedRows, conn)
-        case c: CastOptRefs => handleTuples(c, limit, forward, sortedRows, conn)
-        case c: CastNested  => handleNested(c, limit, forward, sortedRows, conn)
+        case c: CastTuple   => handleTuples(c, limit, sortedRows, conn)
+        case c: CastOptRefs => handleTuples(c, limit, sortedRows, conn)
+        case c: CastNested  => handleNested(c, limit, sortedRows, conn)
         case other          => throw ModelError(
           "Un-allowed element for primary unique cursor pagination: " + other
         )

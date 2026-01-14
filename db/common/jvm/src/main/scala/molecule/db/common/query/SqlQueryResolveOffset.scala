@@ -19,8 +19,6 @@ case class SqlQueryResolveOffset[Tpl](
   with ModelUtils
   with MoleculeLogging {
 
-  lazy val forward = optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0)
-
   def getListFromOffset_sync(using conn: JdbcConn_JVM)
   : (List[Tpl], Int, Boolean) = {
     val sortedRows = getData(conn, optLimit, optOffset)
@@ -35,14 +33,11 @@ case class SqlQueryResolveOffset[Tpl](
     }
   }
 
-
   private def handleTuples(
     c: CastStrategy, sortedRows: RS, conn: JdbcConn_JVM
   ): (List[Tpl], Int, Boolean) = {
-    val tpls       = castTuples(c.rs2row, sortedRows, forward)
-    val totalCount = optOffset.fold(
-      m2q.getRowCount(sortedRows)
-    )(_ => getTotalCount(conn))
+    val tpls       = castTuples(c.rs2row, sortedRows)
+    val totalCount = optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn))
     val fromUntil  = getFromUntil(totalCount, optLimit, optOffset)
     val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
     (tpls, totalCount, hasMore)
@@ -54,16 +49,16 @@ case class SqlQueryResolveOffset[Tpl](
   ): (List[Tpl], Int, Boolean) = {
     val (nestedRows, totalCount) = if (m2q.isManNested) {
       // Nested
-      val nestedRows = order((new NestTpls).rows2nested(
+      val nestedRows = (new NestTpls).rows2nested(
         sortedRows, c.tupleCasters
-      ).asInstanceOf[List[Tpl]])
+      ).asInstanceOf[List[Tpl]]
       (nestedRows, m2q.getRowCount(sortedRows))
 
     } else {
       // OptNested
-      val nestedRows = order((new NestOptTpls).rows2optNested(
+      val nestedRows = (new NestOptTpls).rows2optNested(
         sortedRows, c.tupleCasters
-      ).asInstanceOf[List[Tpl]])
+      ).asInstanceOf[List[Tpl]]
       (nestedRows, optOffset.fold(m2q.getRowCount(sortedRows))(_ => getTotalCount(conn)))
     }
 
@@ -71,10 +66,5 @@ case class SqlQueryResolveOffset[Tpl](
     val fromUntil     = getFromUntil(topLevelCount, optLimit, optOffset)
     val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
     (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
-  }
-
-
-  private def order(rows: List[Tpl]): List[Tpl] = {
-    if (forward) rows else rows.reverse
   }
 }

@@ -52,11 +52,6 @@ case class LimitOffset(
         (2, 4),
         (3, 4),
       ))
-      _ <- Entity.i.a1.select(Ref.i.a1.query.limit(1).offset(0)).query.get.map(_ ==> List(
-        (1, 4),
-        (2, 4),
-        (3, 4),
-      ))
       _ <- Entity.i.a1.select(Ref.i.a1.query.limit(1).offset(1)).query.get.map(_ ==> List(
         (1, 5),
         (2, 5),
@@ -70,11 +65,6 @@ case class LimitOffset(
 
       // Descending
       _ <- Entity.i.a1.select(Ref.i.d1.query.limit(1)).query.get.map(_ ==> List(
-        (1, 6),
-        (2, 6),
-        (3, 6),
-      ))
-      _ <- Entity.i.a1.select(Ref.i.d1.query.limit(1).offset(0)).query.get.map(_ ==> List(
         (1, 6),
         (2, 6),
         (3, 6),

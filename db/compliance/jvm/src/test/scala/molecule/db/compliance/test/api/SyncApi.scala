@@ -117,12 +117,6 @@ case class SyncApi(
     val c3 = query.from(c2).limit(2).get match {
       case (List(5), c, false) => c
     }
-    val c4 = query.from(c3).limit(-2).get match {
-      case (List(3, 4), c, true) => c
-    }
-    query.from(c4).limit(-2).get match {
-      case (List(1, 2), _, false) => ()
-    }
   }
 
 

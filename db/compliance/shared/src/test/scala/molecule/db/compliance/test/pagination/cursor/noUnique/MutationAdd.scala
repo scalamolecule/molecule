@@ -31,7 +31,7 @@ case class MutationAdd(
   import api.*
   import suite.*
 
-  "Forward: Add row before" - types {
+  "Add row before" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -46,7 +46,7 @@ case class MutationAdd(
     } yield ()
   }
 
-  "Forward: Add row after" - types {
+  "Add row after" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     for {
@@ -58,37 +58,6 @@ case class MutationAdd(
 
       // Next page includes new row
       _ <- query.from(cur).limit(2).get.map { case (List(`d`, `e`), _, false) => () }
-    } yield ()
-  }
-
-
-  "Backwards: Add row before" - types {
-    val pairs               = getPairs(Nil)
-    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-    for {
-      _ <- Entity.i.int.insert(a, c, e).transact
-      cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
-
-      // Add row before next page
-      _ <- Entity.i.int.insert(d).transact
-
-      // Next page unaffected
-      _ <- query.from(cur).limit(-2).get.map { case (List(`a`), _, false) => () }
-    } yield ()
-  }
-
-  "Backwards: Add row after" - types {
-    val pairs               = getPairs(Nil)
-    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-    for {
-      _ <- Entity.i.int.insert(a, c, e).transact
-      cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
-
-      // Add row after this page
-      _ <- Entity.i.int.insert(b).transact
-
-      // Next page includes new row
-      _ <- query.from(cur).limit(-2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 }

@@ -21,7 +21,7 @@ case class MutationAdd(
   import api.*
   import suite.*
 
-  "Forward: Add row before" - unique {
+  "Add row before" - unique {
     for {
       _ <- Uniques.int.insert(1, 3, 5).transact
       c <- query.from("").limit(2).get.map { case (List(1, 3), c, true) => c }
@@ -34,7 +34,7 @@ case class MutationAdd(
     } yield ()
   }
 
-  "Forward: Add row after" - unique {
+  "Add row after" - unique {
     for {
       _ <- Uniques.int.insert(1, 3, 5).transact
       c <- query.from("").limit(2).get.map { case (List(1, 3), c, true) => c }
@@ -44,33 +44,6 @@ case class MutationAdd(
 
       // Next page includes new row
       _ <- query.from(c).limit(2).get.map { case (List(4, 5), _, false) => () }
-    } yield ()
-  }
-
-
-  "Backwards: Add row before" - unique {
-    for {
-      _ <- Uniques.int.insert(1, 3, 5).transact
-      c <- query.from("").limit(-2).get.map { case (List(3, 5), c, true) => c }
-
-      // Add row before next page
-      _ <- Uniques.int.insert(4).transact
-
-      // Next page unaffected
-      _ <- query.from(c).limit(-2).get.map { case (List(1), _, false) => () }
-    } yield ()
-  }
-
-  "Backwards: Add row after" - unique {
-    for {
-      _ <- Uniques.int.insert(1, 3, 5).transact
-      c <- query.from("").limit(-2).get.map { case (List(3, 5), c, true) => c }
-
-      // Add row after this page
-      _ <- Uniques.int.insert(2).transact
-
-      // Next page includes new row
-      _ <- query.from(c).limit(-2).get.map { case (List(1, 2), _, false) => () }
     } yield ()
   }
 }

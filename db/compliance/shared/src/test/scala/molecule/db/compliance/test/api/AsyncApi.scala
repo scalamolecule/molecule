@@ -137,8 +137,6 @@ case class AsyncApi(
       c1 <- query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
       c2 <- query.from(c1).limit(2).get.map { case (List(3, 4), c, true) => c }
       c3 <- query.from(c2).limit(2).get.map { case (List(5), c, false) => c }
-      c4 <- query.from(c3).limit(-2).get.map { case (List(3, 4), c, true) => c }
-      _ <- query.from(c4).limit(-2).get.map { case (List(1, 2), _, false) => () }
     } yield ()
   }
 

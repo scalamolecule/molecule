@@ -32,7 +32,7 @@ case class DirectionsOptional(
   import api.*
   import suite.*
 
-  "Forward, asc asc" - types {
+  "asc asc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.a1.int_?.a2.query.from(cursor).limit(limit)
@@ -41,12 +41,10 @@ case class DirectionsOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
-  "Forward, desc asc" - types {
+  "desc asc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
     val query               = (cursor: String, limit: Int) => Entity.i.d1.int_?.a2.query.from(cursor).limit(limit)
@@ -55,12 +53,10 @@ case class DirectionsOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
-  "Forward, asc desc" - types {
+  "asc desc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs
       .sortBy(p => (p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))
@@ -70,12 +66,10 @@ case class DirectionsOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
     } yield ()
   }
 
-  "Forward, desc desc" - types {
+  "desc desc" - types {
     val pairs               = getPairs(Nil)
     val List(a, b, c, d, e) = pairs
       .sortBy(p => (-p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))
@@ -85,68 +79,6 @@ case class DirectionsOptional(
       c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
       c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
       c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-      c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-      _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
-    } yield ()
-  }
-
-
-  "Backwards, asc asc" - types {
-    val pairs               = getPairs(Nil)
-    val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-    val query               = (cursor: String, limit: Int) => Entity.i.a1.int_?.a2.query.from(cursor).limit(limit)
-    for {
-      _ <- Entity.i.int_?.insert(pairs).transact
-      c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
-      c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-      c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
-      c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-      _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
-    } yield ()
-  }
-
-  "Backwards, desc asc" - types {
-    val pairs               = getPairs(Nil)
-    val List(a, b, c, d, e) = pairs
-      .sortBy(p => (-p._1, p._2))
-    val query               = (cursor: String, limit: Int) => Entity.i.d1.int_?.a2.query.from(cursor).limit(limit)
-    for {
-      _ <- Entity.i.int_?.insert(pairs).transact
-      c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
-      c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-      c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
-      c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-      _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
-    } yield ()
-  }
-
-  "Backwards, asc desc" - types {
-    val pairs               = getPairs(Nil)
-    val List(a, b, c, d, e) = pairs
-      .sortBy(p => (p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))
-    val query               = (cursor: String, limit: Int) => Entity.i.a1.int_?.d2.query.from(cursor).limit(limit)
-    for {
-      _ <- Entity.i.int_?.insert(pairs).transact
-      c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
-      c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-      c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
-      c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-      _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
-    } yield ()
-  }
-
-  "Backwards, desc desc" - types {
-    val pairs               = getPairs(Nil)
-    val List(a, b, c, d, e) = pairs
-      .sortBy(p => (-p._1, p._2))(using Ordering.Tuple2(using Ordering.Int, Ordering.Option[Int].reverse))
-    val query               = (cursor: String, limit: Int) => Entity.i.d1.int_?.d2.query.from(cursor).limit(limit)
-    for {
-      _ <- Entity.i.int_?.insert(pairs).transact
-      c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
-      c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-      c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
-      c2 <- query(c3, 2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
-      _ <- query(c2, 2).get.map { case (List(`d`, `e`), _, false) => () }
     } yield ()
   }
 }
