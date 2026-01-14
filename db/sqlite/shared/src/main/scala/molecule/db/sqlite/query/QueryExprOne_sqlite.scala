@@ -100,7 +100,7 @@ trait QueryExprOne_sqlite
   }
 
   private val noStatisticalFunctionsInSubquerySelect =
-    "Median, variance and stddev in .select() subqueries not supported for SQLite."
+    "Median, variance and stddev in .select() subqueries not supported for this database."
 
   override protected def aggr[T: ClassTag](
     baseType: String,

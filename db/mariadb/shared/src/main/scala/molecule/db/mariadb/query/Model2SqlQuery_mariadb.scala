@@ -1,6 +1,6 @@
 package molecule.db.mariadb.query
 
-import molecule.core.dataModel.{Attr, Element, Tacit}
+import molecule.core.dataModel.*
 import molecule.db.common.query.*
 import molecule.db.common.query.casting.strategy.CastTuple
 
@@ -23,7 +23,13 @@ class Model2SqlQuery_mariadb(elements0: List[Element])
 
       if (nonTacitAttrs.length > 1) {
         // Generate separate scalar subqueries for each attribute
+        // BUT keep all tacit attributes (WHERE correlation) and Ref elements (JOIN relationships)
         val allCasts = scala.collection.mutable.ListBuffer.empty[Cast]
+        val otherElements = subElements.filter {
+          case a: Attr if isTacit(a) => true  // Tacit attrs for WHERE clauses
+          case _: Ref => true                  // Ref elements for JOIN relationships
+          case _ => false
+        }
 
         nonTacitAttrs.foreach { attr =>
           subQueryIndex += 1
@@ -32,9 +38,11 @@ class Model2SqlQuery_mariadb(elements0: List[Element])
           val wasInsideSubQuery = insideSubQuery
           insideSubQuery = true
 
-          // Build subquery with just this one attribute
+          // Build subquery with this attribute + all tacit/ref elements
+          // This preserves WHERE clauses (tacit) and JOINs (refs)
+          val subqueryElements = otherElements :+ attr
           val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(
-            List(attr), alias, optLimit, optOffset, isImplicit = false, isJoin = false
+            subqueryElements, alias, optLimit, optOffset, isImplicit = false, isJoin = false
           )
 
           // Add as separate SELECT clause subquery
@@ -80,6 +88,12 @@ class Model2SqlQuery_mariadb(elements0: List[Element])
     subQueryBuilder.resolveElements(subElements)
     if (subQueryBuilder.hasManSubQueryAttr) {
       hasManSubQueryAttr = true
+    }
+
+    // For SELECT clause correlated subqueries with aggregates, turn off DISTINCT
+    // Keep DISTINCT for implicit subqueries (comparisons) and JOIN subqueries
+    if (!isJoin && !isImplicit && subQueryBuilder.aggregate) {
+      subQueryBuilder.distinct = false
     }
     // For SELECT clause subqueries (correlated, scalar), clear ORDER BY from subquery
     // UNLESS there's a LIMIT/OFFSET (ORDER BY determines which rows are selected)

@@ -319,10 +319,10 @@ case class ComparisonOperators(
         (3.0, 3),
       ).transact
 
-      _ <- if (database == "sqlite")
+      _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
         Entity.double(Ref.i(median)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
-            err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
+            err ==> "Median, variance and stddev in .select() subqueries not supported for this database."
           }
       else
         Entity.double(Ref.i(median)).query.i.get.map(_ ==> List(
@@ -342,10 +342,10 @@ case class ComparisonOperators(
       ).transact
 
       _ <- Ref.i(variance).query.get.map(_ ==~ List(2.0 / 3))
-      _ <- if (database == "sqlite")
+      _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
         Entity.double.<(Ref.i(variance)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
-            err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
+            err ==> "Median, variance and stddev in .select() subqueries not supported for this database."
           }
       else
         Entity.double.<(Ref.i(variance)).query.get.map(_ ==~ List(
@@ -365,10 +365,10 @@ case class ComparisonOperators(
       ).transact
 
       _ <- Ref.i(stddev).query.get.map(_ ==~ List(0.816496580927726))
-      _ <- if (database == "sqlite")
+      _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
         Entity.double.>(Ref.i(stddev)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
-            err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
+            err ==> "Median, variance and stddev in .select() subqueries not supported for this database."
           }
       else
         Entity.double.>(Ref.i(stddev)).query.get.map(_ ==~ List(
@@ -431,7 +431,7 @@ case class ComparisonOperators(
       ).transact
 
       // Find sensors where reading is above average threshold
-      _ <- Entity.s.double.>(Ref.double(avg)).query.get.map(_ ==~ List(
+      _ <- Entity.s.double.>(Ref.double(avg)).query.i.get.map(_ ==~ List(
         ("sensor-2", 120.0, 83.3333333333), // 120 > avg(50,100,100)
         ("sensor-3", 85.0, 83.3333333333), // Above threshold
       ))

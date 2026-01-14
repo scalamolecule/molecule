@@ -11,7 +11,10 @@ case class QueryCursor[Tpl](
   private[molecule] val bindValues: List[Value] = Nil
 ) extends QueryBind_[Tpl, QueryCursor] {
 
-  def limit(l: Int): QueryCursor[Tpl] = copy(optLimit = Some(l))
+  def limit(l: Int): QueryCursor[Tpl] = if (l < 1)
+    throw ModelError("Limit must be positive.")
+  else
+    copy(optLimit = Some(l))
 
   // Inspect Query
   def i: QueryCursor[Tpl] = copy(printInspect = true)

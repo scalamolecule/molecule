@@ -83,7 +83,8 @@ abstract class SqlQueryResolve[Tpl](
         tuples += rs2row(sortedRows).asInstanceOf[Tpl]
       }
     }
-    if (forward) tuples.toList else tuples.toList.reverse
+//    if (forward) tuples.toList else tuples.toList.reverse
+    tuples.toList
   }
 
   private def containsNull(row: Any): Boolean = row match {

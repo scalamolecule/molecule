@@ -11,6 +11,17 @@ trait QueryExprOne_mariadb
   extends QueryExprOne
     with LambdasOne { self: Model2Query & QueryExprRef & SqlQueryBase =>
 
+  // MariaDB doesn't support NULLS FIRST/LAST syntax
+  override protected def addSort(attr: AttrOne, col: String): Unit = {
+    attr.sort.foreach { sort =>
+      val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
+      dir match {
+        case 'a' => orderBy += ((level, arity, col, ""))
+        case 'd' => orderBy += ((level, arity, col, " DESC"))
+      }
+    }
+  }
+
   override protected def matches[T](
     col: String,
     args: Seq[T],
@@ -43,6 +54,17 @@ trait QueryExprOne_mariadb
     lazy val sepChar = 29.toChar
     lazy val n       = optN.getOrElse(0)
     def havingOp(expr: String) = addHaving(baseType, fn, expr, aggrOp, aggrOpValue, res)
+
+    def jsonArray2doubles(json: String): Seq[Double] = {
+      if (json == null || json == "[]" || json.isEmpty) {
+        Seq.empty[Double]
+      } else if (json.startsWith("[\"")) {
+        json.substring(2, json.length - 2).split("\",\"").map(_.toDouble).toSeq
+      } else {
+        json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq
+      }
+    }
+
     select -= col
     fn match {
       case "distinct" =>
@@ -55,7 +77,22 @@ trait QueryExprOne_mariadb
 
       case "min" =>
         aggregate = true
-        select += s"MIN($col)"
+        if (hasSort || insideJoinSubQuery) {
+          // Use COALESCE to treat NULL appropriately for proper sorting and JOIN subqueries
+          val defaultValue = res.tpe match {
+            case "String" => "''"
+            case _        => "0"
+          }
+          val alias = col.replace('.', '_') + "_min"
+          select += s"COALESCE(MIN($col), $defaultValue) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"MIN($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"MIN($col)")
 
@@ -69,7 +106,22 @@ trait QueryExprOne_mariadb
 
       case "max" =>
         aggregate = true
-        select += s"MAX($col)"
+        if (hasSort || insideJoinSubQuery) {
+          // Use COALESCE to treat NULL appropriately for proper sorting and JOIN subqueries
+          val defaultValue = res.tpe match {
+            case "String" => "''"
+            case _        => "0"
+          }
+          val alias = col.replace('.', '_') + "_max"
+          select += s"COALESCE(MAX($col), $defaultValue) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"MAX($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"MAX($col)")
 
@@ -127,21 +179,45 @@ trait QueryExprOne_mariadb
         havingOp(s"ROUND(SUM($col), 6)")
 
       case "median" =>
+        aggregate = true
+        if (!select.contains(col)) groupByCols -= col
+        // MariaDB doesn't have a native MEDIAN function, so we need to calculate it
+        // For implicit subqueries (comparisons), we can't use JSON arrays
+        // For JOIN subqueries and sorting, we need aliases
+        if (insideSubQuery && !insideJoinSubQuery) {
+          // Implicit subquery - need to calculate median as scalar value
+          // Use a subquery with LIMIT/OFFSET to get the middle value(s)
+          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+        } else if (hasSort || insideJoinSubQuery) {
+          val alias = col.replace('.', '_') + "_median"
+          select += s"JSON_ARRAYAGG($col) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+          castStrategy.replace(
+            (row: RS, paramIndex: Int) => {
+              val values = jsonArray2doubles(row.getString(paramIndex))
+              if (values.isEmpty) 0.0 else getMedian(values)
+            }
+          )
+        } else {
+          // Regular SELECT clause subquery
+          select += s"JSON_ARRAYAGG($col)"
+          castStrategy.replace(
+            (row: RS, paramIndex: Int) => {
+              val values = jsonArray2doubles(row.getString(paramIndex))
+              if (values.isEmpty) 0.0 else getMedian(values)
+            }
+          )
+        }
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
           throw ModelError("Sorting by median not implemented for this database.")
         }
         if (aggrOp.isDefined) {
           throw ModelError("Operations on median not implemented for this database.")
         }
-        aggregate = true
-        select += s"JSON_ARRAYAGG($col)"
-        if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(
-          (row: RS, paramIndex: Int) => {
-            val json = row.getString(paramIndex)
-            getMedian(json.substring(1, json.length - 1).split(",").map(_.toDouble).toList)
-          }
-        )
 
       case "avg" =>
         aggregate = true
@@ -156,14 +232,24 @@ trait QueryExprOne_mariadb
         if (aggrOp.isDefined) {
           throw ModelError("Operations on variance not implemented for this database.")
         }
+        // Check if used in implicit subquery (comparison operation)
+        if (insideSubQuery && !insideJoinSubQuery) {
+          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+        }
         aggregate = true
-        select += s"JSON_ARRAYAGG($col)"
+        // Only add alias for JOIN subqueries, not SELECT clause scalar subqueries
+        if (insideJoinSubQuery) {
+          val alias = col.replace('.', '_') + "_variance"
+          select += s"JSON_ARRAYAGG($col) AS $alias"
+        } else {
+          select += s"JSON_ARRAYAGG($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"VAR_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
-            val json = row.getString(paramIndex)
-            varianceOf(json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq)
+            val values = jsonArray2doubles(row.getString(paramIndex))
+            if (values.isEmpty) 0.0 else varianceOf(values)
           }
         )
 
@@ -174,14 +260,24 @@ trait QueryExprOne_mariadb
         if (aggrOp.isDefined) {
           throw ModelError("Operations on stddev not implemented for this database.")
         }
+        // Check if used in implicit subquery (comparison operation)
+        if (insideSubQuery && !insideJoinSubQuery) {
+          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+        }
         aggregate = true
-        select += s"JSON_ARRAYAGG($col)"
+        // Only add alias for JOIN subqueries, not SELECT clause scalar subqueries
+        if (insideJoinSubQuery) {
+          val alias = col.replace('.', '_') + "_stddev"
+          select += s"JSON_ARRAYAGG($col) AS $alias"
+        } else {
+          select += s"JSON_ARRAYAGG($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"STDDEV_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
-            val json = row.getString(paramIndex)
-            stdDevOf(json.substring(1, json.length - 1).split(",").map(_.toDouble).toSeq)
+            val values = jsonArray2doubles(row.getString(paramIndex))
+            if (values.isEmpty) 0.0 else stdDevOf(values)
           }
         )
 

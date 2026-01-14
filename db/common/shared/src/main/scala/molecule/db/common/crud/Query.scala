@@ -12,8 +12,16 @@ case class Query[Tpl](
 
   // Common api
 
-  def limit(l: Int): Query[Tpl] = copy(optLimit = Some(l))
-  def offset(o: Int): QueryOffset[Tpl] = QueryOffset(dataModel, optLimit, o, printInspect, bindValues)
+  def limit(l: Int): Query[Tpl] = if (l < 1)
+    throw ModelError("Limit must be positive.")
+  else
+    copy(optLimit = Some(l))
+
+  def offset(o: Int): QueryOffset[Tpl] = if (l < 1)
+    throw ModelError("Offset must be positive.")
+  else
+    QueryOffset(dataModel, optLimit, o, printInspect, bindValues)
+
   def from(cursor: String): QueryCursor[Tpl] = QueryCursor(dataModel, optLimit, cursor, printInspect, bindValues)
 
   // Inspect also

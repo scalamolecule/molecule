@@ -448,7 +448,7 @@ case class Sorting(
       ).transact
 
       // Sort by stddev ascending (.select)
-      _ <- if (database == "sqlite")
+      _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
         Entity.s.select(Ref.i(stddev).a1.entity_(Entity.id_)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
             err ==> "Sorting by standard deviation not implemented for this database."
@@ -462,7 +462,7 @@ case class Sorting(
         ))
 
       // Sort by stddev descending (.join)
-      _ <- if (database == "sqlite")
+      _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
         Entity.s.join(Ref.i(stddev).d1.entity_(Entity.id_)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
             err ==> "Sorting by standard deviation not implemented for this database."

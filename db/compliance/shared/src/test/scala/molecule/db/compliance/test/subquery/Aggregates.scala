@@ -125,7 +125,7 @@ case class Aggregates(
         ))
 
       // .join() - single subquery returning tuple
-      _ <- Entity.s.a1.join(Ref.i(min).i(max).entity_(Entity.id_)).query.get.map(_ ==> List(
+      _ <- Entity.s.a1.join(Ref.i(min).i(max).entity_(Entity.id_)).query.i.get.map(_ ==> List(
         ("a", (10, 30)),
         ("b", (5, 35)),
         // "c" excluded
@@ -168,20 +168,20 @@ case class Aggregates(
       ).transact
 
       // .select()
-      _ <- if (database == "sqlite")
+      _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
         Entity.s.a1.select(Ref.i(median).entity_(Entity.id_)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
-            err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
+            err ==> "Median, variance and stddev in .select() subqueries not supported for this database."
           }
       else
-        Entity.s.a1.select(Ref.i(median).entity_(Entity.id_)).query.get.map(_ ==> List(
+        Entity.s.a1.select(Ref.i(median).entity_(Entity.id_)).query.i.get.map(_ ==> List(
           ("a", 3),
           ("b", 15),
           ("c", 0), // Default
         ))
 
       // .join()
-      _ <- Entity.s.a1.join(Ref.i(median).entity_(Entity.id_)).query.get.map(_ ==> List(
+      _ <- Entity.s.a1.join(Ref.i(median).entity_(Entity.id_)).query.i.get.map(_ ==> List(
         ("a", 3),
         ("b", 15),
         // "c" excluded
@@ -199,10 +199,10 @@ case class Aggregates(
       ).transact
 
       // .select()
-      _ <- if (database == "sqlite")
+      _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
         Entity.s.a1.select(Ref.i(variance).i(stddev).entity_(Entity.id_)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
-            err ==> "Median, variance and stddev in .select() subqueries not supported for SQLite."
+            err ==> "Median, variance and stddev in .select() subqueries not supported for this database."
           }
       else
         Entity.s.a1.select(Ref.i(variance).i(stddev).entity_(Entity.id_)).query.get.map { result =>

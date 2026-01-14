@@ -11,7 +11,10 @@ case class QueryOffset[Tpl](
   private[molecule] val bindValues: List[Value] = Nil
 ) extends QueryBind_[Tpl, QueryOffset] {
 
-  def limit(l: Int): QueryOffset[Tpl] = copy(optLimit = Some(l))
+  def limit(l: Int): QueryOffset[Tpl] = if (l < 1)
+    throw ModelError("Limit must be positive.")
+  else
+    copy(optLimit = Some(l))
 
   // Inspect Query
   def i: QueryOffset[Tpl] = copy(printInspect = true)

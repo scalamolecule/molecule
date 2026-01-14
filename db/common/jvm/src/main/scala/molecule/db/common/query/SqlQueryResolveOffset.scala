@@ -23,7 +23,6 @@ case class SqlQueryResolveOffset[Tpl](
 
   def getListFromOffset_sync(using conn: JdbcConn_JVM)
   : (List[Tpl], Int, Boolean) = {
-    offsetLimitCheck(optLimit, optOffset)
     val sortedRows = getData(conn, optLimit, optOffset)
     m2q.castStrategy match {
       case c: CastTuple     => handleTuples(c, sortedRows, conn)

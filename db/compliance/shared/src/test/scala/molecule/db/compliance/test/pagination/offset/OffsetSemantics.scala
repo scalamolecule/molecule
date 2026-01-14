@@ -19,11 +19,20 @@ case class OffsetSemantics(
   import api.*
   import suite.*
 
-  "Different limit/offset sign" - types {
+  "Negative limit" - types {
     for {
-      _ <- Entity.int.a1.query.limit(20).offset(-10).get
+      _ <- Entity.int.a1.query.limit(-1).get
         .map(_ ==> "Unexpected success").recover { case ModelError(msg) =>
-          msg ==> "Limit and offset should both be positive or negative."
+          msg ==> "Limit must be positive."
+        }
+    } yield ()
+  }
+
+  "Negative offset" - types {
+    for {
+      _ <- Entity.int.a1.query.offset(-1).get
+        .map(_ ==> "Unexpected success").recover { case ModelError(msg) =>
+          msg ==> "Offset must be positive."
         }
     } yield ()
   }
