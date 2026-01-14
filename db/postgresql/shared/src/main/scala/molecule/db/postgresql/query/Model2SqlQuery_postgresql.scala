@@ -13,67 +13,66 @@ class Model2SqlQuery_postgresql(elements0: List[Element])
     with QueryExprSetRefAttr_postgresql
     with SqlQueryBase {
 
-  // Override to split multi-column SELECT subqueries when aggregating IDs
+  // Override to split multi-column SELECT subqueries when aggregating IDs or sorting
   // This allows aggregating IDs across relationships which doesn't work with ROW types
   override protected def querySubQuery(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int], isJoin: Boolean): Unit = {
-    if (!isJoin) {
+    if (shouldSplitSubquery(subElements, isJoin)) {
+      querySplitSubQueries(subElements, optLimit, optOffset)
+    } else {
+      querySubQueryBase(subElements, optLimit, optOffset, isJoin)
+    }
+  }
+
+  private def shouldSplitSubquery(subElements: List[Element], isJoin: Boolean): Boolean = {
+    if (isJoin) {
+      false
+    } else {
       val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
-
-      // Check if we have any aggregation
-      val hasAggregation = nonTacitAttrs.exists { attr =>
-        attr.op.isInstanceOf[AggrFn]
-      }
-
-      // Check if any attribute has sorting
+      val hasAggregation = nonTacitAttrs.exists(attr => attr.op.isInstanceOf[AggrFn])
       val hasSorting = nonTacitAttrs.exists(_.sort.isDefined)
+      nonTacitAttrs.length > 1 && (hasAggregation || hasSorting)
+    }
+  }
 
-      // PostgreSQL requires subqueries to return only one column
-      // Split into separate scalar subqueries when we have multiple columns with aggregation or sorting
-      if (nonTacitAttrs.length > 1 && (hasAggregation || hasSorting)) {
-        // Split into separate scalar subqueries when aggregating IDs
-        val allCasts      = scala.collection.mutable.ListBuffer.empty[Cast]
-        val otherElements = subElements.filter {
-          case a: Attr if a.isInstanceOf[Tacit] => true // Tacit attrs for WHERE clauses
-          case _: Ref                           => true // Ref elements for JOIN relationships
-          case _                                => false
-        }
-
-        nonTacitAttrs.foreach { attr =>
-          subQueryIndex += 1
-          val alias = subQueryAlias
-
-          val wasInsideSubQuery = insideSubQuery
-          insideSubQuery = true
-
-          // Build subquery with this attribute + all tacit/ref elements
-          val subqueryElements             = otherElements :+ attr
-          val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(
-            subqueryElements, alias, optLimit, optOffset, isImplicit = false, isJoin = false
-          )
-
-          select += subquerySql
-          allCasts ++= subQueryCasts
-
-          // Propagate sorting if this attribute has sorting
-          attr.sort.foreach { sort =>
-            val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
-            val sortDir        = if (dir == 'a') "" else " DESC"
-            val selectPosition = select.length.toString
-            orderBy += ((level, arity, selectPosition, sortDir))
-          }
-
-          insideSubQuery = wasInsideSubQuery
-        }
-
-        // Group all casts into a single tuple cast
-        val tupleCast = castMultipleColumns(allCasts.toList)
-        castStrategy.add(tupleCast)
-        return
-      }
+  private def querySplitSubQueries(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int]): Unit = {
+    val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
+    val allCasts      = scala.collection.mutable.ListBuffer.empty[Cast]
+    val otherElements = subElements.filter {
+      case a: Attr if a.isInstanceOf[Tacit] => true // Tacit attrs for WHERE clauses
+      case _: Ref                           => true // Ref elements for JOIN relationships
+      case _                                => false
     }
 
-    // For .join() or single-column .select(), or no ID aggregation, use default behavior
-    super.querySubQuery(subElements, optLimit, optOffset, isJoin)
+    nonTacitAttrs.foreach { attr =>
+      subQueryIndex += 1
+      val alias = subQueryAlias
+
+      val wasInsideSubQuery = insideSubQuery
+      insideSubQuery = true
+
+      // Build subquery with this attribute + all tacit/ref elements
+      val subqueryElements             = otherElements :+ attr
+      val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(
+        subqueryElements, alias, optLimit, optOffset, isImplicit = false, isJoin = false
+      )
+
+      select += subquerySql
+      allCasts ++= subQueryCasts
+
+      // Propagate sorting if this attribute has sorting
+      attr.sort.foreach { sort =>
+        val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
+        val sortDir        = if (dir == 'a') "" else " DESC"
+        val selectPosition = select.length.toString
+        orderBy += ((level, arity, selectPosition, sortDir))
+      }
+
+      insideSubQuery = wasInsideSubQuery
+    }
+
+    // Group all casts into a single tuple cast
+    val tupleCast = castMultipleColumns(allCasts.toList)
+    castStrategy.add(tupleCast)
   }
 
   override protected def buildSubQuerySqlWithCasts(

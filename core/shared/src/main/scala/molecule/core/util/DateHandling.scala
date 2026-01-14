@@ -3,6 +3,7 @@ package molecule.core.util
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.{Date, TimeZone}
+import molecule.core.error.ModelError
 
 
 trait DateHandling extends RegexMatching {
@@ -13,7 +14,7 @@ trait DateHandling extends RegexMatching {
 
   private def error(err: String): Nothing = {
     val err1 = "[DateHandling]  " + err
-    throw new IllegalArgumentException(err1)
+    throw ModelError(err1)
   }
 
   private def mkMs(s: String): Int = s match {

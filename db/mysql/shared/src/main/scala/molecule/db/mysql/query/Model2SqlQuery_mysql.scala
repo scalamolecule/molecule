@@ -17,52 +17,58 @@ class Model2SqlQuery_mysql(elements0: List[Element])
   // Override to handle multiple-column SELECT subqueries
   // MySQL doesn't support ROW types in SELECT clause, so generate multiple scalar subqueries
   override protected def querySubQuery(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int], isJoin: Boolean): Unit = {
-    if (!isJoin) {
-      // Check if we have multiple non-tacit attributes
+    if (shouldSplitSubquery(subElements, isJoin)) {
+      querySplitSubQueries(subElements, optLimit, optOffset)
+    } else {
+      querySubQueryBase(subElements, optLimit, optOffset, isJoin)
+    }
+  }
+
+  private def shouldSplitSubquery(subElements: List[Element], isJoin: Boolean): Boolean = {
+    if (isJoin) {
+      false
+    } else {
       val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
+      nonTacitAttrs.length > 1
+    }
+  }
 
-      if (nonTacitAttrs.length > 1) {
-        // Generate separate scalar subqueries for each attribute
-        val allCasts = scala.collection.mutable.ListBuffer.empty[Cast]
+  private def querySplitSubQueries(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int]): Unit = {
+    val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
+    val allCasts = scala.collection.mutable.ListBuffer.empty[Cast]
 
-        nonTacitAttrs.foreach { attr =>
-          subQueryIndex += 1
-          val alias = subQueryAlias
+    nonTacitAttrs.foreach { attr =>
+      subQueryIndex += 1
+      val alias = subQueryAlias
 
-          val wasInsideSubQuery = insideSubQuery
-          insideSubQuery = true
+      val wasInsideSubQuery = insideSubQuery
+      insideSubQuery = true
 
-          // Build subquery with just this one attribute
-          val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(
-            List(attr), alias, optLimit, optOffset, isImplicit = false, isJoin = false
-          )
+      // Build subquery with just this one attribute
+      val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(
+        List(attr), alias, optLimit, optOffset, isImplicit = false, isJoin = false
+      )
 
-          // Add as separate SELECT clause subquery
-          select += subquerySql
-          allCasts ++= subQueryCasts
+      // Add as separate SELECT clause subquery
+      select += subquerySql
+      allCasts ++= subQueryCasts
 
-          // Propagate sorting if needed (only for first attribute in multi-column subquery)
-          if (attr == nonTacitAttrs.head) {
-            attr.sort.foreach { sort =>
-              val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
-              val sortDir        = if (dir == 'a') "" else " DESC"
-              val selectPosition = select.length.toString
-              orderBy += ((level, arity, selectPosition, sortDir))
-            }
-          }
-
-          insideSubQuery = wasInsideSubQuery
+      // Propagate sorting if needed (only for first attribute in multi-column subquery)
+      if (attr == nonTacitAttrs.head) {
+        attr.sort.foreach { sort =>
+          val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
+          val sortDir        = if (dir == 'a') "" else " DESC"
+          val selectPosition = select.length.toString
+          orderBy += ((level, arity, selectPosition, sortDir))
         }
-
-        // Group all casts into a single tuple cast
-        val tupleCast = castMultipleColumns(allCasts.toList)
-        castStrategy.add(tupleCast)
-        return
       }
+
+      insideSubQuery = wasInsideSubQuery
     }
 
-    // For .join() or single-column .select(), use default behavior
-    super.querySubQuery(subElements, optLimit, optOffset, isJoin)
+    // Group all casts into a single tuple cast
+    val tupleCast = castMultipleColumns(allCasts.toList)
+    castStrategy.add(tupleCast)
   }
 
   override protected def buildSubQuerySqlWithCasts(

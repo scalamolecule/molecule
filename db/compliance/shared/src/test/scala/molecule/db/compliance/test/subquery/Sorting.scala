@@ -215,7 +215,7 @@ case class Sorting(
         ("d", List()),
       ).transact
 
-      _ <- Entity.s.select(Ref.id(count).a1.i(avg).entity_(Entity.id_)).query.get.map(_ ==> List(
+      _ <- Entity.s.select(Ref.id(count).a1.i(avg).entity_(Entity.id_)).query.i.get.map(_ ==> List(
         ("d", (0, 0.0)),
         ("b", (1, 10.0)),
         ("a", (3, 5.0)),

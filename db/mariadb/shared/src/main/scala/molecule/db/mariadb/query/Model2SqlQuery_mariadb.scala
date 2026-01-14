@@ -17,66 +17,67 @@ class Model2SqlQuery_mariadb(elements0: List[Element])
   // Override to handle multiple-column SELECT subqueries
   // MariaDB doesn't support ROW types in SELECT clause, so generate multiple scalar subqueries
   override protected def querySubQuery(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int], isJoin: Boolean): Unit = {
-    if (!isJoin) {
-      // Check if we have multiple non-tacit attributes
+    if (shouldSplitSubquery(subElements, isJoin)) {
+      querySplitSubQueries(subElements, optLimit, optOffset)
+    } else {
+      querySubQueryBase(subElements, optLimit, optOffset, isJoin)
+    }
+  }
+
+  private def shouldSplitSubquery(subElements: List[Element], isJoin: Boolean): Boolean = {
+    if (isJoin) {
+      false
+    } else {
       val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
+      nonTacitAttrs.length > 1
+    }
+  }
 
-      if (nonTacitAttrs.length > 1) {
-        // Generate separate scalar subqueries for each attribute
-        // BUT keep all tacit attributes (WHERE correlation) and Ref elements (JOIN relationships)
-        val allCasts      = scala.collection.mutable.ListBuffer.empty[Cast]
-        val otherElements = subElements.filter {
-          case a: Attr if a.isInstanceOf[Tacit] => true // Tacit attrs for WHERE clauses
-          case _: Ref                           => true // Ref elements for JOIN relationships
-          case _                                => false
-        }
-
-        nonTacitAttrs.foreach { attr =>
-          subQueryIndex += 1
-          val alias = subQueryAlias
-
-          val wasInsideSubQuery = insideSubQuery
-          insideSubQuery = true
-
-          // Build subquery with this attribute + all tacit/ref elements
-          // This preserves WHERE clauses (tacit) and JOINs (refs)
-          val subqueryElements             = otherElements :+ attr
-          val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(
-            subqueryElements, alias, optLimit, optOffset, isImplicit = false, isJoin = false
-          )
-
-          // Add as separate SELECT clause subquery
-          select += subquerySql
-          allCasts ++= subQueryCasts
-
-          // Propagate sorting if needed (only for first attribute in multi-column subquery)
-          if (attr == nonTacitAttrs.head) {
-            attr.sort.foreach { sort =>
-              val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
-              val sortDir        = if (dir == 'a') "" else " DESC"
-              val selectPosition = select.length.toString
-              orderBy += ((level, arity, selectPosition, sortDir))
-            }
-          }
-
-          insideSubQuery = wasInsideSubQuery
-        }
-
-        // Group all casts into a single tuple cast
-        val tupleCast = castMultipleColumns(allCasts.toList)
-        castStrategy.add(tupleCast)
-        return
-      }
+  private def querySplitSubQueries(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int]): Unit = {
+    val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
+    val allCasts      = scala.collection.mutable.ListBuffer.empty[Cast]
+    val otherElements = subElements.filter {
+      case a: Attr if a.isInstanceOf[Tacit] => true // Tacit attrs for WHERE clauses
+      case _: Ref                           => true // Ref elements for JOIN relationships
+      case _                                => false
     }
 
-    // For .join() or single-column .select(), use default behavior
-    super.querySubQuery(subElements, optLimit, optOffset, isJoin)
+    nonTacitAttrs.foreach { attr =>
+      subQueryIndex += 1
+      val alias = subQueryAlias
+
+      val wasInsideSubQuery = insideSubQuery
+      insideSubQuery = true
+
+      // Build subquery with this attribute + all tacit/ref elements
+      // This preserves WHERE clauses (tacit) and JOINs (refs)
+      val subqueryElements             = otherElements :+ attr
+      val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(
+        subqueryElements, alias, optLimit, optOffset, isImplicit = false, isJoin = false
+      )
+
+      // Add as separate SELECT clause subquery
+      select += subquerySql
+      allCasts ++= subQueryCasts
+
+      // Propagate sorting if needed (only for first attribute in multi-column subquery)
+      if (attr == nonTacitAttrs.head) {
+        attr.sort.foreach { sort =>
+          val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
+          val sortDir        = if (dir == 'a') "" else " DESC"
+          val selectPosition = select.length.toString
+          orderBy += ((level, arity, selectPosition, sortDir))
+        }
+      }
+
+      insideSubQuery = wasInsideSubQuery
+    }
+
+    // Group all casts into a single tuple cast
+    val tupleCast = castMultipleColumns(allCasts.toList)
+    castStrategy.add(tupleCast)
   }
 
-  private def isTacit(attr: Attr): Boolean = attr match {
-    case _: Tacit => true
-    case _        => false
-  }
 
   override protected def buildSubQuerySqlWithCasts(
     subElements: List[Element], subQueryAlias: String, optLimit: Option[Int], optOffset: Option[Int],

@@ -9,6 +9,7 @@ import molecule.db.common.util.ModelUtils
 
 abstract class Model2SqlQuery(elements0: List[Element])
   extends Model2Query
+    with QueryExprSubQuery
     with QueryExprRef
     with ModelUtils
     with MoleculeLogging { self: QueryExpr & SqlQueryBase =>

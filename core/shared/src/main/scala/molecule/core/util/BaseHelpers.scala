@@ -5,6 +5,7 @@ import java.nio.ByteBuffer
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.{Date, UUID}
+import molecule.core.error.ModelError
 
 object BaseHelpers extends BaseHelpers
 trait BaseHelpers extends DateHandling {
@@ -104,14 +105,14 @@ trait BaseHelpers extends DateHandling {
   }
   protected final def time(n: Int, prev: Int = 0): Unit = {
     if (n < 1 || prev < 0)
-      throw new IllegalArgumentException(s"Identifiers have to be positive numbers")
+      throw ModelError(s"Identifiers have to be positive numbers")
 
     if (times.nonEmpty && n <= times.keys.max)
-      throw new IllegalArgumentException(
+      throw ModelError(
         s"Identifier have to be incremental. `$n` is smaller than or equal to previous `${times.keys.max}`")
 
     if (times.keys.toSeq.contains(n))
-      throw new IllegalArgumentException(s"Can't use same time identifier `$n` multiple times")
+      throw ModelError(s"Can't use same time identifier `$n` multiple times")
 
     val time1   = if (prev > 0) times(prev) else prevTime
     val time2   = System.currentTimeMillis()
