@@ -198,5 +198,4 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     castStrategy = castStrategy.nest
     resolve(nestedElements)
   }
-
 }

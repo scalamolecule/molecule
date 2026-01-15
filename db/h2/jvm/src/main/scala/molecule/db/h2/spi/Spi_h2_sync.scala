@@ -12,8 +12,8 @@ import molecule.db.common.spi.{SpiBaseJVM_sync, TxReport}
 import molecule.db.common.transaction.*
 import molecule.db.common.util.Executor.*
 import molecule.db.h2.facade.JdbcConn_JVM_h2
-import molecule.db.h2.query.{Model2SqlQuery_h2, Model2SqlQuery_h2_JVM}
-
+import molecule.db.h2.query.Model2SqlQuery_h2
+import molecule.db.h2.query.SqlQueryBase_h2
 
 object Spi_h2_sync extends Spi_h2_sync
 
@@ -38,7 +38,7 @@ trait Spi_h2_sync extends SpiBaseJVM_sync {
   }
 
   override def getModel2SqlQuery(elements: List[Element]): Model2SqlQuery & SqlQueryBase =
-    new Model2SqlQuery_h2_JVM(elements)
+    new Model2SqlQuery_h2(elements) with SqlQueryBase_h2
 
   // Creating connection from RPC proxy
   override protected def getJdbcConn(proxy0: ConnProxy): Future[JdbcConn_JVM] = Future {

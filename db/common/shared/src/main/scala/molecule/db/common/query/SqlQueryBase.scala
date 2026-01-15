@@ -55,6 +55,8 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   // Query variables
   final protected var filterAttrVars = Map.empty[List[String], String]
 
+  def h2Row2resultSet(rowCasts: List[Cast]): (RS, ParamIndex) => RS = ???
+
   def setNotNull(col: String) = {
     where += ((col, "IS NOT NULL"))
   }
@@ -165,40 +167,5 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
     bindIndex = bindIndex + 1
     val bindIndexStable = bindIndex
     binders += ((ps: PrepStmt) => bind(ps, paramIndex, bindIndexStable, bindValues(bindIndexStable)))
-  }
-
-
-  // Cast multiple columns into a tuple (used for JOIN subqueries)
-  protected def castMultipleColumns(columnCasts: List[Cast]): Cast = {
-    val n = columnCasts.length
-    (row: RS, baseIndex: Int) => {
-      val values = columnCasts.zipWithIndex.map { case (cast, i) =>
-        cast(row, baseIndex + i)
-      }
-      n match {
-        case 2  => (values(0), values(1))
-        case 3  => (values(0), values(1), values(2))
-        case 4  => (values(0), values(1), values(2), values(3))
-        case 5  => (values(0), values(1), values(2), values(3), values(4))
-        case 6  => (values(0), values(1), values(2), values(3), values(4), values(5))
-        case 7  => (values(0), values(1), values(2), values(3), values(4), values(5), values(6))
-        case 8  => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7))
-        case 9  => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8))
-        case 10 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9))
-        case 11 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10))
-        case 12 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11))
-        case 13 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12))
-        case 14 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13))
-        case 15 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14))
-        case 16 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15))
-        case 17 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16))
-        case 18 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17))
-        case 19 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18))
-        case 20 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18), values(19))
-        case 21 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18), values(19), values(20))
-        case 22 => (values(0), values(1), values(2), values(3), values(4), values(5), values(6), values(7), values(8), values(9), values(10), values(11), values(12), values(13), values(14), values(15), values(16), values(17), values(18), values(19), values(20), values(21))
-        case _  => throw new IllegalArgumentException(s"Unsupported tuple arity: $n")
-      }
-    }
   }
 }

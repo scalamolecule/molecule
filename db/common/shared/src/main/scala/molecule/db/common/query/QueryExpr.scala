@@ -6,11 +6,9 @@ trait QueryExpr {
 
   // Implemented for each database
 
-  // Handled in db implementations of QueryExprId
+  // Handled in db implementations of QueryExprOne
   protected def queryIdMan(attr: AttrOneMan): Unit
   protected def queryIdTac(attr: AttrOneTac): Unit
-
-  // Handled in db implementations of QueryExprOne
   protected def queryAttrOneMan(attr: AttrOneMan): Unit
   protected def queryAttrOneTac(attr: AttrOneTac): Unit
   protected def queryAttrOneOpt(attr: AttrOneOpt): Unit

@@ -2,11 +2,46 @@ package molecule.db.common.query
 
 import molecule.core.dataModel.*
 import molecule.core.error.ModelError
+import molecule.db.common.query.casting.*
+import molecule.db.common.query.casting.strategy.CastTuple
 
 
 trait QueryExprSubQuery extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
-  // To be implemented by database-specific query builders
+  // To be implemented by database-specific query builders - creates the DB-specific query builder
+  protected def createSubQueryBuilder(subElements: List[Element]): Model2SqlQuery & SqlQueryBase
+
+  // Hook methods for database-specific splitting behavior
+  protected def shouldSplitSubquery(subElements: List[Element], isJoin: Boolean): Boolean
+
+  // Hook for DB-specific modifications to subquery builder
+  protected def configureSubQueryBuilder(
+    subQueryBuilder: Model2SqlQuery with SqlQueryBase,
+    isImplicit: Boolean,
+    isJoin: Boolean
+  ): Unit = {
+    // Default: no additional configuration beyond common setup
+  }
+
+  // Hook for DB-specific cast handling for multi-column subqueries
+  protected def wrapMultiColumnCasts(
+    subqueryCasts: List[Cast],
+    isJoin: Boolean
+  ): List[Cast] = {
+    // Default: wrap in tuple for JOINs, return as-is for SELECT
+    if (subqueryCasts.length > 1) {
+      if (isJoin) {
+        val tupleCast: Cast = (row: RS, startIndex: Int) => casting.CastTpl_.cast(subqueryCasts, startIndex)(row)
+        List(tupleCast)
+      } else {
+        subqueryCasts
+      }
+    } else {
+      subqueryCasts
+    }
+  }
+
+  // Common implementation for building subquery SQL with casts
   protected def buildSubQuerySqlWithCasts(
     subElements: List[Element],
     subQueryAlias: String,
@@ -14,7 +49,92 @@ trait QueryExprSubQuery extends QueryExpr { self: Model2Query & SqlQueryBase =>
     optOffset: Option[Int],
     isImplicit: Boolean,
     isJoin: Boolean
-  ): (String, List[Cast])
+  ): (String, List[Cast]) = {
+    val subQueryBuilder = createSubQueryBuilder(subElements)
+    subQueryBuilder.insideSubQuery = true
+    subQueryBuilder.insideJoinSubQuery = isJoin
+    subQueryBuilder.resolveElements(subElements)
+
+    if (subQueryBuilder.hasManSubQueryAttr) {
+      hasManSubQueryAttr = true
+    }
+
+    // Allow DB-specific configuration
+    configureSubQueryBuilder(subQueryBuilder, isImplicit, isJoin)
+
+    // For SELECT clause subqueries (correlated, scalar), clear ORDER BY from subquery
+    // UNLESS there's a LIMIT/OFFSET (ORDER BY determines which rows are selected)
+    if (!isJoin && optLimit.isEmpty && optOffset.isEmpty) {
+      subQueryBuilder.orderBy.clear()
+    }
+
+    val sql           = subQueryBuilder.renderSubQuery(2, Some(subQueryAlias), optLimit, optOffset, isImplicit)
+    val subqueryCasts = subQueryBuilder.castStrategy match {
+      case tuple: CastTuple => tuple.getCasts
+      case _                => Nil
+    }
+
+    val casts = wrapMultiColumnCasts(subqueryCasts, isJoin)
+    (sql, casts)
+  }
+
+  protected def getOtherElements(subElements: List[Element]): List[Element] = {
+    subElements.filter {
+      case a: Attr if a.isInstanceOf[Tacit] => true // Tacit attrs for WHERE clauses
+      case _: Ref                           => true // Ref elements for JOIN relationships
+      case _                                => false
+    }
+  }
+
+  protected def buildSubqueryElements(otherElements: List[Element], attr: Attr): List[Element] = {
+    otherElements :+ attr
+  }
+
+  protected def handleAttrSorting(attr: Attr, allAttrs: List[Attr]): Unit = {
+    attr.sort.foreach { sort =>
+      val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
+      val sortDir        = if (dir == 'a') "" else " DESC"
+      val selectPosition = select.length.toString
+      orderBy += ((level, arity, selectPosition, sortDir))
+    }
+  }
+
+  // Common implementation for splitting subqueries into multiple scalar subqueries
+  protected def querySplitSubQueries(
+    subElements: List[Element],
+    optLimit: Option[Int],
+    optOffset: Option[Int]
+  ): Unit = {
+    val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
+    val allCasts      = scala.collection.mutable.ListBuffer.empty[Cast]
+    val otherElements = getOtherElements(subElements)
+
+    nonTacitAttrs.foreach { attr =>
+      subQueryIndex += 1
+      val alias = subQueryAlias
+
+      val wasInsideSubQuery = insideSubQuery
+      insideSubQuery = true
+
+      // Build subquery with this attribute + all tacit/ref elements
+      val subqueryElements             = buildSubqueryElements(otherElements, attr)
+      val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(
+        subqueryElements, alias, optLimit, optOffset, isImplicit = false, isJoin = false
+      )
+
+      select += subquerySql
+      allCasts ++= subQueryCasts
+
+      // Propagate sorting if needed
+      handleAttrSorting(attr, nonTacitAttrs)
+
+      insideSubQuery = wasInsideSubQuery
+    }
+
+    // Group all casts into a single tuple cast
+    val tupleCast: Cast = (row: RS, startIndex: Int) => casting.CastTpl_.cast(allCasts.toList, startIndex)(row)
+    castStrategy.add(tupleCast)
+  }
 
   // Base implementation for standard subquery handling
   // Database implementations can call this directly instead of using super
@@ -47,8 +167,8 @@ trait QueryExprSubQuery extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
     // Validate: Can only sort by first column in multi-column .select() subqueries
     // (SQL ROW types sort by their first field when used in ORDER BY)
-    val nonTacitAttrs = subElements.collect { case a: Attr if !isTacit(a) => a }
-    val sortedAttrs = subElements.collect { case a: Attr if a.sort.isDefined && !isTacit(a) => a }
+    val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
+    val sortedAttrs = subElements.collect { case a: Attr if a.sort.isDefined && !a.isInstanceOf[Tacit] => a }
 
     if (nonTacitAttrs.length > 1 && sortedAttrs.nonEmpty) {
       // Multi-column .select() subquery with sorting - only first attribute can be sorted
@@ -92,7 +212,7 @@ trait QueryExprSubQuery extends QueryExpr { self: Model2Query & SqlQueryBase =>
     // Add subquery columns to outer SELECT (listed individually, not as ROW)
     // The cast strategy will group them into a tuple for the result
     subElements.foreach {
-      case a: Attr if !isTacit(a) =>
+      case a: Attr if !a.isInstanceOf[Tacit] =>
         // Add mandatory/returned attributes to outer SELECT (skip all tacit attributes)
         // For aggregates, use the alias (e.g., Ref_id_count)
         val columnRef = getSubqueryColumnRef(a, alias)
@@ -111,16 +231,11 @@ trait QueryExprSubQuery extends QueryExpr { self: Model2Query & SqlQueryBase =>
     // Add subquery column casts
     // For multiple columns, wrap them into a nested tuple
     if (subQueryCasts.length > 1) {
-      val tupleCast = castMultipleColumns(subQueryCasts)
-      castStrategy.add(tupleCast)
+      val cast = (startIndex: Int) => CastTpl_.cast(subQueryCasts, startIndex)
+      castStrategy.add((row: RS, startIndex: Int) => cast(startIndex))
     } else {
       subQueryCasts.foreach(castStrategy.add)
     }
-  }
-
-  private def isTacit(attr: Attr): Boolean = attr match {
-    case _: Tacit => true
-    case _        => false
   }
 
   private def getSubqueryColumnRef(attr: Attr, subqueryAlias: String): String = {
