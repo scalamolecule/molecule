@@ -36,7 +36,7 @@ case class _Overview(
       _ <- Ref.i.insert(1, 2).transact
 
       // Add count of ALL Refs to each row
-      _ <- Entity.s.a1.select(Ref.i(count)).query.get.map(_ ==> List(
+      _ <- Entity.s.a1.select(Ref.i(count)).query.i.get.map(_ ==> List(
         ("a", 2), // 2 total Refs
         ("b", 2), // 2 total Refs
         ("c", 2), // 2 total Refs - same for all

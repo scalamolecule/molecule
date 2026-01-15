@@ -2,7 +2,7 @@ package molecule.db.mysql.query
 
 import scala.reflect.ClassTag
 import scala.util.Random
-import molecule.core.dataModel.{Op, Value}
+import molecule.core.dataModel.*
 import molecule.core.error.ModelError
 import molecule.db.common.javaSql.PrepStmt
 import molecule.db.common.query.{Model2Query, QueryExprOne, QueryExprRef, SqlQueryBase}
@@ -10,6 +10,35 @@ import molecule.db.common.query.{Model2Query, QueryExprOne, QueryExprRef, SqlQue
 trait QueryExprOne_mysql
   extends QueryExprOne
     with LambdasOne_mysql { self: Model2Query & QueryExprRef & SqlQueryBase =>
+
+  // MySQL doesn't support NULLS FIRST/LAST syntax, so we simulate it
+  override protected def addSort(attr: AttrOne, col: String): Unit = {
+    attr.sort.foreach { sort =>
+      val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
+
+      // Check if this is an aggregate function
+      val isAggregate = attr.op.isInstanceOf[AggrFn]
+
+      // In join subqueries with aggregates and GROUP BY, or when sorting aggregate functions,
+      // we can't use IS NULL checks in ORDER BY due to sql_mode=only_full_group_by
+      if ((insideJoinSubQuery && aggregate) || isAggregate) {
+        // Just sort by the column directly (will be replaced with alias by selectWithOrder)
+        val sortDir = if (dir == 'a') "" else " DESC"
+        orderBy += ((level, arity, col, sortDir))
+      } else {
+        dir match {
+          case 'a' =>
+            // ASC NULLS FIRST: sort NULLs first, then values ascending
+            orderBy += ((level, arity, s"($col IS NOT NULL)", ""))
+            orderBy += ((level, arity, col, ""))
+          case 'd' =>
+            // DESC NULLS LAST: sort values descending, then NULLs last
+            orderBy += ((level, arity, s"($col IS NULL)", ""))
+            orderBy += ((level, arity, col, " DESC"))
+        }
+      }
+    }
+  }
 
   override protected def matches[T](
     col: String,
@@ -59,7 +88,22 @@ trait QueryExprOne_mysql
 
       case "min" =>
         aggregate = true
-        select += s"MIN($col)"
+        if (hasSort || insideJoinSubQuery) {
+          // Use COALESCE to treat NULL appropriately for proper sorting and JOIN subqueries
+          val defaultValue = res.tpe match {
+            case "String" => "''"
+            case _        => "0"
+          }
+          val alias = col.replace('.', '_') + "_min"
+          select += s"COALESCE(MIN($col), $defaultValue) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"MIN($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"MIN($col)")
 
@@ -73,7 +117,22 @@ trait QueryExprOne_mysql
 
       case "max" =>
         aggregate = true
-        select += s"MAX($col)"
+        if (hasSort || insideJoinSubQuery) {
+          // Use COALESCE to treat NULL appropriately for proper sorting and JOIN subqueries
+          val defaultValue = res.tpe match {
+            case "String" => "''"
+            case _        => "0"
+          }
+          val alias = col.replace('.', '_') + "_max"
+          select += s"COALESCE(MAX($col), $defaultValue) AS $alias"
+          if (hasSort) {
+            val (level, _, _, dir) = orderBy.last
+            orderBy.remove(orderBy.size - 1)
+            orderBy += ((level, 1, alias, dir))
+          }
+        } else {
+          select += s"MAX($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"MAX($col)")
 
@@ -137,13 +196,26 @@ trait QueryExprOne_mysql
         if (aggrOp.isDefined) {
           throw ModelError("Operations on median not implemented for this database.")
         }
+        if (insideSubQuery && !insideJoinSubQuery) {
+          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+        }
         aggregate = true
-        select += s"JSON_ARRAYAGG($col)"
+        if (insideJoinSubQuery) {
+          // Add alias for JOIN subqueries so outer query can reference it
+          val alias = col.replace('.', '_') + "_median"
+          select += s"JSON_ARRAYAGG($col) AS $alias"
+        } else {
+          select += s"JSON_ARRAYAGG($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
-            getMedian(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toList)
+            if (json == null) {
+              0.0
+            } else {
+              getMedian(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toList)
+            }
           }
         )
 
@@ -160,14 +232,27 @@ trait QueryExprOne_mysql
         if (aggrOp.isDefined) {
           throw ModelError("Operations on variance not implemented for this database.")
         }
+        if (insideSubQuery && !insideJoinSubQuery) {
+          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+        }
         aggregate = true
-        select += s"JSON_ARRAYAGG($col)"
+        if (insideJoinSubQuery) {
+          // Add alias for JOIN subqueries so outer query can reference it
+          val alias = col.replace('.', '_') + "_variance"
+          select += s"JSON_ARRAYAGG($col) AS $alias"
+        } else {
+          select += s"JSON_ARRAYAGG($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"VAR_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
-            varianceOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)
+            if (json == null) {
+              0.0
+            } else {
+              varianceOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)
+            }
           }
         )
 
@@ -178,14 +263,27 @@ trait QueryExprOne_mysql
         if (aggrOp.isDefined) {
           throw ModelError("Operations on stddev not implemented for this database.")
         }
+        if (insideSubQuery && !insideJoinSubQuery) {
+          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+        }
         aggregate = true
-        select += s"JSON_ARRAYAGG($col)"
+        if (insideJoinSubQuery) {
+          // Add alias for JOIN subqueries so outer query can reference it
+          val alias = col.replace('.', '_') + "_stddev"
+          select += s"JSON_ARRAYAGG($col) AS $alias"
+        } else {
+          select += s"JSON_ARRAYAGG($col)"
+        }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"STDDEV_POP($col)")
         castStrategy.replace(
           (row: RS, paramIndex: Int) => {
             val json = row.getString(paramIndex)
-            stdDevOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)
+            if (json == null) {
+              0.0
+            } else {
+              stdDevOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)
+            }
           }
         )
 

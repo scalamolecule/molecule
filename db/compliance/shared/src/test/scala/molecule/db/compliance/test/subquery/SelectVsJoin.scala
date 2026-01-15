@@ -196,7 +196,7 @@ case class SelectVsJoin(
         ))
 
       // .join() - sort by count (descending), excludes 0
-      _ <- Entity.s.join(Ref.id(count).d1.entity_(Entity.id_)).query.get.map(_ ==> List(
+      _ <- Entity.s.join(Ref.id(count).d1.entity_(Entity.id_)).query.i.get.map(_ ==> List(
           ("b", 3),
           ("c", 2),
           ("a", 1),

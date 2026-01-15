@@ -29,19 +29,46 @@ trait QueryExprSubQuery_mysql
     }
   }
 
-  // MySQL-specific: build subquery with just the single attribute (no otherElements)
+  // MySQL-specific: build subquery with just the single attribute + tacit/ref elements for correlation
   override protected def buildSubqueryElements(otherElements: List[Element], attr: Attr): List[Element] = {
-    List(attr)
+    otherElements :+ attr
   }
 
-  // MySQL-specific: only sort on first attribute in multi-column subquery
+  // MySQL-specific: turn off DISTINCT for SELECT clause correlated subqueries with aggregates
+  override protected def configureSubQueryBuilder(
+    subQueryBuilder: Model2SqlQuery with SqlQueryBase,
+    isImplicit: Boolean,
+    isJoin: Boolean
+  ): Unit = {
+    if (!isJoin && !isImplicit && subQueryBuilder.aggregate) {
+      subQueryBuilder.distinct = false
+    }
+  }
+
+  // MySQL-specific: MySQL doesn't support NULLS FIRST/LAST, simulate it
   override protected def handleAttrSorting(attr: Attr, allAttrs: List[Attr]): Unit = {
-    if (attr == allAttrs.head) {
-      attr.sort.foreach { sort =>
-        val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
-        val sortDir        = if (dir == 'a') "" else " DESC"
-        val selectPosition = select.length.toString
+    attr.sort.foreach { sort =>
+      val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
+      val selectPosition = select.length.toString
+
+      // In join subqueries with aggregates and GROUP BY, we can't use IS NULL checks
+      // in ORDER BY due to sql_mode=only_full_group_by
+      if (insideJoinSubQuery && aggregate) {
+        // Just sort by the aggregate column directly
+        val sortDir = if (dir == 'a') "" else " DESC"
         orderBy += ((level, arity, selectPosition, sortDir))
+      } else {
+        // MySQL doesn't support NULLS FIRST/LAST, simulate it
+        dir match {
+          case 'a' =>
+            // ASC NULLS FIRST: sort NULLs first, then values ascending
+            orderBy += ((level, arity, s"($selectPosition IS NOT NULL)", ""))
+            orderBy += ((level, arity, selectPosition, ""))
+          case 'd' =>
+            // DESC NULLS LAST: sort values descending, then NULLs last
+            orderBy += ((level, arity, s"($selectPosition IS NULL)", ""))
+            orderBy += ((level, arity, selectPosition, " DESC"))
+        }
       }
     }
   }

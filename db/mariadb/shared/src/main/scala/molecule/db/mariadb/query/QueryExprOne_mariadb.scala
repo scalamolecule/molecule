@@ -15,15 +15,27 @@ trait QueryExprOne_mariadb
   override protected def addSort(attr: AttrOne, col: String): Unit = {
     attr.sort.foreach { sort =>
       val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
-      dir match {
-        case 'a' =>
-          // ASC NULLS FIRST: sort NULLs first, then values ascending
-          orderBy += ((level, arity, s"($col IS NOT NULL)", ""))
-          orderBy += ((level, arity, col, ""))
-        case 'd' =>
-          // DESC NULLS LAST: sort values descending, then NULLs last
-          orderBy += ((level, arity, s"($col IS NULL)", ""))
-          orderBy += ((level, arity, col, " DESC"))
+
+      // Check if this is an aggregate function
+      val isAggregate = attr.op.isInstanceOf[AggrFn]
+
+      // In join subqueries with aggregates and GROUP BY, or when sorting aggregate functions,
+      // we can't use IS NULL checks in ORDER BY due to sql_mode=only_full_group_by
+      if ((insideJoinSubQuery && aggregate) || isAggregate) {
+        // Just sort by the column directly (will be replaced with alias by selectWithOrder)
+        val sortDir = if (dir == 'a') "" else " DESC"
+        orderBy += ((level, arity, col, sortDir))
+      } else {
+        dir match {
+          case 'a' =>
+            // ASC NULLS FIRST: sort NULLs first, then values ascending
+            orderBy += ((level, arity, s"($col IS NOT NULL)", ""))
+            orderBy += ((level, arity, col, ""))
+          case 'd' =>
+            // DESC NULLS LAST: sort values descending, then NULLs last
+            orderBy += ((level, arity, s"($col IS NULL)", ""))
+            orderBy += ((level, arity, col, " DESC"))
+        }
       }
     }
   }

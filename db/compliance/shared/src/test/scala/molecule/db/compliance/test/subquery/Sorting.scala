@@ -281,11 +281,21 @@ case class Sorting(
         ("b", "m"),
         ("a", "x"),
       ))
+      _ <- Entity.s.select(Ref.s(max).a1.entity_(Entity.id_)).query.i.get.map(_ ==> List(
+        ("d", ""), // Default empty string for no refs
+        ("c", "c"),
+        ("b", "n"),
+        ("a", "z"),
+      ))
 
       // Sort by max string descending (.join)
-      _ <- Entity.s
-        .join(Ref.s(max).d1.entity_(Entity.id_))
-        .query.get.map(_ ==> List(
+      _ <- Entity.s.join(Ref.s(min).d1.entity_(Entity.id_)).query.get.map(_ ==> List(
+          // "d" excluded
+          ("a", "x"),
+          ("b", "m"),
+          ("c", "a"),
+        ))
+      _ <- Entity.s.join(Ref.s(max).d1.entity_(Entity.id_)).query.get.map(_ ==> List(
           ("a", "z"),
           ("b", "n"),
           ("c", "c"),
