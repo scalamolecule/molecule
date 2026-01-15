@@ -29,14 +29,21 @@ trait QueryExprSubQuery_mariadb
     }
   }
 
-  // MariaDB-specific: only sort on first attribute in multi-column subquery
+  // MariaDB-specific: add NULL handling for sorted attributes in split subqueries
   override protected def handleAttrSorting(attr: Attr, allAttrs: List[Attr]): Unit = {
-    if (attr == allAttrs.head) {
-      attr.sort.foreach { sort =>
-        val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
-        val sortDir        = if (dir == 'a') "" else " DESC"
-        val selectPosition = select.length.toString
-        orderBy += ((level, arity, selectPosition, sortDir))
+    attr.sort.foreach { sort =>
+      val (dir, arity)   = (sort.head, sort.substring(1, 2).toInt)
+      val selectPosition = select.length.toString
+      // MariaDB doesn't support NULLS FIRST/LAST, simulate it
+      dir match {
+        case 'a' =>
+          // ASC NULLS FIRST: sort NULLs first, then values ascending
+          orderBy += ((level, arity, s"($selectPosition IS NOT NULL)", ""))
+          orderBy += ((level, arity, selectPosition, ""))
+        case 'd' =>
+          // DESC NULLS LAST: sort values descending, then NULLs last
+          orderBy += ((level, arity, s"($selectPosition IS NULL)", ""))
+          orderBy += ((level, arity, selectPosition, " DESC"))
       }
     }
   }

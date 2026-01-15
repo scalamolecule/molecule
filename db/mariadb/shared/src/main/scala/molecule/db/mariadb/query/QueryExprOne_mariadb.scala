@@ -11,13 +11,19 @@ trait QueryExprOne_mariadb
   extends QueryExprOne
     with LambdasOne { self: Model2Query & QueryExprRef & SqlQueryBase =>
 
-  // MariaDB doesn't support NULLS FIRST/LAST syntax
+  // MariaDB doesn't support NULLS FIRST/LAST syntax, so we simulate it
   override protected def addSort(attr: AttrOne, col: String): Unit = {
     attr.sort.foreach { sort =>
       val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
       dir match {
-        case 'a' => orderBy += ((level, arity, col, ""))
-        case 'd' => orderBy += ((level, arity, col, " DESC"))
+        case 'a' =>
+          // ASC NULLS FIRST: sort NULLs first, then values ascending
+          orderBy += ((level, arity, s"($col IS NOT NULL)", ""))
+          orderBy += ((level, arity, col, ""))
+        case 'd' =>
+          // DESC NULLS LAST: sort values descending, then NULLs last
+          orderBy += ((level, arity, s"($col IS NULL)", ""))
+          orderBy += ((level, arity, col, " DESC"))
       }
     }
   }
@@ -179,23 +185,23 @@ trait QueryExprOne_mariadb
         havingOp(s"ROUND(SUM($col), 6)")
 
       case "median" =>
+        if (hasSort) {
+          throw ModelError("Sorting by median not implemented for this database.")
+        }
+        if (aggrOp.isDefined) {
+          throw ModelError("Operations on median not implemented for this database.")
+        }
         aggregate = true
         if (!select.contains(col)) groupByCols -= col
         // MariaDB doesn't have a native MEDIAN function, so we need to calculate it
         // For implicit subqueries (comparisons), we can't use JSON arrays
-        // For JOIN subqueries and sorting, we need aliases
         if (insideSubQuery && !insideJoinSubQuery) {
           // Implicit subquery - need to calculate median as scalar value
-          // Use a subquery with LIMIT/OFFSET to get the middle value(s)
           throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
-        } else if (hasSort || insideJoinSubQuery) {
+        } else if (insideJoinSubQuery) {
+          // JOIN subquery - use alias
           val alias = col.replace('.', '_') + "_median"
           select += s"JSON_ARRAYAGG($col) AS $alias"
-          if (hasSort) {
-            val (level, _, _, dir) = orderBy.last
-            orderBy.remove(orderBy.size - 1)
-            orderBy += ((level, 1, alias, dir))
-          }
           castStrategy.replace(
             (row: RS, paramIndex: Int) => {
               val values = jsonArray2doubles(row.getString(paramIndex))
@@ -212,12 +218,6 @@ trait QueryExprOne_mariadb
             }
           )
         }
-        if (orderBy.nonEmpty && orderBy.last._3 == col) {
-          throw ModelError("Sorting by median not implemented for this database.")
-        }
-        if (aggrOp.isDefined) {
-          throw ModelError("Operations on median not implemented for this database.")
-        }
 
       case "avg" =>
         aggregate = true
@@ -226,7 +226,7 @@ trait QueryExprOne_mariadb
         havingOp(s"ROUND(AVG($col), 10)")
 
       case "variance" =>
-        if (orderBy.nonEmpty && orderBy.last._3 == col) {
+        if (hasSort) {
           throw ModelError("Sorting by variance not implemented for this database.")
         }
         if (aggrOp.isDefined) {
@@ -254,7 +254,7 @@ trait QueryExprOne_mariadb
         )
 
       case "stddev" =>
-        if (orderBy.nonEmpty && orderBy.last._3 == col) {
+        if (hasSort) {
           throw ModelError("Sorting by standard deviation not implemented for this database.")
         }
         if (aggrOp.isDefined) {
