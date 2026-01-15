@@ -58,8 +58,7 @@ trait QueryExprSubQuery_h2
 
   // Handle JOIN subquery columns (separate values)
   protected def castJoinSubqueryTuple(columnCasts: List[Cast]): Cast = {
-    val cast = (startIndex: Int) => CastTpl_.cast(columnCasts, startIndex)
-    (row: RS, startIndex: Int) => cast(startIndex)(row)
+    (row: RS, startIndex: Int) => CastTpl_.cast(columnCasts, startIndex)(row)
   }
 
   // Handle H2's ROW type (SELECT clause subqueries)

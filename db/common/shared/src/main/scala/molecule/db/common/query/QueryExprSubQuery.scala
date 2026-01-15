@@ -231,8 +231,7 @@ trait QueryExprSubQuery extends QueryExpr { self: Model2Query & SqlQueryBase =>
     // Add subquery column casts
     // For multiple columns, wrap them into a nested tuple
     if (subQueryCasts.length > 1) {
-      val cast = (startIndex: Int) => CastTpl_.cast(subQueryCasts, startIndex)
-      castStrategy.add((row: RS, startIndex: Int) => cast(startIndex))
+      castStrategy.add((row: RS, startIndex: Int) => CastTpl_.cast(subQueryCasts, startIndex)(row))
     } else {
       subQueryCasts.foreach(castStrategy.add)
     }
