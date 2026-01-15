@@ -167,9 +167,7 @@ case class SelectVsJoin(
         ))
 
       // .join() - min/max/avg only for entities with refs
-      _ <- Entity.s.a1
-        .join(Ref.i(min).i(max).i(avg).entity_(Entity.id_))
-        .query.get.map(_ ==> List(
+      _ <- Entity.s.a1.join(Ref.i(min).i(max).i(avg).entity_(Entity.id_)).query.get.map(_ ==> List(
           ("a", (5, 25, 15)),
           ("b", (10, 40, 25)),
           // ✗ "c" excluded (no refs to aggregate)

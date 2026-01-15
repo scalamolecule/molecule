@@ -506,9 +506,7 @@ case class Sorting(
         ))
 
       // Leaderboard: only players with matches (.join)
-      _ <- Entity.s.i
-        .join(Ref.i(count).i(sum).d1.entity_(Entity.id_)) // Sort by total score
-        .query.get.map(_ ==> List(
+      _ <- Entity.s.i.join(Ref.i(count).i(sum).d1.entity_(Entity.id_)).query.get.map(_ ==> List(
           ("charlie", 12, (4, 310)),
           ("alice", 10, (3, 265)),
           ("bob", 8, (2, 185)),
@@ -528,14 +526,10 @@ case class Sorting(
       ).transact
 
       // Return only counts, sorted descending (.select)
-      _ <- Entity.s_
-        .select(Ref.id(count).d1.entity_(Entity.id_))
-        .query.get.map(_ ==> List(3, 2, 1, 0))
+      _ <- Entity.s_.select(Ref.id(count).d1.entity_(Entity.id_)).query.get.map(_ ==> List(3, 2, 1, 0))
 
       // Return only counts, sorted descending (.join)
-      _ <- Entity.s_
-        .join(Ref.id(count).d1.entity_(Entity.id_))
-        .query.get.map(_ ==> List(3, 2, 1)) // No 0
+      _ <- Entity.s_.join(Ref.id(count).d1.entity_(Entity.id_)).query.get.map(_ ==> List(3, 2, 1)) // No 0
     } yield ()
   }
 }
