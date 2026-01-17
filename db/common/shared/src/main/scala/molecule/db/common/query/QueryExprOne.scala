@@ -255,8 +255,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     // isImplicit = true for comparison operations (always Molecule_1, needs "col" alias)
     val (subQuerySql, subQueryCasts) = buildSubQuerySqlWithCasts(
       subQuery.elements, alias, subQuery.optLimit, subQuery.optOffset,
-      isImplicit = true,
-      isJoin = false
+      isImplicit = true
     )
     val opStr                        = getAggrOp(Some(attr.op))
     joins += (("CROSS JOIN", subQuerySql, alias, Nil))

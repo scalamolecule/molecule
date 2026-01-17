@@ -40,7 +40,7 @@ trait ModelTransformations_ extends ModelUtils {
     val dataModel    = self.dataModel
     val subDataModel = subMolecule.dataModel
     DataModel(
-      dataModel.elements :+ SubQuery(subDataModel.elements, None, None, false),
+      dataModel.elements :+ SubQuery(subDataModel.elements, None, None),
       dataModel.attrIndexes ++ subDataModel.attrIndexes,
       binds = dataModel.binds + subDataModel.binds
     )
@@ -49,7 +49,7 @@ trait ModelTransformations_ extends ModelUtils {
     val dataModel    = self.dataModel
     val subDataModel = subQuery.dataModel
     DataModel(
-      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, None, false),
+      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, None),
       dataModel.attrIndexes ++ subDataModel.attrIndexes,
       binds = dataModel.binds + subDataModel.binds
     )
@@ -58,7 +58,7 @@ trait ModelTransformations_ extends ModelUtils {
     val dataModel    = self.dataModel
     val subDataModel = subQuery.dataModel
     DataModel(
-      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, Some(subQuery.offset), false),
+      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, Some(subQuery.offset)),
       dataModel.attrIndexes ++ subDataModel.attrIndexes,
       binds = dataModel.binds + subDataModel.binds
     )
@@ -71,7 +71,7 @@ trait ModelTransformations_ extends ModelUtils {
     val dataModel    = self.dataModel
     val subDataModel = subMolecule.dataModel
     DataModel(
-      dataModel.elements :+ SubQuery(subDataModel.elements, None, None, true),
+      dataModel.elements :+ SubQuery(subDataModel.elements, None, None),
       dataModel.attrIndexes ++ subDataModel.attrIndexes,
       binds = dataModel.binds + subDataModel.binds
     )
@@ -80,7 +80,7 @@ trait ModelTransformations_ extends ModelUtils {
     val dataModel    = self.dataModel
     val subDataModel = subQuery.dataModel
     DataModel(
-      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, None, true),
+      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, None),
       dataModel.attrIndexes ++ subDataModel.attrIndexes,
       binds = dataModel.binds + subDataModel.binds
     )
@@ -89,7 +89,7 @@ trait ModelTransformations_ extends ModelUtils {
     val dataModel    = self.dataModel
     val subDataModel = subQuery.dataModel
     DataModel(
-      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, Some(subQuery.offset), true),
+      dataModel.elements :+ SubQuery(subDataModel.elements, subQuery.optLimit, Some(subQuery.offset)),
       dataModel.attrIndexes ++ subDataModel.attrIndexes,
       binds = dataModel.binds + subDataModel.binds
     )
@@ -3200,7 +3200,7 @@ trait ModelTransformations_ extends ModelUtils {
 
   def subQueryComparison(dataModel: DataModel, op: Op, subQueryMolecule: Molecule): DataModel = {
     val es       = dataModel.elements
-    val subQuery = SubQuery(subQueryMolecule.dataModel.elements, None, None, false)
+    val subQuery = SubQuery(subQueryMolecule.dataModel.elements, None, None)
 
     val attrWithSubQuery = es.last match {
       case a: AttrOneMan => a match {

@@ -42,5 +42,5 @@ trait QueryExpr {
   protected def queryOptNested(ref: Ref, nestedElements: List[Element]): Unit
 
   // Handled in db implementations of QueryExprSubQuery
-  protected def querySubQuery(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int], isJoin: Boolean): Unit
+  protected def querySubQuery(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int]): Unit
 }

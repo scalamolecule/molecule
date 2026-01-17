@@ -17,8 +17,7 @@ trait QueryExprSubQuery_sqlite
     subQueryAlias: String,
     optLimit: Option[Int],
     optOffset: Option[Int],
-    isImplicit: Boolean,
-    isJoin: Boolean
+    isImplicit: Boolean
   ): (String, List[Cast]) = {
     // For JOIN subqueries with LIMIT, use window functions for per-entity limiting
     // BUT only if there's a correlation attribute (otherwise it's a global limit)
@@ -27,10 +26,10 @@ trait QueryExprSubQuery_sqlite
       case _ => false
     }
 
-    if (isJoin && (optLimit.isDefined || optOffset.isDefined) && hasCorrelation) {
+    if ((optLimit.isDefined || optOffset.isDefined) && hasCorrelation) {
       buildWindowFunctionSubQuery(subElements, subQueryAlias, optLimit, optOffset)
     } else {
-      super.buildSubQuerySqlWithCasts(subElements, subQueryAlias, optLimit, optOffset, isImplicit, isJoin)
+      super.buildSubQuerySqlWithCasts(subElements, subQueryAlias, optLimit, optOffset, isImplicit)
     }
   }
 
@@ -91,7 +90,7 @@ trait QueryExprSubQuery_sqlite
       case _                => Nil
     }
 
-    val casts = wrapMultiColumnCasts(subqueryCasts, isJoin = true)
+    val casts = wrapMultiColumnCasts(subqueryCasts)
     (windowSql, casts)
   }
 
@@ -135,22 +134,17 @@ trait QueryExprSubQuery_sqlite
   override protected def querySubQuery(
     subElements: List[Element],
     optLimit: Option[Int],
-    optOffset: Option[Int],
-    isJoin: Boolean
+    optOffset: Option[Int]
   ): Unit = {
-    if (shouldSplitSubquery(subElements, isJoin)) {
+    if (shouldSplitSubquery(subElements)) {
       querySplitSubQueries(subElements, optLimit, optOffset)
     } else {
-      querySubQueryBase(subElements, optLimit, optOffset, isJoin)
+      querySubQueryBase(subElements, optLimit, optOffset)
     }
   }
 
-  override protected def shouldSplitSubquery(subElements: List[Element], isJoin: Boolean): Boolean = {
-    if (isJoin) {
-      false
-    } else {
-      val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
-      nonTacitAttrs.length > 1
-    }
+  override protected def shouldSplitSubquery(subElements: List[Element]): Boolean = {
+    // JOIN subqueries never split
+    false
   }
 }

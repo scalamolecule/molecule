@@ -15,14 +15,13 @@ trait QueryExprSubQuery_mysql
   override protected def querySubQueryBase(
     subElements: List[Element],
     optLimit: Option[Int],
-    optOffset: Option[Int],
-    isJoin: Boolean
+    optOffset: Option[Int]
   ): Unit = {
-    if (isJoin && (optLimit.isDefined || optOffset.isDefined)) {
+    if (optLimit.isDefined || optOffset.isDefined) {
       // Use LATERAL join for per-entity limiting
       queryLateralJoin(subElements, optLimit, optOffset)
     } else {
-      super.querySubQueryBase(subElements, optLimit, optOffset, isJoin)
+      super.querySubQueryBase(subElements, optLimit, optOffset)
     }
   }
 
@@ -97,23 +96,18 @@ trait QueryExprSubQuery_mysql
   override protected def querySubQuery(
     subElements: List[Element],
     optLimit: Option[Int],
-    optOffset: Option[Int],
-    isJoin: Boolean
+    optOffset: Option[Int]
   ): Unit = {
-    if (shouldSplitSubquery(subElements, isJoin)) {
+    if (shouldSplitSubquery(subElements)) {
       querySplitSubQueries(subElements, optLimit, optOffset)
     } else {
-      querySubQueryBase(subElements, optLimit, optOffset, isJoin)
+      querySubQueryBase(subElements, optLimit, optOffset)
     }
   }
 
-  override protected def shouldSplitSubquery(subElements: List[Element], isJoin: Boolean): Boolean = {
-    if (isJoin) {
-      false
-    } else {
-      val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
-      nonTacitAttrs.length > 1
-    }
+  override protected def shouldSplitSubquery(subElements: List[Element]): Boolean = {
+    // JOIN subqueries never split
+    false
   }
 
   // MySQL-specific: build subquery with just the single attribute + tacit/ref elements for correlation
@@ -121,13 +115,12 @@ trait QueryExprSubQuery_mysql
     otherElements :+ attr
   }
 
-  // MySQL-specific: turn off DISTINCT for SELECT clause correlated subqueries with aggregates
+  // MySQL-specific: turn off DISTINCT for correlated subqueries with aggregates
   override protected def configureSubQueryBuilder(
     subQueryBuilder: Model2SqlQuery & SqlQueryBase,
-    isImplicit: Boolean,
-    isJoin: Boolean
+    isImplicit: Boolean
   ): Unit = {
-    if (!isJoin && !isImplicit && subQueryBuilder.aggregate) {
+    if (!isImplicit && subQueryBuilder.aggregate) {
       subQueryBuilder.distinct = false
     }
   }

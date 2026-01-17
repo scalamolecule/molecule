@@ -19,8 +19,7 @@ trait QueryExprSubQuery_h2
     subQueryAlias: String,
     optLimit: Option[Int],
     optOffset: Option[Int],
-    isImplicit: Boolean,
-    isJoin: Boolean
+    isImplicit: Boolean
   ): (String, List[Cast]) = {
     // For JOIN subqueries with LIMIT, use window functions for per-entity limiting
     // BUT only if there's a correlation attribute (otherwise it's a global limit)
@@ -29,10 +28,10 @@ trait QueryExprSubQuery_h2
       case _ => false
     }
 
-    if (isJoin && (optLimit.isDefined || optOffset.isDefined) && hasCorrelation) {
+    if ((optLimit.isDefined || optOffset.isDefined) && hasCorrelation) {
       buildWindowFunctionSubQuery(subElements, subQueryAlias, optLimit, optOffset)
     } else {
-      super.buildSubQuerySqlWithCasts(subElements, subQueryAlias, optLimit, optOffset, isImplicit, isJoin)
+      super.buildSubQuerySqlWithCasts(subElements, subQueryAlias, optLimit, optOffset, isImplicit)
     }
   }
 
@@ -94,7 +93,7 @@ trait QueryExprSubQuery_h2
       case _                => Nil
     }
 
-    val casts = wrapMultiColumnCasts(subqueryCasts, isJoin = true)
+    val casts = wrapMultiColumnCasts(subqueryCasts)
     (windowSql, casts)
   }
 
@@ -138,40 +137,27 @@ trait QueryExprSubQuery_h2
   override protected def querySubQuery(
     subElements: List[Element],
     optLimit: Option[Int],
-    optOffset: Option[Int],
-    isJoin: Boolean
+    optOffset: Option[Int]
   ): Unit = {
-    if (shouldSplitSubquery(subElements, isJoin)) {
+    if (shouldSplitSubquery(subElements)) {
       querySplitSubQueries(subElements, optLimit, optOffset)
     } else {
-      querySubQueryBase(subElements, optLimit, optOffset, isJoin)
+      querySubQueryBase(subElements, optLimit, optOffset)
     }
   }
 
-  override protected def shouldSplitSubquery(subElements: List[Element], isJoin: Boolean): Boolean = {
-    if (isJoin) {
-      false
-    } else {
-      val nonTacitAttrs    = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
-      val hasIdAggregation = nonTacitAttrs.exists(attr => attr.name == "id" && attr.op.isInstanceOf[AggrFn])
-      val hasSorting       = nonTacitAttrs.exists(_.sort.isDefined)
-      nonTacitAttrs.length > 1 && (hasIdAggregation || hasSorting)
-    }
+  override protected def shouldSplitSubquery(subElements: List[Element]): Boolean = {
+    // JOIN subqueries never split
+    false
   }
 
   // H2-specific cast handling for multi-column subqueries
   override protected def wrapMultiColumnCasts(
-    subqueryCasts: List[Cast],
-    isJoin: Boolean
+    subqueryCasts: List[Cast]
   ): List[Cast] = {
     if (subqueryCasts.length > 1) {
-      if (isJoin) {
-        // JOIN: columns are separate in result set, group into tuple manually
-        List(castJoinSubqueryTuple(subqueryCasts))
-      } else {
-        // SELECT: H2 returns ROW type, extract values from ROW
-        List(castSubqueryRow(subqueryCasts))
-      }
+      // JOIN: columns are separate in result set, group into tuple manually
+      List(castJoinSubqueryTuple(subqueryCasts))
     } else {
       subqueryCasts
     }

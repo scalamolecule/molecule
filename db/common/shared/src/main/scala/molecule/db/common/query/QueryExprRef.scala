@@ -142,8 +142,7 @@ trait QueryExprRef extends QueryExpr { self: Model2Query & SqlQueryBase =>
     subQueryAlias: String,
     optLimit: Option[Int],
     optOffset: Option[Int],
-    isImplicit: Boolean,
-    isJoin: Boolean
+    isImplicit: Boolean
   ): (String, List[Cast])
 
 

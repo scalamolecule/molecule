@@ -15,14 +15,13 @@ trait QueryExprSubQuery_postgresql
   override protected def querySubQueryBase(
     subElements: List[Element],
     optLimit: Option[Int],
-    optOffset: Option[Int],
-    isJoin: Boolean
+    optOffset: Option[Int]
   ): Unit = {
-    if (isJoin && (optLimit.isDefined || optOffset.isDefined)) {
+    if (optLimit.isDefined || optOffset.isDefined) {
       // Use LATERAL join for per-entity limiting
       queryLateralJoin(subElements, optLimit, optOffset)
     } else {
-      super.querySubQueryBase(subElements, optLimit, optOffset, isJoin)
+      super.querySubQueryBase(subElements, optLimit, optOffset)
     }
   }
 
@@ -97,31 +96,23 @@ trait QueryExprSubQuery_postgresql
   override protected def querySubQuery(
     subElements: List[Element],
     optLimit: Option[Int],
-    optOffset: Option[Int],
-    isJoin: Boolean
+    optOffset: Option[Int]
   ): Unit = {
-    if (shouldSplitSubquery(subElements, isJoin)) {
+    if (shouldSplitSubquery(subElements)) {
       querySplitSubQueries(subElements, optLimit, optOffset)
     } else {
-      querySubQueryBase(subElements, optLimit, optOffset, isJoin)
+      querySubQueryBase(subElements, optLimit, optOffset)
     }
   }
 
-  override protected def shouldSplitSubquery(subElements: List[Element], isJoin: Boolean): Boolean = {
-    if (isJoin) {
-      false
-    } else {
-      val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
-      val hasAggregation = nonTacitAttrs.exists(attr => attr.op.isInstanceOf[AggrFn])
-      val hasSorting = nonTacitAttrs.exists(_.sort.isDefined)
-      nonTacitAttrs.length > 1 && (hasAggregation || hasSorting)
-    }
+  override protected def shouldSplitSubquery(subElements: List[Element]): Boolean = {
+    // JOIN subqueries never split
+    false
   }
 
   // PostgreSQL-specific: return casts directly without wrapping
   override protected def wrapMultiColumnCasts(
-    subqueryCasts: List[Cast],
-    isJoin: Boolean
+    subqueryCasts: List[Cast]
   ): List[Cast] = {
     subqueryCasts
   }

@@ -18,8 +18,7 @@ trait QueryExprSubQuery_mariadb
     subQueryAlias: String,
     optLimit: Option[Int],
     optOffset: Option[Int],
-    isImplicit: Boolean,
-    isJoin: Boolean
+    isImplicit: Boolean
   ): (String, List[Cast]) = {
     // For JOIN subqueries with LIMIT, use window functions for per-entity limiting
     // BUT only if there's a correlation attribute (otherwise it's a global limit)
@@ -28,10 +27,10 @@ trait QueryExprSubQuery_mariadb
       case _ => false
     }
 
-    if (isJoin && (optLimit.isDefined || optOffset.isDefined) && hasCorrelation) {
+    if ((optLimit.isDefined || optOffset.isDefined) && hasCorrelation) {
       buildWindowFunctionSubQuery(subElements, subQueryAlias, optLimit, optOffset)
     } else {
-      super.buildSubQuerySqlWithCasts(subElements, subQueryAlias, optLimit, optOffset, isImplicit, isJoin)
+      super.buildSubQuerySqlWithCasts(subElements, subQueryAlias, optLimit, optOffset, isImplicit)
     }
   }
 
@@ -92,7 +91,7 @@ trait QueryExprSubQuery_mariadb
       case _                => Nil
     }
 
-    val casts = wrapMultiColumnCasts(subqueryCasts, isJoin = true)
+    val casts = wrapMultiColumnCasts(subqueryCasts)
     (windowSql, casts)
   }
 
@@ -142,21 +141,20 @@ trait QueryExprSubQuery_mariadb
   override protected def querySubQuery(
     subElements: List[Element],
     optLimit: Option[Int],
-    optOffset: Option[Int],
-    isJoin: Boolean
+    optOffset: Option[Int]
   ): Unit = {
     val hasCorrelation = subElements.exists {
       case a: Attr if a.filterAttr.isDefined => true
       case _ => false
     }
 
-    if (shouldSplitSubquery(subElements, isJoin)) {
+    if (shouldSplitSubquery(subElements)) {
       querySplitSubQueries(subElements, optLimit, optOffset)
-    } else if (isJoin && (optLimit.isDefined || optOffset.isDefined) && hasCorrelation) {
+    } else if ((optLimit.isDefined || optOffset.isDefined) && hasCorrelation) {
       // Use window function approach for per-entity limiting in JOIN subqueries
       queryWindowFunctionJoin(subElements, optLimit, optOffset)
     } else {
-      querySubQueryBase(subElements, optLimit, optOffset, isJoin)
+      querySubQueryBase(subElements, optLimit, optOffset)
     }
   }
 
@@ -220,13 +218,9 @@ trait QueryExprSubQuery_mariadb
     }
   }
 
-  override protected def shouldSplitSubquery(subElements: List[Element], isJoin: Boolean): Boolean = {
-    if (isJoin) {
-      false
-    } else {
-      val nonTacitAttrs = subElements.collect { case a: Attr if !a.isInstanceOf[Tacit] => a }
-      nonTacitAttrs.length > 1
-    }
+  override protected def shouldSplitSubquery(subElements: List[Element]): Boolean = {
+    // JOIN subqueries always use window functions, never split
+    false
   }
 
   // MariaDB-specific: add NULL handling for sorted attributes in split subqueries
@@ -248,13 +242,12 @@ trait QueryExprSubQuery_mariadb
     }
   }
 
-  // MariaDB-specific: turn off DISTINCT for SELECT clause correlated subqueries with aggregates
+  // MariaDB-specific: turn off DISTINCT for correlated subqueries with aggregates
   override protected def configureSubQueryBuilder(
     subQueryBuilder: Model2SqlQuery & SqlQueryBase,
-    isImplicit: Boolean,
-    isJoin: Boolean
+    isImplicit: Boolean
   ): Unit = {
-    if (!isJoin && !isImplicit && subQueryBuilder.aggregate) {
+    if (!isImplicit && subQueryBuilder.aggregate) {
       subQueryBuilder.distinct = false
     }
   }

@@ -167,7 +167,7 @@ class CheckFilterAttrs(
   def prepareSubQuery(subQuery: SubQuery): SubQuery = {
     val wasInsideSubQuery = m2q.insideSubQuery
     m2q.insideSubQuery = true
-    val result = SubQuery(prepare(subQuery.elements, Nil), subQuery.optLimit, subQuery.optOffset, subQuery.isJoin)
+    val result = SubQuery(prepare(subQuery.elements, Nil), subQuery.optLimit, subQuery.optOffset)
     m2q.insideSubQuery = wasInsideSubQuery
     result
   }

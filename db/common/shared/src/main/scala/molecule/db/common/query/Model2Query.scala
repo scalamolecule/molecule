@@ -75,13 +75,13 @@ trait Model2Query extends QueryExpr with ModelUtils {
         case a: AttrMapOpt => queryAttrMapOpt(a); resolve(tail)
       }
 
-      case ref: Ref                                           => queryRef(ref, tail); resolve(tail)
-      case backRef: BackRef                                   => queryBackRef(backRef, tail); resolve(tail)
-      case OptRef(ref, refElements)                           => queryOptRef(ref, refElements); resolve(tail)
-      case OptEntity(refElements)                             => queryOptEntity(refElements); resolve(tail)
-      case SubQuery(subElements, optLimit, optOffset, isJoin) => querySubQuery(subElements, optLimit, optOffset, isJoin); resolve(tail)
-      case Nested(ref, nestedElements)                        => queryNested(ref, nestedElements); resolve(tail)
-      case OptNested(nestedRef, nestedElements)               => queryOptNested(nestedRef, nestedElements); resolve(tail)
+      case ref: Ref                                   => queryRef(ref, tail); resolve(tail)
+      case backRef: BackRef                           => queryBackRef(backRef, tail); resolve(tail)
+      case OptRef(ref, refElements)                   => queryOptRef(ref, refElements); resolve(tail)
+      case OptEntity(refElements)                     => queryOptEntity(refElements); resolve(tail)
+      case SubQuery(subElements, optLimit, optOffset) => querySubQuery(subElements, optLimit, optOffset); resolve(tail)
+      case Nested(ref, nestedElements)                => queryNested(ref, nestedElements); resolve(tail)
+      case OptNested(nestedRef, nestedElements)       => queryOptNested(nestedRef, nestedElements); resolve(tail)
     }
     case Nil             => ()
   }
@@ -129,7 +129,7 @@ trait Model2Query extends QueryExpr with ModelUtils {
                     )
                   validate(validateOptEntity(attrs) ++ tail, prevElements)
 
-                case SubQuery(es, _, _, isJoin) =>
+                case SubQuery(es, _, _) =>
                   validateJoinSubQueryCorrelationAttrs(es)
                   validateSubQuery()
                   validate(es ++ tail, prevElements)
@@ -217,10 +217,10 @@ trait Model2Query extends QueryExpr with ModelUtils {
           sq.elements.foreach {
             case correlAttr: Attr if correlAttr.isInstanceOf[Mandatory] =>
               throw ModelError(s"Correlation attribute ${correlAttr.cleanName} should be tacit.")
-            case _ => ()
+            case _                                                      => ()
           }
         }
-      case _ => ()
+      case _       => ()
     }
     // Ensure at most one correlation attribute
     if (correlationCount > 1) {
