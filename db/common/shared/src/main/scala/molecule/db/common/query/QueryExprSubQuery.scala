@@ -16,7 +16,7 @@ trait QueryExprSubQuery extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
   // Hook for DB-specific modifications to subquery builder
   protected def configureSubQueryBuilder(
-    subQueryBuilder: Model2SqlQuery with SqlQueryBase,
+    subQueryBuilder: Model2SqlQuery & SqlQueryBase,
     isImplicit: Boolean,
     isJoin: Boolean
   ): Unit = {
@@ -138,7 +138,12 @@ trait QueryExprSubQuery extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
   // Base implementation for standard subquery handling
   // Database implementations can call this directly instead of using super
-  protected def querySubQueryBase(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int], isJoin: Boolean): Unit = {
+  protected def querySubQueryBase(
+    subElements: List[Element],
+    optLimit: Option[Int],
+    optOffset: Option[Int],
+    isJoin: Boolean
+  ): Unit = {
     subQueryIndex += 1
     val alias = subQueryAlias
 
@@ -147,7 +152,9 @@ trait QueryExprSubQuery extends QueryExpr { self: Model2Query & SqlQueryBase =>
 
     // Build subquery SQL and get casts from subquery builder
     // isImplicit = false for explicit .select/.join calls (can return multiple columns, no alias needed)
-    val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(subElements, alias, optLimit, optOffset, isImplicit = false, isJoin)
+    val (subquerySql, subQueryCasts) = buildSubQuerySqlWithCasts(
+      subElements, alias, optLimit, optOffset, isImplicit = false, isJoin
+    )
 
     if (isJoin) {
       // .join() - Add as FROM clause join
@@ -160,7 +167,11 @@ trait QueryExprSubQuery extends QueryExpr { self: Model2Query & SqlQueryBase =>
     insideSubQuery = wasInsideSubQuery
   }
 
-  private def selectSubQuery(subquerySql: String, subQueryCasts: List[Cast], subElements: List[Element]): Unit = {
+  private def selectSubQuery(
+    subquerySql: String,
+    subQueryCasts: List[Cast],
+    subElements: List[Element]
+  ): Unit = {
     val selectIndex = select.length
     select += subquerySql
     subQueryCasts.foreach(castStrategy.add)
@@ -195,7 +206,12 @@ trait QueryExprSubQuery extends QueryExpr { self: Model2Query & SqlQueryBase =>
     }
   }
 
-  private def joinSubQuery(subquerySql: String, subQueryCasts: List[Cast], subElements: List[Element], alias: String): Unit = {
+  private def joinSubQuery(
+    subquerySql: String,
+    subQueryCasts: List[Cast],
+    subElements: List[Element],
+    alias: String
+  ): Unit = {
 
     // Extract join conditions from filter attributes in subElements
     val joinConditions = extractJoinConditions(subElements, alias)
