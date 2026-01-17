@@ -197,7 +197,7 @@ trait QueryExprOne_mysql
           throw ModelError("Operations on median not implemented for this database.")
         }
         if (insideSubQuery && !insideJoinSubQuery) {
-          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+          throw ModelError(noStatisticalFunctionsInSubquery)
         }
         aggregate = true
         if (insideJoinSubQuery) {
@@ -233,7 +233,7 @@ trait QueryExprOne_mysql
           throw ModelError("Operations on variance not implemented for this database.")
         }
         if (insideSubQuery && !insideJoinSubQuery) {
-          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+          throw ModelError(noStatisticalFunctionsInSubquery)
         }
         aggregate = true
         if (insideJoinSubQuery) {
@@ -264,7 +264,7 @@ trait QueryExprOne_mysql
           throw ModelError("Operations on stddev not implemented for this database.")
         }
         if (insideSubQuery && !insideJoinSubQuery) {
-          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+          throw ModelError(noStatisticalFunctionsInSubquery)
         }
         aggregate = true
         if (insideJoinSubQuery) {

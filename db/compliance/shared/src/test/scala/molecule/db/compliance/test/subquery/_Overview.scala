@@ -30,36 +30,22 @@ case class _Overview(
   }
 
 
-  "1b. Global aggregate - select" - types {
-    for {
-      _ <- Entity.s.insert("a", "b", "c").transact
-      _ <- Ref.i.insert(1, 2).transact
-
-      // Add count of ALL Refs to each row
-      _ <- Entity.s.a1.select(Ref.i(count)).query.i.get.map(_ ==> List(
-        ("a", 2), // 2 total Refs
-        ("b", 2), // 2 total Refs
-        ("c", 2), // 2 total Refs - same for all
-      ))
-    } yield ()
-  }
-
-  "1c. Global aggregate - join" - types {
+  "1b. Global aggregate - join" - types {
     for {
       _ <- Entity.s.insert("a", "b", "c").transact
       _ <- Ref.i.insert(1, 2).transact
 
       // Add count of ALL Refs to each row
       _ <- Entity.s.a1.join(Ref.i(count)).query.get.map(_ ==> List(
-        ("a", 2), // Same as .select() for global aggregates
-        ("b", 2),
-        ("c", 2), // All rows included
+        ("a", 2), // 2 total Refs
+        ("b", 2), // 2 total Refs
+        ("c", 2), // 2 total Refs - same for all (global aggregate)
       ))
     } yield ()
   }
 
 
-  "2. Correlated aggregate - select / join" - types {
+  "2. Correlated aggregate - join" - types {
     // "Correlated" means the subquery depends on the current row being processed.
     // The .entity_(Entity.id_) creates the correlation: "count Refs WHERE Ref.entity = Entity.id"
     for {
@@ -69,37 +55,24 @@ case class _Overview(
         ("c", 5, List()), // No Ref rows pointing to "c" Entity row
       ).transact
 
-      // Use .select() to count refs per Entity row
-      // Returns ALL Entities, even those with no matching Refs
-      _ <- Entity.s.a1.select(Ref.i(count).entity_(Entity.id_)).query.get.map(_ ==> List(
-        ("a", 2),
-        ("b", 3),
-        ("c", 0), // ✓ Included with count 0
-      ))
-      // or we could correlate the Ref.i with Entity.i:
-      _ <- Entity.s.a1.select(Ref.i(count).i_(Entity.i_)).query.get.map(_ ==> List(
-        ("a", 1), // 1 matches once
-        ("b", 2), // 3 matches twice
-        ("c", 0), // ✓ Included with count 0
-      ))
-
-      // Use .join() to count _related_ refs per Entity row
-      // Returns ONLY entities that have matching refs
+      // Count refs per Entity row - returns ONLY entities that have matching refs
       _ <- Entity.s.a1.join(Ref.id(count).entity_(Entity.id_)).query.get.map(_ ==> List(
         ("a", 2),
         ("b", 3),
-        // ✗ "c" excluded - no matching refs (INNER JOIN semantics)
+        // ✗ "c" excluded - no matching refs
       ))
+
+      // Or correlate using different attributes (Ref.i with Entity.i):
       _ <- Entity.s.a1.join(Ref.id(count).i_(Entity.i_)).query.get.map(_ ==> List(
-        ("a", 1),
-        ("b", 2),
-        // ✗ "c" excluded - no matching refs (INNER JOIN semantics)
+        ("a", 1), // 1 matches once
+        ("b", 2), // 3 matches twice
+        // ✗ "c" excluded - no matching refs
       ))
     } yield ()
   }
 
 
-  "3. Sub table values with limit" - types {
+  "3. Sub table values with limit/offset" - types {
     for {
       _ <- Entity.s.Refs.*(Ref.i).insert(
         ("a", List(1, 2, 3)),
@@ -107,20 +80,88 @@ case class _Overview(
         ("c", List()),
       ).transact
 
-      // Global
-      // Select highest of ALL Ref.i rows (5)
-      _ <- Entity.s.a1.select(Ref.i.d1.query.limit(1)).query.get.map(_ ==> List(
-        ("a", 5),
+
+      // Correlated - highest Ref.i per entity (just 1-1 correlation)
+      _ <- Entity.s.a1.join(Ref.i.d1.entity_(Entity.id_)).query.i.get.map(_ ==> List(
+        ("a", 3),
+        ("a", 2),
+        ("a", 1),
         ("b", 5),
-        ("c", 5),
+        ("b", 4),
       ))
 
-      // Correlate per row
-      // Select highest Ref.i per entity
-      _ <- Entity.s.a1.select(Ref.i.d1.entity_(Entity.id_).query.limit(1)).query.get.map(_ ==> List(
-        ("a", 3), // Highest Ref.i for "a"
-        ("b", 5), // Highest Ref.i for "b"
-        // ("c", ), // No correlated Ref.i value to find
+      // limit(3) - all in this case
+
+      _ <- Entity.s.a1.join(Ref.i.d1.entity_(Entity.id_).query.limit(3)).query.i.get.map(_ ==> List(
+        ("a", 3),
+        ("a", 2),
+        ("a", 1),
+        ("b", 5),
+        ("b", 4),
+      ))
+      _ <- Entity.s.a1.join(Ref.i.d1.entity_(Entity.id_).query.offset(1).limit(3)).query.i.get.map(_ ==> List(
+        // ("a", 3),
+        ("a", 2),
+        ("a", 1),
+        // ("b", 5),
+        ("b", 4),
+      ))
+      _ <- Entity.s.a1.join(Ref.i.d1.entity_(Entity.id_).query.offset(2).limit(3)).query.i.get.map(_ ==> List(
+        // ("a", 3),
+        // ("a", 2),
+        ("a", 1),
+        // ("b", 5),
+        // ("b", 4),
+      ))
+
+
+      // limit(2)
+
+      _ <- Entity.s.a1.join(Ref.i.d1.entity_(Entity.id_).query.limit(2)).query.i.get.map(_ ==> List(
+        ("a", 3),
+        ("a", 2),
+        // ("a", 1),
+        ("b", 5),
+        ("b", 4),
+      ))
+      _ <- Entity.s.a1.join(Ref.i.d1.entity_(Entity.id_).query.offset(1).limit(2)).query.i.get.map(_ ==> List(
+        // ("a", 3),
+        ("a", 2),
+        ("a", 1),
+        // ("b", 5),
+        ("b", 4),
+      ))
+      _ <- Entity.s.a1.join(Ref.i.d1.entity_(Entity.id_).query.offset(2).limit(2)).query.i.get.map(_ ==> List(
+        // ("a", 3),
+        // ("a", 2),
+        ("a", 1),
+        // ("b", 5),
+        // ("b", 4),
+      ))
+
+
+      // limit(1)
+
+      _ <- Entity.s.a1.join(Ref.i.d1.entity_(Entity.id_).query.limit(1)).query.i.get.map(_ ==> List(
+        ("a", 3),
+        // ("a", 2),
+        // ("a", 1),
+        ("b", 5),
+        // ("b", 4),
+      ))
+      _ <- Entity.s.a1.join(Ref.i.d1.entity_(Entity.id_).query.offset(1).limit(1)).query.i.get.map(_ ==> List(
+        // ("a", 3),
+        ("a", 2),
+        // ("a", 1),
+        // ("b", 5),
+        ("b", 4),
+      ))
+      _ <- Entity.s.a1.join(Ref.i.d1.entity_(Entity.id_).query.offset(2).limit(1)).query.i.get.map(_ ==> List(
+        // ("a", 3),
+        // ("a", 2),
+        ("a", 1),
+        // ("b", 5),
+        // ("b", 4),
       ))
     } yield ()
   }
@@ -134,26 +175,21 @@ case class _Overview(
    * Global aggregate comparison: Entity.i.>(Ref.i(sum))
    *   Compare each row to aggregate of entire sub table
    *
-   * Global aggregate select/join: Entity.s.select(Ref.i(count))
+   * Global aggregate join: Entity.s.join(Ref.i(count))
    *   Add aggregate from entire sub table to each row
-   *   Same result for .select() and .join()
    *
-   * Global with limit: Entity.s.select(Ref.i.d1.query.limit(1))
+   * Global with limit: Entity.s.join(Ref.i.d1.query.limit(1))
    *   Add top sorted value from entire sub table to each row
    *
    *
    * CORRELATED PATTERNS - different values per row based on correlation
    *
-   * Correlated aggregate select: Entity.s.select(Ref.i(count).entity_(Entity.id_))
+   * Correlated aggregate: Entity.s.join(Ref.i(count).entity_(Entity.id_))
    *   Per-row aggregate using correlation (e.g., .entity_() or .i_())
-   *   Includes ALL rows (default values for no matches)
+   *   Returns ONLY rows with matches
    *
-   * Correlated aggregate join: Entity.s.join(Ref.i(count).entity_(Entity.id_))
-   *   Per-row aggregate using correlation
-   *   Excludes rows with no matches
-   *
-   * Correlated with limit: Entity.s.select(Ref.i.d1.entity_(Entity.id_).query.limit(1))
+   * Correlated with limit: Entity.s.join(Ref.i.d1.entity_(Entity.id_).query.limit(1))
    *   Per-row top sorted value using correlation
-   *   Excludes rows with no matches (no value to return)
+   *   Returns ONLY rows with matches
    */
 }

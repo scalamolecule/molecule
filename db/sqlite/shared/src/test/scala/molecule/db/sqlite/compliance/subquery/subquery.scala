@@ -17,14 +17,8 @@ class ComparisonOperatorsTest extends MUnit {
 class FilteringTest extends MUnit {
   Filtering(this, Api_sqlite_async)
 }
-class LimitOffsetTest extends MUnit {
-  LimitOffset(this, Api_sqlite_async)
-}
 class NestedRelationshipsTest extends MUnit {
   NestedRelationships(this, Api_sqlite_async)
-}
-class SelectVsJoinTest extends MUnit {
-  SelectVsJoin(this, Api_sqlite_async)
 }
 class SemanticsTest extends MUnit {
   Semantics(this, Api_sqlite_async)

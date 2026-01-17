@@ -24,18 +24,11 @@ case class NestedRelationships(
         ("c", List()),
       ).transact
 
-      // Subquery can aggregate attribute values from nested relationships (.select)
-      _ <- A.s.a1.select(B.id(count).a_(A.id_).C.i(sum)).query.get.map(_ ==> List(
+      // Subquery can aggregate attribute values from nested relationships
+      _ <- A.s.a1.join(B.id(count).a_(A.id_).C.i(sum)).query.get.map(_ ==> List(
         ("a", (2, 30)), // 2 B's, sum of C.i = 10+20
         ("b", (3, 120)), // 3 B's, sum of C.i = 30+40+50
-        ("c", (0, 0)), // No B's
-      ))
-
-      // Same with .join()
-      _ <- A.s.a1.join(B.id(count).a_(A.id_).C.i(sum)).query.get.map(_ ==> List(
-        ("a", (2, 30)),
-        ("b", (3, 120)),
-        // "c" excluded
+        // "c" excluded - no B's
       ))
     } yield ()
   }
@@ -50,17 +43,10 @@ case class NestedRelationships(
       ).transact
 
       // Aggregate IDs across relationships
-      _ <- A.s.a1.select(B.id(count).a_(A.id_).C.id(count)).query.get.map(_ ==> List(
-        ("a", (2, 2)),
-        ("b", (3, 3)),
-        ("c", (0, 0)),
-      ))
-
-      // Same with .join()
       _ <- A.s.a1.join(B.id(count).a_(A.id_).C.id(count)).query.i.get.map(_ ==> List(
         ("a", (2, 2)),
         ("b", (3, 3)),
-        // ("c", (0, 0)), // No refs to B
+        // "c" excluded - no refs to B
       ))
     } yield ()
   }

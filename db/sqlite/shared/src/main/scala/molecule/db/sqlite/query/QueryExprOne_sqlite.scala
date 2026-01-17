@@ -99,9 +99,6 @@ trait QueryExprOne_sqlite
     }
   }
 
-  private val noStatisticalFunctionsInSubquerySelect =
-    "Median, variance and stddev in .select() subqueries not supported for this database."
-
   override protected def aggr[T: ClassTag](
     baseType: String,
     ent: String,
@@ -307,7 +304,7 @@ trait QueryExprOne_sqlite
         }
         // Check if used in WHERE clause comparison (implicit subquery)
         if (insideSubQuery && !insideJoinSubQuery) {
-          throw ModelError(noStatisticalFunctionsInSubquerySelect)
+          throw ModelError(noStatisticalFunctionsInSubquery)
         }
         aggregate = true
         // Falling back on calculating the median for each returned json array of values
@@ -352,7 +349,7 @@ trait QueryExprOne_sqlite
         }
         // Check if used in WHERE clause comparison (implicit subquery)
         if (insideSubQuery && !insideJoinSubQuery) {
-          throw ModelError(noStatisticalFunctionsInSubquerySelect)
+          throw ModelError(noStatisticalFunctionsInSubquery)
         }
         aggregate = true
         // Falling back on calculating the variance for each returned json array of values
@@ -380,7 +377,7 @@ trait QueryExprOne_sqlite
         }
         // Check if used in WHERE clause comparison (implicit subquery)
         if (insideSubQuery && !insideJoinSubQuery) {
-          throw ModelError(noStatisticalFunctionsInSubquerySelect)
+          throw ModelError(noStatisticalFunctionsInSubquery)
         }
         aggregate = true
         if (insideJoinSubQuery) {

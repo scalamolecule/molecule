@@ -129,11 +129,8 @@ trait Model2Query extends QueryExpr with ModelUtils {
                     )
                   validate(validateOptEntity(attrs) ++ tail, prevElements)
 
-                case SubQuery(es, _, _, _) =>
-                  // Subqueries can be either:
-                  // - .select(): SELECT clause correlated subquery
-                  // - .join(): FROM clause join to subquery
-                  // Both are valid use cases, so no validation needed here
+                case SubQuery(es, _, _, isJoin) =>
+                  validateJoinSubQueryCorrelationAttrs(es)
                   validateSubQuery()
                   validate(es ++ tail, prevElements)
 
@@ -200,6 +197,34 @@ trait Model2Query extends QueryExpr with ModelUtils {
       case other   => throw ModelError(
         "Only attributes of initial entity allowed in optional entity. Found:\n" + other
       )
+    }
+  }
+
+  private def validateJoinSubQueryCorrelationAttrs(elements: List[Element]): Unit = {
+    var correlationCount = 0
+    elements.foreach {
+      case a: Attr =>
+        // Check if this attribute has a filterAttr (correlation in join subquery)
+        a.filterAttr.foreach { case (_, _, correlAttr) =>
+          correlationCount += 1
+          // Ensure correlation attribute is tacit
+          if (correlAttr.isInstanceOf[Mandatory]) {
+            throw ModelError(s"Correlation attribute ${correlAttr.cleanName} should be tacit.")
+          }
+        }
+        // Also check if this attribute has a subquery with correlation
+        a.subquery.foreach { sq =>
+          sq.elements.foreach {
+            case correlAttr: Attr if correlAttr.isInstanceOf[Mandatory] =>
+              throw ModelError(s"Correlation attribute ${correlAttr.cleanName} should be tacit.")
+            case _ => ()
+          }
+        }
+      case _ => ()
+    }
+    // Ensure at most one correlation attribute
+    if (correlationCount > 1) {
+      throw ModelError("Only one correlation attribute allowed per subquery.")
     }
   }
 

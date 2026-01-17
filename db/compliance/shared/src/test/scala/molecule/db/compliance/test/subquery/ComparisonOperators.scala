@@ -322,7 +322,7 @@ case class ComparisonOperators(
       _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
         Entity.double(Ref.i(median)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
-            err ==> "Median, variance and stddev in .select() subqueries not supported for this database."
+            err ==> "Median, variance and stddev in subqueries not supported for this database."
           }
       else
         Entity.double(Ref.i(median)).query.i.get.map(_ ==> List(
@@ -345,7 +345,7 @@ case class ComparisonOperators(
       _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
         Entity.double.<(Ref.i(variance)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
-            err ==> "Median, variance and stddev in .select() subqueries not supported for this database."
+            err ==> "Median, variance and stddev in subqueries not supported for this database."
           }
       else
         Entity.double.<(Ref.i(variance)).query.get.map(_ ==~ List(
@@ -368,7 +368,7 @@ case class ComparisonOperators(
       _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
         Entity.double.>(Ref.i(stddev)).query.i.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
-            err ==> "Median, variance and stddev in .select() subqueries not supported for this database."
+            err ==> "Median, variance and stddev in subqueries not supported for this database."
           }
       else
         Entity.double.>(Ref.i(stddev)).query.get.map(_ ==~ List(

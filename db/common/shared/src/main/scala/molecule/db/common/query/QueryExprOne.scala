@@ -821,4 +821,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
       }
     }
   }
+
+  protected val noStatisticalFunctionsInSubquery =
+    "Median, variance and stddev in subqueries not supported for this database."
 }

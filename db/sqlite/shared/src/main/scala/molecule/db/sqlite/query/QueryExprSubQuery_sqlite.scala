@@ -10,9 +10,134 @@ trait QueryExprSubQuery_sqlite
   override protected def createSubQueryBuilder(subElements: List[Element]): Model2SqlQuery & SqlQueryBase =
     new Model2SqlQuery_sqlite(subElements)
 
+  // Override to handle per-entity LIMIT using window functions
+  // SQLite doesn't support LATERAL keyword, so we use ROW_NUMBER() window functions
+  override protected def buildSubQuerySqlWithCasts(
+    subElements: List[Element],
+    subQueryAlias: String,
+    optLimit: Option[Int],
+    optOffset: Option[Int],
+    isImplicit: Boolean,
+    isJoin: Boolean
+  ): (String, List[Cast]) = {
+    // For JOIN subqueries with LIMIT, use window functions for per-entity limiting
+    // BUT only if there's a correlation attribute (otherwise it's a global limit)
+    val hasCorrelation = subElements.exists {
+      case a: Attr if a.filterAttr.isDefined => true
+      case _ => false
+    }
+
+    if (isJoin && (optLimit.isDefined || optOffset.isDefined) && hasCorrelation) {
+      buildWindowFunctionSubQuery(subElements, subQueryAlias, optLimit, optOffset)
+    } else {
+      super.buildSubQuerySqlWithCasts(subElements, subQueryAlias, optLimit, optOffset, isImplicit, isJoin)
+    }
+  }
+
+  // Build subquery using ROW_NUMBER() window function for per-entity LIMIT
+  private def buildWindowFunctionSubQuery(
+    subElements: List[Element],
+    subQueryAlias: String,
+    optLimit: Option[Int],
+    optOffset: Option[Int]
+  ): (String, List[Cast]) = {
+    val subQueryBuilder = createSubQueryBuilder(subElements)
+    subQueryBuilder.insideSubQuery = true
+    subQueryBuilder.insideJoinSubQuery = true
+    subQueryBuilder.resolveElements(subElements)
+
+    if (subQueryBuilder.hasManSubQueryAttr) {
+      hasManSubQueryAttr = true
+    }
+
+    // Extract partition column (the join/filter column)
+    val partitionCol = extractPartitionColumn(subElements)
+
+    // Get ALL attributes (including tacit ones needed for join conditions)
+    val selectColumns = subElements.collect {
+      case a: Attr => a.attr
+    }.mkString(", ")
+
+    // Build the inner query (without LIMIT)
+    val innerSql = subQueryBuilder.renderSubQuery(3, Some("inner_query"), None, None, isImplicit = false)
+
+    // Build ORDER BY clause for window function from subquery's orderBy
+    val windowOrderBy = buildWindowOrderBy(subQueryBuilder)
+
+    // Build row number filter based on limit/offset
+    val rowFilter = (optOffset, optLimit) match {
+      case (None, None)                => "" // Should not happen, but handle gracefully
+      case (None, Some(limit))         => s"rn <= $limit"
+      case (Some(offset), None)        => s"rn > $offset"
+      case (Some(offset), Some(limit)) => s"rn > $offset AND rn <= ${offset + limit}"
+    }
+
+    // Build the complete window function query
+    // Need to wrap in outer SELECT to filter by row number and exclude rn column
+    val windowSql = s"""(
+      |    SELECT DISTINCT
+      |      $selectColumns
+      |    FROM (
+      |      SELECT DISTINCT
+      |        inner_query.*,
+      |        ROW_NUMBER() OVER (PARTITION BY inner_query.$partitionCol$windowOrderBy) as rn
+      |      FROM $innerSql inner_query
+      |    ) filtered_query
+      |    WHERE $rowFilter
+      |  )""".stripMargin
+
+    val subqueryCasts = subQueryBuilder.castStrategy match {
+      case tuple: CastTuple => tuple.getCasts
+      case _                => Nil
+    }
+
+    val casts = wrapMultiColumnCasts(subqueryCasts, isJoin = true)
+    (windowSql, casts)
+  }
+
+  // Extract the partition column from filter attributes
+  private def extractPartitionColumn(subElements: List[Element]): String = {
+    subElements.collectFirst {
+      case a: Attr if a.filterAttr.isDefined =>
+        // The column we're joining on (e.g., "entity" in Ref.entity_)
+        a.attr
+    }.getOrElse {
+      // Uncorrelated subquery - use any column for partitioning (all rows will be in same partition)
+      subElements.collectFirst {
+        case a: Attr => a.attr
+      }.getOrElse("id")
+    }
+  }
+
+  // Build ORDER BY clause for window function
+  private def buildWindowOrderBy(subQueryBuilder: Model2SqlQuery & SqlQueryBase): String = {
+    if (subQueryBuilder.orderBy.isEmpty) {
+      ""
+    } else {
+      val orderClauses = subQueryBuilder.orderBy.toList
+        .sortBy(_._2) // Sort by arity
+        .map { case (_, _, col, dir) =>
+          // col might be "Table.column" or just "column"
+          // Need to strip table prefix and reference via inner_query alias
+          val columnName = if (col.contains(".")) {
+            col.split("\\.").last
+          } else {
+            col
+          }
+          s"inner_query.$columnName$dir"
+        }
+      " ORDER BY " + orderClauses.mkString(", ")
+    }
+  }
+
   // Override to handle multiple-column SELECT subqueries
   // SQLite doesn't support ROW types, so generate multiple scalar subqueries
-  override protected def querySubQuery(subElements: List[Element], optLimit: Option[Int], optOffset: Option[Int], isJoin: Boolean): Unit = {
+  override protected def querySubQuery(
+    subElements: List[Element],
+    optLimit: Option[Int],
+    optOffset: Option[Int],
+    isJoin: Boolean
+  ): Unit = {
     if (shouldSplitSubquery(subElements, isJoin)) {
       querySplitSubQueries(subElements, optLimit, optOffset)
     } else {

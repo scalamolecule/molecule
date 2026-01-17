@@ -209,7 +209,7 @@ trait QueryExprOne_mariadb
         // For implicit subqueries (comparisons), we can't use JSON arrays
         if (insideSubQuery && !insideJoinSubQuery) {
           // Implicit subquery - need to calculate median as scalar value
-          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+          throw ModelError(noStatisticalFunctionsInSubquery)
         } else if (insideJoinSubQuery) {
           // JOIN subquery - use alias
           val alias = col.replace('.', '_') + "_median"
@@ -246,7 +246,7 @@ trait QueryExprOne_mariadb
         }
         // Check if used in implicit subquery (comparison operation)
         if (insideSubQuery && !insideJoinSubQuery) {
-          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+          throw ModelError(noStatisticalFunctionsInSubquery)
         }
         aggregate = true
         // Only add alias for JOIN subqueries, not SELECT clause scalar subqueries
@@ -274,7 +274,7 @@ trait QueryExprOne_mariadb
         }
         // Check if used in implicit subquery (comparison operation)
         if (insideSubQuery && !insideJoinSubQuery) {
-          throw ModelError("Median, variance and stddev in .select() subqueries not supported for this database.")
+          throw ModelError(noStatisticalFunctionsInSubquery)
         }
         aggregate = true
         // Only add alias for JOIN subqueries, not SELECT clause scalar subqueries
