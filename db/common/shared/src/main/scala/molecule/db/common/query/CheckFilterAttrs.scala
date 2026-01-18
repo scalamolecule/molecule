@@ -45,7 +45,9 @@ class CheckFilterAttrs(
     // (This is for comparison subqueries stored in a.subquery field)
     s.elements.foreach {
       case a: Attr =>
-        if (entAttrPaths.contains(a.cleanName)) {
+        // Skip validation for aggregated attributes (they're not filter attributes)
+        val isAggregated = a.op.isInstanceOf[AggrFn]
+        if (!isAggregated && entAttrPaths.contains(a.cleanName)) {
           throw ModelError(
             s"Filter attribute ${a.cleanName} should be tacit."
           )
@@ -63,7 +65,9 @@ class CheckFilterAttrs(
     // Validate that subquery attributes don't conflict with outer query attributes
     s.elements.foreach {
       case a: Attr =>
-        if (entAttrPaths.contains(a.cleanName)) {
+        // Skip validation for aggregated attributes (they're not filter attributes)
+        val isAggregated = a.op.isInstanceOf[AggrFn]
+        if (!isAggregated && entAttrPaths.contains(a.cleanName)) {
           throw ModelError(
             s"Filter attribute ${a.cleanName} should be tacit."
           )
@@ -98,7 +102,7 @@ class CheckFilterAttrs(
 
       if (fa.filterAttr.nonEmpty) {
         throw ModelError(s"Filter attributes inside filter attributes not allowed in ${a.ent}.${a.attr}")
-      } else if (filterPath :+ fa.cleanAttr == path :+ a.cleanAttr) {
+      } else if (filterPath :+ fa.cleanAttr == path :+ a.cleanAttr && !fa.op.isInstanceOf[AggrFn]) {
         throw ModelError(s"Can't filter by the same attribute `${a.name}`")
       } else if (fa.isInstanceOf[Mandatory]) {
         throw ModelError(s"Filter attribute $filterEntAttr pointing to other entity should be tacit.")

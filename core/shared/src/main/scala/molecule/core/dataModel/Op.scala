@@ -34,7 +34,7 @@ case class AggrFn(
   op: Option[Op] = None,
   v: Option[Value] = None,
 ) extends Op {
-  override def toString: String = s"""Fn("$baseType", "$fn", ${opt(n)}, ${opt(op)}, ${opt(v)})"""
+  override def toString: String = s"""AggrFn("$baseType", "$fn", ${opt(n)}, ${opt(op)}, ${opt(v)})"""
 }
 
 sealed trait AttrOp extends Op

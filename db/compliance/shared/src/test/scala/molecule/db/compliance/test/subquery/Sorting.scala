@@ -215,7 +215,7 @@ case class Sorting(
       ))
 
       // Sort by max string ascending
-      _ <- Entity.s.join(Ref.s(max).a1.entity_(Entity.id_)).query.i.get.map(_ ==> List(
+      _ <- Entity.s.join(Ref.s(max).a1.entity_(Entity.id_)).query.get.map(_ ==> List(
         ("c", "c"),
         ("b", "n"),
         ("a", "z"),
@@ -322,12 +322,12 @@ case class Sorting(
 
       // Sort by median descending
       _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
-        Entity.s.join(Ref.i(median).d1.entity_(Entity.id_)).query.i.get
+        Entity.s.join(Ref.i(median).d1.entity_(Entity.id_)).query.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
             err ==> "Sorting by median not implemented for this database."
           }
       else
-        Entity.s.join(Ref.i(median).d1.entity_(Entity.id_)).query.i.get.map(_ ==> List(
+        Entity.s.join(Ref.i(median).d1.entity_(Entity.id_)).query.get.map(_ ==> List(
           ("b", 25.0),
           ("c", 5.0),
           ("a", 2.0),
@@ -363,7 +363,7 @@ case class Sorting(
 
       // Sort by variance descending
       _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
-        Entity.s.join(Ref.i(variance).d1.entity_(Entity.id_)).query.i.get
+        Entity.s.join(Ref.i(variance).d1.entity_(Entity.id_)).query.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
             err ==> "Sorting by variance not implemented for this database."
           }
@@ -404,7 +404,7 @@ case class Sorting(
 
       // Sort by stddev descending
       _ <- if (List("sqlite", "mariadb", "mysql").contains(database))
-        Entity.s.join(Ref.i(stddev).d1.entity_(Entity.id_)).query.i.get
+        Entity.s.join(Ref.i(stddev).d1.entity_(Entity.id_)).query.get
           .map(_ ==> "Should fail").recover { case ModelError(err) =>
             err ==> "Sorting by standard deviation not implemented for this database."
           }

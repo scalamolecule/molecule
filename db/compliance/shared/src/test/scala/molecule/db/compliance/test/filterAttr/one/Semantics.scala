@@ -37,7 +37,7 @@ case class Semantics(
       ).transact
 
       _ <- Entity.s.i.>(Ref.i).Ref.i.s
-        .query.i.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+        .query.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attribute Ref.i should be tacit."
         }
 

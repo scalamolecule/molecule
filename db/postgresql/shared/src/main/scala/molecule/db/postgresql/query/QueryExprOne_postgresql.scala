@@ -101,7 +101,8 @@ trait QueryExprOne_postgresql
     aggrOp: Option[Op],
     aggrOpValue: Option[Value],
     hasSort: Boolean,
-    res: ResOne[T]
+    res: ResOne[T],
+    mandatory: Boolean = true
   ): Unit = {
     checkAggrOne()
     lazy val n        = optN.getOrElse(0)
@@ -120,7 +121,8 @@ trait QueryExprOne_postgresql
         aggregate = true
         select += s"ARRAY_AGG(DISTINCT $col)"
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(res.array2set)
+        if (mandatory)
+          castStrategy.replace(res.array2set)
 
       case "min" =>
         aggregate = true
@@ -130,7 +132,7 @@ trait QueryExprOne_postgresql
             case "String" => "''"
             case _        => "0"
           }
-          val alias = col.replace('.', '_') + "_min"
+          val alias        = col.replace('.', '_') + "_min"
           select += s"COALESCE(MIN($col$castText), $defaultValue) AS $alias"
           if (hasSort) {
             val (level, _, _, dir) = orderBy.last
@@ -154,7 +156,8 @@ trait QueryExprOne_postgresql
              |    )
              |  )""".stripMargin
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(res.array2set)
+        if (mandatory)
+          castStrategy.replace(res.array2set)
 
       case "max" =>
         aggregate = true
@@ -164,7 +167,7 @@ trait QueryExprOne_postgresql
             case "String" => "''"
             case _        => "0"
           }
-          val alias = col.replace('.', '_') + "_max"
+          val alias        = col.replace('.', '_') + "_max"
           select += s"COALESCE(MAX($col$castText), $defaultValue) AS $alias"
           if (hasSort) {
             val (level, _, _, dir) = orderBy.last
@@ -188,7 +191,8 @@ trait QueryExprOne_postgresql
              |    )
              |  )""".stripMargin
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(res.array2set)
+        if (mandatory)
+          castStrategy.replace(res.array2set)
 
       case "sample" =>
         distinct = false
@@ -208,7 +212,8 @@ trait QueryExprOne_postgresql
              |    )
              |  )""".stripMargin
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(res.array2set)
+        if (mandatory)
+          castStrategy.replace(res.array2set)
 
       case "count" =>
         aggregate = true
@@ -216,7 +221,8 @@ trait QueryExprOne_postgresql
         selectWithOrder(col, "COUNT", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT($col)")
-        castStrategy.replace(toInt)
+        if (mandatory)
+          castStrategy.replace(toInt)
 
       case "countDistinct" =>
         aggregate = true
@@ -224,7 +230,8 @@ trait QueryExprOne_postgresql
         selectWithOrder(col, "COUNT", hasSort, aliasSuffix = Some("countDistinct"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
-        castStrategy.replace(toInt)
+        if (mandatory)
+          castStrategy.replace(toInt)
 
       case "sum" =>
         aggregate = true

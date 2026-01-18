@@ -1,7 +1,7 @@
 package molecule.db.common.api.expression
 
 import molecule.core.dataModel.*
-import molecule.core.dataModel.Keywords.qm
+import molecule.core.dataModel.Keywords.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
@@ -48,4 +48,11 @@ trait ExprOneTac_String[T, Entity](
   def endsWith  (suffix: qm): Entity = entity(addOne(dataModel, EndsWith  , Nil, true))
   def contains  (needle: qm): Entity = entity(addOne(dataModel, Contains  , Nil, true))
   def matches   (regex : qm): Entity = entity(addOne(dataModel, Matches   , Nil, true))
+
+  // Base type not used for tacit aggregates in subqueries
+  def apply(kw: count)        : Entity = entity(addOne(dataModel, AggrFn("<unused>", "count"        ), Nil))
+  def apply(kw: countDistinct): Entity = entity(addOne(dataModel, AggrFn("<unused>", "countDistinct"), Nil))
+  def apply(kw: min)          : Entity = entity(addOne(dataModel, AggrFn("<unused>", "min"          ), Nil))
+  def apply(kw: max)          : Entity = entity(addOne(dataModel, AggrFn("<unused>", "max"          ), Nil))
+  def apply(kw: sample)       : Entity = entity(addOne(dataModel, AggrFn("<unused>", "sample"       ), Nil))
 }

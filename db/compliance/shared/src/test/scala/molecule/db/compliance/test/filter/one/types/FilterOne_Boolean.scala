@@ -47,11 +47,11 @@ case class FilterOne_Boolean(
       _ <- Entity.i.a1.boolean.not(Seq.empty[Boolean]).query.get.map(_ ==> List(a, b))
 
       // Boolean operations
-      _ <- Entity.i.a1.boolean.&&(true).query.i.get.map(_ ==> List(a))
+      _ <- Entity.i.a1.boolean.&&(true).query.get.map(_ ==> List(a))
       _ <- Entity.i.a1.boolean.&&(false).query.get.map(_ ==> List())
       _ <- Entity.i.a1.boolean.||(true).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.boolean.||(false).query.get.map(_ ==> List(a))
-      _ <- Entity.i.a1.boolean.!.query.i.get.map(_ ==> List(b))
+      _ <- Entity.i.a1.boolean.!.query.get.map(_ ==> List(b))
     } yield ()
   }
 
@@ -96,7 +96,7 @@ case class FilterOne_Boolean(
       // Boolean operations
       _ <- Entity.i.a1.boolean_.&&(true).query.get.map(_ ==> List(a))
       _ <- Entity.i.a1.boolean_.&&(false).query.get.map(_ ==> List())
-      _ <- Entity.i.a1.boolean_.||(true).query.i.get.map(_ ==> List(a, b))
+      _ <- Entity.i.a1.boolean_.||(true).query.get.map(_ ==> List(a, b))
       _ <- Entity.i.a1.boolean_.||(false).query.get.map(_ ==> List(a))
       _ <- Entity.i.a1.boolean_.!.query.get.map(_ ==> List(b))
     } yield ()

@@ -69,7 +69,7 @@ case class Aggregates(
       ).transact
 
       // Single subquery returning tuple
-      _ <- Entity.s.a1.join(Ref.i(min).i(max).entity_(Entity.id_)).query.i.get.map(_ ==> List(
+      _ <- Entity.s.a1.join(Ref.i(min).i(max).entity_(Entity.id_)).query.get.map(_ ==> List(
         ("a", (10, 30)),
         ("b", (5, 35)),
         // "c" excluded
@@ -113,7 +113,7 @@ case class Aggregates(
         ("c", List()),
       ).transact
 
-      _ <- Entity.s.a1.join(Ref.i(median).entity_(Entity.id_)).query.i.get.map(_ ==> List(
+      _ <- Entity.s.a1.join(Ref.i(median).entity_(Entity.id_)).query.get.map(_ ==> List(
         ("a", 3),
         ("b", 15),
         // "c" excluded

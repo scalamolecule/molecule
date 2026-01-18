@@ -1,7 +1,7 @@
 package molecule.db.common.api.expression
 
 import molecule.core.dataModel.*
-import molecule.core.dataModel.Keywords.qm
+import molecule.core.dataModel.Keywords.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
@@ -42,5 +42,17 @@ trait ExprOneTac_Integer[T, Entity](
   def even                       : Entity = entity(addOne(dataModel, Even      , Nil                    ))
   def odd                        : Entity = entity(addOne(dataModel, Odd       , Nil                    ))
   def %(divider: T, remainder: T): Entity = entity(addOne(dataModel, Remainder , Seq(divider, remainder)))
+
+  // Base type not used for tacit aggregates in subqueries
+  def apply(kw: count)        : Entity = entity(addOne(dataModel, AggrFn("<unused>", "count"        ), Nil))
+  def apply(kw: countDistinct): Entity = entity(addOne(dataModel, AggrFn("<unused>", "countDistinct"), Nil))
+  def apply(kw: min)          : Entity = entity(addOne(dataModel, AggrFn("<unused>", "min"          ), Nil))
+  def apply(kw: max)          : Entity = entity(addOne(dataModel, AggrFn("<unused>", "max"          ), Nil))
+  def apply(kw: sample)       : Entity = entity(addOne(dataModel, AggrFn("<unused>", "sample"       ), Nil))
+  def apply(kw: sum)          : Entity = entity(addOne(dataModel, AggrFn("<unused>", "sum"          ), Nil))
+  def apply(kw: median)       : Entity = entity(addOne(dataModel, AggrFn("<unused>", "median"       ), Nil))
+  def apply(kw: avg)          : Entity = entity(addOne(dataModel, AggrFn("<unused>", "avg"          ), Nil))
+  def apply(kw: variance)     : Entity = entity(addOne(dataModel, AggrFn("<unused>", "variance"     ), Nil))
+  def apply(kw: stddev)       : Entity = entity(addOne(dataModel, AggrFn("<unused>", "stddev"       ), Nil))
 }
 

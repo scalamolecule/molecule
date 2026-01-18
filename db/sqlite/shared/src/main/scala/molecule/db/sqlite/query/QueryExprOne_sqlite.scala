@@ -109,7 +109,8 @@ trait QueryExprOne_sqlite
     aggrOp: Option[Op],
     aggrOpValue: Option[Value],
     hasSort: Boolean,
-    res: ResOne[T]
+    res: ResOne[T],
+    mandatory: Boolean = true
   ): Unit = {
     checkAggrOne()
     lazy val n = optN.getOrElse(0)
@@ -133,9 +134,10 @@ trait QueryExprOne_sqlite
         aggregate = true
         select += s"json_group_array(DISTINCT $col)"
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace((row: RS, paramIndex: Int) =>
-          res.json2array(row.getString(paramIndex)).toSet
-        )
+        if (mandatory)
+          castStrategy.replace((row: RS, paramIndex: Int) =>
+            res.json2array(row.getString(paramIndex)).toSet
+          )
 
       case "min" =>
         aggregate = true
@@ -145,7 +147,7 @@ trait QueryExprOne_sqlite
             case "String" => "''"
             case _        => "0"
           }
-          val alias = col.replace('.', '_') + "_min"
+          val alias        = col.replace('.', '_') + "_min"
           select += s"COALESCE(MIN($col), $defaultValue) AS $alias"
           if (hasSort) {
             val (level, _, _, dir) = orderBy.last
@@ -164,9 +166,10 @@ trait QueryExprOne_sqlite
         select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "ASC"))
         select += "<replace>" // add to maintain correct indexing
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace((row: RS, paramIndex: Int) =>
-          res.json2array(row.getString(paramIndex)).toSet
-        )
+        if (mandatory)
+          castStrategy.replace((row: RS, paramIndex: Int) =>
+            res.json2array(row.getString(paramIndex)).toSet
+          )
 
       case "max" =>
         aggregate = true
@@ -176,7 +179,7 @@ trait QueryExprOne_sqlite
             case "String" => "''"
             case _        => "0"
           }
-          val alias = col.replace('.', '_') + "_max"
+          val alias        = col.replace('.', '_') + "_max"
           select += s"COALESCE(MAX($col), $defaultValue) AS $alias"
           if (hasSort) {
             val (level, _, _, dir) = orderBy.last
@@ -195,9 +198,10 @@ trait QueryExprOne_sqlite
         select2 = select2 + (select.length -> minMaxSelect(ent, attr, n, "DESC"))
         select += "<replace>" // add to maintain correct indexing
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace((row: RS, paramIndex: Int) =>
-          res.json2array(row.getString(paramIndex)).toSet
-        )
+        if (mandatory)
+          castStrategy.replace((row: RS, paramIndex: Int) =>
+            res.json2array(row.getString(paramIndex)).toSet
+          )
 
       case "sample" =>
         select2 = select2 + (select.length -> sampleSelect(ent, attr))
@@ -210,9 +214,10 @@ trait QueryExprOne_sqlite
         select2 = select2 + (select.length -> samplesSelect(ent, attr, n))
         select += "<replace>" // add to maintain correct indexing
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace((row: RS, paramIndex: Int) =>
-          res.json2array(row.getString(paramIndex)).toSet
-        )
+        if (mandatory)
+          castStrategy.replace((row: RS, paramIndex: Int) =>
+            res.json2array(row.getString(paramIndex)).toSet
+          )
 
       case "count" =>
         aggregate = true
@@ -220,7 +225,8 @@ trait QueryExprOne_sqlite
         selectWithOrder(col, "COUNT", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT($col)")
-        castStrategy.replace(toInt)
+        if (mandatory)
+          castStrategy.replace(toInt)
 
       case "countDistinct" =>
         aggregate = true
@@ -228,7 +234,8 @@ trait QueryExprOne_sqlite
         selectWithOrder(col, "COUNT", hasSort, aliasSuffix = Some("countDistinct"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
-        castStrategy.replace(toInt)
+        if (mandatory)
+          castStrategy.replace(toInt)
 
       case "sum" =>
         aggregate = true
@@ -315,12 +322,13 @@ trait QueryExprOne_sqlite
           select += s"json_group_array($col)"
         }
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(
-          (row: RS, paramIndex: Int) => {
-            val values = jsonArray2doubles(row.getString(paramIndex))
-            if (values.isEmpty) 0.0 else getMedian(values)
-          }
-        )
+        if (mandatory)
+          castStrategy.replace(
+            (row: RS, paramIndex: Int) => {
+              val values = jsonArray2doubles(row.getString(paramIndex))
+              if (values.isEmpty) 0.0 else getMedian(values)
+            }
+          )
 
       case "avg" =>
         aggregate = true
@@ -361,12 +369,13 @@ trait QueryExprOne_sqlite
         }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"VAR_POP($col)")
-        castStrategy.replace(
-          (row: RS, paramIndex: Int) => {
-            val values = jsonArray2doubles(row.getString(paramIndex))
-            if (values.isEmpty) 0.0 else varianceOf(values)
-          }
-        )
+        if (mandatory)
+          castStrategy.replace(
+            (row: RS, paramIndex: Int) => {
+              val values = jsonArray2doubles(row.getString(paramIndex))
+              if (values.isEmpty) 0.0 else varianceOf(values)
+            }
+          )
 
       case "stddev" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
@@ -388,12 +397,13 @@ trait QueryExprOne_sqlite
         }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"STDDEV_POP($col)")
-        castStrategy.replace(
-          (row: RS, paramIndex: Int) => {
-            val values = jsonArray2doubles(row.getString(paramIndex))
-            if (values.isEmpty) 0.0 else stdDevOf(values)
-          }
-        )
+        if (mandatory)
+          castStrategy.replace(
+            (row: RS, paramIndex: Int) => {
+              val values = jsonArray2doubles(row.getString(paramIndex))
+              if (values.isEmpty) 0.0 else stdDevOf(values)
+            }
+          )
 
       case other => unexpectedKw(other)
     }

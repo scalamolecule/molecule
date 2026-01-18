@@ -335,7 +335,7 @@ case class FlatOptEntity(
           err ==> "Optional entity not allowed in save molecule. Please use mandatory entity instead."
         }
 
-      _ <- A.?(A.i.s).B.?(B.i).query.i.get
+      _ <- A.?(A.i.s).B.?(B.i).query.get
         .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Only mandatory ref allowed after optional entity."
         }

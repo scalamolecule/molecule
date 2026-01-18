@@ -114,7 +114,7 @@ case class AggrNum_Int(
       )).transact
 
       // 1 attribute
-      _ <- Entity.int(median).query.i.get.map(_.head ==~ medianAll)
+      _ <- Entity.int(median).query.get.map(_.head ==~ medianAll)
 
       // n attributes
       _ <- Entity.i.a1.int(median).query.get.map { res =>

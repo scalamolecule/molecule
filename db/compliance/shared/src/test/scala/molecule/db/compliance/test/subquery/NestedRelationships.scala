@@ -43,7 +43,7 @@ case class NestedRelationships(
       ).transact
 
       // Aggregate IDs across relationships
-      _ <- A.s.a1.join(B.id(count).a_(A.id_).C.id(count)).query.i.get.map(_ ==> List(
+      _ <- A.s.a1.join(B.id(count).a_(A.id_).C.id(count)).query.get.map(_ ==> List(
         ("a", (2, 2)),
         ("b", (3, 3)),
         // "c" excluded - no refs to B

@@ -3,28 +3,55 @@ package molecule.db.h2
 import scala.concurrent.Future
 import molecule.core.error.ModelError
 import molecule.core.setup.{MUnit, TestUtils}
+import molecule.db.common.spi.Conn
 import molecule.db.common.util.Executor.*
 import molecule.db.h2.async.*
 import molecule.db.h2.setup.DbProviders_h2
 import org.scalactic.Equality
-import molecule.core.dataModel.*
-import molecule.db.common.spi.Conn
+import molecule.db.compliance.domains.dsl.Types.*
+import molecule.db.compliance.domains.dsl.Types.ops.{Entity_0, Entity_0_ExprOneTac_Decimal, Entity_1, Entity_1_ExprOneMan_Decimal, Entity_1_ExprOneMan_Decimal_AggrOps, Entity_1_ExprOneTac_Decimal}
+
 
 class Adhoc_h2_jvm_async extends MUnit with DbProviders_h2 with TestUtils {
 
-  "types" - types {
-    import molecule.db.compliance.domains.dsl.Types.*
-    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
-    for {
-      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
-      _ <- Entity.int(3).save.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
-      _ <- Entity(a).int(10).update.transact
-      _ <- Entity(b).delete.transact
-      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
 
+  "types" - types {
+    for {
+      _ <- Entity.double.insert(1.0, 2.0, 3.0).transact
+
+      _ <- Entity.double.<=(Entity.double.apply(avg)).query.i.get.map(_ ==> List(
+        (1.0, 2.0),
+        (2.0, 2.0),
+      ))
+
+
+      _ <- Entity.double.<=(Entity.double_.apply(avg)).query.i.get.map(_ ==> List(1.0, 2.0))
+
+
+      // When we don't aggregate, it's correctly interpretted as an
+      // attempt of using a filter attribute that should have been tacit
+      _ <- Entity.double.<=(Entity.double).query.get
+        .map(_ ==> "Should fail").recover { case ModelError(err) =>
+          err ==> "Filter attribute Entity.double should be tacit."
+        }
     } yield ()
   }
+
+
+  //  "types" - types {
+  //    //    import molecule.db.compliance.domains.dsl.Types.*
+  //    //    given Equality[Double] = tolerantDoubleEquality(toleranceDouble)
+  //    for {
+  //      List(a, b) <- Entity.int.insert(1, 2).transact.map(_.ids)
+  //      _ <- Entity.int(3).save.transact
+  //      _ <- Entity.int.a1.query.get.map(_ ==> List(1, 2, 3))
+  //      _ <- Entity(a).int(10).update.transact
+  //      _ <- Entity(b).delete.transact
+  //      _ <- Entity.int.a1.query.get.map(_ ==> List(3, 10))
+  //    } yield ()
+  //  }
+
+
   //
   //  "allowRoles, new role" - social {
   //    import molecule.db.compliance.domains.dsl.SocialApp.*

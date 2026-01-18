@@ -1,7 +1,7 @@
 package molecule.db.common.api.expression
 
 import molecule.core.dataModel.*
-import molecule.core.dataModel.Keywords.qm
+import molecule.core.dataModel.Keywords.*
 import molecule.db.common.api.*
 import molecule.db.common.ops.ModelTransformations_.*
 
@@ -38,4 +38,11 @@ trait ExprOneTac[T, Entity](
   def <=   (sub: Molecule_1[T] & OneValue): Entity = entity(subQueryComparison(dataModel, Le , sub))
   def >    (sub: Molecule_1[T] & OneValue): Entity = entity(subQueryComparison(dataModel, Gt , sub))
   def >=   (sub: Molecule_1[T] & OneValue): Entity = entity(subQueryComparison(dataModel, Ge , sub))
+
+  // Base type not used for tacit aggregates in subqueries
+  def apply(kw: count)        : Entity = entity(addOne(dataModel, AggrFn("<unused>", "count"        ), Nil))
+  def apply(kw: countDistinct): Entity = entity(addOne(dataModel, AggrFn("<unused>", "countDistinct"), Nil))
+  def apply(kw: min)          : Entity = entity(addOne(dataModel, AggrFn("<unused>", "min"          ), Nil))
+  def apply(kw: max)          : Entity = entity(addOne(dataModel, AggrFn("<unused>", "max"          ), Nil))
+  def apply(kw: sample)       : Entity = entity(addOne(dataModel, AggrFn("<unused>", "sample"       ), Nil))
 }

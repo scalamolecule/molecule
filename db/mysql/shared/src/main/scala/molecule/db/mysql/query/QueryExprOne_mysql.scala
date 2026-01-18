@@ -65,7 +65,8 @@ trait QueryExprOne_mysql
     aggrOp: Option[Op],
     aggrOpValue: Option[Value],
     hasSort: Boolean,
-    res: ResOne[T]
+    res: ResOne[T],
+    mandatory: Boolean = true
   ): Unit = {
     checkAggrOne()
     lazy val sep     = "0x1D" // Use invisible ascii Group Selector to separate concatenated values
@@ -82,9 +83,10 @@ trait QueryExprOne_mysql
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace((row: RS, paramIndex: Int) =>
-          res.json2array(row.getString(paramIndex)).toSet
-        )
+        if (mandatory)
+          castStrategy.replace((row: RS, paramIndex: Int) =>
+            res.json2array(row.getString(paramIndex)).toSet
+          )
 
       case "min" =>
         aggregate = true
@@ -94,7 +96,7 @@ trait QueryExprOne_mysql
             case "String" => "''"
             case _        => "0"
           }
-          val alias = col.replace('.', '_') + "_min"
+          val alias        = col.replace('.', '_') + "_min"
           select += s"COALESCE(MIN($col), $defaultValue) AS $alias"
           if (hasSort) {
             val (level, _, _, dir) = orderBy.last
@@ -111,9 +113,10 @@ trait QueryExprOne_mysql
         aggregate = true
         select += s"GROUP_CONCAT(DISTINCT $col SEPARATOR $sep)"
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace((row: RS, paramIndex: Int) =>
-          row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
-        )
+        if (mandatory)
+          castStrategy.replace((row: RS, paramIndex: Int) =>
+            row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
+          )
 
       case "max" =>
         aggregate = true
@@ -123,7 +126,7 @@ trait QueryExprOne_mysql
             case "String" => "''"
             case _        => "0"
           }
-          val alias = col.replace('.', '_') + "_max"
+          val alias        = col.replace('.', '_') + "_max"
           select += s"COALESCE(MAX($col), $defaultValue) AS $alias"
           if (hasSort) {
             val (level, _, _, dir) = orderBy.last
@@ -140,9 +143,10 @@ trait QueryExprOne_mysql
         aggregate = true
         select += s"GROUP_CONCAT(DISTINCT $col ORDER BY $col DESC SEPARATOR $sep)"
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace((row: RS, paramIndex: Int) =>
-          row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
-        )
+        if (mandatory)
+          castStrategy.replace((row: RS, paramIndex: Int) =>
+            row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
+          )
 
       case "sample" =>
         if (aggrOp.isDefined) {
@@ -152,20 +156,22 @@ trait QueryExprOne_mysql
         select += s"JSON_ARRAYAGG($col)"
         if (!select.contains(col)) groupByCols -= col
         havingOp("RAND()")
-        castStrategy.replace((row: RS, paramIndex: Int) => {
-          val array = res.json2array(row.getString(paramIndex))
-          val rnd   = new Random().nextInt(array.length)
-          array(rnd)
-        })
+        if (mandatory)
+          castStrategy.replace((row: RS, paramIndex: Int) => {
+            val array = res.json2array(row.getString(paramIndex))
+            val rnd   = new Random().nextInt(array.length)
+            array(rnd)
+          })
 
       case "samples" =>
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace((row: RS, paramIndex: Int) => {
-          val array = res.json2array(row.getString(paramIndex))
-          Random.shuffle(array.toSet).take(n)
-        })
+        if (mandatory)
+          castStrategy.replace((row: RS, paramIndex: Int) => {
+            val array = res.json2array(row.getString(paramIndex))
+            Random.shuffle(array.toSet).take(n)
+          })
 
       case "count" =>
         aggregate = true
@@ -173,7 +179,8 @@ trait QueryExprOne_mysql
         selectWithOrder(col, "COUNT", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT($col)")
-        castStrategy.replace(toInt)
+        if (mandatory)
+          castStrategy.replace(toInt)
 
       case "countDistinct" =>
         aggregate = true
@@ -181,7 +188,8 @@ trait QueryExprOne_mysql
         selectWithOrder(col, "COUNT", hasSort, aliasSuffix = Some("countDistinct"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
-        castStrategy.replace(toInt)
+        if (mandatory)
+          castStrategy.replace(toInt)
 
       case "sum" =>
         aggregate = true
@@ -208,16 +216,17 @@ trait QueryExprOne_mysql
           select += s"JSON_ARRAYAGG($col)"
         }
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(
-          (row: RS, paramIndex: Int) => {
-            val json = row.getString(paramIndex)
-            if (json == null) {
-              0.0
-            } else {
-              getMedian(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toList)
+        if (mandatory)
+          castStrategy.replace(
+            (row: RS, paramIndex: Int) => {
+              val json = row.getString(paramIndex)
+              if (json == null) {
+                0.0
+              } else {
+                getMedian(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toList)
+              }
             }
-          }
-        )
+          )
 
       case "avg" =>
         aggregate = true
@@ -245,16 +254,17 @@ trait QueryExprOne_mysql
         }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"VAR_POP($col)")
-        castStrategy.replace(
-          (row: RS, paramIndex: Int) => {
-            val json = row.getString(paramIndex)
-            if (json == null) {
-              0.0
-            } else {
-              varianceOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)
+        if (mandatory)
+          castStrategy.replace(
+            (row: RS, paramIndex: Int) => {
+              val json = row.getString(paramIndex)
+              if (json == null) {
+                0.0
+              } else {
+                varianceOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)
+              }
             }
-          }
-        )
+          )
 
       case "stddev" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
@@ -276,16 +286,17 @@ trait QueryExprOne_mysql
         }
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"STDDEV_POP($col)")
-        castStrategy.replace(
-          (row: RS, paramIndex: Int) => {
-            val json = row.getString(paramIndex)
-            if (json == null) {
-              0.0
-            } else {
-              stdDevOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)
+        if (mandatory)
+          castStrategy.replace(
+            (row: RS, paramIndex: Int) => {
+              val json = row.getString(paramIndex)
+              if (json == null) {
+                0.0
+              } else {
+                stdDevOf(json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSeq)
+              }
             }
-          }
-        )
+          )
 
       case other => unexpectedKw(other)
     }

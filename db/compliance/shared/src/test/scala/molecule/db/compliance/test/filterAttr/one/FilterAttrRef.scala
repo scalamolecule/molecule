@@ -95,7 +95,7 @@ case class FilterAttrRef(
       _ <- A.s.i_(B.i_)
         .B.i_._A
         .C.i_
-        .query.i.get.map(_ ==> List("a"))
+        .query.get.map(_ ==> List("a"))
 
       //      // Filter attribute B.i needs qualifying
       //      _ <- A.s.i_(B.i_) // Ambiguous if B points to A.B or A.C

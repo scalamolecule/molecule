@@ -31,7 +31,7 @@ case class Semantics(
 
       // Filter attribute should be tacit
       _ <- Entity.s.i.>(Ref.i).Ref.i.s
-        .query.i.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+        .query.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Filter attribute Ref.i should be tacit."
         }
 
@@ -99,7 +99,7 @@ case class Semantics(
 
       // Correlation attribute must be tacit
       _ <- Entity.s.a1.join(Ref.i(count).entity_(Entity.id))
-        .query.i.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+        .query.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Correlation attribute Entity.id should be tacit."
         }
     } yield ()
@@ -115,7 +115,7 @@ case class Semantics(
 
       // Multiple correlation attributes not allowed
       _ <- Entity.s.a1.join(Ref.i(count).entity_(Entity.id_).i_(Entity.i_))
-        .query.i.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+        .query.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Only one correlation attribute allowed per subquery."
         }
     } yield ()
@@ -131,7 +131,7 @@ case class Semantics(
       ).transact
 
       // same result for all rows (not typically useful)
-      _ <- Entity.i.a1.join(Ref.i.a1.query.limit(1)).query.i.get.map(_ ==> List(
+      _ <- Entity.i.a1.join(Ref.i.a1.query.limit(1)).query.get.map(_ ==> List(
         (1, 4),
         (2, 4),
         (3, 4),

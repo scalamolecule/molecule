@@ -161,7 +161,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
       case (None, Some(subQuery))                      =>
         selectSubQuery(subQuery, col, attr)
       case (None, None)                                =>
-        expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res)
+        expr(attr.ent, attr.attr, col, attr.op, args, attr.sort.isDefined, attr.binding, res, false)
       case _                                           => throw ModelError(s"Attribute ${attr.name}_ cannot have both filterAttr and subquery")
     }
   }
@@ -207,6 +207,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     hasSort: Boolean,
     binding: Boolean,
     res: ResOne[T],
+    mandatory: Boolean = true
   ): Unit = op match {
     case V            => attrV(col)
     case Eq           => equal(col, args, res.one2sql, binding, res.bind, res.tpe)
@@ -230,7 +231,7 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     case Not          => not(col)
 
     case AggrFn(baseType, kw, n, aggrOp, aggrOpValue) =>
-      aggr(baseType, ent, attr, col, kw, n, aggrOp, aggrOpValue, hasSort, res)
+      aggr(baseType, ent, attr, col, kw, n, aggrOp, aggrOpValue, hasSort, res, mandatory)
 
     case other => unexpectedOp(other)
   }
@@ -498,7 +499,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
     aggrOp: Option[Op],
     aggrOpValue: Option[Value],
     hasSort: Boolean,
-    res: ResOne[T]
+    res: ResOne[T],
+    mandatory: Boolean
   ): Unit = {
     checkAggrOne()
     lazy val n = optN.getOrElse(0)
@@ -511,7 +513,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
         aggregate = true
         select += s"ARRAY_AGG(DISTINCT $col)"
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(res.array2set)
+        if (mandatory)
+          castStrategy.replace(res.array2set)
 
       case "min" =>
         aggregate = true
@@ -527,8 +530,9 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
           select += s"MIN($col)"
         }
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(subQueryAggrCast(res))
         havingOp(s"MIN($col)")
+        if (mandatory)
+          castStrategy.replace(subQueryAggrCast(res))
 
       case "mins" =>
         aggregate = true
@@ -542,7 +546,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
              |    )
              |  )""".stripMargin
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(res.array2set)
+        if (mandatory)
+          castStrategy.replace(res.array2set)
 
       case "max" =>
         aggregate = true
@@ -558,8 +563,9 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
           select += s"MAX($col)"
         }
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(subQueryAggrCast(res))
         havingOp(s"MAX($col)")
+        if (mandatory)
+          castStrategy.replace(subQueryAggrCast(res))
 
       case "maxs" =>
         aggregate = true
@@ -573,7 +579,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
              |    )
              |  )""".stripMargin
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(res.array2set)
+        if (mandatory)
+          castStrategy.replace(res.array2set)
 
       case "sample" =>
         distinct = false
@@ -594,7 +601,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
              |    )
              |  )""".stripMargin
         if (!select.contains(col)) groupByCols -= col
-        castStrategy.replace(res.array2set)
+        if (mandatory)
+          castStrategy.replace(res.array2set)
 
       case "count" =>
         aggregate = true
@@ -602,7 +610,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
         selectWithOrder(col, "COUNT", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT($col)")
-        castStrategy.replace(toInt)
+        if (mandatory)
+          castStrategy.replace(toInt)
 
       case "countDistinct" =>
         aggregate = true
@@ -610,42 +619,49 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
         selectWithOrder(col, "COUNT", hasSort, aliasSuffix = Some("countDistinct"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"COUNT(DISTINCT $col)")
-        castStrategy.replace(toInt)
+        if (mandatory)
+          castStrategy.replace(toInt)
 
       case "sum" =>
         aggregate = true
         selectWithOrder(col, "SUM", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"SUM($col)")
-        castStrategy.replace(subQueryAggrCast(res))
+        if (mandatory)
+          castStrategy.replace(subQueryAggrCast(res))
 
       case "median" =>
         aggregate = true
         selectWithOrder(col, "MEDIAN", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"MEDIAN($col)")
-        castStrategy.replace(subQueryAggrCast(res))
+        if (mandatory)
+          castStrategy.replace(subQueryAggrCast(res))
 
       case "avg" =>
         aggregate = true
         selectWithOrder(col, "AVG", hasSort, "")
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"AVG($col)")
-        castStrategy.replace(subQueryAggrCast(res))
+        if (mandatory)
+          castStrategy.replace(subQueryAggrCast(res))
+
 
       case "variance" =>
         aggregate = true
         selectWithOrder(col, "VAR_POP", hasSort, "", "", "", "", Some("variance"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"VAR_POP($col)")
-        castStrategy.replace(subQueryAggrCast(res))
+        if (mandatory)
+          castStrategy.replace(subQueryAggrCast(res))
 
       case "stddev" =>
         aggregate = true
         selectWithOrder(col, "STDDEV_POP", hasSort, "", "", "", "", Some("stddev"))
         if (!select.contains(col)) groupByCols -= col
         havingOp(s"STDDEV_POP($col)")
-        castStrategy.replace(subQueryAggrCast(res))
+        if (mandatory)
+          castStrategy.replace(subQueryAggrCast(res))
 
       case other => unexpectedKw(other)
     }
@@ -662,8 +678,8 @@ trait QueryExprOne extends QueryExpr { self: Model2Query & QueryExprRef & SqlQue
         // sql2oneOrNull returns null for NULL, use typed zero based on type
         if (v == null) {
           res.tpe match {
-            case "String" => res.json2tpe("\"\"")  // Empty string as JSON
-            case _        => res.json2tpe("0")     // Numeric zero
+            case "String" => res.json2tpe("\"\"") // Empty string as JSON
+            case _        => res.json2tpe("0") // Numeric zero
           }
         } else v
       }
