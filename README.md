@@ -308,7 +308,7 @@ sbt.version = 1.11.7
 
 `project/plugins.sbt`:
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.24.2")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.25.0")
 ```
 
 `build.sbt`:
@@ -318,11 +318,11 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // import database(s) that you need
-      "org.scalamolecule" %% "molecule-db-h2" % "0.29.0",
-      "org.scalamolecule" %% "molecule-db-mariadb" % "0.29.0",
-      "org.scalamolecule" %% "molecule-db-mysql" % "0.29.0",
-      "org.scalamolecule" %% "molecule-db-postgresql" % "0.29.0",
-      "org.scalamolecule" %% "molecule-db-sqlite" % "0.29.0",
+      "org.scalamolecule" %% "molecule-db-h2" % "0.30.0",
+      "org.scalamolecule" %% "molecule-db-mariadb" % "0.30.0",
+      "org.scalamolecule" %% "molecule-db-mysql" % "0.30.0",
+      "org.scalamolecule" %% "molecule-db-postgresql" % "0.30.0",
+      "org.scalamolecule" %% "molecule-db-sqlite" % "0.30.0",
     )
   )
 ```
@@ -420,57 +420,3 @@ Marc Grue
 ## License
 
 Apache License 2.0
-
-
-class Ref_refs_1[T](override val dataModel: DataModel) extends Molecule_1[T] {
-trait OptRefInit { self: Molecule =>
-def ?[OptRefT           ](optRef: Molecule_1[OptRefT  ]) = new Ref_n[(T, Option[OptRefT  ])](addOptRef(self, optRef))
-def ?[OptRefTpl <: Tuple](optRef: Molecule_n[OptRefTpl]) = new Ref_n[(T, Option[OptRefTpl])](addOptRef(self, optRef))
-}
-
-trait NestedInit extends OptRefInit { self: Molecule =>
-def * [NestedT](nested: Molecule_1[NestedT]) = new Ref_n[(T, Seq[NestedT])](addNested(self, nested))
-def *?[NestedT](nested: Molecule_1[NestedT]) = new Ref_n[(T, Seq[NestedT])](addOptNested(self, nested))
-
-    def * [NestedTpl <: Tuple](nested: Molecule_n[NestedTpl]) = new Ref_n[(T, Seq[NestedTpl])](addNested(self, nested))
-    def *?[NestedTpl <: Tuple](nested: Molecule_n[NestedTpl]) = new Ref_n[(T, Seq[NestedTpl])](addOptNested(self, nested))
-}
-
-def sub[SubT           ](subQuery: Molecule_1[SubT  ]) = new Ref_n[(T, SubT)  ](addSubQuery(this, subQuery))
-def sub[SubTpl <: Tuple](subQuery: Molecule_n[SubTpl]) = new Ref_n[(T, SubTpl)](addSubQuery(this, subQuery))
-
-object Entity   extends Entity_1[T](dataModel.add(_dm.Ref("Ref", "entity"  , "Entity", ManyToOne , List(1, 173, 0), Some("Refs")))) with OptRefInit
-object Entities extends Entity_1[T](dataModel.add(_dm.Ref("Ref", "Entities", "Entity", OneToMany , List(1, 174, 0), Some("ref")))) with NestedInit
-
-object _Entity extends Entity_1[T](dataModel.add(_dm.BackRef("Entity", "Ref", List(0, 1))))
-}
-
-```
-SELECT DISTINCT
-  Ref.s,
-  (
-    SELECT
-      COUNT(Entity.id)
-    FROM Entity
-    WHERE
-      Entity.ref = Ref.id
-  )
-FROM Ref
-WHERE
-  Ref.s IS NOT NULL;
-```
-
-```
-SELECT DISTINCT
-  Ref.s,
-  (
-    SELECT
-      COUNT(Entity.id)
-    FROM Entity
-    WHERE
-      Entity.ref = Ref.id
-  )
-FROM Ref
-WHERE
-  Ref.s IS NOT NULL;
-```
