@@ -287,14 +287,9 @@ Most of the time you'll likely have enough expressiveness with Molecule without 
 
 ## What Molecule is Not
 
-Molecule is not a complete database facade or SQL replacement. It focuses on type-safe queries and transactions from your domain model. Outside its scope:
+Molecule is not a complete database facade or SQL replacement. It focuses on type-safe queries and transactions from your domain model. 
 
-- Administrative operations (creating indexes, connection pooling)
-- Advanced SQL features (subqueries, window functions, CTEs)
-- Database migrations and schema management
-- Direct JDBC operations
-
-For administrative tasks, use other SQL libraries or JDBC directly alongside Molecule. For advanced SQL features, Molecule provides fallback `rawQuery` and `rawTransact` methods that let you execute raw SQL when needed—you just lose type safety for those specific queries.
+For administrative tasks, use other SQL libraries or JDBC directly alongside Molecule. For edge cases, Molecule provides fallback `rawQuery` and `rawTransact` methods that let you execute raw SQL when needed — you just lose type safety for those specific queries.
 
 
 ## SBT Setup
